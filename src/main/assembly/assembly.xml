@@ -1,0 +1,44 @@
+<assembly
+        xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
+    <id>pack</id>
+    <formats>
+        <format>tar.gz</format>
+        <format>dir</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <dependencySets>
+        <dependencySet>
+            <useProjectArtifact>true</useProjectArtifact>
+            <outputDirectory>lib</outputDirectory>
+        </dependencySet>
+    </dependencySets>
+    <fileSets>
+        <fileSet>
+            <directory>src/main/assembly/bin</directory>
+            <outputDirectory>bin</outputDirectory>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>target/classes</directory>
+            <outputDirectory>conf</outputDirectory>
+            <fileMode>0755</fileMode>
+            <includes>
+                <include>*.conf</include>
+                <include>log4j2.xml</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+
+    <files>
+        <file>
+            <source>LICENSE-BIN</source>
+            <destName>LICENSE</destName>
+        </file>
+        <file>
+            <source>NOTICE-BIN</source>
+            <destName>NOTICE</destName>
+        </file>
+    </files>
+</assembly>
