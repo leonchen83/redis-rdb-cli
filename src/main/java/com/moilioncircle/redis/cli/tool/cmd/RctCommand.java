@@ -20,7 +20,7 @@ public class RctCommand extends AbstractCommand {
 
     private static final Option HELP = Option.builder("h").longOpt("help").required(false).hasArg(false).desc("rct usage.").build();
     private static final Option VERSION = Option.builder("v").longOpt("version").required(false).hasArg(false).desc("rct version.").build();
-    private static final Option FORMAT = Option.builder("f").longOpt("format").required(false).hasArg().argName("format").type(String.class).desc("Command to execute. Valid commands are json, csv, dump, key, val, mem and resp").build();
+    private static final Option FORMAT = Option.builder("f").longOpt("format").required(false).hasArg().argName("format").type(String.class).desc("Command to execute. Valid commands are json, dump, key, val, mem and resp").build();
     private static final Option INPUT = Option.builder("i").longOpt("in").required(false).hasArg().argName("file").type(File.class).desc("Input file").build();
     private static final Option OUTPUT = Option.builder("o").longOpt("out").required(false).hasArg().argName("file").type(File.class).desc("Output file").build();
     private static final Option DB = Option.builder("d").longOpt("db").required(false).hasArg().argName("db num").type(Number.class).desc("Database Number. Multiple databases can be provided. If not specified, all databases will be included.").build();
