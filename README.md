@@ -1,7 +1,7 @@
 ```java  
 
 usage: rct
- -d,--db <db num>            Database Number. Multiple databases can be
+ -d,--db <num num...>        Database Number. Multiple databases can be
                              provided. If not specified, all databases
                              will be included.
  -e,--escape <escape>        Escape strings to encoding: raw (default),
