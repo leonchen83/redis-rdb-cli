@@ -2,9 +2,9 @@ package com.moilioncircle.redis.cli.tool.ext;
 
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Escape;
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Type;
+import com.moilioncircle.redis.cli.tool.util.CRCOutputStream;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
-import com.moilioncircle.redis.replicator.io.CRCOutputStream;
 import com.moilioncircle.redis.replicator.io.RawByteListener;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
@@ -24,48 +24,48 @@ import static com.moilioncircle.redis.replicator.Constants.MODULE_SET;
  * @author Baoyi Chen
  */
 public class DumpRdbVisitor extends BaseRdbVisitor {
-    
+
     private final int version;
-    
+
     public DumpRdbVisitor(Replicator replicator, File out, Long db, String keyRegEx, Long top, List<Type> types, Escape escape) throws Exception {
         super(replicator, out, db, keyRegEx, top, types, escape);
         this.version = -1;
     }
-    
+
     private class DefaultRawByteListener implements RawByteListener, Closeable {
         private final int version;
         private final boolean contains;
         private final CRCOutputStream sub;
-        
+
         private DefaultRawByteListener(byte type, int version, boolean contains) throws IOException {
-            this.sub = new CRCOutputStream(out);
+            this.sub = new CRCOutputStream(out, escape);
             this.contains = contains;
             if (contains) sub.write(type);
             int ver = DumpRdbVisitor.this.version;
             this.version = ver == -1 ? version : ver;
         }
-        
+
         @Override
         public void handle(byte... rawBytes) {
             if (!contains) return;
             try {
-                this.sub.write(rawBytes);
+                sub.write(rawBytes);
             } catch (IOException e) {
             }
         }
-        
+
         public void close() throws IOException {
             if (!contains) return;
             this.sub.write((byte) version);
             this.sub.write((byte) 0x00);
             this.sub.write(this.sub.getCRC64());
-            this.sub.write('\n');
+            out.write('\n');
         }
     }
-    
+
     @Override
     public Event doApplyString(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
+        escape.encode(key, out);
         out.write(',');
         try (DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version, contains)) {
             replicator.addRawByteListener(listener);
@@ -74,10 +74,10 @@ public class DumpRdbVisitor extends BaseRdbVisitor {
         }
         return null;
     }
-    
+
     @Override
     public Event doApplyList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
+        escape.encode(key, out);
         out.write(',');
         try (DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version, contains)) {
             replicator.addRawByteListener(listener);
@@ -91,10 +91,10 @@ public class DumpRdbVisitor extends BaseRdbVisitor {
         }
         return null;
     }
-    
+
     @Override
     public Event doApplySet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
+        escape.encode(key, out);
         out.write(',');
         try (DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version, contains)) {
             replicator.addRawByteListener(listener);
@@ -108,10 +108,10 @@ public class DumpRdbVisitor extends BaseRdbVisitor {
         }
         return null;
     }
-    
+
     @Override
     public Event doApplyZSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
+        escape.encode(key, out);
         out.write(',');
         try (DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version, contains)) {
             replicator.addRawByteListener(listener);
@@ -126,10 +126,10 @@ public class DumpRdbVisitor extends BaseRdbVisitor {
         }
         return null;
     }
-    
+
     @Override
     public Event doApplyZSet2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
+        escape.encode(key, out);
         out.write(',');
         try (DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version, contains)) {
             replicator.addRawByteListener(listener);
@@ -144,10 +144,10 @@ public class DumpRdbVisitor extends BaseRdbVisitor {
         }
         return null;
     }
-    
+
     @Override
     public Event doApplyHash(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
+        escape.encode(key, out);
         out.write(',');
         try (DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version, contains)) {
             replicator.addRawByteListener(listener);
@@ -162,10 +162,10 @@ public class DumpRdbVisitor extends BaseRdbVisitor {
         }
         return null;
     }
-    
+
     @Override
     public Event doApplyHashZipMap(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
+        escape.encode(key, out);
         out.write(',');
         try (DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version, contains)) {
             replicator.addRawByteListener(listener);
@@ -174,10 +174,10 @@ public class DumpRdbVisitor extends BaseRdbVisitor {
         }
         return null;
     }
-    
+
     @Override
     public Event doApplyListZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
+        escape.encode(key, out);
         out.write(',');
         try (DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version, contains)) {
             replicator.addRawByteListener(listener);
@@ -186,10 +186,10 @@ public class DumpRdbVisitor extends BaseRdbVisitor {
         }
         return null;
     }
-    
+
     @Override
     public Event doApplySetIntSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
+        escape.encode(key, out);
         out.write(',');
         try (DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version, contains)) {
             replicator.addRawByteListener(listener);
@@ -198,10 +198,10 @@ public class DumpRdbVisitor extends BaseRdbVisitor {
         }
         return null;
     }
-    
+
     @Override
     public Event doApplyZSetZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
+        escape.encode(key, out);
         out.write(',');
         try (DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version, contains)) {
             replicator.addRawByteListener(listener);
@@ -210,10 +210,10 @@ public class DumpRdbVisitor extends BaseRdbVisitor {
         }
         return null;
     }
-    
+
     @Override
     public Event doApplyHashZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
+        escape.encode(key, out);
         out.write(',');
         try (DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version, contains)) {
             replicator.addRawByteListener(listener);
@@ -222,10 +222,10 @@ public class DumpRdbVisitor extends BaseRdbVisitor {
         }
         return null;
     }
-    
+
     @Override
     public Event doApplyListQuickList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
+        escape.encode(key, out);
         out.write(',');
         try (DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version, contains)) {
             replicator.addRawByteListener(listener);
@@ -238,10 +238,10 @@ public class DumpRdbVisitor extends BaseRdbVisitor {
         }
         return null;
     }
-    
+
     @Override
     public Event doApplyModule(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
+        escape.encode(key, out);
         out.write(',');
         try (DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version, contains)) {
             replicator.addRawByteListener(listener);
@@ -262,10 +262,10 @@ public class DumpRdbVisitor extends BaseRdbVisitor {
         }
         return null;
     }
-    
+
     @Override
     public Event doApplyModule2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
+        escape.encode(key, out);
         out.write(',');
         try (DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version, contains)) {
             replicator.addRawByteListener(listener);
@@ -275,10 +275,10 @@ public class DumpRdbVisitor extends BaseRdbVisitor {
         }
         return null;
     }
-    
+
     @Override
     public Event doApplyStreamListPacks(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
+        escape.encode(key, out);
         out.write(',');
         try (DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version, contains)) {
             replicator.addRawByteListener(listener);

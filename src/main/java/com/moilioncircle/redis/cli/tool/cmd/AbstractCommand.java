@@ -3,7 +3,6 @@ package com.moilioncircle.redis.cli.tool.cmd;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
@@ -18,14 +17,12 @@ public abstract class AbstractCommand implements Command {
 
     protected abstract void doExecute(CommandLine line) throws Exception;
 
+    @Override
     public void addOption(Option option) {
         options.addOption(option);
     }
 
-    public void addOptionGroup(OptionGroup group) {
-        options.addOptionGroup(group);
-    }
-
+    @Override
     public void execute(String[] args) throws Exception {
         CommandLineParser parser = new DefaultParser();
         try {

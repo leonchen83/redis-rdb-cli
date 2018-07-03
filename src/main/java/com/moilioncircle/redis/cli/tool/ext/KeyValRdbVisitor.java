@@ -23,125 +23,125 @@ import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
 /**
  * @author Baoyi Chen
  */
-public class ValRdbVisitor extends BaseRdbVisitor {
-    public ValRdbVisitor(Replicator replicator, File out, Long db, String keyRegEx, Long top, List<Type> types, Escape escape) throws Exception {
+public class KeyValRdbVisitor extends BaseRdbVisitor {
+    public KeyValRdbVisitor(Replicator replicator, File out, Long db, String keyRegEx, Long top, List<Type> types, Escape escape) throws Exception {
         super(replicator, out, db, keyRegEx, top, types, escape);
     }
-    
+
     @Override
     public Event doApplyString(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
-        out.write(',');
+        escape.encode(key, out);
+        out.write(' ');
         BaseRdbParser parser = new BaseRdbParser(in);
         byte[] val = parser.rdbLoadEncodedStringObject().first();
-        escape(escape, val, out);
+        escape.encode(val, out);
         out.write('\n');
         return null;
     }
-    
+
     @Override
     public Event doApplyList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
-        out.write(',');
+        escape.encode(key, out);
+        out.write(' ');
         BaseRdbParser parser = new BaseRdbParser(in);
         long len = parser.rdbLoadLen().len;
         while (len > 0) {
             byte[] element = parser.rdbLoadEncodedStringObject().first();
             if (contains) {
-                escape(escape, element, out);
-                if (len - 1 > 0) out.write(',');
+                escape.encode(element, out);
+                if (len - 1 > 0) out.write(' ');
                 else out.write('\n');
             }
             len--;
         }
         return null;
     }
-    
+
     @Override
     public Event doApplySet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
-        out.write(',');
+        escape.encode(key, out);
+        out.write(' ');
         BaseRdbParser parser = new BaseRdbParser(in);
         long len = parser.rdbLoadLen().len;
         while (len > 0) {
             byte[] element = parser.rdbLoadEncodedStringObject().first();
             if (contains) {
-                escape(escape, element, out);
-                if (len - 1 > 0) out.write(',');
+                escape.encode(element, out);
+                if (len - 1 > 0) out.write(' ');
                 else out.write('\n');
             }
             len--;
         }
         return null;
     }
-    
+
     @Override
     public Event doApplyZSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
-        out.write(',');
+        escape.encode(key, out);
+        out.write(' ');
         BaseRdbParser parser = new BaseRdbParser(in);
         long len = parser.rdbLoadLen().len;
         while (len > 0) {
             byte[] element = parser.rdbLoadEncodedStringObject().first();
             double score = parser.rdbLoadDoubleValue();
             if (contains) {
-                escape(escape, element, out);
-                out.write(',');
-                escape(escape, score, out);
-                if (len - 1 > 0) out.write(',');
+                escape.encode(element, out);
+                out.write(' ');
+                escape.encode(score, out);
+                if (len - 1 > 0) out.write(' ');
                 else out.write('\n');
             }
             len--;
         }
         return null;
     }
-    
+
     @Override
     public Event doApplyZSet2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
-        out.write(',');
+        escape.encode(key, out);
+        out.write(' ');
         BaseRdbParser parser = new BaseRdbParser(in);
         long len = parser.rdbLoadLen().len;
         while (len > 0) {
             byte[] element = parser.rdbLoadEncodedStringObject().first();
             double score = parser.rdbLoadBinaryDoubleValue();
             if (contains) {
-                escape(escape, element, out);
-                out.write(',');
-                escape(escape, score, out);
-                if (len - 1 > 0) out.write(',');
+                escape.encode(element, out);
+                out.write(' ');
+                escape.encode(score, out);
+                if (len - 1 > 0) out.write(' ');
                 else out.write('\n');
             }
             len--;
         }
         return null;
     }
-    
+
     @Override
     public Event doApplyHash(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
-        out.write(',');
+        escape.encode(key, out);
+        out.write(' ');
         BaseRdbParser parser = new BaseRdbParser(in);
         long len = parser.rdbLoadLen().len;
         while (len > 0) {
             byte[] field = parser.rdbLoadEncodedStringObject().first();
             byte[] value = parser.rdbLoadEncodedStringObject().first();
             if (contains) {
-                escape(escape, field, out);
-                out.write(',');
-                escape(escape, value, out);
-                if (len - 1 > 0) out.write(',');
+                escape.encode(field, out);
+                out.write(' ');
+                escape.encode(value, out);
+                if (len - 1 > 0) out.write(' ');
                 else out.write('\n');
             }
             len--;
         }
         return null;
     }
-    
+
     @Override
     public Event doApplyHashZipMap(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
-        out.write(',');
+        escape.encode(key, out);
+        out.write(' ');
         BaseRdbParser parser = new BaseRdbParser(in);
         RedisInputStream stream = new RedisInputStream(parser.rdbLoadPlainStringObject());
         BaseRdbParser.LenHelper.zmlen(stream); // zmlen
@@ -157,10 +157,10 @@ public class ValRdbVisitor extends BaseRdbVisitor {
             zmEleLen = BaseRdbParser.LenHelper.zmElementLen(stream);
             if (zmEleLen == 255) {
                 if (contains) {
-                    escape(escape, field, out);
-                    out.write(',');
-                    escape(escape, null, out);
-                    out.write(',');
+                    escape.encode(field, out);
+                    out.write(' ');
+                    escape.encode(null, out);
+                    out.write(' ');
                 }
                 return null;
             }
@@ -168,29 +168,29 @@ public class ValRdbVisitor extends BaseRdbVisitor {
             byte[] value = BaseRdbParser.StringHelper.bytes(stream, zmEleLen);
             BaseRdbParser.StringHelper.skip(stream, free);
             if (contains) {
-                escape(escape, field, out);
-                out.write(',');
-                escape(escape, value, out);
-                out.write(',');
+                escape.encode(field, out);
+                out.write(' ');
+                escape.encode(value, out);
+                out.write(' ');
             }
         }
     }
-    
+
     @Override
     public Event doApplyListZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
-        out.write(',');
+        escape.encode(key, out);
+        out.write(' ');
         BaseRdbParser parser = new BaseRdbParser(in);
         RedisInputStream stream = new RedisInputStream(parser.rdbLoadPlainStringObject());
-        
+
         BaseRdbParser.LenHelper.zlbytes(stream); // zlbytes
         BaseRdbParser.LenHelper.zltail(stream); // zltail
         int zllen = BaseRdbParser.LenHelper.zllen(stream);
         for (int i = 0; i < zllen; i++) {
             byte[] e = BaseRdbParser.StringHelper.zipListEntry(stream);
             if (contains) {
-                escape(escape, e, out);
-                if (i + 1 < zllen) out.write(',');
+                escape.encode(e, out);
+                if (i + 1 < zllen) out.write(' ');
                 else out.write('\n');
             }
         }
@@ -200,14 +200,14 @@ public class ValRdbVisitor extends BaseRdbVisitor {
         }
         return null;
     }
-    
+
     @Override
     public Event doApplySetIntSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
-        out.write(',');
+        escape.encode(key, out);
+        out.write(' ');
         BaseRdbParser parser = new BaseRdbParser(in);
         RedisInputStream stream = new RedisInputStream(parser.rdbLoadPlainStringObject());
-        
+
         int encoding = BaseRdbParser.LenHelper.encoding(stream);
         long lenOfContent = BaseRdbParser.LenHelper.lenOfContent(stream);
         for (long i = 0; i < lenOfContent; i++) {
@@ -226,21 +226,21 @@ public class ValRdbVisitor extends BaseRdbVisitor {
                     throw new AssertionError("expect encoding [2,4,8] but:" + encoding);
             }
             if (contains) {
-                escape(escape, element.getBytes(), out);
-                if (i + 1 < lenOfContent) out.write(',');
+                escape.encode(element.getBytes(), out);
+                if (i + 1 < lenOfContent) out.write(' ');
                 else out.write('\n');
             }
         }
         return null;
     }
-    
+
     @Override
     public Event doApplyZSetZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
-        out.write(',');
+        escape.encode(key, out);
+        out.write(' ');
         BaseRdbParser parser = new BaseRdbParser(in);
         RedisInputStream stream = new RedisInputStream(parser.rdbLoadPlainStringObject());
-        
+
         BaseRdbParser.LenHelper.zlbytes(stream); // zlbytes
         BaseRdbParser.LenHelper.zltail(stream); // zltail
         int zllen = BaseRdbParser.LenHelper.zllen(stream);
@@ -250,10 +250,10 @@ public class ValRdbVisitor extends BaseRdbVisitor {
             double score = Double.valueOf(Strings.toString(BaseRdbParser.StringHelper.zipListEntry(stream)));
             zllen--;
             if (contains) {
-                escape(escape, element, out);
-                out.write(',');
-                escape(escape, score, out);
-                if (zllen - 1 > 0) out.write(',');
+                escape.encode(element, out);
+                out.write(' ');
+                escape.encode(score, out);
+                if (zllen - 1 > 0) out.write(' ');
                 else out.write('\n');
             }
         }
@@ -263,11 +263,11 @@ public class ValRdbVisitor extends BaseRdbVisitor {
         }
         return null;
     }
-    
+
     @Override
     public Event doApplyHashZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
-        out.write(',');
+        escape.encode(key, out);
+        out.write(' ');
         BaseRdbParser parser = new BaseRdbParser(in);
         RedisInputStream stream = new RedisInputStream(parser.rdbLoadPlainStringObject());
         BaseRdbParser.LenHelper.zlbytes(stream); // zlbytes
@@ -279,10 +279,10 @@ public class ValRdbVisitor extends BaseRdbVisitor {
             byte[] value = BaseRdbParser.StringHelper.zipListEntry(stream);
             zllen--;
             if (contains) {
-                escape(escape, field, out);
-                out.write(',');
-                escape(escape, value, out);
-                if (zllen - 1 > 0) out.write(',');
+                escape.encode(field, out);
+                out.write(' ');
+                escape.encode(value, out);
+                if (zllen - 1 > 0) out.write(' ');
                 else out.write('\n');
             }
         }
@@ -292,25 +292,25 @@ public class ValRdbVisitor extends BaseRdbVisitor {
         }
         return null;
     }
-    
+
     @Override
     public Event doApplyListQuickList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
-        out.write(',');
+        escape.encode(key, out);
+        out.write(' ');
         BaseRdbParser parser = new BaseRdbParser(in);
         long len = parser.rdbLoadLen().len;
         for (int i = 0; i < len; i++) {
             RedisInputStream stream = new RedisInputStream(parser.rdbGenericLoadStringObject(RDB_LOAD_NONE));
-    
+
             BaseRdbParser.LenHelper.zlbytes(stream); // zlbytes
             BaseRdbParser.LenHelper.zltail(stream); // zltail
             int zllen = BaseRdbParser.LenHelper.zllen(stream);
             for (int j = 0; j < zllen; j++) {
                 byte[] e = BaseRdbParser.StringHelper.zipListEntry(stream);
                 if (contains) {
-                    escape(escape, e, out);
-                    if (i + 1 < len) out.write(',');
-                    else if (j + 1 < zllen) out.write(',');
+                    escape.encode(e, out);
+                    if (i + 1 < len) out.write(' ');
+                    else if (j + 1 < zllen) out.write(' ');
                     else out.write('\n');
                 }
             }
@@ -321,10 +321,10 @@ public class ValRdbVisitor extends BaseRdbVisitor {
         }
         return null;
     }
-    
+
     @Override
     public Event doApplyModule(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
+        escape.encode(key, out);
         out.write('\n');
         BaseRdbParser parser = new BaseRdbParser(in);
         char[] c = new char[9];
@@ -341,25 +341,25 @@ public class ValRdbVisitor extends BaseRdbVisitor {
         moduleParser.parse(in, 1);
         return null;
     }
-    
+
     @Override
     public Event doApplyModule2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
+        escape.encode(key, out);
         out.write('\n');
         SkipRdbParser skip = new SkipRdbParser(in);
         skip.rdbLoadLen();
         skip.rdbLoadCheckModuleValue();
         return null;
     }
-    
+
     protected ModuleParser<? extends Module> lookupModuleParser(String moduleName, int moduleVersion) {
         return replicator.getModuleParser(moduleName, moduleVersion);
     }
-    
+
     @Override
     @SuppressWarnings("resource")
     public Event doApplyStreamListPacks(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        escape(escape, key, out);
+        escape.encode(key, out);
         out.write('\n');
         SkipRdbParser skip = new SkipRdbParser(in);
         long listPacks = skip.rdbLoadLen().len;
