@@ -15,8 +15,8 @@ import java.util.List;
  * @author Baoyi Chen
  */
 public class MemRdbVisitor extends BaseRdbVisitor {
-    public MemRdbVisitor(Replicator replicator, File out, Long db, String keyRegEx, Long top, List<Type> types, Escape escape) throws Exception {
-        super(replicator, out, db, keyRegEx, top, types, escape);
+    public MemRdbVisitor(Replicator replicator, File out, Long db, List<String> regexs, Long top, List<Type> types, Escape escape) throws Exception {
+        super(replicator, out, db, regexs, top, types, escape);
     }
     
     @Override

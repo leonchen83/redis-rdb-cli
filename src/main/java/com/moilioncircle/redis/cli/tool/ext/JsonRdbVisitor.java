@@ -15,8 +15,8 @@ import java.util.List;
  * @author Baoyi Chen
  */
 public class JsonRdbVisitor extends BaseRdbVisitor {
-    public JsonRdbVisitor(Replicator replicator, File out, Long db, String keyRegEx, Long largest, List<Type> types, Escape escape) throws Exception {
-        super(replicator, out, db, keyRegEx, largest, types, escape);
+    public JsonRdbVisitor(Replicator replicator, File out, Long db, List<String> regexs, Long top, List<Type> types, Escape escape) throws Exception {
+        super(replicator, out, db, regexs, top, types, escape);
     }
     
     @Override

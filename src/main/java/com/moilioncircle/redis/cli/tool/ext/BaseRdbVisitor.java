@@ -38,27 +38,28 @@ import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_STRING;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET_2;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET_ZIPLIST;
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author Baoyi Chen
  */
 public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
-    
+
     protected Long db;
-    protected Long limit;
+    protected Long largest;
     protected Escape escape;
-    protected Pattern keyRegEx;
     protected List<Type> types;
     protected OutputStream out;
+    protected List<Pattern> regexs;
 
-    public BaseRdbVisitor(Replicator replicator, File output, Long db, String keyRegEx, Long largest, List<Type> types, Escape escape) throws Exception {
+    public BaseRdbVisitor(Replicator replicator, File output, Long db, List<String> regexs, Long largest, List<Type> types, Escape escape) throws Exception {
         super(replicator);
         this.db = db;
         this.types = types;
-        this.limit = largest;
+        this.largest = largest;
         this.escape = escape;
-        this.keyRegEx = Pattern.compile(keyRegEx);
         this.out = new BufferedOutputStream(new FileOutputStream(output));
+        this.regexs = regexs.stream().map(Pattern::compile).collect(toList());
         replicator.addCloseListener(r -> {
             try {
                 out.close();
@@ -66,23 +67,28 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
             }
         });
     }
-    
+
     protected boolean contains(int rdbType) {
         return Type.contains(types, rdbType);
     }
-    
+
     protected boolean contains(long db) {
         return this.db == null || this.db.intValue() == db;
     }
-    
+
     protected boolean contains(String key) {
-        return keyRegEx.matcher(Strings.toString(key)).matches();
+        for (Pattern pattern : regexs) {
+            if (key.equals(pattern) || pattern.matcher(Strings.toString(key)).matches()) {
+                return true;
+            }
+        }
+        return false;
     }
-    
+
     protected boolean contains(long db, int rdbType, String key) {
         return contains(db) && contains(rdbType) && contains(key);
     }
-    
+
     @Override
     public Event applyString(RedisInputStream in, DB db, int version) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -97,7 +103,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
             return null;
         }
     }
-    
+
     @Override
     public Event applyList(RedisInputStream in, DB db, int version) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -116,7 +122,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
             return null;
         }
     }
-    
+
     @Override
     public Event applySet(RedisInputStream in, DB db, int version) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -136,7 +142,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
             return null;
         }
     }
-    
+
     @Override
     public Event applyZSet(RedisInputStream in, DB db, int version) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -156,7 +162,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
             return null;
         }
     }
-    
+
     @Override
     public Event applyZSet2(RedisInputStream in, DB db, int version) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -176,7 +182,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
             return null;
         }
     }
-    
+
     @Override
     public Event applyHash(RedisInputStream in, DB db, int version) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -196,7 +202,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
             return null;
         }
     }
-    
+
     @Override
     public Event applyHashZipMap(RedisInputStream in, DB db, int version) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -210,9 +216,9 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
             skip.rdbLoadPlainStringObject();
             return null;
         }
-        
+
     }
-    
+
     @Override
     public Event applyListZipList(RedisInputStream in, DB db, int version) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -226,9 +232,9 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
             skip.rdbLoadPlainStringObject();
             return null;
         }
-        
+
     }
-    
+
     @Override
     public Event applySetIntSet(RedisInputStream in, DB db, int version) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -242,9 +248,9 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
             skip.rdbLoadPlainStringObject();
             return null;
         }
-        
+
     }
-    
+
     @Override
     public Event applyZSetZipList(RedisInputStream in, DB db, int version) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -259,7 +265,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
             return null;
         }
     }
-    
+
     @Override
     public Event applyHashZipList(RedisInputStream in, DB db, int version) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -274,7 +280,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
             return null;
         }
     }
-    
+
     @Override
     public Event applyListQuickList(RedisInputStream in, DB db, int version) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -292,7 +298,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
             return null;
         }
     }
-    
+
     @Override
     public Event applyModule(RedisInputStream in, DB db, int version) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -318,7 +324,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
             return null;
         }
     }
-    
+
     @Override
     public Event applyModule2(RedisInputStream in, DB db, int version) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -335,11 +341,11 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
             return null;
         }
     }
-    
+
     protected ModuleParser<? extends Module> lookupModuleParser(String moduleName, int moduleVersion) {
         return replicator.getModuleParser(moduleName, moduleVersion);
     }
-    
+
     @Override
     @SuppressWarnings("resource")
     public Event applyStreamListPacks(RedisInputStream in, DB db, int version) throws IOException {
@@ -382,36 +388,36 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
             }
             return null;
         }
-        
+
     }
-    
+
     protected abstract Event doApplyZSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
-    
+
     protected abstract Event doApplySet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
-    
+
     protected abstract Event doApplyList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
-    
+
     protected abstract Event doApplyString(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
-    
+
     protected abstract Event doApplyZSet2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
-    
+
     protected abstract Event doApplyHash(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
-    
+
     protected abstract Event doApplyHashZipMap(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
-    
+
     protected abstract Event doApplyListZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
-    
+
     protected abstract Event doApplySetIntSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
-    
+
     protected abstract Event doApplyZSetZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
-    
+
     protected abstract Event doApplyHashZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
-    
+
     protected abstract Event doApplyListQuickList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
-    
+
     protected abstract Event doApplyModule(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
-    
+
     protected abstract Event doApplyModule2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
-    
+
     protected abstract Event doApplyStreamListPacks(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
 }

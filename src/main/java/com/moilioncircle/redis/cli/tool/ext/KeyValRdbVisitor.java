@@ -24,8 +24,8 @@ import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
  * @author Baoyi Chen
  */
 public class KeyValRdbVisitor extends BaseRdbVisitor {
-    public KeyValRdbVisitor(Replicator replicator, File out, Long db, String keyRegEx, Long top, List<Type> types, Escape escape) throws Exception {
-        super(replicator, out, db, keyRegEx, top, types, escape);
+    public KeyValRdbVisitor(Replicator replicator, File out, Long db, List<String> regexs, Long top, List<Type> types, Escape escape) throws Exception {
+        super(replicator, out, db, regexs, top, types, escape);
     }
 
     @Override
