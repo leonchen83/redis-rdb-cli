@@ -2,6 +2,7 @@ package com.moilioncircle.redis.cli.tool.ext;
 
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Escape;
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Type;
+import com.moilioncircle.redis.cli.tool.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
@@ -23,8 +24,14 @@ import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
 /**
  * @author Baoyi Chen
  */
-public class KeyValRdbVisitor extends BaseRdbVisitor {
-    public KeyValRdbVisitor(Replicator replicator, File out, List<Long> db, List<String> regexs, Long top, List<Type> types, Escape escape) throws Exception {
+public class KeyValRdbVisitor extends AbstractRdbVisitor {
+    public KeyValRdbVisitor(Replicator replicator,
+                            File out,
+                            List<Long> db,
+                            List<String> regexs,
+                            Long top,
+                            List<Type> types,
+                            Escape escape) throws Exception {
         super(replicator, out, db, regexs, top, types, escape);
     }
 
@@ -36,7 +43,7 @@ public class KeyValRdbVisitor extends BaseRdbVisitor {
         byte[] val = parser.rdbLoadEncodedStringObject().first();
         escape.encode(val, out);
         out.write('\n');
-        return null;
+        return new DummyKeyValuePair();
     }
 
     @Override
@@ -47,14 +54,12 @@ public class KeyValRdbVisitor extends BaseRdbVisitor {
         long len = parser.rdbLoadLen().len;
         while (len > 0) {
             byte[] element = parser.rdbLoadEncodedStringObject().first();
-            if (contains) {
-                escape.encode(element, out);
-                if (len - 1 > 0) out.write(' ');
-                else out.write('\n');
-            }
+            escape.encode(element, out);
+            if (len - 1 > 0) out.write(' ');
+            else out.write('\n');
             len--;
         }
-        return null;
+        return new DummyKeyValuePair();
     }
 
     @Override
@@ -65,14 +70,12 @@ public class KeyValRdbVisitor extends BaseRdbVisitor {
         long len = parser.rdbLoadLen().len;
         while (len > 0) {
             byte[] element = parser.rdbLoadEncodedStringObject().first();
-            if (contains) {
-                escape.encode(element, out);
-                if (len - 1 > 0) out.write(' ');
-                else out.write('\n');
-            }
+            escape.encode(element, out);
+            if (len - 1 > 0) out.write(' ');
+            else out.write('\n');
             len--;
         }
-        return null;
+        return new DummyKeyValuePair();
     }
 
     @Override
@@ -84,16 +87,14 @@ public class KeyValRdbVisitor extends BaseRdbVisitor {
         while (len > 0) {
             byte[] element = parser.rdbLoadEncodedStringObject().first();
             double score = parser.rdbLoadDoubleValue();
-            if (contains) {
-                escape.encode(element, out);
-                out.write(' ');
-                escape.encode(score, out);
-                if (len - 1 > 0) out.write(' ');
-                else out.write('\n');
-            }
+            escape.encode(element, out);
+            out.write(' ');
+            escape.encode(score, out);
+            if (len - 1 > 0) out.write(' ');
+            else out.write('\n');
             len--;
         }
-        return null;
+        return new DummyKeyValuePair();
     }
 
     @Override
@@ -105,16 +106,14 @@ public class KeyValRdbVisitor extends BaseRdbVisitor {
         while (len > 0) {
             byte[] element = parser.rdbLoadEncodedStringObject().first();
             double score = parser.rdbLoadBinaryDoubleValue();
-            if (contains) {
-                escape.encode(element, out);
-                out.write(' ');
-                escape.encode(score, out);
-                if (len - 1 > 0) out.write(' ');
-                else out.write('\n');
-            }
+            escape.encode(element, out);
+            out.write(' ');
+            escape.encode(score, out);
+            if (len - 1 > 0) out.write(' ');
+            else out.write('\n');
             len--;
         }
-        return null;
+        return new DummyKeyValuePair();
     }
 
     @Override
@@ -126,16 +125,14 @@ public class KeyValRdbVisitor extends BaseRdbVisitor {
         while (len > 0) {
             byte[] field = parser.rdbLoadEncodedStringObject().first();
             byte[] value = parser.rdbLoadEncodedStringObject().first();
-            if (contains) {
-                escape.encode(field, out);
-                out.write(' ');
-                escape.encode(value, out);
-                if (len - 1 > 0) out.write(' ');
-                else out.write('\n');
-            }
+            escape.encode(field, out);
+            out.write(' ');
+            escape.encode(value, out);
+            if (len - 1 > 0) out.write(' ');
+            else out.write('\n');
             len--;
         }
-        return null;
+        return new DummyKeyValuePair();
     }
 
     @Override
@@ -145,34 +142,32 @@ public class KeyValRdbVisitor extends BaseRdbVisitor {
         BaseRdbParser parser = new BaseRdbParser(in);
         RedisInputStream stream = new RedisInputStream(parser.rdbLoadPlainStringObject());
         BaseRdbParser.LenHelper.zmlen(stream); // zmlen
+        boolean flag = true;
         while (true) {
             int zmEleLen = BaseRdbParser.LenHelper.zmElementLen(stream);
             if (zmEleLen == 255) {
-                if (contains) {
-                    out.write('\n');
-                }
-                return null;
+                out.write('\n');
+                return new DummyKeyValuePair();
             }
             byte[] field = BaseRdbParser.StringHelper.bytes(stream, zmEleLen);
             zmEleLen = BaseRdbParser.LenHelper.zmElementLen(stream);
             if (zmEleLen == 255) {
-                if (contains) {
-                    escape.encode(field, out);
-                    out.write(' ');
-                    escape.encode(null, out);
-                    out.write(' ');
-                }
-                return null;
+                if (flag) flag = false;
+                else out.write(' ');
+                escape.encode(field, out);
+                out.write(' ');
+                escape.encode(null, out);
+                out.write('\n');
+                return new DummyKeyValuePair();
             }
             int free = BaseRdbParser.LenHelper.free(stream);
             byte[] value = BaseRdbParser.StringHelper.bytes(stream, zmEleLen);
             BaseRdbParser.StringHelper.skip(stream, free);
-            if (contains) {
-                escape.encode(field, out);
-                out.write(' ');
-                escape.encode(value, out);
-                out.write(' ');
-            }
+            if (flag) flag = false;
+            else out.write(' ');
+            escape.encode(field, out);
+            out.write(' ');
+            escape.encode(value, out);
         }
     }
 
@@ -188,17 +183,15 @@ public class KeyValRdbVisitor extends BaseRdbVisitor {
         int zllen = BaseRdbParser.LenHelper.zllen(stream);
         for (int i = 0; i < zllen; i++) {
             byte[] e = BaseRdbParser.StringHelper.zipListEntry(stream);
-            if (contains) {
-                escape.encode(e, out);
-                if (i + 1 < zllen) out.write(' ');
-                else out.write('\n');
-            }
+            escape.encode(e, out);
+            if (i + 1 < zllen) out.write(' ');
+            else out.write('\n');
         }
         int zlend = BaseRdbParser.LenHelper.zlend(stream);
         if (zlend != 255) {
             throw new AssertionError("zlend expect 255 but " + zlend);
         }
-        return null;
+        return new DummyKeyValuePair();
     }
 
     @Override
@@ -225,13 +218,11 @@ public class KeyValRdbVisitor extends BaseRdbVisitor {
                 default:
                     throw new AssertionError("expect encoding [2,4,8] but:" + encoding);
             }
-            if (contains) {
-                escape.encode(element.getBytes(), out);
-                if (i + 1 < lenOfContent) out.write(' ');
-                else out.write('\n');
-            }
+            escape.encode(element.getBytes(), out);
+            if (i + 1 < lenOfContent) out.write(' ');
+            else out.write('\n');
         }
-        return null;
+        return new DummyKeyValuePair();
     }
 
     @Override
@@ -249,19 +240,17 @@ public class KeyValRdbVisitor extends BaseRdbVisitor {
             zllen--;
             double score = Double.valueOf(Strings.toString(BaseRdbParser.StringHelper.zipListEntry(stream)));
             zllen--;
-            if (contains) {
-                escape.encode(element, out);
-                out.write(' ');
-                escape.encode(score, out);
-                if (zllen - 1 > 0) out.write(' ');
-                else out.write('\n');
-            }
+            escape.encode(element, out);
+            out.write(' ');
+            escape.encode(score, out);
+            if (zllen - 1 > 0) out.write(' ');
+            else out.write('\n');
         }
         int zlend = BaseRdbParser.LenHelper.zlend(stream);
         if (zlend != 255) {
             throw new AssertionError("zlend expect 255 but " + zlend);
         }
-        return null;
+        return new DummyKeyValuePair();
     }
 
     @Override
@@ -278,19 +267,17 @@ public class KeyValRdbVisitor extends BaseRdbVisitor {
             zllen--;
             byte[] value = BaseRdbParser.StringHelper.zipListEntry(stream);
             zllen--;
-            if (contains) {
-                escape.encode(field, out);
-                out.write(' ');
-                escape.encode(value, out);
-                if (zllen - 1 > 0) out.write(' ');
-                else out.write('\n');
-            }
+            escape.encode(field, out);
+            out.write(' ');
+            escape.encode(value, out);
+            if (zllen - 1 > 0) out.write(' ');
+            else out.write('\n');
         }
         int zlend = BaseRdbParser.LenHelper.zlend(stream);
         if (zlend != 255) {
             throw new AssertionError("zlend expect 255 but " + zlend);
         }
-        return null;
+        return new DummyKeyValuePair();
     }
 
     @Override
@@ -307,19 +294,17 @@ public class KeyValRdbVisitor extends BaseRdbVisitor {
             int zllen = BaseRdbParser.LenHelper.zllen(stream);
             for (int j = 0; j < zllen; j++) {
                 byte[] e = BaseRdbParser.StringHelper.zipListEntry(stream);
-                if (contains) {
-                    escape.encode(e, out);
-                    if (i + 1 < len) out.write(' ');
-                    else if (j + 1 < zllen) out.write(' ');
-                    else out.write('\n');
-                }
+                escape.encode(e, out);
+                if (i + 1 < len) out.write(' ');
+                else if (j + 1 < zllen) out.write(' ');
+                else out.write('\n');
             }
             int zlend = BaseRdbParser.LenHelper.zlend(stream);
             if (zlend != 255) {
                 throw new AssertionError("zlend expect 255 but " + zlend);
             }
         }
-        return null;
+        return new DummyKeyValuePair();
     }
 
     @Override
@@ -339,7 +324,7 @@ public class KeyValRdbVisitor extends BaseRdbVisitor {
             throw new NoSuchElementException("module parser[" + moduleName + ", " + moduleVersion + "] not register. rdb type: [RDB_TYPE_MODULE]");
         }
         moduleParser.parse(in, 1);
-        return null;
+        return new DummyKeyValuePair();
     }
 
     @Override
@@ -349,7 +334,7 @@ public class KeyValRdbVisitor extends BaseRdbVisitor {
         SkipRdbParser skip = new SkipRdbParser(in);
         skip.rdbLoadLen();
         skip.rdbLoadCheckModuleValue();
-        return null;
+        return new DummyKeyValuePair();
     }
 
     protected ModuleParser<? extends Module> lookupModuleParser(String moduleName, int moduleVersion) {
@@ -391,6 +376,6 @@ public class KeyValRdbVisitor extends BaseRdbVisitor {
                 }
             }
         }
-        return null;
+        return new DummyKeyValuePair();
     }
 }

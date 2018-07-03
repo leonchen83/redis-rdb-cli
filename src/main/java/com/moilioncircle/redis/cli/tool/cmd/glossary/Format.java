@@ -15,12 +15,12 @@ import java.util.List;
  * @author Baoyi Chen
  */
 public enum Format {
-    JSON("json"),
-    DUMP("dump"),
     KEY("key"),
-    KEYVAL("keyval"),
     MEM("mem"),
-    RESP("resp");
+    DUMP("dump"),
+    JSON("json"),
+    RESP("resp"),
+    KEYVAL("keyval");
 
     private String value;
 
@@ -34,23 +34,23 @@ public enum Format {
 
     public void dress(Replicator r, File output, List<Long> db, List<String> regexs, Long largest, List<Type> types, Escape escape) throws Exception {
         switch (this) {
+            case KEY:
+                r.setRdbVisitor(new KeyRdbVisitor(r, output, db, regexs, largest, types, escape));
+                break;
+            case MEM:
+                r.setRdbVisitor(new MemRdbVisitor(r, output, db, regexs, largest, types, escape));
+                break;
             case JSON:
                 r.setRdbVisitor(new JsonRdbVisitor(r, output, db, regexs, largest, types, escape));
                 break;
             case DUMP:
                 r.setRdbVisitor(new DumpRdbVisitor(r, output, db, regexs, largest, types, escape));
                 break;
-            case KEY:
-                r.setRdbVisitor(new KeyRdbVisitor(r, output, db, regexs, largest, types, escape));
+            case RESP:
+                r.setRdbVisitor(new RespRdbVisitor(r, output, db, regexs, largest, types, escape));
                 break;
             case KEYVAL:
                 r.setRdbVisitor(new KeyValRdbVisitor(r, output, db, regexs, largest, types, escape));
-                break;
-            case MEM:
-                r.setRdbVisitor(new MemRdbVisitor(r, output, db, regexs, largest, types, escape));
-                break;
-            case RESP:
-                r.setRdbVisitor(new RespRdbVisitor(r, output, db, regexs, largest, types, escape));
                 break;
         }
     }

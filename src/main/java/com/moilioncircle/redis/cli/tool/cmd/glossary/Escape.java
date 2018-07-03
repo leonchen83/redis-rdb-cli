@@ -43,15 +43,15 @@ public enum Escape {
                 } else if (b == '\b') {
                     out.write('\\');
                     out.write('b');
-                } else if (b == '\f') {
-                    out.write('\\');
-                    out.write('f');
-                } else if (b == '"') {
-                    out.write('\\');
-                    out.write('"');
                 } else if (b == 7) {
                     out.write('\\');
                     out.write('a');
+                } else if (b == '"') {
+                    out.write('\\');
+                    out.write('"');
+                } else if (b == '\'') {
+                    out.write('\\');
+                    out.write('\'');
                 } else if (!((b >= 33 && b <= 126) || (b >= 161 && b <= 255))) {
                     out.write('\\');
                     out.write('x');
@@ -74,6 +74,8 @@ public enum Escape {
                     encode(bytes[i], out);
                 }
                 break;
+            default:
+                throw new AssertionError(this);
         }
     }
 

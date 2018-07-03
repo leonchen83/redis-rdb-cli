@@ -1,4 +1,4 @@
-package com.moilioncircle.redis.cli.tool.util;
+package com.moilioncircle.redis.cli.tool.util.io;
 
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Escape;
 

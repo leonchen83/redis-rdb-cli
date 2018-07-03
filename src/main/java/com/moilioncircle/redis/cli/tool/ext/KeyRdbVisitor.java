@@ -2,6 +2,7 @@ package com.moilioncircle.redis.cli.tool.ext;
 
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Escape;
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Type;
+import com.moilioncircle.redis.cli.tool.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
@@ -20,8 +21,14 @@ import static com.moilioncircle.redis.replicator.Constants.MODULE_SET;
 /**
  * @author Baoyi Chen
  */
-public class KeyRdbVisitor extends BaseRdbVisitor {
-    public KeyRdbVisitor(Replicator replicator, File out, List<Long> db, List<String> regexs, Long top, List<Type> types, Escape escape) throws Exception {
+public class KeyRdbVisitor extends AbstractRdbVisitor {
+    public KeyRdbVisitor(Replicator replicator,
+                         File out,
+                         List<Long> db,
+                         List<String> regexs,
+                         Long top,
+                         List<Type> types,
+                         Escape escape) throws Exception {
         super(replicator, out, db, regexs, top, types, escape);
     }
     
@@ -31,7 +38,7 @@ public class KeyRdbVisitor extends BaseRdbVisitor {
         out.write('\n');
         SkipRdbParser skip = new SkipRdbParser(in);
         skip.rdbLoadEncodedStringObject();
-        return null;
+        return new DummyKeyValuePair();
     }
     
     @Override
@@ -44,7 +51,7 @@ public class KeyRdbVisitor extends BaseRdbVisitor {
             skip.rdbLoadEncodedStringObject();
             len--;
         }
-        return null;
+        return new DummyKeyValuePair();
     }
     
     @Override
@@ -57,7 +64,7 @@ public class KeyRdbVisitor extends BaseRdbVisitor {
             skip.rdbLoadEncodedStringObject();
             len--;
         }
-        return null;
+        return new DummyKeyValuePair();
     }
     
     @Override
@@ -71,7 +78,7 @@ public class KeyRdbVisitor extends BaseRdbVisitor {
             skip.rdbLoadDoubleValue();
             len--;
         }
-        return null;
+        return new DummyKeyValuePair();
     }
     
     @Override
@@ -85,7 +92,7 @@ public class KeyRdbVisitor extends BaseRdbVisitor {
             skip.rdbLoadBinaryDoubleValue();
             len--;
         }
-        return null;
+        return new DummyKeyValuePair();
     }
     
     @Override
@@ -99,7 +106,7 @@ public class KeyRdbVisitor extends BaseRdbVisitor {
             skip.rdbLoadEncodedStringObject();
             len--;
         }
-        return null;
+        return new DummyKeyValuePair();
     }
     
     @Override
@@ -108,7 +115,7 @@ public class KeyRdbVisitor extends BaseRdbVisitor {
         out.write('\n');
         SkipRdbParser skip = new SkipRdbParser(in);
         skip.rdbLoadPlainStringObject();
-        return null;
+        return new DummyKeyValuePair();
     }
     
     @Override
@@ -117,7 +124,7 @@ public class KeyRdbVisitor extends BaseRdbVisitor {
         out.write('\n');
         SkipRdbParser skip = new SkipRdbParser(in);
         skip.rdbLoadPlainStringObject();
-        return null;
+        return new DummyKeyValuePair();
     }
     
     @Override
@@ -126,7 +133,7 @@ public class KeyRdbVisitor extends BaseRdbVisitor {
         out.write('\n');
         SkipRdbParser skip = new SkipRdbParser(in);
         skip.rdbLoadPlainStringObject();
-        return null;
+        return new DummyKeyValuePair();
     }
     
     @Override
@@ -135,7 +142,7 @@ public class KeyRdbVisitor extends BaseRdbVisitor {
         out.write('\n');
         SkipRdbParser skip = new SkipRdbParser(in);
         skip.rdbLoadPlainStringObject();
-        return null;
+        return new DummyKeyValuePair();
     }
     
     @Override
@@ -144,7 +151,7 @@ public class KeyRdbVisitor extends BaseRdbVisitor {
         out.write('\n');
         SkipRdbParser skip = new SkipRdbParser(in);
         skip.rdbLoadPlainStringObject();
-        return null;
+        return new DummyKeyValuePair();
     }
     
     @Override
@@ -156,7 +163,7 @@ public class KeyRdbVisitor extends BaseRdbVisitor {
         for (int i = 0; i < len; i++) {
             skip.rdbGenericLoadStringObject();
         }
-        return null;
+        return new DummyKeyValuePair();
     }
     
     @Override
@@ -176,7 +183,7 @@ public class KeyRdbVisitor extends BaseRdbVisitor {
             throw new NoSuchElementException("module parser[" + moduleName + ", " + moduleVersion + "] not register. rdb type: [RDB_TYPE_MODULE]");
         }
         moduleParser.parse(in, 1);
-        return null;
+        return new DummyKeyValuePair();
     }
     
     @Override
@@ -186,7 +193,7 @@ public class KeyRdbVisitor extends BaseRdbVisitor {
         SkipRdbParser skip = new SkipRdbParser(in);
         skip.rdbLoadLen();
         skip.rdbLoadCheckModuleValue();
-        return null;
+        return new DummyKeyValuePair();
     }
     
     @Override
@@ -223,6 +230,6 @@ public class KeyRdbVisitor extends BaseRdbVisitor {
                 }
             }
         }
-        return null;
+        return new DummyKeyValuePair();
     }
 }

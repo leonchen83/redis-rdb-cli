@@ -2,6 +2,8 @@ package com.moilioncircle.redis.cli.tool.ext;
 
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Escape;
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Type;
+import com.moilioncircle.redis.cli.tool.ext.datatype.DummyKeyValuePair;
+import com.moilioncircle.redis.cli.tool.util.Closes;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
@@ -45,33 +47,36 @@ import static java.util.stream.Collectors.toList;
 /**
  * @author Baoyi Chen
  */
-public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
+public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
 
     protected Long largest;
     protected Set<Long> db;
     protected Escape escape;
     protected List<Type> types;
     protected OutputStream out;
+    protected Set<String> keys;
     protected List<Pattern> regexs;
 
-    public BaseRdbVisitor(Replicator replicator, File output, List<Long> db, List<String> regexs, Long largest, List<Type> types, Escape escape) throws Exception {
+    public AbstractRdbVisitor(Replicator replicator,
+                              File output,
+                              List<Long> db,
+                              List<String> regexs,
+                              Long largest,
+                              List<Type> types,
+                              Escape escape) throws Exception {
         super(replicator);
         this.types = types;
         this.escape = escape;
         this.largest = largest;
         this.db = new HashSet<>(db);
+        this.keys = new HashSet<>(regexs);
         this.out = new BufferedOutputStream(new FileOutputStream(output));
         this.regexs = regexs.stream().map(Pattern::compile).collect(toList());
-        replicator.addCloseListener(r -> {
-            try {
-                out.close();
-            } catch (IOException e) {
-            }
-        });
+        replicator.addCloseListener(r -> Closes.closeQuietly(out));
     }
 
-    protected boolean contains(int rdbType) {
-        return Type.contains(types, rdbType);
+    protected boolean contains(int type) {
+        return Type.contains(types, type);
     }
 
     protected boolean contains(long db) {
@@ -79,10 +84,9 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
     }
 
     protected boolean contains(String key) {
+        if (keys.contains(key)) return true;
         for (Pattern pattern : regexs) {
-            if (key.equals(pattern) || pattern.matcher(Strings.toString(key)).matches()) {
-                return true;
-            }
+            if (pattern.matcher(Strings.toString(key)).matches()) return true;
         }
         return false;
     }
@@ -102,7 +106,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
         } else {
             SkipRdbParser skip = new SkipRdbParser(in);
             skip.rdbLoadEncodedStringObject();
-            return null;
+            return new DummyKeyValuePair();
         }
     }
 
@@ -121,7 +125,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
                 skip.rdbLoadEncodedStringObject();
                 len--;
             }
-            return null;
+            return new DummyKeyValuePair();
         }
     }
 
@@ -141,7 +145,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
                 skip.rdbLoadEncodedStringObject();
                 len--;
             }
-            return null;
+            return new DummyKeyValuePair();
         }
     }
 
@@ -161,7 +165,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
                 skip.rdbLoadDoubleValue();
                 len--;
             }
-            return null;
+            return new DummyKeyValuePair();
         }
     }
 
@@ -181,7 +185,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
                 skip.rdbLoadBinaryDoubleValue();
                 len--;
             }
-            return null;
+            return new DummyKeyValuePair();
         }
     }
 
@@ -201,7 +205,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
                 skip.rdbLoadEncodedStringObject();
                 len--;
             }
-            return null;
+            return new DummyKeyValuePair();
         }
     }
 
@@ -216,7 +220,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
         } else {
             SkipRdbParser skip = new SkipRdbParser(in);
             skip.rdbLoadPlainStringObject();
-            return null;
+            return new DummyKeyValuePair();
         }
 
     }
@@ -232,7 +236,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
         } else {
             SkipRdbParser skip = new SkipRdbParser(in);
             skip.rdbLoadPlainStringObject();
-            return null;
+            return new DummyKeyValuePair();
         }
 
     }
@@ -248,7 +252,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
         } else {
             SkipRdbParser skip = new SkipRdbParser(in);
             skip.rdbLoadPlainStringObject();
-            return null;
+            return new DummyKeyValuePair();
         }
 
     }
@@ -264,7 +268,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
         } else {
             SkipRdbParser skip = new SkipRdbParser(in);
             skip.rdbLoadPlainStringObject();
-            return null;
+            return new DummyKeyValuePair();
         }
     }
 
@@ -279,7 +283,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
         } else {
             SkipRdbParser skip = new SkipRdbParser(in);
             skip.rdbLoadPlainStringObject();
-            return null;
+            return new DummyKeyValuePair();
         }
     }
 
@@ -297,7 +301,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
             for (int i = 0; i < len; i++) {
                 skip.rdbGenericLoadStringObject();
             }
-            return null;
+            return new DummyKeyValuePair();
         }
     }
 
@@ -323,7 +327,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
                 throw new NoSuchElementException("module parser[" + moduleName + ", " + moduleVersion + "] not register. rdb type: [RDB_TYPE_MODULE]");
             }
             moduleParser.parse(in, 1);
-            return null;
+            return new DummyKeyValuePair();
         }
     }
 
@@ -340,7 +344,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
             skip.rdbLoadLen();
             SkipRdbParser skipRdbParser = new SkipRdbParser(in);
             skipRdbParser.rdbLoadCheckModuleValue();
-            return null;
+            return new DummyKeyValuePair();
         }
     }
 
@@ -388,9 +392,8 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
                     }
                 }
             }
-            return null;
+            return new DummyKeyValuePair();
         }
-
     }
 
     protected abstract Event doApplyZSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;

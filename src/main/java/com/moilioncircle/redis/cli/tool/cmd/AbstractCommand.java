@@ -33,6 +33,15 @@ public abstract class AbstractCommand implements Command {
         }
     }
 
+    protected void write(String message) throws Exception {
+        System.out.print(message);
+        System.out.flush();
+    }
+
+    protected void writeLine(String message) throws Exception {
+        System.out.println(message);
+    }
+
     protected String version() {
         StringBuilder builder = new StringBuilder();
         builder.append("redis cli tool: ").append(VERSION).append("\n");
@@ -45,14 +54,5 @@ public abstract class AbstractCommand implements Command {
         builder.append("version: ").append(System.getProperty("os.version")).append(", ");
         builder.append("arch: ").append(System.getProperty("os.arch"));
         return builder.toString();
-    }
-
-    public void write(String message) throws Exception {
-        System.out.print(message);
-        System.out.flush();
-    }
-
-    public void writeLine(String message) throws Exception {
-        System.out.println(message);
     }
 }
