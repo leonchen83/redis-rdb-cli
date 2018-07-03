@@ -13,8 +13,8 @@ usage: rct
                              redis://host:port?authPassword=foobar
                              redis:///path/to/dump.rdb.
  -k,--key <regex regex...>   Keys to export. This can be a RegEx.
- -l,--largest <n>            Limit memory output to only the top N keys
-                             (by size).
+ -l,--largest <n>            Limit memory output(--format mem) to only the
+                             top N keys (by size).
  -o,--out <file>             Output file.
  -t,--type <type type...>    Data type to include. Possible values are
                              string, hash, set, sortedset, list, module,

@@ -26,7 +26,7 @@ public class RctCommand extends AbstractCommand {
     private static final Option DB = Option.builder("d").longOpt("db").required(false).hasArg().argName("num num...").valueSeparator(' ').type(Number.class).desc("Database Number. Multiple databases can be provided. If not specified, all databases will be included.").build();
     private static final Option KEY = Option.builder("k").longOpt("key").required(false).hasArg().argName("regex regex...").valueSeparator(' ').desc("Keys to export. This can be a RegEx.").build();
     private static final Option TYPE = Option.builder("t").longOpt("type").required(false).hasArgs().argName("type type...").valueSeparator(' ').desc("Data type to include. Possible values are string, hash, set, sortedset, list, module, stream. Multiple types can be provided. If not specified, all data types will be returned.").build();
-    private static final Option TOP = Option.builder("l").longOpt("largest").required(false).hasArg().argName("n").type(Number.class).desc("Limit memory output to only the top N keys (by size).").build();
+    private static final Option TOP = Option.builder("l").longOpt("largest").required(false).hasArg().argName("n").type(Number.class).desc("Limit memory output(--format mem) to only the top N keys (by size).").build();
     private static final Option ESCAPE = Option.builder("e").longOpt("escape").required(false).hasArg().argName("escape").type(String.class).desc("Escape strings to encoding: raw (default), print.").build();
 
     @Override
