@@ -23,7 +23,7 @@ public class RctCommand extends AbstractCommand {
     private static final Option FORMAT = Option.builder("f").longOpt("format").required(false).hasArg().argName("format").type(String.class).desc("Command to execute. Valid commands are json, dump, key, keyval, mem and resp").build();
     private static final Option INPUT = Option.builder("i").longOpt("in").required(false).hasArg().argName("redis uri").type(File.class).desc("Input uri. eg: redis://host:port?authPassword=foobar redis:///path/to/dump.rdb.").build();
     private static final Option OUTPUT = Option.builder("o").longOpt("out").required(false).hasArg().argName("file").type(File.class).desc("Output file.").build();
-    private static final Option DB = Option.builder("d").longOpt("db").required(false).hasArg().argName("db num").type(Number.class).desc("Database Number. Multiple databases can be provided. If not specified, all databases will be included.").build();
+    private static final Option DB = Option.builder("d").longOpt("db").required(false).hasArg().argName("num num...").valueSeparator(' ').type(Number.class).desc("Database Number. Multiple databases can be provided. If not specified, all databases will be included.").build();
     private static final Option KEY = Option.builder("k").longOpt("key").required(false).hasArg().argName("regex regex...").valueSeparator(' ').desc("Keys to export. This can be a RegEx.").build();
     private static final Option TYPE = Option.builder("t").longOpt("type").required(false).hasArgs().argName("type type...").valueSeparator(' ').desc("Data type to include. Possible values are string, hash, set, sortedset, list, module, stream. Multiple types can be provided. If not specified, all data types will be returned.").build();
     private static final Option TOP = Option.builder("l").longOpt("largest").required(false).hasArg().argName("n").type(Number.class).desc("Limit memory output to only the top N keys (by size).").build();
@@ -77,11 +77,11 @@ public class RctCommand extends AbstractCommand {
             File output = line.getOption("out");
             String format = line.getOption("format");
 
-            Long db = line.getOption("db");
-            List<String> regexs = line.getOptions("key");
+            List<Long> db = line.getOptions("db");
             Long largest = line.getOption("largest");
             String escape = line.getOption("escape");
             List<String> type = line.getOptions("type");
+            List<String> regexs = line.getOptions("key");
 
             Replicator r = new RedisReplicator(input);
             Format.parse(format).dress(r, output, db, regexs, largest, Type.parse(type), Escape.parse(escape));

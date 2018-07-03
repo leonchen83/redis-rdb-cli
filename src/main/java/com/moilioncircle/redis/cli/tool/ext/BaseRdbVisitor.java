@@ -18,8 +18,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import static com.moilioncircle.redis.replicator.Constants.MODULE_SET;
@@ -45,19 +47,19 @@ import static java.util.stream.Collectors.toList;
  */
 public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
 
-    protected Long db;
     protected Long largest;
+    protected Set<Long> db;
     protected Escape escape;
     protected List<Type> types;
     protected OutputStream out;
     protected List<Pattern> regexs;
 
-    public BaseRdbVisitor(Replicator replicator, File output, Long db, List<String> regexs, Long largest, List<Type> types, Escape escape) throws Exception {
+    public BaseRdbVisitor(Replicator replicator, File output, List<Long> db, List<String> regexs, Long largest, List<Type> types, Escape escape) throws Exception {
         super(replicator);
-        this.db = db;
         this.types = types;
-        this.largest = largest;
         this.escape = escape;
+        this.largest = largest;
+        this.db = new HashSet<>(db);
         this.out = new BufferedOutputStream(new FileOutputStream(output));
         this.regexs = regexs.stream().map(Pattern::compile).collect(toList());
         replicator.addCloseListener(r -> {
@@ -73,7 +75,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
     }
 
     protected boolean contains(long db) {
-        return this.db == null || this.db.intValue() == db;
+        return this.db.isEmpty() || this.db.contains(db);
     }
 
     protected boolean contains(String key) {
@@ -85,8 +87,8 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
         return false;
     }
 
-    protected boolean contains(long db, int rdbType, String key) {
-        return contains(db) && contains(rdbType) && contains(key);
+    protected boolean contains(long db, int type, String key) {
+        return contains(db) && contains(type) && contains(key);
     }
 
     @Override

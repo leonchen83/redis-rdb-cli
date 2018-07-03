@@ -27,7 +27,7 @@ public class DumpRdbVisitor extends BaseRdbVisitor {
 
     private final int version;
 
-    public DumpRdbVisitor(Replicator replicator, File out, Long db, List<String> regexs, Long top, List<Type> types, Escape escape) throws Exception {
+    public DumpRdbVisitor(Replicator replicator, File out, List<Long> db, List<String> regexs, Long top, List<Type> types, Escape escape) throws Exception {
         super(replicator, out, db, regexs, top, types, escape);
         this.version = -1;
     }

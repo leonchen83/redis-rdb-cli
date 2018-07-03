@@ -32,7 +32,7 @@ public enum Format {
         return Format.valueOf(format);
     }
 
-    public void dress(Replicator r, File output, Long db, List<String> regexs, Long largest, List<Type> types, Escape escape) throws Exception {
+    public void dress(Replicator r, File output, List<Long> db, List<String> regexs, Long largest, List<Type> types, Escape escape) throws Exception {
         switch (this) {
             case JSON:
                 r.setRdbVisitor(new JsonRdbVisitor(r, output, db, regexs, largest, types, escape));

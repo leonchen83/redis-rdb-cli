@@ -21,7 +21,7 @@ import static com.moilioncircle.redis.replicator.Constants.MODULE_SET;
  * @author Baoyi Chen
  */
 public class KeyRdbVisitor extends BaseRdbVisitor {
-    public KeyRdbVisitor(Replicator replicator, File out, Long db, List<String> regexs, Long top, List<Type> types, Escape escape) throws Exception {
+    public KeyRdbVisitor(Replicator replicator, File out, List<Long> db, List<String> regexs, Long top, List<Type> types, Escape escape) throws Exception {
         super(replicator, out, db, regexs, top, types, escape);
     }
     
