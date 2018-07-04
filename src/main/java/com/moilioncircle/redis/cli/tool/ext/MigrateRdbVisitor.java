@@ -87,7 +87,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
                     }
                 }
             } catch (Throwable e) {
-
+                System.out.println(e.getMessage());
             } finally {
                 if (target != null) pool.release(target);
             }

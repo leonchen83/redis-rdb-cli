@@ -9,7 +9,7 @@ import static java.util.Arrays.asList;
  * @author Baoyi Chen
  */
 public enum Type {
-
+    
     ALL("all"),
     SET("set"),
     LIST("list"),
@@ -18,30 +18,54 @@ public enum Type {
     MODULE("module"),
     STREAM("stream"),
     SORTEDSET("sortedset");
-
+    
     private String value;
-
+    
     Type(String value) {
         this.value = value;
     }
-
+    
     public String getValue() {
         return value;
     }
-
+    
     public static List<Type> parse(List<String> list) {
         if (list.isEmpty()) return asList(ALL);
         List<Type> r = new ArrayList<>(list.size());
-        for (String name : list) r.add(Type.valueOf(name));
+        for (String name : list) r.add(Type.parse(name));
         return r;
     }
-
+    
     public static boolean contains(List<Type> list, int rdb) {
         if (list.isEmpty()) return true;
         for (Type type : list) if (type.contains(rdb)) return true;
         return false;
     }
-
+    
+    public static Type parse(String type) {
+        switch (type) {
+            case "all":
+                return ALL;
+            case "set":
+                return SET;
+            case "list":
+                return LIST;
+            case "hash":
+                return HASH;
+            case "string":
+                return STRING;
+            case "module":
+                return MODULE;
+            case "stream":
+                return STREAM;
+            case "sortedset":
+                return SORTEDSET;
+            default:
+                throw new AssertionError("Unsupported type '" + type + "'");
+            
+        }
+    }
+    
     public static Type parse(int type) {
         switch (type) {
             case 0:
@@ -70,7 +94,7 @@ public enum Type {
                 throw new AssertionError(type);
         }
     }
-
+    
     public boolean contains(int type) {
         switch (this) {
             case ALL:
@@ -92,7 +116,7 @@ public enum Type {
         }
         return false;
     }
-
+    
     public static String type(int type) {
         switch (type) {
             case 0:
@@ -129,5 +153,5 @@ public enum Type {
                 throw new AssertionError(type);
         }
     }
-
+    
 }

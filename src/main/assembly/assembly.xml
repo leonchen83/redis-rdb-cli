@@ -30,15 +30,4 @@
             </includes>
         </fileSet>
     </fileSets>
-
-    <files>
-        <file>
-            <source>LICENSE-BIN</source>
-            <destName>LICENSE</destName>
-        </file>
-        <file>
-            <source>NOTICE-BIN</source>
-            <destName>NOTICE</destName>
-        </file>
-    </files>
 </assembly>

@@ -9,26 +9,33 @@ import java.io.OutputStream;
 public enum Escape {
     RAW("raw"),
     PRINT("print");
-
+    
     private String value;
-
+    
     Escape(String value) {
         this.value = value;
     }
-
+    
     public static Escape parse(String escape) {
         if (escape == null) return RAW;
-        return Escape.valueOf(escape);
+        switch (escape) {
+            case "raw":
+                return RAW;
+            case "print":
+                return PRINT;
+            default:
+                throw new AssertionError("Unsupported escape '" + escape + "'");
+        }
     }
-
+    
     public void encode(double value, OutputStream out) throws IOException {
         encode(String.valueOf(value).getBytes(), out);
     }
-
+    
     public void encode(long value, OutputStream out) throws IOException {
         encode(String.valueOf(value).getBytes(), out);
     }
-
+    
     public void encode(byte b, OutputStream out) throws IOException {
         switch (this) {
             case RAW:
@@ -66,7 +73,7 @@ public enum Escape {
                 break;
         }
     }
-
+    
     public void encode(byte[] bytes, int off, int len, OutputStream out) throws IOException {
         if (bytes == null) return;
         switch (this) {
@@ -82,7 +89,7 @@ public enum Escape {
                 throw new AssertionError(this);
         }
     }
-
+    
     public void encode(byte[] bytes, OutputStream out) throws IOException {
         encode(bytes, 0, bytes.length, out);
     }

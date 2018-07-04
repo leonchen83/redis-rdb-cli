@@ -21,17 +21,32 @@ public enum Format {
     JSON("json"),
     RESP("resp"),
     KEYVAL("keyval");
-
+    
     private String value;
-
+    
     Format(String value) {
         this.value = value;
     }
-
+    
     public static Format parse(String format) {
-        return Format.valueOf(format);
+        switch (format) {
+            case "key":
+                return KEY;
+            case "mem":
+                return MEM;
+            case "dump":
+                return DUMP;
+            case "json":
+                return JSON;
+            case "resp":
+                return RESP;
+            case "keyval":
+                return KEYVAL;
+            default:
+                throw new AssertionError("Unsupported format '" + format + "'");
+        }
     }
-
+    
     public void dress(Replicator r, File output, List<Long> db, List<String> regexs, Long largest, Long bytes, List<Type> types, Escape escape) throws Exception {
         switch (this) {
             case KEY:
