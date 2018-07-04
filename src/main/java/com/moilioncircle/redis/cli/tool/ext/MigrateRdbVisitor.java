@@ -3,13 +3,15 @@ package com.moilioncircle.redis.cli.tool.ext;
 import cn.nextop.lite.pool.Pool;
 import cn.nextop.lite.pool.glossary.Lifecyclet;
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Type;
+import com.moilioncircle.redis.cli.tool.util.Closes;
 import com.moilioncircle.redis.cli.tool.util.pooling.ClientPool;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
-import com.moilioncircle.redis.replicator.cmd.impl.DefaultCommand;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
+import com.moilioncircle.redis.replicator.event.PostFullSyncEvent;
+import com.moilioncircle.redis.replicator.event.PreFullSyncEvent;
 import com.moilioncircle.redis.replicator.io.RawByteListener;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
@@ -50,48 +52,49 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         this.replace = replace;
         this.uri = new RedisURI(uri);
         Configuration config = Configuration.valueOf(this.uri);
-        this.pool = ClientPool.create(this.uri.getHost(), this.uri.getPort(), config.getAuthPassword());
+        this.pool = ClientPool.create(this.uri.getHost(), this.uri.getPort(), config.getAuthPassword(), config.getConnectionTimeout());
+        this.replicator.addEventListener(this);
         this.replicator.addCloseListener(e -> {
-            Concurrents.terminateQuietly(executor, 30, TimeUnit.SECONDS);
+            Concurrents.terminateQuietly(executor, config.getConnectionTimeout(), TimeUnit.MILLISECONDS);
             Lifecyclet.stopQuietly(this.pool);
         });
     }
     
     @Override
     public void onEvent(Replicator replicator, Event event) {
+        if (event instanceof PreFullSyncEvent) {
+            dbnum.set(-1);
+            return;
+        }
+        if (event instanceof PostFullSyncEvent) {
+            Closes.close(replicator);
+            return;
+        }
+        if (!(event instanceof DumpKeyValuePair)) return;
         executor.submit(() -> {
             ClientPool.Client target = null;
             try {
                 target = pool.acquire();
                 if (target == null) target = pool.acquire();
                 if (target != null) {
-                    if (event instanceof DumpKeyValuePair) {
-                        DumpKeyValuePair dkv = (DumpKeyValuePair) event;
-                        // Step1: select db
-                        DB db = dkv.getDb();
-                        int index;
-                        if (db != null && (index = (int) db.getDbNumber()) != dbnum.get()) {
-                            String r = target.send(SELECT, toByteArray(index));
-                            if (r != null) System.out.println(r);
-                            dbnum.set(index);
-                        }
-    
-                        // Step2: restore dump data
-                        if (dkv.getExpiredMs() == null) {
-                            String r = target.restore(dkv.getKey(), 0L, dkv.getValue(), replace);
-                            if (r != null) System.out.println(r);
-                        } else {
-                            long ms = dkv.getExpiredMs() - System.currentTimeMillis();
-                            if (ms <= 0) return;
-                            String r = target.restore(dkv.getKey(), ms, dkv.getValue(), replace);
-                            if (r != null) System.out.println(r);
-                        }
+                    DumpKeyValuePair dkv = (DumpKeyValuePair) event;
+                    // Step1: select db
+                    DB db = dkv.getDb();
+                    int index;
+                    if (db != null && (index = (int) db.getDbNumber()) != dbnum.get()) {
+                        String r = target.send(SELECT, toByteArray(index));
+                        if (r != null) System.out.println(r);
+                        dbnum.set(index);
                     }
     
-                    if (event instanceof DefaultCommand) {
-                        // Step3: sync aof command
-                        DefaultCommand dc = (DefaultCommand) event;
-                        String r = target.send(dc.getCommand(), dc.getArgs());
+                    // Step2: restore dump data
+                    if (dkv.getExpiredMs() == null) {
+                        String r = target.restore(dkv.getKey(), 0L, dkv.getValue(), replace);
+                        if (r != null) System.out.println(r);
+                    } else {
+                        long ms = dkv.getExpiredMs() - System.currentTimeMillis();
+                        if (ms <= 0) return;
+                        String r = target.restore(dkv.getKey(), ms, dkv.getValue(), replace);
                         if (r != null) System.out.println(r);
                     }
                 }

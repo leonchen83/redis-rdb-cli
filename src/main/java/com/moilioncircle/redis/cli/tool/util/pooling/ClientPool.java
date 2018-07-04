@@ -22,10 +22,10 @@ import static redis.clients.jedis.Protocol.toByteArray;
  * @author Baoyi Chen
  */
 public class ClientPool {
-
-    public static Pool<Client> create(String host, int port, String password) {
+    
+    public static Pool<Client> create(String host, int port, String password, int timeout) {
         Pool<Client> pool = new PoolBuilder<Client>().validator(e -> !e.broken.get()).supplier(() -> {
-            Client client = new Client(host, port, 10000, 10000);
+            Client client = new Client(host, port, timeout);
             if (password != null) {
                 String r = client.send(AUTH, password.getBytes());
                 if (r != null) System.out.println(r);
@@ -37,17 +37,17 @@ public class ClientPool {
         Lifecyclet.start(pool);
         return pool;
     }
-
+    
     public static class Client extends redis.clients.jedis.Client {
-
+        
         private AtomicBoolean broken = new AtomicBoolean(false);
-
-        public Client(final String host, final int port, int timeout, int soTimeout) {
+        
+        public Client(final String host, final int port, int timeout) {
             super(host, port);
+            setSoTimeout(timeout);
             setConnectionTimeout(timeout);
-            setSoTimeout(soTimeout);
         }
-
+        
         public String send(Protocol.Command cmd, final byte[]... args) {
             try {
                 sendCommand(cmd, args);
@@ -60,11 +60,11 @@ public class ClientPool {
                 return e.getMessage();
             }
         }
-
+        
         public String send(final byte[] cmd, final byte[]... args) {
             return send(Protocol.Command.valueOf(Strings.toString(cmd).toUpperCase()), args);
         }
-
+        
         public String restore(byte[] key, long expired, byte[] dumped, boolean replace) {
             if (!replace) {
                 return send(RESTORE, key, toByteArray(expired), dumped);
