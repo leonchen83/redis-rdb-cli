@@ -1,6 +1,8 @@
 ```java  
 
 usage: rct
+ -b,--bytes <bytes>          Limit memory output(--format mem) to keys
+                             greater to or equal to this value (in bytes)
  -d,--db <num num...>        Database Number. Multiple databases can be
                              provided. If not specified, all databases
                              will be included.

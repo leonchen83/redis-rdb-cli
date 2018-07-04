@@ -35,10 +35,9 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
                           File out,
                           List<Long> db,
                           List<String> regexs,
-                          Long top,
                           List<Type> types,
                           Escape escape) throws Exception {
-        super(replicator, out, db, regexs, top, types, escape);
+        super(replicator, out, db, regexs, types, escape);
     }
 
     @Override
@@ -471,6 +470,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
 
     @Override
     protected Event doApplyStreamListPacks(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        // TODO
         SkipRdbParser skip = new SkipRdbParser(in);
         long listPacks = skip.rdbLoadLen().len;
         while (listPacks-- > 0) {

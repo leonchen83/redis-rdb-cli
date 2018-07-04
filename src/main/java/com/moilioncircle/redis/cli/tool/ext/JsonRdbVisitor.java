@@ -29,10 +29,9 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
                           File out,
                           List<Long> db,
                           List<String> regexs,
-                          Long top,
                           List<Type> types,
                           Escape escape) throws Exception {
-        super(replicator, out, db, regexs, top, types, escape);
+        super(replicator, out, db, regexs, types, escape);
     }
 
     private void emit(byte[] field, double value) throws IOException {
@@ -343,7 +342,6 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         out.write('[');
         BaseRdbParser parser = new BaseRdbParser(in);
         RedisInputStream stream = new RedisInputStream(parser.rdbLoadPlainStringObject());
-
         boolean flag = true;
         int encoding = BaseRdbParser.LenHelper.encoding(stream);
         long lenOfContent = BaseRdbParser.LenHelper.lenOfContent(stream);
@@ -526,6 +524,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
 
     @Override
     protected Event doApplyStreamListPacks(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        // TODO
         SkipRdbParser skip = new SkipRdbParser(in);
         long listPacks = skip.rdbLoadLen().len;
         while (listPacks-- > 0) {

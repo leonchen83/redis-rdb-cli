@@ -4,7 +4,10 @@ import com.moilioncircle.redis.cli.tool.cmd.glossary.Escape;
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Type;
 import com.moilioncircle.redis.cli.tool.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.replicator.Replicator;
+import com.moilioncircle.redis.replicator.UncheckedIOException;
 import com.moilioncircle.redis.replicator.event.Event;
+import com.moilioncircle.redis.replicator.event.EventListener;
+import com.moilioncircle.redis.replicator.event.PreFullSyncEvent;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.BaseRdbParser;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
@@ -24,15 +27,29 @@ import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
 /**
  * @author Baoyi Chen
  */
-public class KeyValRdbVisitor extends AbstractRdbVisitor {
+public class KeyValRdbVisitor extends AbstractRdbVisitor implements EventListener {
     public KeyValRdbVisitor(Replicator replicator,
                             File out,
                             List<Long> db,
                             List<String> regexs,
-                            Long top,
                             List<Type> types,
                             Escape escape) throws Exception {
-        super(replicator, out, db, regexs, top, types, escape);
+        super(replicator, out, db, regexs, types, escape);
+        this.replicator.addEventListener(this);
+    }
+
+    @Override
+    public void onEvent(Replicator replicator, Event event) {
+        if (event instanceof PreFullSyncEvent) {
+            try {
+                escape.encode("key".getBytes(), out);
+                out.write(' ');
+                escape.encode("val".getBytes(), out);
+                out.write('\n');
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
     }
 
     @Override
@@ -346,6 +363,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
     public Event doApplyStreamListPacks(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         escape.encode(key, out);
         out.write('\n');
+        // TODO
         SkipRdbParser skip = new SkipRdbParser(in);
         long listPacks = skip.rdbLoadLen().len;
         while (listPacks-- > 0) {

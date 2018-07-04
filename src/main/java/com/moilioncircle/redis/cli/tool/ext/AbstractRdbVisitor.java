@@ -49,7 +49,6 @@ import static java.util.stream.Collectors.toList;
  */
 public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
 
-    protected Long largest;
     protected Set<Long> db;
     protected Escape escape;
     protected List<Type> types;
@@ -61,18 +60,23 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
                               File output,
                               List<Long> db,
                               List<String> regexs,
-                              Long largest,
                               List<Type> types,
                               Escape escape) throws Exception {
+        this(replicator, db, regexs, types);
+        this.escape = escape;
+        this.out = new BufferedOutputStream(new FileOutputStream(output));
+        replicator.addCloseListener(r -> Closes.closeQuietly(out));
+    }
+
+    public AbstractRdbVisitor(Replicator replicator,
+                              List<Long> db,
+                              List<String> regexs,
+                              List<Type> types) {
         super(replicator);
         this.types = types;
-        this.escape = escape;
-        this.largest = largest;
         this.db = new HashSet<>(db);
         this.keys = new HashSet<>(regexs);
-        this.out = new BufferedOutputStream(new FileOutputStream(output));
         this.regexs = regexs.stream().map(Pattern::compile).collect(toList());
-        replicator.addCloseListener(r -> Closes.closeQuietly(out));
     }
 
     protected boolean contains(int type) {
