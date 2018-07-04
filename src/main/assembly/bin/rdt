@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+if type -P java &>/dev/null; then
+    _java=java
+elif [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]]; then
+    _java="$JAVA_HOME/bin/java"
+else
+    echo "no found java."
+fi
+
+if [[ "$_java" ]]; then
+    version=$("$_java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
+    if [[ "$version" < "1.8" ]]; then
+        echo "java -version is less than 1.8"
+    fi
+fi
+
+binPath=$(cd "$(dirname "$0")"; pwd);
+cd $binPath
+cd ..
+parentPath=`pwd`
+libPath=$parentPath/lib/
+
+function exportClassPath(){
+    jarFileList=`find "$libPath" -name *.jar |awk -F'/' '{print $(NF)}' 2>>/dev/null`
+    CLASSPATH=".:$binPath";
+    for jarItem in $jarFileList
+      do
+        CLASSPATH="$CLASSPATH:$libPath$jarItem"
+    done
+    CLASSPATH=$CLASSPATH:./conf
+    export CLASSPATH
+}
+ulimit -n 65535
+exportClassPath
+
+$_java -server -Xms512m -Xmx512m -Xss2m -XX:NewRatio=2  -XX:+UseGCOverheadLimit -XX:-UseParallelGC -XX:ParallelGCThreads=24 com.moilioncircle.redis.cli.tool.Rdt $@
