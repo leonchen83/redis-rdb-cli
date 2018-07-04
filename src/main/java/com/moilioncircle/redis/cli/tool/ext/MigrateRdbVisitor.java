@@ -3,11 +3,11 @@ package com.moilioncircle.redis.cli.tool.ext;
 import cn.nextop.lite.pool.Pool;
 import cn.nextop.lite.pool.glossary.Lifecyclet;
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Type;
-import com.moilioncircle.redis.cli.tool.util.Closes;
 import com.moilioncircle.redis.cli.tool.util.pooling.ClientPool;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
+import com.moilioncircle.redis.replicator.cmd.impl.DefaultCommand;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
 import com.moilioncircle.redis.replicator.event.PostFullSyncEvent;
@@ -62,39 +62,44 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     
     @Override
     public void onEvent(Replicator replicator, Event event) {
-        if (event instanceof PreFullSyncEvent) {
-            dbnum.set(-1);
-            return;
-        }
-        if (event instanceof PostFullSyncEvent) {
-            Closes.close(replicator);
-            return;
-        }
-        if (!(event instanceof DumpKeyValuePair)) return;
         executor.submit(() -> {
+            if (event instanceof PreFullSyncEvent) {
+                dbnum.set(-1);
+                return;
+            }
+            if (event instanceof PostFullSyncEvent) {
+                return;
+            }
             ClientPool.Client target = null;
             try {
                 target = pool.acquire();
                 if (target == null) target = pool.acquire();
                 if (target != null) {
-                    DumpKeyValuePair dkv = (DumpKeyValuePair) event;
-                    // Step1: select db
-                    DB db = dkv.getDb();
-                    int index;
-                    if (db != null && (index = (int) db.getDbNumber()) != dbnum.get()) {
-                        String r = target.send(SELECT, toByteArray(index));
-                        if (r != null) System.out.println(r);
-                        dbnum.set(index);
-                    }
-    
-                    // Step2: restore dump data
-                    if (dkv.getExpiredMs() == null) {
-                        String r = target.restore(dkv.getKey(), 0L, dkv.getValue(), replace);
-                        if (r != null) System.out.println(r);
-                    } else {
-                        long ms = dkv.getExpiredMs() - System.currentTimeMillis();
-                        if (ms <= 0) return;
-                        String r = target.restore(dkv.getKey(), ms, dkv.getValue(), replace);
+                    if (event instanceof DumpKeyValuePair) {
+                        DumpKeyValuePair dkv = (DumpKeyValuePair) event;
+                        // Step1: select db
+                        DB db = dkv.getDb();
+                        int index;
+                        if (db != null && (index = (int) db.getDbNumber()) != dbnum.get()) {
+                            String r = target.send(SELECT, toByteArray(index));
+                            if (r != null) System.out.println(r);
+                            dbnum.set(index);
+                        }
+        
+                        // Step2: restore dump data
+                        if (dkv.getExpiredMs() == null) {
+                            String r = target.restore(dkv.getKey(), 0L, dkv.getValue(), replace);
+                            if (r != null) System.out.println(r);
+                        } else {
+                            long ms = dkv.getExpiredMs() - System.currentTimeMillis();
+                            if (ms <= 0) return;
+                            String r = target.restore(dkv.getKey(), ms, dkv.getValue(), replace);
+                            if (r != null) System.out.println(r);
+                        }
+                    } else if (event instanceof DefaultCommand) {
+                        // Step3: sync aof command
+                        DefaultCommand dc = (DefaultCommand) event;
+                        String r = target.send(dc.getCommand(), dc.getArgs());
                         if (r != null) System.out.println(r);
                     }
                 }
