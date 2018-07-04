@@ -84,7 +84,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
     }
 
     protected boolean contains(String key) {
-        if (keys.contains(key)) return true;
+        if (keys.isEmpty() || keys.contains(key)) return true;
         for (Pattern pattern : regexs) {
             if (pattern.matcher(Strings.toString(key)).matches()) return true;
         }

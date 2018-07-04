@@ -33,6 +33,7 @@ public enum Type {
     }
 
     public static boolean contains(List<Type> list, int rdb) {
+        if (list.isEmpty()) return true;
         for (Type type : list) if (type.contains(rdb)) return true;
         return false;
     }

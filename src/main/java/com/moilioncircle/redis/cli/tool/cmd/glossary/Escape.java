@@ -25,6 +25,10 @@ public enum Escape {
         encode(String.valueOf(value).getBytes(), out);
     }
 
+    public void encode(long value, OutputStream out) throws IOException {
+        encode(String.valueOf(value).getBytes(), out);
+    }
+
     public void encode(byte b, OutputStream out) throws IOException {
         switch (this) {
             case RAW:

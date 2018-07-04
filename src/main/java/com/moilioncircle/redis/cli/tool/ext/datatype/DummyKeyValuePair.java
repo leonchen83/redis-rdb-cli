@@ -5,7 +5,7 @@ import com.moilioncircle.redis.replicator.rdb.datatype.KeyValuePair;
 /**
  * @author Baoyi Chen
  */
-public class DummyKeyValuePair extends KeyValuePair<byte[], byte[]> {
+public class DummyKeyValuePair extends KeyValuePair<byte[], Long> {
     private static final long serialVersionUID = 1L;
 
     private boolean contains;
