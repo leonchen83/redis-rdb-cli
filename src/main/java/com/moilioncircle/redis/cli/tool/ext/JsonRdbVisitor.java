@@ -25,6 +25,11 @@ import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
  * @author Baoyi Chen
  */
 public class JsonRdbVisitor extends AbstractRdbVisitor {
+    
+    private boolean first = true;
+    private boolean hasdb = false;
+    private boolean firstkey = true;
+    
     public JsonRdbVisitor(Replicator replicator,
                           File out,
                           List<Long> db,
@@ -58,10 +63,6 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         return super.applyMagic(in);
     }
 
-    private boolean first = true;
-    private boolean hasdb = false;
-    private boolean firstkey = true;
-
     @Override
     public DB applySelectDB(RedisInputStream in, int version) throws IOException {
         if (!first) {
@@ -69,9 +70,10 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
             out.write(',');
             out.write('\n');
         }
-        out.write('{');
         first = false;
+        firstkey = true;
         hasdb = true;
+        out.write('{');
         DB db = super.applySelectDB(in, version);
         return db;
     }
@@ -88,13 +90,11 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
-            firstkey = true;
         }
+        firstkey = false;
         BaseRdbParser parser = new BaseRdbParser(in);
         byte[] val = parser.rdbLoadEncodedStringObject().first();
-        out.write('{');
         emit(key, val);
-        out.write('}');
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setDb(db);
         kv.setValueRdbType(type);
@@ -107,8 +107,8 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
-            firstkey = true;
         }
+        firstkey = false;
         emitString(key);
         out.write(':');
         out.write('[');
@@ -138,8 +138,8 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
-            firstkey = true;
         }
+        firstkey = false;
         emitString(key);
         out.write(':');
         out.write('[');
@@ -169,8 +169,8 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
-            firstkey = true;
         }
+        firstkey = false;
         emitString(key);
         out.write(':');
         out.write('{');
@@ -201,8 +201,8 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
-            firstkey = true;
         }
+        firstkey = false;
         emitString(key);
         out.write(':');
         out.write('{');
@@ -233,8 +233,8 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
-            firstkey = true;
         }
+        firstkey = false;
         emitString(key);
         out.write(':');
         out.write('{');
@@ -265,8 +265,8 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
-            firstkey = true;
         }
+        firstkey = false;
         emitString(key);
         out.write(':');
         out.write('{');
@@ -297,8 +297,8 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
-            firstkey = true;
         }
+        firstkey = false;
         emitString(key);
         out.write(':');
         out.write('[');
@@ -335,8 +335,8 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
-            firstkey = true;
         }
+        firstkey = false;
         emitString(key);
         out.write(':');
         out.write('[');
@@ -380,8 +380,8 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
-            firstkey = true;
         }
+        firstkey = false;
         emitString(key);
         out.write(':');
         out.write('[');
@@ -420,8 +420,8 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
-            firstkey = true;
         }
+        firstkey = false;
         emitString(key);
         out.write(':');
         out.write('{');
@@ -460,8 +460,8 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
-            firstkey = true;
         }
+        firstkey = false;
         emitString(key);
         out.write(':');
         out.write('[');

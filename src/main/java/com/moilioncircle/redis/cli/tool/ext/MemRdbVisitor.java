@@ -142,8 +142,9 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setValueRdbType(type);
         kv.setKey(key);
         kv.setValue(size.string(val));
+        kv.setContains(contains);
         kv.setLength(1);
-        kv.setMax(size.elemen(val));
+        kv.setMax(size.element(val));
         return kv;
     }
 
@@ -156,7 +157,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         long max = 0;
         while (len > 0) {
             byte[] element = parser.rdbLoadEncodedStringObject().first();
-            max = Math.max(max, size.elemen(element));
+            max = Math.max(max, size.element(element));
             val += size.string(element) + size.linkedlistEntry();
             if (version < 8) val += size.robj();
             len--;
@@ -181,7 +182,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         long max = 0;
         while (len > 0) {
             byte[] element = parser.rdbLoadEncodedStringObject().first();
-            max = Math.max(max, size.elemen(element));
+            max = Math.max(max, size.element(element));
             val += size.hashEntry() + size.string(element);
             if (version < 8) val += 2 * size.robj();
             len--;
@@ -207,7 +208,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         while (len > 0) {
             byte[] element = parser.rdbLoadEncodedStringObject().first();
             parser.rdbLoadDoubleValue();
-            max = Math.max(max, size.elemen(element));
+            max = Math.max(max, size.element(element));
             val += 8 + size.string(element) + size.skiplistEntry();
             if (version < 8) val += size.robj();
             len--;
@@ -217,7 +218,6 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setDb(db);
         kv.setValueRdbType(type);
         kv.setKey(key);
-        kv.setContains(contains);
         kv.setValue(val);
         kv.setContains(contains);
         kv.setLength(length);
@@ -235,7 +235,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         while (len > 0) {
             byte[] element = parser.rdbLoadEncodedStringObject().first();
             parser.rdbLoadBinaryDoubleValue();
-            max = Math.max(max, size.elemen(element));
+            max = Math.max(max, size.element(element));
             val += 8 + size.string(element) + size.skiplistEntry();
             if (version < 8) val += size.robj();
             len--;
@@ -262,8 +262,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         while (len > 0) {
             byte[] field = parser.rdbLoadEncodedStringObject().first();
             byte[] value = parser.rdbLoadEncodedStringObject().first();
-            max = Math.max(max, size.elemen(field));
-            max = Math.max(max, size.elemen(value));
+            max = Math.max(max, size.element(field));
+            max = Math.max(max, size.element(value));
             val += size.string(field) + size.string(value) + size.hashEntry();
             if (version < 8) val += 2 * size.robj();
             len--;
@@ -318,8 +318,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             int free = BaseRdbParser.LenHelper.free(stream);
             byte[] value = BaseRdbParser.StringHelper.bytes(stream, zmEleLen);
             BaseRdbParser.StringHelper.skip(stream, free);
-            max = Math.max(max, size.elemen(field));
-            max = Math.max(max, size.elemen(value));
+            max = Math.max(max, size.element(field));
+            max = Math.max(max, size.element(value));
             length++;
         }
     }
@@ -335,7 +335,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         int length = BaseRdbParser.LenHelper.zllen(stream);
         for (int i = 0; i < length; i++) {
             byte[] e = BaseRdbParser.StringHelper.zipListEntry(stream);
-            max = Math.max(max, size.elemen(e));
+            max = Math.max(max, size.element(e));
         }
         int zlend = BaseRdbParser.LenHelper.zlend(stream);
         if (zlend != 255) {
@@ -375,7 +375,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
                 default:
                     throw new AssertionError("expect encoding [2,4,8] but:" + encoding);
             }
-            Math.max(max, size.elemen(element.getBytes()));
+            Math.max(max, size.element(element.getBytes()));
         }
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setDb(db);
@@ -403,7 +403,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             zllen--;
             BaseRdbParser.StringHelper.zipListEntry(stream);
             zllen--;
-            max = Math.max(max, size.elemen(element));
+            max = Math.max(max, size.element(element));
             length++;
         }
         int zlend = BaseRdbParser.LenHelper.zlend(stream);
@@ -436,8 +436,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             zllen--;
             byte[] value = BaseRdbParser.StringHelper.zipListEntry(stream);
             zllen--;
-            max = Math.max(max, size.elemen(field));
-            max = Math.max(max, size.elemen(value));
+            max = Math.max(max, size.element(field));
+            max = Math.max(max, size.element(value));
             length++;
         }
         int zlend = BaseRdbParser.LenHelper.zlend(stream);
@@ -471,7 +471,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             int zllen = BaseRdbParser.LenHelper.zllen(stream);
             for (int j = 0; j < zllen; j++) {
                 byte[] e = BaseRdbParser.StringHelper.zipListEntry(stream);
-                max = Math.max(max, size.elemen(e));
+                max = Math.max(max, size.element(e));
                 length++;
             }
             int zlend = BaseRdbParser.LenHelper.zlend(stream);
@@ -560,8 +560,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
                     for (int i = 0; i < numFields; i++) {
                         byte[] value = listPackEntry(listPack);
                         byte[] field = tempFields[i];
-                        Math.max(max, size.elemen(value));
-                        Math.max(max, size.elemen(field));
+                        Math.max(max, size.element(value));
+                        Math.max(max, size.element(field));
                         if (!delete) length++;
                     }
                 } else {
@@ -569,8 +569,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
                     for (int i = 0; i < numFields; i++) {
                         byte[] field = listPackEntry(listPack);
                         byte[] value = listPackEntry(listPack);
-                        Math.max(max, size.elemen(value));
-                        Math.max(max, size.elemen(field));
+                        Math.max(max, size.element(value));
+                        Math.max(max, size.element(field));
                         if (!delete) length++;
                     }
                 }
@@ -734,8 +734,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             }
             return Math.max(level, 32);
         }
-
-        public long elemen(byte[] element) {
+    
+        public long element(byte[] element) {
             try {
                 Integer.parseInt(Strings.toString(element));
                 return 8;

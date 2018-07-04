@@ -20,6 +20,17 @@
         <Property name="pattern">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %p %c{1.}:%L - %m%n</Property>
     </Properties>
     <Appenders>
+        <RollingFile name="RollingFile" fileName="log/cli-tool.log"
+                     filePattern="logs/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout>
+                <Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
+            </PatternLayout>
+            <RegexFilter regex=".*socket error.*" onMatch="DENY" onMismatch="ACCEPT"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="128 MB"/>
+            </Policies>
+        </RollingFile>
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="${pattern}"/>
             <RegexFilter regex=".*socket error.*" onMatch="DENY" onMismatch="ACCEPT"/>
@@ -27,10 +38,10 @@
     </Appenders>
     <Loggers>
         <Logger name="com.moilioncircle" level="debug" additivity="false">
-            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingFile"/>
         </Logger>
         <Root level="error">
-            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingFile"/>
         </Root>
     </Loggers>
 </configuration>

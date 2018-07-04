@@ -90,7 +90,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
     protected boolean contains(String key) {
         if (keys.isEmpty() || keys.contains(key)) return true;
         for (Pattern pattern : regexs) {
-            if (pattern.matcher(Strings.toString(key)).matches()) return true;
+            if (pattern.matcher(key).matches()) return true;
         }
         return false;
     }
@@ -143,7 +143,6 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             return event;
         } else {
             SkipRdbParser skip = new SkipRdbParser(in);
-            skip.rdbLoadEncodedStringObject();
             long len = skip.rdbLoadLen().len;
             while (len > 0) {
                 skip.rdbLoadEncodedStringObject();

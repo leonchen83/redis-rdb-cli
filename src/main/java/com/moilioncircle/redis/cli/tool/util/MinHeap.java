@@ -1,6 +1,8 @@
 package com.moilioncircle.redis.cli.tool.util;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -9,7 +11,6 @@ import java.util.function.Consumer;
  */
 public class MinHeap<T extends Comparable<T>> {
 
-    private int idx;
     private final int n;
     private final List<T> ary;
     private Consumer<T> consumer;
@@ -75,10 +76,11 @@ public class MinHeap<T extends Comparable<T>> {
             if (consumer != null) consumer.accept(t);
             return;
         }
-        if (idx < n) {
-            ary.set(idx++, t);
+        if (ary.size() < n) {
+            ary.add(t);
+            return;
         }
-        if (idx == n) {
+        if (ary.size() == n) {
             builtMinHeap(ary);
         }
         if (ary.get(0).compareTo(t) < 0) {
@@ -88,7 +90,7 @@ public class MinHeap<T extends Comparable<T>> {
     }
 
     public List<T> get() {
+        Collections.sort(ary, Comparator.reverseOrder());
         return ary;
     }
-
 }

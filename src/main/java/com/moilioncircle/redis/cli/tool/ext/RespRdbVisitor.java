@@ -58,7 +58,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
 
     @Override
     public Event applyExpireTimeMs(RedisInputStream in, DB db, int version) throws IOException {
-        DummyKeyValuePair kv = (DummyKeyValuePair) super.applyExpireTime(in, db, version);
+        DummyKeyValuePair kv = (DummyKeyValuePair) super.applyExpireTimeMs(in, db, version);
         if (!kv.isContains() || kv.getKey() == null) return kv;
         emit("expireat".getBytes(), kv.getKey(), String.valueOf(kv.getExpiredMs()).getBytes());
         return kv;
@@ -72,7 +72,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
 
     private void emit(byte[] command, byte[] key, byte[]... ary) throws IOException {
         byte[][] args = new byte[ary.length + 1][];
-        System.arraycopy(ary, 0, args, 1, args.length);
+        System.arraycopy(ary, 0, args, 1, ary.length);
         args[0] = key;
         out.write(STAR);
         escape.encode(String.valueOf(args.length + 1).getBytes(), out);
@@ -120,7 +120,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             list.add(element);
             if (list.size() == batch) {
                 emit("rpush".getBytes(), key, list.toArray(new byte[0][]));
-                list = new ArrayList<>();
+                list.clear();
             }
             len--;
         }
@@ -143,7 +143,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             list.add(element);
             if (list.size() == batch) {
                 emit("sadd".getBytes(), key, list.toArray(new byte[0][]));
-                list = new ArrayList<>();
+                list.clear();
             }
             len--;
         }
@@ -168,7 +168,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             list.add(element);
             if (list.size() == 2 * batch) {
                 emit("zadd".getBytes(), key, list.toArray(new byte[0][]));
-                list = new ArrayList<>();
+                list.clear();
             }
             len--;
         }
@@ -193,7 +193,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             list.add(element);
             if (list.size() == 2 * batch) {
                 emit("zadd".getBytes(), key, list.toArray(new byte[0][]));
-                list = new ArrayList<>();
+                list.clear();
             }
             len--;
         }
@@ -218,7 +218,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             list.add(value);
             if (list.size() == 2 * batch) {
                 emit("hmset".getBytes(), key, list.toArray(new byte[0][]));
-                list = new ArrayList<>();
+                list.clear();
             }
             len--;
         }
@@ -242,6 +242,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             if (zmEleLen == 255) {
                 if (!list.isEmpty()) {
                     emit("hmset".getBytes(), key, list.toArray(new byte[0][]));
+                    list.clear();
                 }
                 DummyKeyValuePair kv = new DummyKeyValuePair();
                 kv.setDb(db);
@@ -256,6 +257,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
                 list.add(field);
                 list.add(null);
                 emit("hmset".getBytes(), key, list.toArray(new byte[0][]));
+                list.clear();
                 DummyKeyValuePair kv = new DummyKeyValuePair();
                 kv.setDb(db);
                 kv.setValueRdbType(type);
@@ -289,7 +291,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             list.add(e);
             if (list.size() == batch) {
                 emit("rpush".getBytes(), key, list.toArray(new byte[0][]));
-                list = new ArrayList<>();
+                list.clear();
             }
         }
         int zlend = BaseRdbParser.LenHelper.zlend(stream);
@@ -331,7 +333,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             list.add(element.getBytes());
             if (list.size() == batch) {
                 emit("sadd".getBytes(), key, list.toArray(new byte[0][]));
-                list = new ArrayList<>();
+                list.clear();
             }
         }
         if (!list.isEmpty()) emit("sadd".getBytes(), key, list.toArray(new byte[0][]));
@@ -360,7 +362,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             list.add(element);
             if (list.size() == 2 * batch) {
                 emit("zadd".getBytes(), key, list.toArray(new byte[0][]));
-                list = new ArrayList<>();
+                list.clear();
             }
         }
         int zlend = BaseRdbParser.LenHelper.zlend(stream);
@@ -393,7 +395,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             list.add(value);
             if (list.size() == 2 * batch) {
                 emit("hmset".getBytes(), key, list.toArray(new byte[0][]));
-                list = new ArrayList<>();
+                list.clear();
             }
         }
         int zlend = BaseRdbParser.LenHelper.zlend(stream);
@@ -425,7 +427,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
                 list.add(e);
                 if (list.size() == batch) {
                     emit("rpush".getBytes(), key, list.toArray(new byte[0][]));
-                    list = new ArrayList<>();
+                    list.clear();
                 }
             }
             int zlend = BaseRdbParser.LenHelper.zlend(stream);
