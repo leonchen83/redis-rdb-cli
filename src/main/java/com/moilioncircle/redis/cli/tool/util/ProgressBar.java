@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class ProgressBar {
 
     public enum Phase {
-        RDB, AOF
+        RDB, AOF, NOP
     }
 
     private final long total;
