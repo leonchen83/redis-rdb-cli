@@ -3,6 +3,7 @@ package com.moilioncircle.redis.cli.tool.ext;
 import cn.nextop.lite.pool.Pool;
 import cn.nextop.lite.pool.glossary.Lifecyclet;
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Type;
+import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.util.pooling.ClientPool;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.RedisURI;
@@ -21,6 +22,9 @@ import com.moilioncircle.redis.replicator.rdb.module.ModuleParser;
 import com.moilioncircle.redis.replicator.rdb.skip.SkipRdbParser;
 import com.moilioncircle.redis.replicator.util.ByteBuilder;
 import com.moilioncircle.redis.replicator.util.Concurrents;
+import com.moilioncircle.redis.replicator.util.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
@@ -28,6 +32,7 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.moilioncircle.redis.replicator.Constants.MODULE_SET;
@@ -39,27 +44,36 @@ import static redis.clients.jedis.Protocol.toByteArray;
 /**
  * @author Baoyi Chen
  */
-public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListener {
-    
+public class MigRdbVisitor extends AbstractRdbVisitor implements EventListener {
+
+    private static final Logger logger = LoggerFactory.getLogger(MigRdbVisitor.class);
+
     private final RedisURI uri;
     private final boolean replace;
     private final Pool<ClientPool.Client> pool;
     private final AtomicInteger dbnum = new AtomicInteger(-1);
     private ExecutorService executor = Executors.newSingleThreadExecutor();
-    
-    public MigrateRdbVisitor(Replicator replicator, String uri, List<Long> db, List<String> regexs, List<Type> types, boolean replace) throws Exception {
-        super(replicator, db, regexs, types);
+
+    public MigRdbVisitor(Replicator replicator,
+                         Configure configure,
+                         String uri,
+                         List<Long> db,
+                         List<String> regexs,
+                         List<Type> types,
+                         boolean replace) throws Exception {
+        super(replicator, configure, db, regexs, types);
         this.replace = replace;
         this.uri = new RedisURI(uri);
         Configuration config = Configuration.valueOf(this.uri);
-        this.pool = ClientPool.create(this.uri.getHost(), this.uri.getPort(), config.getAuthPassword(), config.getConnectionTimeout());
+
+        this.pool = ClientPool.create(this.uri.getHost(), this.uri.getPort(), config.getAuthPassword(), configure.getTimeout());
         this.replicator.addEventListener(this);
         this.replicator.addCloseListener(e -> {
-            Concurrents.terminateQuietly(executor, config.getConnectionTimeout(), TimeUnit.MILLISECONDS);
+            Concurrents.terminateQuietly(executor, configure.getTimeout(), TimeUnit.MILLISECONDS);
             Lifecyclet.stopQuietly(this.pool);
         });
     }
-    
+
     @Override
     public void onEvent(Replicator replicator, Event event) {
         executor.submit(() -> {
@@ -70,45 +84,55 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
             if (event instanceof PostFullSyncEvent) {
                 return;
             }
-            ClientPool.Client target = null;
-            try {
-                target = pool.acquire();
-                if (target == null) target = pool.acquire();
-                if (target != null) {
-                    if (event instanceof DumpKeyValuePair) {
-                        DumpKeyValuePair dkv = (DumpKeyValuePair) event;
-                        // Step1: select db
-                        DB db = dkv.getDb();
-                        int index;
-                        if (db != null && (index = (int) db.getDbNumber()) != dbnum.get()) {
-                            String r = target.send(SELECT, toByteArray(index));
-                            if (r != null) System.out.println(r);
-                            dbnum.set(index);
-                        }
-        
-                        // Step2: restore dump data
-                        if (dkv.getExpiredMs() == null) {
-                            String r = target.restore(dkv.getKey(), 0L, dkv.getValue(), replace);
-                            if (r != null) System.out.println(r);
-                        } else {
-                            long ms = dkv.getExpiredMs() - System.currentTimeMillis();
-                            if (ms <= 0) return;
-                            String r = target.restore(dkv.getKey(), ms, dkv.getValue(), replace);
-                            if (r != null) System.out.println(r);
-                        }
-                    } else if (event instanceof DefaultCommand) {
-                        // Step3: sync aof command
-                        DefaultCommand dc = (DefaultCommand) event;
-                        String r = target.send(dc.getCommand(), dc.getArgs());
-                        if (r != null) System.out.println(r);
-                    }
-                }
-            } catch (Throwable e) {
-                System.out.println(e.getMessage());
-            } finally {
-                if (target != null) pool.release(target);
-            }
+            retry(event, configure.getMigrateRetryTime());
         });
+    }
+
+    public void retry(Event event, int times) {
+        ClientPool.Client target = null;
+        try {
+            target = pool.acquire();
+            if (target == null) {
+                throw new TimeoutException("redis pool acquire timeout");
+            }
+            if (event instanceof DumpKeyValuePair) {
+                DumpKeyValuePair dkv = (DumpKeyValuePair) event;
+                // Step1: select db
+                DB db = dkv.getDb();
+                int index;
+                if (db != null && (index = (int) db.getDbNumber()) != dbnum.get()) {
+                    String r = target.send(SELECT, toByteArray(index));
+                    if (r != null) logger.error("select {} failed. reason:{}", index, r);
+                    dbnum.set(index);
+                }
+
+                // Step2: restore dump data
+                if (dkv.getExpiredMs() == null) {
+                    String r = target.restore(dkv.getKey(), 0L, dkv.getValue(), replace);
+                    if (r != null) logger.error("restore {} failed. reason:{}", Strings.toString(dkv.getKey()), r);
+                } else {
+                    long ms = dkv.getExpiredMs() - System.currentTimeMillis();
+                    if (ms <= 0) return;
+                    String r = target.restore(dkv.getKey(), ms, dkv.getValue(), replace);
+                    if (r != null) logger.error("restore {} failed. reason:{}", Strings.toString(dkv.getKey()), r);
+                }
+            } else if (event instanceof DefaultCommand) {
+                // Step3: sync aof command
+                DefaultCommand dc = (DefaultCommand) event;
+                String r = target.send(dc.getCommand(), dc.getArgs());
+                if (r != null) logger.error("{} failed. reason:{}", Strings.toString(dc.getCommand()), r);
+            }
+        } catch (Throwable e) {
+            if (target != null) {
+                pool.release(target);
+                target = null;
+            }
+            times--;
+            if (times >= 0) retry(event, times);
+            else logger.error("internal error occur. reason:{}", e.getMessage());
+        } finally {
+            if (target != null) pool.release(target);
+        }
     }
 
     static class DefaultRawByteListener implements RawByteListener {
@@ -120,12 +144,12 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
             this.builder.put(type);
             this.version = version;
         }
-        
+
         @Override
         public void handle(byte... rawBytes) {
             for (byte b : rawBytes) this.builder.put(b);
         }
-        
+
         public byte[] getBytes() {
             this.builder.put((byte) version);
             this.builder.put((byte) 0x00);
@@ -137,7 +161,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
             return this.builder.array();
         }
     }
-    
+
     @Override
     protected Event doApplyString(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
@@ -151,7 +175,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setValue(listener.getBytes());
         return kv;
     }
-    
+
     @Override
     protected Event doApplyList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
@@ -170,7 +194,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setValue(listener.getBytes());
         return kv;
     }
-    
+
     @Override
     protected Event doApplySet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
@@ -189,7 +213,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setValue(listener.getBytes());
         return kv;
     }
-    
+
     @Override
     protected Event doApplyZSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
@@ -209,7 +233,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setValue(listener.getBytes());
         return kv;
     }
-    
+
     @Override
     protected Event doApplyZSet2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
@@ -229,7 +253,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setValue(listener.getBytes());
         return kv;
     }
-    
+
     @Override
     protected Event doApplyHash(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
@@ -249,7 +273,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setValue(listener.getBytes());
         return kv;
     }
-    
+
     @Override
     protected Event doApplyHashZipMap(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
@@ -263,7 +287,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setValue(listener.getBytes());
         return kv;
     }
-    
+
     @Override
     protected Event doApplyListZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
@@ -277,7 +301,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setValue(listener.getBytes());
         return kv;
     }
-    
+
     @Override
     protected Event doApplySetIntSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
@@ -291,7 +315,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setValue(listener.getBytes());
         return kv;
     }
-    
+
     @Override
     protected Event doApplyZSetZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
@@ -305,7 +329,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setValue(listener.getBytes());
         return kv;
     }
-    
+
     @Override
     protected Event doApplyHashZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
@@ -319,7 +343,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setValue(listener.getBytes());
         return kv;
     }
-    
+
     @Override
     protected Event doApplyListQuickList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
@@ -337,7 +361,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setValue(listener.getBytes());
         return kv;
     }
-    
+
     @Override
     protected Event doApplyModule(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
@@ -363,7 +387,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setValue(listener.getBytes());
         return kv;
     }
-    
+
     @Override
     protected Event doApplyModule2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
@@ -378,7 +402,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setValue(listener.getBytes());
         return kv;
     }
-    
+
     @Override
     protected Event doApplyStreamListPacks(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);

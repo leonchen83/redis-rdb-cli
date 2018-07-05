@@ -1,5 +1,6 @@
 package com.moilioncircle.redis.cli.tool.cmd.glossary;
 
+import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.ext.DumpRdbVisitor;
 import com.moilioncircle.redis.cli.tool.ext.JsonRdbVisitor;
 import com.moilioncircle.redis.cli.tool.ext.KeyRdbVisitor;
@@ -21,13 +22,13 @@ public enum Format {
     JSON("json"),
     RESP("resp"),
     KEYVAL("keyval");
-    
+
     private String value;
-    
+
     Format(String value) {
         this.value = value;
     }
-    
+
     public static Format parse(String format) {
         switch (format) {
             case "key":
@@ -46,26 +47,34 @@ public enum Format {
                 throw new AssertionError("Unsupported format '" + format + "'");
         }
     }
-    
-    public void dress(Replicator r, File output, List<Long> db, List<String> regexs, Long largest, Long bytes, List<Type> types, Escape escape) throws Exception {
+
+    public void dress(Replicator r,
+                      Configure conf,
+                      File output,
+                      List<Long> db,
+                      List<String> regexs,
+                      Long largest,
+                      Long bytes,
+                      List<Type> types,
+                      Escape escape) throws Exception {
         switch (this) {
             case KEY:
-                r.setRdbVisitor(new KeyRdbVisitor(r, output, db, regexs, types, escape));
+                r.setRdbVisitor(new KeyRdbVisitor(r, conf, output, db, regexs, types, escape));
                 break;
             case JSON:
-                r.setRdbVisitor(new JsonRdbVisitor(r, output, db, regexs, types, escape));
+                r.setRdbVisitor(new JsonRdbVisitor(r, conf, output, db, regexs, types, escape));
                 break;
             case DUMP:
-                r.setRdbVisitor(new DumpRdbVisitor(r, output, db, regexs, types, escape));
+                r.setRdbVisitor(new DumpRdbVisitor(r, conf, output, db, regexs, types, escape));
                 break;
             case RESP:
-                r.setRdbVisitor(new RespRdbVisitor(r, output, db, regexs, types, escape));
+                r.setRdbVisitor(new RespRdbVisitor(r, conf, output, db, regexs, types, escape));
                 break;
             case KEYVAL:
-                r.setRdbVisitor(new KeyValRdbVisitor(r, output, db, regexs, types, escape));
+                r.setRdbVisitor(new KeyValRdbVisitor(r, conf, output, db, regexs, types, escape));
                 break;
             case MEM:
-                r.setRdbVisitor(new MemRdbVisitor(r, output, db, regexs, types, escape, largest, bytes));
+                r.setRdbVisitor(new MemRdbVisitor(r, conf, output, db, regexs, types, escape, largest, bytes));
                 break;
             default:
                 throw new AssertionError(this);

@@ -30,4 +30,15 @@
             </includes>
         </fileSet>
     </fileSets>
+
+    <files>
+        <file>
+            <source>LICENSE</source>
+            <destName>LICENSE</destName>
+        </file>
+        <file>
+            <source>README.md</source>
+            <destName>README.md</destName>
+        </file>
+    </files>
 </assembly>

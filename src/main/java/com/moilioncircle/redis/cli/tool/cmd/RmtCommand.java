@@ -1,10 +1,13 @@
 package com.moilioncircle.redis.cli.tool.cmd;
 
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Type;
-import com.moilioncircle.redis.cli.tool.ext.MigrateRdbVisitor;
-import com.moilioncircle.redis.replicator.RedisReplicator;
+import com.moilioncircle.redis.cli.tool.conf.Configure;
+import com.moilioncircle.redis.cli.tool.ext.CliRedisReplicator;
+import com.moilioncircle.redis.cli.tool.ext.MigRdbVisitor;
+import com.moilioncircle.redis.cli.tool.util.ProgressBar;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
+import com.moilioncircle.redis.replicator.cmd.Command;
 import com.moilioncircle.redis.replicator.cmd.CommandName;
 import com.moilioncircle.redis.replicator.cmd.parser.DefaultCommandParser;
 import com.moilioncircle.redis.replicator.cmd.parser.PingParser;
@@ -15,12 +18,16 @@ import org.apache.commons.cli.Option;
 import java.io.File;
 import java.net.URI;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static com.moilioncircle.redis.cli.tool.util.ProgressBar.Phase.AOF;
+import static com.moilioncircle.redis.cli.tool.util.ProgressBar.Phase.RDB;
 
 /**
  * @author Baoyi Chen
  */
 public class RmtCommand extends AbstractCommand {
-    
+
     private static final Option HELP = Option.builder("h").longOpt("help").required(false).hasArg(false).desc("rmt usage.").build();
     private static final Option VERSION = Option.builder("v").longOpt("version").required(false).hasArg(false).desc("rmt version.").build();
     private static final Option SOURCE = Option.builder("s").longOpt("source").required(false).hasArg().argName("uri").type(String.class).desc("Source uri. eg: redis://host:port?authPassword=foobar redis:///path/to/dump.rdb redis:///path/to/appendonly.aof.").build();
@@ -30,7 +37,7 @@ public class RmtCommand extends AbstractCommand {
     private static final Option DB = Option.builder("d").longOpt("db").required(false).hasArg().argName("num num...").valueSeparator(' ').type(Number.class).desc("Database Number. Multiple databases can be provided. If not specified, all databases will be included.").build();
     private static final Option KEY = Option.builder("k").longOpt("key").required(false).hasArg().argName("regex regex...").valueSeparator(' ').desc("Keys to export. This can be a RegEx. If not specified, all keys will be returned.").build();
     private static final Option TYPE = Option.builder("t").longOpt("type").required(false).hasArgs().argName("type type...").valueSeparator(' ').desc("Data type to include. Possible values are string, hash, set, sortedset, list, module, stream. Multiple types can be provided. If not specified, all data types will be returned.").build();
-    
+
     public RmtCommand() {
         addOption(HELP);
         addOption(VERSION);
@@ -42,7 +49,7 @@ public class RmtCommand extends AbstractCommand {
         addOption(KEY);
         addOption(TYPE);
     }
-    
+
     @Override
     protected void doExecute(CommandLine line) throws Exception {
         if (line.hasOption("help")) {
@@ -52,47 +59,61 @@ public class RmtCommand extends AbstractCommand {
             writeLine(version());
         } else {
             StringBuilder sb = new StringBuilder();
-    
+
             if (!line.hasOption("in") && !line.hasOption("source")) {
                 sb.append("i or s ");
             }
-    
+
             if (!line.hasOption("migrate")) {
                 sb.append("m ");
             }
-    
+
             if (sb.length() > 0) {
                 writeLine("Missing required options: " + sb.toString() + ", `rmt -h` for more information.");
                 return;
             }
-    
+
             File input = line.getOption("in");
             String migrate = line.getOption("migrate");
             String source = line.getOption("source");
-            
+
             List<Long> db = line.getOptions("db");
             List<String> type = line.getOptions("type");
             boolean replace = line.hasOption("replace");
             List<String> regexs = line.getOptions("key");
-    
+
             if (source == null && input != null) {
                 URI u = input.toURI();
                 source = new URI("redis", u.getRawAuthority(), u.getRawPath(), u.getRawQuery(), u.getRawFragment()).toString();
             }
-    
+
             RedisURI uri = new RedisURI(migrate);
             if (uri.getFileType() != null) {
                 writeLine("Invalid uri: " + migrate);
                 return;
             }
-            Replicator r = new RedisReplicator(source);
-            dress(r, migrate, db, regexs, Type.parse(type), replace);
+            ProgressBar bar = new ProgressBar(-1);
+            Configure configure = Configure.bind();
+            Replicator r = new CliRedisReplicator(source, configure);
+            dress(r, configure, migrate, db, regexs, Type.parse(type), replace);
+            AtomicReference<ProgressBar.Phase> phase = new AtomicReference<>(AOF);
+            r.addRawByteListener(b -> bar.react(b.length, phase.get()));
+            r.addEventListener((rep, event) -> {
+                if (event instanceof Command) phase.set(AOF);
+                else phase.set(RDB);
+            });
             r.open();
         }
     }
-    
-    private void dress(Replicator r, String migrate, List<Long> db, List<String> regexs, List<Type> types, boolean replace) throws Exception {
-        r.setRdbVisitor(new MigrateRdbVisitor(r, migrate, db, regexs, types, replace));
+
+    private void dress(Replicator r,
+                       Configure conf,
+                       String migrate,
+                       List<Long> db,
+                       List<String> regexs,
+                       List<Type> types,
+                       boolean replace) throws Exception {
+        r.setRdbVisitor(new MigRdbVisitor(r, conf, migrate, db, regexs, types, replace));
         // ignore PING REPLCONF GETACK
         r.addCommandParser(CommandName.name("PING"), new PingParser());
         r.addCommandParser(CommandName.name("REPLCONF"), new ReplConfParser());
@@ -179,12 +200,12 @@ public class RmtCommand extends AbstractCommand {
         r.addCommandParser(CommandName.name("XGROUP"), new DefaultCommandParser());
         r.addCommandParser(CommandName.name("XTRIM"), new DefaultCommandParser());
     }
-    
+
     @Override
     public String name() {
         return "rmt";
     }
-    
+
     public static void run(String[] args) throws Exception {
         RmtCommand command = new RmtCommand();
         command.execute(args);

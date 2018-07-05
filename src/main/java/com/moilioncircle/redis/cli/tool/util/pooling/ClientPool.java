@@ -6,6 +6,8 @@ import cn.nextop.lite.pool.PoolValidation;
 import cn.nextop.lite.pool.glossary.Lifecyclet;
 import com.moilioncircle.redis.cli.tool.util.Closes;
 import com.moilioncircle.redis.replicator.util.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Protocol;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
@@ -28,6 +30,8 @@ import static redis.clients.jedis.Protocol.toByteArray;
  */
 public class ClientPool implements Consumer<Client>, Supplier<Client>, Predicate<Client> {
 
+    private static final Logger logger = LoggerFactory.getLogger(ClientPool.class);
+
     private final int port;
     private final String host;
     private final int timeout;
@@ -43,7 +47,9 @@ public class ClientPool implements Consumer<Client>, Supplier<Client>, Predicate
     public static Pool<Client> create(String host, int port, String password, int timeout) {
         ClientPool cp = new ClientPool(host, port, password, timeout);
         PoolValidation pv = new PoolValidation((byte) (RELEASE | ACQUIRE | PULSE));
-        Pool<Client> pool = new PoolBuilder<Client>().validator(cp).supplier(cp).consumer(cp).validation(pv).build("redis.pool");
+        PoolBuilder<Client> builder = new PoolBuilder<>();
+        builder.validator(cp).supplier(cp).consumer(cp).validation(pv);
+        Pool<Client> pool = builder.build("redis.pool");
         Lifecyclet.start(pool);
         return pool;
     }
@@ -63,10 +69,10 @@ public class ClientPool implements Consumer<Client>, Supplier<Client>, Predicate
         Client client = new Client(host, port, timeout);
         if (password != null) {
             String r = client.send(AUTH, password.getBytes());
-            if (r != null) System.out.println(r);
+            if (r != null) logger.error("auth[{}:{}] failed. reason:{}", host, port, r);
         } else {
             String r = client.send(PING);
-            if (r != null) System.out.println(r);
+            if (r != null) logger.error("ping[{}:{}] failed. reason:{}", host, port, r);
         }
         return client;
     }

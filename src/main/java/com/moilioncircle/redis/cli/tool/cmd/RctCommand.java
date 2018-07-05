@@ -3,16 +3,21 @@ package com.moilioncircle.redis.cli.tool.cmd;
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Escape;
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Format;
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Type;
+import com.moilioncircle.redis.cli.tool.conf.Configure;
+import com.moilioncircle.redis.cli.tool.ext.CliRedisReplicator;
 import com.moilioncircle.redis.cli.tool.util.Closes;
-import com.moilioncircle.redis.replicator.RedisReplicator;
+import com.moilioncircle.redis.cli.tool.util.ProgressBar;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.PostFullSyncEvent;
+import com.moilioncircle.redis.replicator.event.PreFullSyncEvent;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 
 import java.io.File;
 import java.net.URI;
 import java.util.List;
+
+import static com.moilioncircle.redis.cli.tool.util.ProgressBar.Phase.RDB;
 
 /**
  * @author Baoyi Chen
@@ -94,10 +99,14 @@ public class RctCommand extends AbstractCommand {
                 URI u = input.toURI();
                 uri = new URI("redis", u.getRawAuthority(), u.getRawPath(), u.getRawQuery(), u.getRawFragment()).toString();
             }
-            Replicator r = new RedisReplicator(uri);
-            Format.parse(format).dress(r, output, db, regexs, largest, bytes, Type.parse(type), Escape.parse(escape));
-            r.addEventListener((replicator, event) -> {
-                if (event instanceof PostFullSyncEvent) Closes.close(replicator);
+            ProgressBar bar = new ProgressBar(-1);
+            Configure configure = Configure.bind();
+            Replicator r = new CliRedisReplicator(uri, configure);
+            Format.parse(format).dress(r, configure, output, db, regexs, largest, bytes, Type.parse(type), Escape.parse(escape));
+            r.addEventListener((rep, event) -> {
+                if (event instanceof PreFullSyncEvent)
+                    rep.addRawByteListener(b -> bar.react(b.length, RDB));
+                if (event instanceof PostFullSyncEvent) Closes.close(rep);
             });
             r.open();
         }

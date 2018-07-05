@@ -2,6 +2,7 @@ package com.moilioncircle.redis.cli.tool.ext;
 
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Escape;
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Type;
+import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.cli.tool.util.Closes;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -54,26 +55,30 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
     protected List<Type> types;
     protected OutputStream out;
     protected Set<String> keys;
+    protected Configure configure;
     protected List<Pattern> regexs;
 
     public AbstractRdbVisitor(Replicator replicator,
+                              Configure configure,
                               File output,
                               List<Long> db,
                               List<String> regexs,
                               List<Type> types,
                               Escape escape) throws Exception {
-        this(replicator, db, regexs, types);
+        this(replicator, configure, db, regexs, types);
         this.escape = escape;
         this.out = new BufferedOutputStream(new FileOutputStream(output));
         replicator.addCloseListener(r -> Closes.closeQuietly(out));
     }
 
     public AbstractRdbVisitor(Replicator replicator,
+                              Configure configure,
                               List<Long> db,
                               List<String> regexs,
                               List<Type> types) {
         super(replicator);
         this.types = types;
+        this.configure = configure;
         this.db = new HashSet<>(db);
         this.keys = new HashSet<>(regexs);
         this.regexs = regexs.stream().map(Pattern::compile).collect(toList());

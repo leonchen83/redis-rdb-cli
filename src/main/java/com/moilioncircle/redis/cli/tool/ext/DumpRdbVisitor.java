@@ -2,6 +2,7 @@ package com.moilioncircle.redis.cli.tool.ext;
 
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Escape;
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Type;
+import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.cli.tool.util.io.CRCOutputStream;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -29,12 +30,13 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     private final int version;
 
     public DumpRdbVisitor(Replicator replicator,
+                          Configure configure,
                           File out,
                           List<Long> db,
                           List<String> regexs,
                           List<Type> types,
                           Escape escape) throws Exception {
-        super(replicator, out, db, regexs, types, escape);
+        super(replicator, configure, out, db, regexs, types, escape);
         this.version = -1;
     }
 

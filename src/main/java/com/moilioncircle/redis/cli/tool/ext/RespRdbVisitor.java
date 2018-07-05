@@ -2,6 +2,7 @@ package com.moilioncircle.redis.cli.tool.ext;
 
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Escape;
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Type;
+import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
@@ -19,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import static com.moilioncircle.redis.cli.tool.ext.MigrateRdbVisitor.DefaultRawByteListener;
+import static com.moilioncircle.redis.cli.tool.ext.MigRdbVisitor.DefaultRawByteListener;
 import static com.moilioncircle.redis.replicator.Constants.DOLLAR;
 import static com.moilioncircle.redis.replicator.Constants.MODULE_SET;
 import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
@@ -30,15 +31,17 @@ import static com.moilioncircle.redis.replicator.Constants.STAR;
  */
 public class RespRdbVisitor extends AbstractRdbVisitor {
 
-    private int batch = 128;
+    private final int batch;
 
     public RespRdbVisitor(Replicator replicator,
+                          Configure configure,
                           File out,
                           List<Long> db,
                           List<String> regexs,
                           List<Type> types,
                           Escape escape) throws Exception {
-        super(replicator, out, db, regexs, types, escape);
+        super(replicator, configure, out, db, regexs, types, escape);
+        this.batch = configure.getBatchSize();
     }
 
     @Override

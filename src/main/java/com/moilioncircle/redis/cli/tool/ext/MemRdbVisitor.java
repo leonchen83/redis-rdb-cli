@@ -2,6 +2,7 @@ package com.moilioncircle.redis.cli.tool.ext;
 
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Escape;
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Type;
+import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.cli.tool.util.MinHeap;
 import com.moilioncircle.redis.cli.tool.util.type.Tuple2;
@@ -49,13 +50,14 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     private Size size;
 
     public MemRdbVisitor(Replicator replicator,
+                         Configure configure,
                          File out,
                          List<Long> db,
                          List<String> regexs,
                          List<Type> types,
                          Escape escape,
                          Long largest, Long bytes) throws Exception {
-        super(replicator, out, db, regexs, types, escape);
+        super(replicator, configure, out, db, regexs, types, escape);
         this.bytes = bytes;
         this.heap = new MinHeap<>(largest == null ? -1 : largest.intValue());
         this.heap.setConsumer(this);
