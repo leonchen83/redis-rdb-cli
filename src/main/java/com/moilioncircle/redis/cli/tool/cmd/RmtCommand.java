@@ -112,6 +112,7 @@ public class RmtCommand extends AbstractCommand {
                     phase.set(AOF);
                 }
             });
+            r.addCloseListener(rep -> System.out.println('\n'));
             r.open();
         }
     }
