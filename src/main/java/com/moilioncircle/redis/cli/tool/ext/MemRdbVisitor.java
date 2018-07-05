@@ -581,26 +581,26 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
                 throw new AssertionError("listpack expect 255 but " + lpend);
             }
         }
-        SkipRdbParser skipParser = new SkipRdbParser(in);
-        skipParser.rdbLoadLen();
-        skipParser.rdbLoadLen();
-        skipParser.rdbLoadLen();
-        long groupCount = skipParser.rdbLoadLen().len;
+        SkipRdbParser skip = new SkipRdbParser(in);
+        skip.rdbLoadLen();
+        skip.rdbLoadLen();
+        skip.rdbLoadLen();
+        long groupCount = skip.rdbLoadLen().len;
         while (groupCount-- > 0) {
-            skipParser.rdbLoadPlainStringObject();
-            skipParser.rdbLoadLen();
-            skipParser.rdbLoadLen();
-            long groupPel = skipParser.rdbLoadLen().len;
+            skip.rdbLoadPlainStringObject();
+            skip.rdbLoadLen();
+            skip.rdbLoadLen();
+            long groupPel = skip.rdbLoadLen().len;
             while (groupPel-- > 0) {
                 in.skip(16);
-                skipParser.rdbLoadMillisecondTime();
-                skipParser.rdbLoadLen();
+                skip.rdbLoadMillisecondTime();
+                skip.rdbLoadLen();
             }
-            long consumerCount = skipParser.rdbLoadLen().len;
+            long consumerCount = skip.rdbLoadLen().len;
             while (consumerCount-- > 0) {
-                skipParser.rdbLoadPlainStringObject();
-                skipParser.rdbLoadMillisecondTime();
-                long consumerPel = skipParser.rdbLoadLen().len;
+                skip.rdbLoadPlainStringObject();
+                skip.rdbLoadMillisecondTime();
+                long consumerPel = skip.rdbLoadLen().len;
                 while (consumerPel-- > 0) {
                     in.skip(16);
                 }

@@ -110,12 +110,12 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
             }
         });
     }
-    
-    private class DefaultRawByteListener implements RawByteListener {
+
+    static class DefaultRawByteListener implements RawByteListener {
         private final int version;
         private final ByteBuilder builder;
-        
-        private DefaultRawByteListener(byte type, int version) {
+
+        DefaultRawByteListener(byte type, int version) {
             this.builder = ByteBuilder.allocate(8192);
             this.builder.put(type);
             this.version = version;
@@ -156,10 +156,10 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     protected Event doApplyList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
         replicator.addRawByteListener(listener);
-        SkipRdbParser skipParser = new SkipRdbParser(in);
-        long len = skipParser.rdbLoadLen().len;
+        SkipRdbParser skip = new SkipRdbParser(in);
+        long len = skip.rdbLoadLen().len;
         while (len > 0) {
-            skipParser.rdbLoadEncodedStringObject();
+            skip.rdbLoadEncodedStringObject();
             len--;
         }
         replicator.removeRawByteListener(listener);
@@ -175,10 +175,10 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     protected Event doApplySet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
         replicator.addRawByteListener(listener);
-        SkipRdbParser skipParser = new SkipRdbParser(in);
-        long len = skipParser.rdbLoadLen().len;
+        SkipRdbParser skip = new SkipRdbParser(in);
+        long len = skip.rdbLoadLen().len;
         while (len > 0) {
-            skipParser.rdbLoadEncodedStringObject();
+            skip.rdbLoadEncodedStringObject();
             len--;
         }
         replicator.removeRawByteListener(listener);
@@ -194,11 +194,11 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     protected Event doApplyZSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
         replicator.addRawByteListener(listener);
-        SkipRdbParser skipParser = new SkipRdbParser(in);
-        long len = skipParser.rdbLoadLen().len;
+        SkipRdbParser skip = new SkipRdbParser(in);
+        long len = skip.rdbLoadLen().len;
         while (len > 0) {
-            skipParser.rdbLoadEncodedStringObject();
-            skipParser.rdbLoadDoubleValue();
+            skip.rdbLoadEncodedStringObject();
+            skip.rdbLoadDoubleValue();
             len--;
         }
         replicator.removeRawByteListener(listener);
@@ -214,11 +214,11 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     protected Event doApplyZSet2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
         replicator.addRawByteListener(listener);
-        SkipRdbParser skipParser = new SkipRdbParser(in);
-        long len = skipParser.rdbLoadLen().len;
+        SkipRdbParser skip = new SkipRdbParser(in);
+        long len = skip.rdbLoadLen().len;
         while (len > 0) {
-            skipParser.rdbLoadEncodedStringObject();
-            skipParser.rdbLoadBinaryDoubleValue();
+            skip.rdbLoadEncodedStringObject();
+            skip.rdbLoadBinaryDoubleValue();
             len--;
         }
         replicator.removeRawByteListener(listener);
@@ -234,11 +234,11 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     protected Event doApplyHash(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
         replicator.addRawByteListener(listener);
-        SkipRdbParser skipParser = new SkipRdbParser(in);
-        long len = skipParser.rdbLoadLen().len;
+        SkipRdbParser skip = new SkipRdbParser(in);
+        long len = skip.rdbLoadLen().len;
         while (len > 0) {
-            skipParser.rdbLoadEncodedStringObject();
-            skipParser.rdbLoadEncodedStringObject();
+            skip.rdbLoadEncodedStringObject();
+            skip.rdbLoadEncodedStringObject();
             len--;
         }
         replicator.removeRawByteListener(listener);
@@ -324,10 +324,10 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     protected Event doApplyListQuickList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
         replicator.addRawByteListener(listener);
-        SkipRdbParser skipParser = new SkipRdbParser(in);
-        long len = skipParser.rdbLoadLen().len;
+        SkipRdbParser skip = new SkipRdbParser(in);
+        long len = skip.rdbLoadLen().len;
         for (int i = 0; i < len; i++) {
-            skipParser.rdbGenericLoadStringObject();
+            skip.rdbGenericLoadStringObject();
         }
         replicator.removeRawByteListener(listener);
         DumpKeyValuePair kv = new DumpKeyValuePair();
@@ -342,9 +342,9 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     protected Event doApplyModule(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
         replicator.addRawByteListener(listener);
-        SkipRdbParser skipParser = new SkipRdbParser(in);
+        SkipRdbParser skip = new SkipRdbParser(in);
         char[] c = new char[9];
-        long moduleid = skipParser.rdbLoadLen().len;
+        long moduleid = skip.rdbLoadLen().len;
         for (int i = 0; i < c.length; i++) {
             c[i] = MODULE_SET[(int) (moduleid >>> (10 + (c.length - 1 - i) * 6) & 63)];
         }
@@ -368,8 +368,8 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     protected Event doApplyModule2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
         replicator.addRawByteListener(listener);
-        SkipRdbParser skipRdbParser = new SkipRdbParser(in);
-        skipRdbParser.rdbLoadCheckModuleValue();
+        SkipRdbParser skip = new SkipRdbParser(in);
+        skip.rdbLoadCheckModuleValue();
         replicator.removeRawByteListener(listener);
         DumpKeyValuePair kv = new DumpKeyValuePair();
         kv.setDb(db);
@@ -383,31 +383,31 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     protected Event doApplyStreamListPacks(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
         replicator.addRawByteListener(listener);
-        SkipRdbParser skipParser = new SkipRdbParser(in);
-        long listPacks = skipParser.rdbLoadLen().len;
+        SkipRdbParser skip = new SkipRdbParser(in);
+        long listPacks = skip.rdbLoadLen().len;
         while (listPacks-- > 0) {
-            skipParser.rdbLoadPlainStringObject();
-            skipParser.rdbLoadPlainStringObject();
+            skip.rdbLoadPlainStringObject();
+            skip.rdbLoadPlainStringObject();
         }
-        skipParser.rdbLoadLen();
-        skipParser.rdbLoadLen();
-        skipParser.rdbLoadLen();
-        long groupCount = skipParser.rdbLoadLen().len;
+        skip.rdbLoadLen();
+        skip.rdbLoadLen();
+        skip.rdbLoadLen();
+        long groupCount = skip.rdbLoadLen().len;
         while (groupCount-- > 0) {
-            skipParser.rdbLoadPlainStringObject();
-            skipParser.rdbLoadLen();
-            skipParser.rdbLoadLen();
-            long groupPel = skipParser.rdbLoadLen().len;
+            skip.rdbLoadPlainStringObject();
+            skip.rdbLoadLen();
+            skip.rdbLoadLen();
+            long groupPel = skip.rdbLoadLen().len;
             while (groupPel-- > 0) {
                 in.skip(16);
-                skipParser.rdbLoadMillisecondTime();
-                skipParser.rdbLoadLen();
+                skip.rdbLoadMillisecondTime();
+                skip.rdbLoadLen();
             }
-            long consumerCount = skipParser.rdbLoadLen().len;
+            long consumerCount = skip.rdbLoadLen().len;
             while (consumerCount-- > 0) {
-                skipParser.rdbLoadPlainStringObject();
-                skipParser.rdbLoadMillisecondTime();
-                long consumerPel = skipParser.rdbLoadLen().len;
+                skip.rdbLoadPlainStringObject();
+                skip.rdbLoadMillisecondTime();
+                long consumerPel = skip.rdbLoadLen().len;
                 while (consumerPel-- > 0) {
                     in.skip(16);
                 }

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import static com.moilioncircle.redis.cli.tool.ext.MigrateRdbVisitor.DefaultRawByteListener;
 import static com.moilioncircle.redis.replicator.Constants.DOLLAR;
 import static com.moilioncircle.redis.replicator.Constants.MODULE_SET;
 import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
@@ -75,26 +76,27 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         System.arraycopy(ary, 0, args, 1, ary.length);
         args[0] = key;
         out.write(STAR);
-        escape.encode(String.valueOf(args.length + 1).getBytes(), out);
+        out.write(String.valueOf(args.length + 1).getBytes());
         out.write('\r');
         out.write('\n');
         out.write(DOLLAR);
-        escape.encode(String.valueOf(command.length).getBytes(), out);
+        byte[] c = escape.encode(command);
+        out.write(String.valueOf(c.length).getBytes());
         out.write('\r');
         out.write('\n');
-        escape.encode(command, out);
+        out.write(c);
         out.write('\r');
         out.write('\n');
         for (final byte[] arg : args) {
             out.write(DOLLAR);
-            escape.encode(String.valueOf(arg.length).getBytes(), out);
+            byte[] a = escape.encode(arg);
+            out.write(String.valueOf(a.length).getBytes());
             out.write('\r');
             out.write('\n');
-            escape.encode(arg, out);
+            out.write(a);
             out.write('\r');
             out.write('\n');
         }
-        out.flush();
     }
 
     @Override
@@ -446,9 +448,11 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
 
     @Override
     protected Event doApplyModule(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        BaseRdbParser parser = new BaseRdbParser(in);
+        DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
+        replicator.addRawByteListener(listener);
+        SkipRdbParser skipParser = new SkipRdbParser(in);
         char[] c = new char[9];
-        long moduleid = parser.rdbLoadLen().len;
+        long moduleid = skipParser.rdbLoadLen().len;
         for (int i = 0; i < c.length; i++) {
             c[i] = MODULE_SET[(int) (moduleid >>> (10 + (c.length - 1 - i) * 6) & 63)];
         }
@@ -459,20 +463,36 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             throw new NoSuchElementException("module parser[" + moduleName + ", " + moduleVersion + "] not register. rdb type: [RDB_TYPE_MODULE]");
         }
         moduleParser.parse(in, 1);
-        return new DummyKeyValuePair();
+        replicator.removeRawByteListener(listener);
+        emit("restore".getBytes(), key, "0".getBytes(), listener.getBytes());
+        DummyKeyValuePair kv = new DummyKeyValuePair();
+        kv.setDb(db);
+        kv.setValueRdbType(type);
+        kv.setKey(key);
+        kv.setContains(contains);
+        return kv;
     }
 
     @Override
     protected Event doApplyModule2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        SkipRdbParser skip = new SkipRdbParser(in);
-        skip.rdbLoadLen();
-        skip.rdbLoadCheckModuleValue();
-        return new DummyKeyValuePair();
+        DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
+        replicator.addRawByteListener(listener);
+        SkipRdbParser skipRdbParser = new SkipRdbParser(in);
+        skipRdbParser.rdbLoadCheckModuleValue();
+        replicator.removeRawByteListener(listener);
+        emit("restore".getBytes(), key, "0".getBytes(), listener.getBytes());
+        DummyKeyValuePair kv = new DummyKeyValuePair();
+        kv.setDb(db);
+        kv.setValueRdbType(type);
+        kv.setKey(key);
+        kv.setContains(contains);
+        return kv;
     }
 
     @Override
     protected Event doApplyStreamListPacks(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        // TODO
+        DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
+        replicator.addRawByteListener(listener);
         SkipRdbParser skip = new SkipRdbParser(in);
         long listPacks = skip.rdbLoadLen().len;
         while (listPacks-- > 0) {
@@ -503,6 +523,13 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
                 }
             }
         }
-        return new DummyKeyValuePair();
+        replicator.removeRawByteListener(listener);
+        emit("restore".getBytes(), key, "0".getBytes(), listener.getBytes());
+        DummyKeyValuePair kv = new DummyKeyValuePair();
+        kv.setDb(db);
+        kv.setValueRdbType(type);
+        kv.setKey(key);
+        kv.setContains(contains);
+        return kv;
     }
 }

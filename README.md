@@ -19,11 +19,10 @@ usage: rct
                              top N keys (by size).
  -o,--out <file>             Output file.
  -t,--type <type type...>    Data type to include. Possible values are
-                             string, hash, set, sortedset, list,
-                             module(--format [mem|dump|key]),
-                             stream(--format [mem|dump|key]). Multiple
-                             types can be provided. If not specified, all
-                             data types will be returned.
+                             string, hash, set, sortedset, list, module,
+                             stream. Multiple types can be provided. If
+                             not specified, all data types will be
+                             returned.
  -u,--uri <uri>              Input uri. eg:
                              redis://host:port?authPassword=foobar
                              redis:///path/to/dump.rdb.
@@ -51,11 +50,10 @@ usage: rmt
                              redis:///path/to/dump.rdb
                              redis:///path/to/appendonly.aof.
  -t,--type <type type...>    Data type to include. Possible values are
-                             string, hash, set, sortedset, list,
-                             module(--format [mem|dump|key]),
-                             stream(--format [mem|dump|key]). Multiple
-                             types can be provided. If not specified, all
-                             data types will be returned.
+                             string, hash, set, sortedset, list, module,
+                             stream. Multiple types can be provided. If
+                             not specified, all data types will be
+                             returned.
  -v,--version                rmt version.
 
 

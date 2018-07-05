@@ -4,10 +4,7 @@ import com.moilioncircle.redis.cli.tool.cmd.glossary.Escape;
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Type;
 import com.moilioncircle.redis.cli.tool.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.replicator.Replicator;
-import com.moilioncircle.redis.replicator.UncheckedIOException;
 import com.moilioncircle.redis.replicator.event.Event;
-import com.moilioncircle.redis.replicator.event.EventListener;
-import com.moilioncircle.redis.replicator.event.PreFullSyncEvent;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.BaseRdbParser;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
@@ -27,7 +24,7 @@ import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
 /**
  * @author Baoyi Chen
  */
-public class KeyValRdbVisitor extends AbstractRdbVisitor implements EventListener {
+public class KeyValRdbVisitor extends AbstractRdbVisitor {
     public KeyValRdbVisitor(Replicator replicator,
                             File out,
                             List<Long> db,
@@ -35,21 +32,6 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor implements EventListene
                             List<Type> types,
                             Escape escape) throws Exception {
         super(replicator, out, db, regexs, types, escape);
-        this.replicator.addEventListener(this);
-    }
-
-    @Override
-    public void onEvent(Replicator replicator, Event event) {
-        if (event instanceof PreFullSyncEvent) {
-            try {
-                escape.encode("key".getBytes(), out);
-                out.write(' ');
-                escape.encode("val".getBytes(), out);
-                out.write('\n');
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        }
     }
 
     @Override
@@ -169,8 +151,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor implements EventListene
             byte[] field = BaseRdbParser.StringHelper.bytes(stream, zmEleLen);
             zmEleLen = BaseRdbParser.LenHelper.zmElementLen(stream);
             if (zmEleLen == 255) {
-                if (flag) flag = false;
-                else out.write(' ');
+                if (!flag) out.write(' ');
                 escape.encode(field, out);
                 out.write(' ');
                 escape.encode(null, out);

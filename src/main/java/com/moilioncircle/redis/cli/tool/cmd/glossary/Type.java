@@ -153,5 +153,4 @@ public enum Type {
                 throw new AssertionError(type);
         }
     }
-    
 }

@@ -5,10 +5,7 @@ import com.moilioncircle.redis.cli.tool.cmd.glossary.Type;
 import com.moilioncircle.redis.cli.tool.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.cli.tool.util.io.CRCOutputStream;
 import com.moilioncircle.redis.replicator.Replicator;
-import com.moilioncircle.redis.replicator.UncheckedIOException;
 import com.moilioncircle.redis.replicator.event.Event;
-import com.moilioncircle.redis.replicator.event.EventListener;
-import com.moilioncircle.redis.replicator.event.PreFullSyncEvent;
 import com.moilioncircle.redis.replicator.io.RawByteListener;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
@@ -27,7 +24,7 @@ import static com.moilioncircle.redis.replicator.Constants.MODULE_SET;
 /**
  * @author Baoyi Chen
  */
-public class DumpRdbVisitor extends AbstractRdbVisitor implements EventListener {
+public class DumpRdbVisitor extends AbstractRdbVisitor {
 
     private final int version;
 
@@ -39,21 +36,6 @@ public class DumpRdbVisitor extends AbstractRdbVisitor implements EventListener 
                           Escape escape) throws Exception {
         super(replicator, out, db, regexs, types, escape);
         this.version = -1;
-        this.replicator.addEventListener(this);
-    }
-
-    @Override
-    public void onEvent(Replicator replicator, Event event) {
-        if (event instanceof PreFullSyncEvent) {
-            try {
-                escape.encode("key".getBytes(), out);
-                out.write(' ');
-                escape.encode("dump".getBytes(), out);
-                out.write('\n');
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        }
     }
 
     private class DefaultRawByteListener implements RawByteListener, Closeable {
