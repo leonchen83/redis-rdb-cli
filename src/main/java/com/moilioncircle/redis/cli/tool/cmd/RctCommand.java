@@ -27,7 +27,7 @@ public class RctCommand extends AbstractCommand {
     private static final Option HELP = Option.builder("h").longOpt("help").required(false).hasArg(false).desc("rct usage.").build();
     private static final Option VERSION = Option.builder("v").longOpt("version").required(false).hasArg(false).desc("rct version.").build();
     private static final Option FORMAT = Option.builder("f").longOpt("format").required(false).hasArg().argName("format").type(String.class).desc("command to execute. valid commands are json, dump, key, keyval, mem and resp").build();
-    private static final Option URI = Option.builder("u").longOpt("uri").required(false).hasArg().argName("uri").type(String.class).desc("input uri. eg: redis://host:port?authpassword=foobar redis:///path/to/dump.rdb.").build();
+    private static final Option URI = Option.builder("u").longOpt("uri").required(false).hasArg().argName("uri").type(String.class).desc("input uri. eg: redis://host:port?authPassword=foobar redis:///path/to/dump.rdb.").build();
     private static final Option INPUT = Option.builder("i").longOpt("in").required(false).hasArg().argName("file").type(File.class).desc("input file.").build();
     private static final Option OUTPUT = Option.builder("o").longOpt("out").required(false).hasArg().argName("file").type(File.class).desc("output file.").build();
     private static final Option DB = Option.builder("d").longOpt("db").required(false).hasArg().argName("num num...").valueSeparator(' ').type(Number.class).desc("database number. multiple databases can be provided. if not specified, all databases will be included.").build();

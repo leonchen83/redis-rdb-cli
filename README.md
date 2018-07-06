@@ -25,7 +25,7 @@ usage: rct
                              not specified, all data types will be
                              returned.
  -u,--uri <uri>              input uri. eg:
-                             redis://host:port?authpassword=foobar
+                             redis://host:port?authPassword=foobar
                              redis:///path/to/dump.rdb.
  -v,--version                rct version.
 
