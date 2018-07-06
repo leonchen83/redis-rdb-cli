@@ -6,6 +6,7 @@ import com.moilioncircle.redis.replicator.UncheckedIOException;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 /**
@@ -20,9 +21,14 @@ public class Configure {
         try {
             String path = System.getProperty("conf");
             if (path != null && path.trim().length() != 0) {
-                properties.load(new FileInputStream(path));
+                try (InputStream in = new FileInputStream(path)) {
+                    properties.load(in);
+                }
             } else {
-                properties.load(Configure.class.getResourceAsStream("/cli.conf"));
+                ClassLoader loader = Configure.class.getClassLoader();
+                try (InputStream in = loader.getResourceAsStream("cli.conf")) {
+                    properties.load(in);
+                }
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
