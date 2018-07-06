@@ -33,13 +33,13 @@ public class RmtCommand extends AbstractCommand {
     
     private static final Option HELP = Option.builder("h").longOpt("help").required(false).hasArg(false).desc("rmt usage.").build();
     private static final Option VERSION = Option.builder("v").longOpt("version").required(false).hasArg(false).desc("rmt version.").build();
-    private static final Option SOURCE = Option.builder("s").longOpt("source").required(false).hasArg().argName("uri").type(String.class).desc("Source uri. eg: redis://host:port?authPassword=foobar redis:///path/to/dump.rdb redis:///path/to/appendonly.aof.").build();
-    private static final Option INPUT = Option.builder("i").longOpt("in").required(false).hasArg().argName("file").type(File.class).desc("Input file.").build();
-    private static final Option REPLACE = Option.builder("r").longOpt("replace").required(false).desc("Replace exist key value. If not specified, default value is false.").build();
-    private static final Option MIGRATE = Option.builder("m").longOpt("migrate").required(false).hasArg().argName("uri").type(String.class).desc("Migrate to uri. eg: redis://host:port?authPassword=foobar.").build();
-    private static final Option DB = Option.builder("d").longOpt("db").required(false).hasArg().argName("num num...").valueSeparator(' ').type(Number.class).desc("Database Number. Multiple databases can be provided. If not specified, all databases will be included.").build();
-    private static final Option KEY = Option.builder("k").longOpt("key").required(false).hasArg().argName("regex regex...").valueSeparator(' ').desc("Keys to export. This can be a RegEx. If not specified, all keys will be returned.").build();
-    private static final Option TYPE = Option.builder("t").longOpt("type").required(false).hasArgs().argName("type type...").valueSeparator(' ').desc("Data type to include. Possible values are string, hash, set, sortedset, list, module, stream. Multiple types can be provided. If not specified, all data types will be returned.").build();
+    private static final Option SOURCE = Option.builder("s").longOpt("source").required(false).hasArg().argName("uri").type(String.class).desc("source uri. eg: redis://host:port?authPassword=foobar redis:///path/to/dump.rdb redis:///path/to/appendonly.aof.").build();
+    private static final Option INPUT = Option.builder("i").longOpt("in").required(false).hasArg().argName("file").type(File.class).desc("input file.").build();
+    private static final Option REPLACE = Option.builder("r").longOpt("replace").required(false).desc("replace exist key value. if not specified, default value is false.").build();
+    private static final Option MIGRATE = Option.builder("m").longOpt("migrate").required(false).hasArg().argName("uri").type(String.class).desc("migrate to uri. eg: redis://host:port?authPassword=foobar.").build();
+    private static final Option DB = Option.builder("d").longOpt("db").required(false).hasArg().argName("num num...").valueSeparator(' ').type(Number.class).desc("database number. multiple databases can be provided. if not specified, all databases will be included.").build();
+    private static final Option KEY = Option.builder("k").longOpt("key").required(false).hasArg().argName("regex regex...").valueSeparator(' ').desc("keys to export. this can be a regex. if not specified, all keys will be returned.").build();
+    private static final Option TYPE = Option.builder("t").longOpt("type").required(false).hasArgs().argName("type type...").valueSeparator(' ').desc("data type to include. possible values are string, hash, set, sortedset, list, module, stream. multiple types can be provided. if not specified, all data types will be returned.").build();
     
     public RmtCommand() {
         addOption(HELP);

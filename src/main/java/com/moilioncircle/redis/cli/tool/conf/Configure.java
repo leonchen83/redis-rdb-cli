@@ -22,7 +22,7 @@ public class Configure {
             if (path != null && path.trim().length() != 0) {
                 properties.load(new FileInputStream(path));
             } else {
-                properties.load(Configure.class.getClassLoader().getResourceAsStream("cli.conf"));
+                properties.load(Configure.class.getResourceAsStream("/cli.conf"));
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);

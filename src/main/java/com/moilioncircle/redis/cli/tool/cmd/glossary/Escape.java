@@ -9,7 +9,7 @@ import java.io.OutputStream;
  */
 public enum Escape {
     RAW("raw"),
-    PRINT("print");
+    REDIS("redis");
 
     private String value;
 
@@ -22,8 +22,8 @@ public enum Escape {
         switch (escape) {
             case "raw":
                 return RAW;
-            case "print":
-                return PRINT;
+            case "redis":
+                return REDIS;
             default:
                 throw new AssertionError("Unsupported escape '" + escape + "'");
         }
@@ -42,7 +42,7 @@ public enum Escape {
             case RAW:
                 out.write(b);
                 break;
-            case PRINT:
+            case REDIS:
                 if (b == '\n') {
                     out.write('\\');
                     out.write('n');
@@ -84,7 +84,7 @@ public enum Escape {
             case RAW:
                 out.write(bytes, off, len);
                 break;
-            case PRINT:
+            case REDIS:
                 for (int i = off; i < len; i++) {
                     encode(bytes[i], out);
                 }

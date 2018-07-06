@@ -3,28 +3,29 @@
 ```java  
 
 usage: rct
- -b,--bytes <bytes>          Limit memory output(--format mem) to keys
+ -b,--bytes <bytes>          limit memory output(--format mem) to keys
                              greater to or equal to this value (in bytes)
- -d,--db <num num...>        Database Number. Multiple databases can be
-                             provided. If not specified, all databases
+ -d,--db <num num...>        database number. multiple databases can be
+                             provided. if not specified, all databases
                              will be included.
- -e,--escape <escape>        Escape strings to encoding: raw (default),
-                             print.
- -f,--format <format>        Command to execute. Valid commands are json,
+ -e,--escape <escape>        escape strings to encoding: raw (default),
+                             redis.
+ -f,--format <format>        command to execute. valid commands are json,
                              dump, key, keyval, mem and resp
  -h,--help                   rct usage.
- -i,--in <file>              Input file.
- -k,--key <regex regex...>   Keys to export. This can be a RegEx.
- -l,--largest <n>            Limit memory output(--format mem) to only the
-                             top N keys (by size).
- -o,--out <file>             Output file.
- -t,--type <type type...>    Data type to include. Possible values are
+ -i,--in <file>              input file.
+ -k,--key <regex regex...>   keys to export. this can be a regex. if not
+                             specified, all keys will be returned.
+ -l,--largest <n>            limit memory output(--format mem) to only the
+                             top n keys (by size).
+ -o,--out <file>             output file.
+ -t,--type <type type...>    data type to include. possible values are
                              string, hash, set, sortedset, list, module,
-                             stream. Multiple types can be provided. If
+                             stream. multiple types can be provided. if
                              not specified, all data types will be
                              returned.
- -u,--uri <uri>              Input uri. eg:
-                             redis://host:port?authPassword=foobar
+ -u,--uri <uri>              input uri. eg:
+                             redis://host:port?authpassword=foobar
                              redis:///path/to/dump.rdb.
  -v,--version                rct version.
 
@@ -35,23 +36,24 @@ usage: rct
 ```java  
 
 usage: rmt
- -d,--db <num num...>        Database Number. Multiple databases can be
-                             provided. If not specified, all databases
+ -d,--db <num num...>        database number. multiple databases can be
+                             provided. if not specified, all databases
                              will be included.
  -h,--help                   rmt usage.
- -i,--in <file>              Input file.
- -k,--key <regex regex...>   Keys to export. This can be a RegEx.
- -m,--migrate <uri>          Migrate to uri. eg:
+ -i,--in <file>              input file.
+ -k,--key <regex regex...>   keys to export. this can be a regex. if not
+                             specified, all keys will be returned.
+ -m,--migrate <uri>          migrate to uri. eg:
                              redis://host:port?authPassword=foobar.
- -r,--replace                Replace exist key value. If not specified
+ -r,--replace                replace exist key value. if not specified,
                              default value is false.
- -s,--source <uri>           Source uri. eg:
+ -s,--source <uri>           source uri. eg:
                              redis://host:port?authPassword=foobar
                              redis:///path/to/dump.rdb
                              redis:///path/to/appendonly.aof.
- -t,--type <type type...>    Data type to include. Possible values are
+ -t,--type <type type...>    data type to include. possible values are
                              string, hash, set, sortedset, list, module,
-                             stream. Multiple types can be provided. If
+                             stream. multiple types can be provided. if
                              not specified, all data types will be
                              returned.
  -v,--version                rmt version.

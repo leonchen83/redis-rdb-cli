@@ -24,31 +24,12 @@ public class MinHeap<T extends Comparable<T>> {
         this.ary = new ArrayList<>();
     }
 
-    @SuppressWarnings("unused")
-    private int parent(int i) {
-        if (i == 0)
-            return -1;
-        return i / 2;
-    }
-
-    private int left(int i) {
-        if (i == 0)
-            return 1;
-        return 2 * i;
-    }
-
-    private int right(int i) {
-        if (i == 0)
-            return 2;
-        return 2 * i + 1;
-    }
-
-    private void minHeapify(List<T> ary, int i) {
-        int l = left(i);
-        int r = right(i);
-        int min = i;
+    private void heapify(List<T> ary, int idx) {
+        int l = idx == 0 ? 1 : (idx << 1);
+        int r = idx == 0 ? 2 : (idx << 1) + 1;
+        int min = idx;
         if (l < ary.size()) {
-            if (ary.get(l).compareTo(ary.get(i)) < 0) {
+            if (ary.get(l).compareTo(ary.get(idx)) < 0) {
                 min = l;
             }
         }
@@ -57,17 +38,18 @@ public class MinHeap<T extends Comparable<T>> {
                 min = r;
             }
         }
-        if (min != i) {
-            T temp = ary.get(i);
-            ary.set(i, ary.get(min));
-            ary.set(min, temp);
-            minHeapify(ary, min);
+        if (min != idx) {
+            T t1 = ary.get(idx);
+            T t2 = ary.get(min);
+            ary.set(idx, t2);
+            ary.set(min, t1);
+            heapify(ary, min);
         }
     }
 
     private void builtMinHeap(List<T> a) {
         for (int i = (a.size() - 1) / 2; i >= 0; i--) {
-            minHeapify(a, i);
+            heapify(a, i);
         }
     }
 
@@ -85,7 +67,7 @@ public class MinHeap<T extends Comparable<T>> {
         }
         if (ary.get(0).compareTo(t) < 0) {
             ary.set(0, t);
-            minHeapify(ary, 0);
+            heapify(ary, 0);
         }
     }
 

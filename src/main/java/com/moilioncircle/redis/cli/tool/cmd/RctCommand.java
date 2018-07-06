@@ -26,16 +26,16 @@ public class RctCommand extends AbstractCommand {
 
     private static final Option HELP = Option.builder("h").longOpt("help").required(false).hasArg(false).desc("rct usage.").build();
     private static final Option VERSION = Option.builder("v").longOpt("version").required(false).hasArg(false).desc("rct version.").build();
-    private static final Option FORMAT = Option.builder("f").longOpt("format").required(false).hasArg().argName("format").type(String.class).desc("Command to execute. Valid commands are json, dump, key, keyval, mem and resp").build();
-    private static final Option URI = Option.builder("u").longOpt("uri").required(false).hasArg().argName("uri").type(String.class).desc("Input uri. eg: redis://host:port?authPassword=foobar redis:///path/to/dump.rdb.").build();
-    private static final Option INPUT = Option.builder("i").longOpt("in").required(false).hasArg().argName("file").type(File.class).desc("Input file.").build();
-    private static final Option OUTPUT = Option.builder("o").longOpt("out").required(false).hasArg().argName("file").type(File.class).desc("Output file.").build();
-    private static final Option DB = Option.builder("d").longOpt("db").required(false).hasArg().argName("num num...").valueSeparator(' ').type(Number.class).desc("Database Number. Multiple databases can be provided. If not specified, all databases will be included.").build();
-    private static final Option KEY = Option.builder("k").longOpt("key").required(false).hasArg().argName("regex regex...").valueSeparator(' ').desc("Keys to export. This can be a RegEx. If not specified, all keys will be returned.").build();
-    private static final Option TYPE = Option.builder("t").longOpt("type").required(false).hasArgs().argName("type type...").valueSeparator(' ').desc("Data type to include. Possible values are string, hash, set, sortedset, list, module, stream. Multiple types can be provided. If not specified, all data types will be returned.").build();
-    private static final Option BYTES = Option.builder("b").longOpt("bytes").required(false).hasArgs().argName("bytes").type(Number.class).desc("Limit memory output(--format mem) to keys greater to or equal to this value (in bytes)").build();
-    private static final Option LARGEST = Option.builder("l").longOpt("largest").required(false).hasArg().argName("n").type(Number.class).desc("Limit memory output(--format mem) to only the top N keys (by size).").build();
-    private static final Option ESCAPE = Option.builder("e").longOpt("escape").required(false).hasArg().argName("escape").type(String.class).desc("Escape strings to encoding: raw (default), print.").build();
+    private static final Option FORMAT = Option.builder("f").longOpt("format").required(false).hasArg().argName("format").type(String.class).desc("command to execute. valid commands are json, dump, key, keyval, mem and resp").build();
+    private static final Option URI = Option.builder("u").longOpt("uri").required(false).hasArg().argName("uri").type(String.class).desc("input uri. eg: redis://host:port?authpassword=foobar redis:///path/to/dump.rdb.").build();
+    private static final Option INPUT = Option.builder("i").longOpt("in").required(false).hasArg().argName("file").type(File.class).desc("input file.").build();
+    private static final Option OUTPUT = Option.builder("o").longOpt("out").required(false).hasArg().argName("file").type(File.class).desc("output file.").build();
+    private static final Option DB = Option.builder("d").longOpt("db").required(false).hasArg().argName("num num...").valueSeparator(' ').type(Number.class).desc("database number. multiple databases can be provided. if not specified, all databases will be included.").build();
+    private static final Option KEY = Option.builder("k").longOpt("key").required(false).hasArg().argName("regex regex...").valueSeparator(' ').desc("keys to export. this can be a regex. if not specified, all keys will be returned.").build();
+    private static final Option TYPE = Option.builder("t").longOpt("type").required(false).hasArgs().argName("type type...").valueSeparator(' ').desc("data type to include. possible values are string, hash, set, sortedset, list, module, stream. multiple types can be provided. if not specified, all data types will be returned.").build();
+    private static final Option BYTES = Option.builder("b").longOpt("bytes").required(false).hasArgs().argName("bytes").type(Number.class).desc("limit memory output(--format mem) to keys greater to or equal to this value (in bytes)").build();
+    private static final Option LARGEST = Option.builder("l").longOpt("largest").required(false).hasArg().argName("n").type(Number.class).desc("limit memory output(--format mem) to only the top n keys (by size).").build();
+    private static final Option ESCAPE = Option.builder("e").longOpt("escape").required(false).hasArg().argName("escape").type(String.class).desc("escape strings to encoding: raw (default), redis.").build();
 
     @Override
     public String name() {
