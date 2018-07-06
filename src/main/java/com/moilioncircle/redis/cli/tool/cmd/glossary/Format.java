@@ -1,12 +1,12 @@
 package com.moilioncircle.redis.cli.tool.cmd.glossary;
 
 import com.moilioncircle.redis.cli.tool.conf.Configure;
-import com.moilioncircle.redis.cli.tool.ext.DumpRdbVisitor;
-import com.moilioncircle.redis.cli.tool.ext.JsonRdbVisitor;
-import com.moilioncircle.redis.cli.tool.ext.KeyRdbVisitor;
-import com.moilioncircle.redis.cli.tool.ext.KeyValRdbVisitor;
-import com.moilioncircle.redis.cli.tool.ext.MemRdbVisitor;
-import com.moilioncircle.redis.cli.tool.ext.RespRdbVisitor;
+import com.moilioncircle.redis.cli.tool.ext.rct.DumpRdbVisitor;
+import com.moilioncircle.redis.cli.tool.ext.rct.JsonRdbVisitor;
+import com.moilioncircle.redis.cli.tool.ext.rct.KeyRdbVisitor;
+import com.moilioncircle.redis.cli.tool.ext.rct.KeyValRdbVisitor;
+import com.moilioncircle.redis.cli.tool.ext.rct.MemRdbVisitor;
+import com.moilioncircle.redis.cli.tool.ext.rct.RespRdbVisitor;
 import com.moilioncircle.redis.replicator.Replicator;
 
 import java.io.File;

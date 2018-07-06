@@ -3,7 +3,8 @@ package com.moilioncircle.redis.cli.tool.cmd;
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Type;
 import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.ext.CliRedisReplicator;
-import com.moilioncircle.redis.cli.tool.ext.MigRdbVisitor;
+import com.moilioncircle.redis.cli.tool.ext.rmt.MigRdbVisitor;
+import com.moilioncircle.redis.cli.tool.util.Closes;
 import com.moilioncircle.redis.cli.tool.util.ProgressBar;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -38,8 +39,8 @@ public class RmtCommand extends AbstractCommand {
     private static final Option REPLACE = Option.builder("r").longOpt("replace").required(false).desc("replace exist key value. if not specified, default value is false.").build();
     private static final Option MIGRATE = Option.builder("m").longOpt("migrate").required(false).hasArg().argName("uri").type(String.class).desc("migrate to uri. eg: redis://host:port?authPassword=foobar.").build();
     private static final Option DB = Option.builder("d").longOpt("db").required(false).hasArg().argName("num num...").valueSeparator(' ').type(Number.class).desc("database number. multiple databases can be provided. if not specified, all databases will be included.").build();
-    private static final Option KEY = Option.builder("k").longOpt("key").required(false).hasArg().argName("regex regex...").valueSeparator(' ').desc("keys to export. this can be a regex. if not specified, all keys will be returned.").build();
-    private static final Option TYPE = Option.builder("t").longOpt("type").required(false).hasArgs().argName("type type...").valueSeparator(' ').desc("data type to include. possible values are string, hash, set, sortedset, list, module, stream. multiple types can be provided. if not specified, all data types will be returned.").build();
+    private static final Option KEY = Option.builder("k").longOpt("key").required(false).hasArg().argName("regex regex...").valueSeparator(' ').type(String.class).desc("keys to export. this can be a regex. if not specified, all keys will be returned.").build();
+    private static final Option TYPE = Option.builder("t").longOpt("type").required(false).hasArgs().argName("type type...").valueSeparator(' ').type(String.class).desc("data type to export. possible values are string, hash, set, sortedset, list, module, stream. multiple types can be provided. if not specified, all data types will be returned.").build();
     
     public RmtCommand() {
         addOption(HELP);
@@ -64,7 +65,7 @@ public class RmtCommand extends AbstractCommand {
             StringBuilder sb = new StringBuilder();
     
             if (!line.hasOption("in") && !line.hasOption("source")) {
-                sb.append("i or s ");
+                sb.append("[i or s] ");
             }
     
             if (!line.hasOption("migrate")) {
@@ -72,7 +73,7 @@ public class RmtCommand extends AbstractCommand {
             }
     
             if (sb.length() > 0) {
-                writeLine("Missing required options: " + sb.toString() + ", `rmt -h` for more information.");
+                writeLine("Missing required options: " + sb.toString() + ". Try `rmt -h` for more information.");
                 return;
             }
     
@@ -100,6 +101,7 @@ public class RmtCommand extends AbstractCommand {
             Replicator r = new CliRedisReplicator(source, configure);
             dress(r, configure, migrate, db, regexs, Type.parse(type), replace);
             AtomicReference<ProgressBar.Phase> phase = new AtomicReference<>(NOP);
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> Closes.closeQuietly(r)));
             r.addRawByteListener(b -> bar.react(b.length, phase.get()));
             r.addEventListener((rep, event) -> {
                 if (event instanceof PreFullSyncEvent) {

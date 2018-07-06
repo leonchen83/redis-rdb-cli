@@ -27,7 +27,7 @@ public class ProgressBar {
     }
 
     public void react(long num, boolean increment, Phase phase) {
-        react(num, total < 0 ? 0 : Processes.width(), increment, phase);
+        react(num, total <= 0 ? 0 : Processes.width(), increment, phase);
     }
 
     public void react(long num, int len, boolean increment, Phase phase) {
@@ -35,16 +35,21 @@ public class ProgressBar {
             this.num.addAndGet(num);
         else
             this.num.set(num);
+        if (total <= 0) {
+            show(0, 0, len, this.num.get(), phase);
+            return;
+        }
+        assert total > 0;
         double percentage = this.num.get() / (double) total * 100;
         if (this.percentage != percentage) {
             double prev = this.percentage;
             this.percentage = percentage;
             double next = this.percentage;
-            show(prev, next, len, this.num.get(), this.total, phase);
+            show(prev, next, len, this.num.get(), phase);
         }
     }
 
-    private void show(double prev, double next, int len, long num, long total, Phase phase) {
+    private void show(double prev, double next, int len, long num, Phase phase) {
         long now = System.currentTimeMillis();
         long elapsed = now - access;
         if (elapsed < 1000) return;
@@ -60,7 +65,12 @@ public class ProgressBar {
             bit = true;
         }
         builder.append('[').append(pretty(num));
-        if (total > 0) {
+        if (total <= 0) {
+            if (phase != null) {
+                builder.append('|');
+                builder.append(phase);
+            }
+        } else {
             builder.append('/').append(pretty(total)).append('|');
             if ((int) next < 10) {
                 builder.append(' ').append(' ').append((int) next).append('%');
@@ -85,11 +95,6 @@ public class ProgressBar {
                 } else {
                     builder.append('-');
                 }
-            }
-        } else {
-            if (phase != null) {
-                builder.append('|');
-                builder.append(phase);
             }
         }
         builder.append('|');

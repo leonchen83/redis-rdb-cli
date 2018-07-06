@@ -1,8 +1,10 @@
-package com.moilioncircle.redis.cli.tool.ext;
+package com.moilioncircle.redis.cli.tool.ext.rct;
 
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Escape;
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Type;
 import com.moilioncircle.redis.cli.tool.conf.Configure;
+import com.moilioncircle.redis.cli.tool.ext.AbstractRdbVisitor;
+import com.moilioncircle.redis.cli.tool.ext.DumpRawByteListener;
 import com.moilioncircle.redis.cli.tool.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
@@ -19,7 +21,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import static com.moilioncircle.redis.cli.tool.ext.MigRdbVisitor.DefaultRawByteListener;
 import static com.moilioncircle.redis.replicator.Constants.MODULE_SET;
 import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
 
@@ -33,7 +34,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
                             List<Long> db,
                             List<String> regexs,
                             List<Type> types,
-                            Escape escape) throws Exception {
+                            Escape escape) {
         super(replicator, configure, out, db, regexs, types, escape);
     }
 
@@ -316,23 +317,23 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
     public Event doApplyModule(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         emit(key);
         out.write(' ');
-        DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
-        replicator.addRawByteListener(listener);
-        BaseRdbParser parser = new BaseRdbParser(in);
-        char[] c = new char[9];
-        long moduleid = parser.rdbLoadLen().len;
-        for (int i = 0; i < c.length; i++) {
-            c[i] = MODULE_SET[(int) (moduleid >>> (10 + (c.length - 1 - i) * 6) & 63)];
+        try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape)) {
+            replicator.addRawByteListener(listener);
+            BaseRdbParser parser = new BaseRdbParser(in);
+            char[] c = new char[9];
+            long moduleid = parser.rdbLoadLen().len;
+            for (int i = 0; i < c.length; i++) {
+                c[i] = MODULE_SET[(int) (moduleid >>> (10 + (c.length - 1 - i) * 6) & 63)];
+            }
+            String moduleName = new String(c);
+            int moduleVersion = (int) (moduleid & 1023);
+            ModuleParser<? extends Module> moduleParser = lookupModuleParser(moduleName, moduleVersion);
+            if (moduleParser == null) {
+                throw new NoSuchElementException("module parser[" + moduleName + ", " + moduleVersion + "] not register. rdb type: [RDB_TYPE_MODULE]");
+            }
+            moduleParser.parse(in, 1);
+            replicator.removeRawByteListener(listener);
         }
-        String moduleName = new String(c);
-        int moduleVersion = (int) (moduleid & 1023);
-        ModuleParser<? extends Module> moduleParser = lookupModuleParser(moduleName, moduleVersion);
-        if (moduleParser == null) {
-            throw new NoSuchElementException("module parser[" + moduleName + ", " + moduleVersion + "] not register. rdb type: [RDB_TYPE_MODULE]");
-        }
-        moduleParser.parse(in, 1);
-        replicator.removeRawByteListener(listener);
-        escape.encode(listener.getBytes(), out);
         out.write('\n');
         return new DummyKeyValuePair();
     }
@@ -341,13 +342,13 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
     public Event doApplyModule2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         emit(key);
         out.write(' ');
-        DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
-        replicator.addRawByteListener(listener);
-        SkipRdbParser skip = new SkipRdbParser(in);
-        skip.rdbLoadLen();
-        skip.rdbLoadCheckModuleValue();
-        replicator.removeRawByteListener(listener);
-        escape.encode(listener.getBytes(), out);
+        try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape)) {
+            replicator.addRawByteListener(listener);
+            SkipRdbParser skip = new SkipRdbParser(in);
+            skip.rdbLoadLen();
+            skip.rdbLoadCheckModuleValue();
+            replicator.removeRawByteListener(listener);
+        }
         out.write('\n');
         return new DummyKeyValuePair();
     }
@@ -361,40 +362,40 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
     public Event doApplyStreamListPacks(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         emit(key);
         out.write(' ');
-        DefaultRawByteListener listener = new DefaultRawByteListener((byte) type, version);
-        replicator.addRawByteListener(listener);
-        SkipRdbParser skip = new SkipRdbParser(in);
-        long listPacks = skip.rdbLoadLen().len;
-        while (listPacks-- > 0) {
-            skip.rdbLoadPlainStringObject();
-            skip.rdbLoadPlainStringObject();
-        }
-        skip.rdbLoadLen();
-        skip.rdbLoadLen();
-        skip.rdbLoadLen();
-        long groupCount = skip.rdbLoadLen().len;
-        while (groupCount-- > 0) {
-            skip.rdbLoadPlainStringObject();
-            skip.rdbLoadLen();
-            skip.rdbLoadLen();
-            long groupPel = skip.rdbLoadLen().len;
-            while (groupPel-- > 0) {
-                in.skip(16);
-                skip.rdbLoadMillisecondTime();
-                skip.rdbLoadLen();
-            }
-            long consumerCount = skip.rdbLoadLen().len;
-            while (consumerCount-- > 0) {
+        try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape)) {
+            replicator.addRawByteListener(listener);
+            SkipRdbParser skip = new SkipRdbParser(in);
+            long listPacks = skip.rdbLoadLen().len;
+            while (listPacks-- > 0) {
                 skip.rdbLoadPlainStringObject();
-                skip.rdbLoadMillisecondTime();
-                long consumerPel = skip.rdbLoadLen().len;
-                while (consumerPel-- > 0) {
+                skip.rdbLoadPlainStringObject();
+            }
+            skip.rdbLoadLen();
+            skip.rdbLoadLen();
+            skip.rdbLoadLen();
+            long groupCount = skip.rdbLoadLen().len;
+            while (groupCount-- > 0) {
+                skip.rdbLoadPlainStringObject();
+                skip.rdbLoadLen();
+                skip.rdbLoadLen();
+                long groupPel = skip.rdbLoadLen().len;
+                while (groupPel-- > 0) {
                     in.skip(16);
+                    skip.rdbLoadMillisecondTime();
+                    skip.rdbLoadLen();
+                }
+                long consumerCount = skip.rdbLoadLen().len;
+                while (consumerCount-- > 0) {
+                    skip.rdbLoadPlainStringObject();
+                    skip.rdbLoadMillisecondTime();
+                    long consumerPel = skip.rdbLoadLen().len;
+                    while (consumerPel-- > 0) {
+                        in.skip(16);
+                    }
                 }
             }
+            replicator.removeRawByteListener(listener);
         }
-        replicator.removeRawByteListener(listener);
-        escape.encode(listener.getBytes(), out);
         out.write('\n');
         return new DummyKeyValuePair();
     }

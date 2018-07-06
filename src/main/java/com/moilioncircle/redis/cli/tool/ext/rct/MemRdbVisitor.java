@@ -1,8 +1,9 @@
-package com.moilioncircle.redis.cli.tool.ext;
+package com.moilioncircle.redis.cli.tool.ext.rct;
 
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Escape;
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Type;
 import com.moilioncircle.redis.cli.tool.conf.Configure;
+import com.moilioncircle.redis.cli.tool.ext.AbstractRdbVisitor;
 import com.moilioncircle.redis.cli.tool.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.cli.tool.util.MinHeap;
 import com.moilioncircle.redis.cli.tool.util.type.Tuple2;
@@ -30,7 +31,7 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 
-import static com.moilioncircle.redis.cli.tool.ext.MemRdbVisitor.Tuple2Ex;
+import static com.moilioncircle.redis.cli.tool.ext.rct.MemRdbVisitor.Tuple2Ex;
 import static com.moilioncircle.redis.replicator.Constants.MODULE_SET;
 import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
 import static com.moilioncircle.redis.replicator.Constants.STREAM_ITEM_FLAG_DELETED;
@@ -56,7 +57,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
                          List<String> regexs,
                          List<Type> types,
                          Escape escape,
-                         Long largest, Long bytes) throws Exception {
+                         Long largest, Long bytes) {
         super(replicator, configure, out, db, regexs, types, escape);
         this.bytes = bytes;
         this.heap = new MinHeap<>(largest == null ? -1 : largest.intValue());
@@ -83,6 +84,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             escape.encode(kv.getMax(), out);
             out.write(',');
             if (kv.getExpiredType() != NONE) {
+                // TODO
                 escape.encode(String.valueOf(kv.getExpiredValue()).getBytes(), out);
             } else {
                 escape.encode("".getBytes(), out);

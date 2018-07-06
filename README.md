@@ -10,7 +10,7 @@ usage: rct
                              will be included.
  -e,--escape <escape>        escape strings to encoding: raw (default),
                              redis.
- -f,--format <format>        command to execute. valid commands are json,
+ -f,--format <format>        format to export. valid commands are json,
                              dump, key, keyval, mem and resp
  -h,--help                   rct usage.
  -i,--in <file>              input file.
@@ -19,16 +19,15 @@ usage: rct
  -l,--largest <n>            limit memory output(--format mem) to only the
                              top n keys (by size).
  -o,--out <file>             output file.
- -t,--type <type type...>    data type to include. possible values are
+ -s,--source <uri>           source uri. eg:
+                             redis://host:port?authPassword=foobar
+                             redis:///path/to/dump.rdb.
+ -t,--type <type type...>    data type to export. possible values are
                              string, hash, set, sortedset, list, module,
                              stream. multiple types can be provided. if
                              not specified, all data types will be
                              returned.
- -u,--uri <uri>              input uri. eg:
-                             redis://host:port?authPassword=foobar
-                             redis:///path/to/dump.rdb.
  -v,--version                rct version.
-
 
 ```
 
@@ -51,12 +50,45 @@ usage: rmt
                              redis://host:port?authPassword=foobar
                              redis:///path/to/dump.rdb
                              redis:///path/to/appendonly.aof.
- -t,--type <type type...>    data type to include. possible values are
+ -t,--type <type type...>    data type to export. possible values are
                              string, hash, set, sortedset, list, module,
                              stream. multiple types can be provided. if
                              not specified, all data types will be
                              returned.
  -v,--version                rmt version.
+
+```
+
+```java  
+
+usage: rdt
+ -b,--backup <uri>           backup uri to local rdb file. eg:
+                             redis://host:port?authPassword=foobar
+                             redis:///path/to/dump.rdb
+ -c,--config <file>          redis cluster's <node.conf> file(--split
+                             <file>).
+ -d,--db <num num...>        database number. multiple databases can be
+                             provided. if not specified, all databases
+                             will be included.
+ -h,--help                   rdt usage.
+ -k,--key <regex regex...>   keys to export. this can be a regex. if not
+                             specified, all keys will be returned.
+ -m,--merge <file file...>   merge multi file to one file. if file
+                             contains aof format. then will generate a
+                             mixed file that can read via redis-4.x+.
+ -o,--out <file>             output file(--backup <uri> or --merge <file
+                             file...>).
+ -s,--split <uri>            split uri to multi file via cluster's
+                             <node.conf>. eg:
+                             redis://host:port?authPassword=foobar
+                             redis:///path/to/dump.rdb
+                             redis:///path/to/appendonly.aof.
+ -t,--type <type type...>    data type to export. possible values are
+                             string, hash, set, sortedset, list, module,
+                             stream. multiple types can be provided. if
+                             not specified, all data types will be
+                             returned.
+ -v,--version                rdt version.
 
 
 ```

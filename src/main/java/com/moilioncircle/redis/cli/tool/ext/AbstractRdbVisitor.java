@@ -6,7 +6,9 @@ import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.cli.tool.util.Closes;
 import com.moilioncircle.redis.replicator.Replicator;
+import com.moilioncircle.redis.replicator.UncheckedIOException;
 import com.moilioncircle.redis.replicator.event.Event;
+import com.moilioncircle.redis.replicator.event.PreFullSyncEvent;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.BaseRdbParser;
 import com.moilioncircle.redis.replicator.rdb.DefaultRdbVisitor;
@@ -64,11 +66,19 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
                               List<Long> db,
                               List<String> regexs,
                               List<Type> types,
-                              Escape escape) throws Exception {
+                              Escape escape) {
         this(replicator, configure, db, regexs, types);
         this.escape = escape;
-        this.out = new BufferedOutputStream(new FileOutputStream(output));
-        replicator.addCloseListener(r -> Closes.closeQuietly(out));
+        replicator.addEventListener((rep, event) -> {
+            if (!(event instanceof PreFullSyncEvent)) return;
+            try {
+                Closes.closeQuietly(this.out);
+                this.out = new BufferedOutputStream(new FileOutputStream(output));
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        });
+        replicator.addCloseListener(rep -> Closes.closeQuietly(out));
     }
 
     public AbstractRdbVisitor(Replicator replicator,

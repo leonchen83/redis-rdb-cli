@@ -10,6 +10,7 @@ import java.io.UncheckedIOException;
 public class Closes {
 
     public static void close(Closeable task) {
+        if (task == null) return;
         try {
             task.close();
         } catch (IOException t) {
@@ -20,6 +21,7 @@ public class Closes {
     }
 
     public static void closeQuietly(Closeable task) {
+        if (task == null) return;
         try {
             task.close();
         } catch (Throwable t) {

@@ -26,13 +26,13 @@ public class RctCommand extends AbstractCommand {
 
     private static final Option HELP = Option.builder("h").longOpt("help").required(false).hasArg(false).desc("rct usage.").build();
     private static final Option VERSION = Option.builder("v").longOpt("version").required(false).hasArg(false).desc("rct version.").build();
-    private static final Option FORMAT = Option.builder("f").longOpt("format").required(false).hasArg().argName("format").type(String.class).desc("command to execute. valid commands are json, dump, key, keyval, mem and resp").build();
-    private static final Option URI = Option.builder("u").longOpt("uri").required(false).hasArg().argName("uri").type(String.class).desc("input uri. eg: redis://host:port?authPassword=foobar redis:///path/to/dump.rdb.").build();
+    private static final Option FORMAT = Option.builder("f").longOpt("format").required(false).hasArg().argName("format").type(String.class).desc("format to export. valid commands are json, dump, key, keyval, mem and resp").build();
+    private static final Option SOURCE = Option.builder("s").longOpt("source").required(false).hasArg().argName("uri").type(String.class).desc("source uri. eg: redis://host:port?authPassword=foobar redis:///path/to/dump.rdb.").build();
     private static final Option INPUT = Option.builder("i").longOpt("in").required(false).hasArg().argName("file").type(File.class).desc("input file.").build();
     private static final Option OUTPUT = Option.builder("o").longOpt("out").required(false).hasArg().argName("file").type(File.class).desc("output file.").build();
     private static final Option DB = Option.builder("d").longOpt("db").required(false).hasArg().argName("num num...").valueSeparator(' ').type(Number.class).desc("database number. multiple databases can be provided. if not specified, all databases will be included.").build();
-    private static final Option KEY = Option.builder("k").longOpt("key").required(false).hasArg().argName("regex regex...").valueSeparator(' ').desc("keys to export. this can be a regex. if not specified, all keys will be returned.").build();
-    private static final Option TYPE = Option.builder("t").longOpt("type").required(false).hasArgs().argName("type type...").valueSeparator(' ').desc("data type to include. possible values are string, hash, set, sortedset, list, module, stream. multiple types can be provided. if not specified, all data types will be returned.").build();
+    private static final Option KEY = Option.builder("k").longOpt("key").required(false).hasArg().argName("regex regex...").valueSeparator(' ').type(String.class).desc("keys to export. this can be a regex. if not specified, all keys will be returned.").build();
+    private static final Option TYPE = Option.builder("t").longOpt("type").required(false).hasArgs().argName("type type...").valueSeparator(' ').type(String.class).desc("data type to export. possible values are string, hash, set, sortedset, list, module, stream. multiple types can be provided. if not specified, all data types will be returned.").build();
     private static final Option BYTES = Option.builder("b").longOpt("bytes").required(false).hasArgs().argName("bytes").type(Number.class).desc("limit memory output(--format mem) to keys greater to or equal to this value (in bytes)").build();
     private static final Option LARGEST = Option.builder("l").longOpt("largest").required(false).hasArg().argName("n").type(Number.class).desc("limit memory output(--format mem) to only the top n keys (by size).").build();
     private static final Option ESCAPE = Option.builder("e").longOpt("escape").required(false).hasArg().argName("escape").type(String.class).desc("escape strings to encoding: raw (default), redis.").build();
@@ -46,7 +46,7 @@ public class RctCommand extends AbstractCommand {
         addOption(HELP);
         addOption(VERSION);
         addOption(FORMAT);
-        addOption(URI);
+        addOption(SOURCE);
         addOption(INPUT);
         addOption(OUTPUT);
         addOption(DB);
@@ -70,8 +70,8 @@ public class RctCommand extends AbstractCommand {
                 sb.append("f ");
             }
 
-            if (!line.hasOption("in") && !line.hasOption("uri")) {
-                sb.append("i or u ");
+            if (!line.hasOption("in") && !line.hasOption("source")) {
+                sb.append("[i or s] ");
             }
 
             if (!line.hasOption("out")) {
@@ -84,7 +84,7 @@ public class RctCommand extends AbstractCommand {
             }
 
             File input = line.getOption("in");
-            String uri = line.getOption("uri");
+            String source = line.getOption("source");
             File output = line.getOption("out");
             String format = line.getOption("format");
 
@@ -95,14 +95,15 @@ public class RctCommand extends AbstractCommand {
             List<String> type = line.getOptions("type");
             List<String> regexs = line.getOptions("key");
 
-            if (uri == null && input != null) {
+            if (source == null && input != null) {
                 URI u = input.toURI();
-                uri = new URI("redis", u.getRawAuthority(), u.getRawPath(), u.getRawQuery(), u.getRawFragment()).toString();
+                source = new URI("redis", u.getRawAuthority(), u.getRawPath(), u.getRawQuery(), u.getRawFragment()).toString();
             }
             ProgressBar bar = new ProgressBar(-1);
             Configure configure = Configure.bind();
-            Replicator r = new CliRedisReplicator(uri, configure);
+            Replicator r = new CliRedisReplicator(source, configure);
             Format.parse(format).dress(r, configure, output, db, regexs, largest, bytes, Type.parse(type), Escape.parse(escape));
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> Closes.closeQuietly(r)));
             r.addEventListener((rep, event) -> {
                 if (event instanceof PreFullSyncEvent)
                     rep.addRawByteListener(b -> bar.react(b.length, RDB));
