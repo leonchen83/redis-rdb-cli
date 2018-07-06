@@ -15,7 +15,7 @@ if [[ "$_java" ]]; then
     fi
 fi
 
-base_dir=$(dirname $0)/..
+base_dir="$(dirname "$(readlink -f "$0")")"/..
 
 lib_dir="$base_dir"/lib
 log_dir="$base_dir"/log
