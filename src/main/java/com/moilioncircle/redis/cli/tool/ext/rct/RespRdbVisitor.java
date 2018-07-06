@@ -4,7 +4,7 @@ import com.moilioncircle.redis.cli.tool.cmd.glossary.Escape;
 import com.moilioncircle.redis.cli.tool.cmd.glossary.Type;
 import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.ext.AbstractRdbVisitor;
-import com.moilioncircle.redis.cli.tool.ext.RawByteListenerEx;
+import com.moilioncircle.redis.cli.tool.ext.GuardRawByteListener;
 import com.moilioncircle.redis.cli.tool.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
@@ -452,7 +452,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
 
     @Override
     protected Event doApplyModule(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        RawByteListenerEx listener = new RawByteListenerEx((byte) type, version);
+        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, null);
         replicator.addRawByteListener(listener);
         SkipRdbParser skipParser = new SkipRdbParser(in);
         char[] c = new char[9];
@@ -479,7 +479,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
 
     @Override
     protected Event doApplyModule2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        RawByteListenerEx listener = new RawByteListenerEx((byte) type, version);
+        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, null);
         replicator.addRawByteListener(listener);
         SkipRdbParser skipRdbParser = new SkipRdbParser(in);
         skipRdbParser.rdbLoadCheckModuleValue();
@@ -495,7 +495,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
 
     @Override
     protected Event doApplyStreamListPacks(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        RawByteListenerEx listener = new RawByteListenerEx((byte) type, version);
+        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, null);
         replicator.addRawByteListener(listener);
         SkipRdbParser skip = new SkipRdbParser(in);
         long listPacks = skip.rdbLoadLen().len;
