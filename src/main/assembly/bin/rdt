@@ -33,4 +33,4 @@ ulimit -n 65535
 
 export CLASSPATH
 
-$_java -server -Xms512m -Xmx512m -Xss2m -XX:NewRatio=2 -XX:+UseGCOverheadLimit -XX:-UseParallelGC -XX:ParallelGCThreads=24 -Dlog4j.configurationFile=${log_file} -Dcli.log.path=${log_dir} -Dconf=${con_file} com.moilioncircle.redis.cli.tool.Rdt $@
+$_java -server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -Dlog4j.configurationFile=${log_file} -Dcli.log.path=${log_dir} -Dconf=${con_file} com.moilioncircle.redis.cli.tool.Rdt $@
