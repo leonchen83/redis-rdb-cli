@@ -19,12 +19,7 @@ import java.util.function.Supplier;
  */
 public class MergeRdbVisitor extends AbstractRdbVisitor {
     
-    public MergeRdbVisitor(Replicator replicator,
-                           Configure configure,
-                           List<Long> db,
-                           List<String> regexs,
-                           List<DataType> types,
-                           Supplier<OutputStream> supplier) {
+    public MergeRdbVisitor(Replicator replicator, Configure configure, List<Long> db, List<String> regexs, List<DataType> types, Supplier<OutputStream> supplier) {
         super(replicator, configure, db, regexs, types, supplier);
     }
     

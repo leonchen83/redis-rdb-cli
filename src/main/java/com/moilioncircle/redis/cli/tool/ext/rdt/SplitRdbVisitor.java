@@ -5,7 +5,7 @@ import com.moilioncircle.redis.cli.tool.ext.AbstractRdbVisitor;
 import com.moilioncircle.redis.cli.tool.glossary.DataType;
 import com.moilioncircle.redis.cli.tool.glossary.Guard;
 import com.moilioncircle.redis.cli.tool.io.FilesOutputStream;
-import com.moilioncircle.redis.cli.tool.util.Closes;
+import com.moilioncircle.redis.cli.tool.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.PostFullSyncEvent;
@@ -35,15 +35,15 @@ public class SplitRdbVisitor extends AbstractRdbVisitor {
                 listener.reset(supplier.get());
             }
             if (event instanceof PostFullSyncEvent) {
-                FilesOutputStream out = listener.getInternal();
+                FilesOutputStream out = listener.getOutputStream();
                 out.writeCRC();
-                Closes.closeQuietly(out);
+                OutputStreams.closeQuietly(out);
             }
         });
     }
     
     private void shard(byte[] key) {
-        FilesOutputStream out = listener.getInternal();
+        FilesOutputStream out = listener.getOutputStream();
         out.shard(key);
     }
     

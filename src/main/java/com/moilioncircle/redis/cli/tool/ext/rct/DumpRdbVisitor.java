@@ -22,13 +22,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     
     private final int version;
     
-    public DumpRdbVisitor(Replicator replicator,
-                          Configure configure,
-                          File out,
-                          List<Long> db,
-                          List<String> regexs,
-                          List<DataType> types,
-                          Escape escape) {
+    public DumpRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escape escape) {
         super(replicator, configure, out, db, regexs, types, escape);
         this.version = -1;
     }

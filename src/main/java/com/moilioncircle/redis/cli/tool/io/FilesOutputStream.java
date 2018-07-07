@@ -1,6 +1,7 @@
 package com.moilioncircle.redis.cli.tool.io;
 
 import com.moilioncircle.redis.cli.tool.util.NodeConf;
+import com.moilioncircle.redis.cli.tool.util.OutputStreams;
 import com.moilioncircle.redis.replicator.io.CRCOutputStream;
 
 import java.io.IOException;
@@ -87,13 +88,9 @@ public class FilesOutputStream extends OutputStream {
     }
     
     public void writeCRC() {
-        try {
-            for (CRCOutputStream out : set) {
-                out.write(255); // eof
-                byte[] bytes = out.getCRC64();
-                out.write(bytes);
-            }
-        } catch (IOException e) {
+        for (CRCOutputStream out : set) {
+            OutputStreams.writeQuietly((byte) 255, out);
+            OutputStreams.writeQuietly(out.getCRC64(), out);
         }
     }
 }

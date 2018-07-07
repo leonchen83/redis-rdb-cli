@@ -2,6 +2,7 @@ package com.moilioncircle.redis.cli.tool.ext;
 
 import com.moilioncircle.redis.cli.tool.glossary.Guard;
 import com.moilioncircle.redis.cli.tool.io.GuardOutputStream;
+import com.moilioncircle.redis.cli.tool.util.OutputStreams;
 import com.moilioncircle.redis.replicator.io.RawByteListener;
 
 import java.io.IOException;
@@ -23,7 +24,7 @@ public class GuardRawByteListener implements RawByteListener {
         this.out = new GuardOutputStream(8192, internal);
     }
     
-    public <T extends OutputStream> T getInternal() {
+    public <T extends OutputStream> T getOutputStream() {
         return (T) this.internal;
     }
     
@@ -44,11 +45,8 @@ public class GuardRawByteListener implements RawByteListener {
     }
     
     @Override
-    public void handle(byte... rawBytes) {
-        try {
-            this.out.write(rawBytes);
-        } catch (IOException e) {
-        }
+    public void handle(byte... raw) {
+        OutputStreams.writeQuietly(raw, out);
     }
     
     public byte[] getBytes() throws IOException {

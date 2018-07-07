@@ -4,7 +4,6 @@ import cn.nextop.lite.pool.Pool;
 import cn.nextop.lite.pool.PoolBuilder;
 import cn.nextop.lite.pool.PoolValidation;
 import cn.nextop.lite.pool.glossary.Lifecyclet;
-import com.moilioncircle.redis.cli.tool.util.Closes;
 import com.moilioncircle.redis.replicator.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +53,24 @@ public class ClientPool implements Consumer<Client>, Supplier<Client>, Predicate
     
     @Override
     public void accept(Client client) {
-        Closes.closeQuietly(client);
+        closeQuietly(client);
+    }
+    
+    public static void close(Client client) {
+        if (client == null) return;
+        try {
+            client.close();
+        } catch (Throwable txt) {
+            throw new RuntimeException(txt);
+        }
+    }
+    
+    public static void closeQuietly(Client client) {
+        if (client == null) return;
+        try {
+            client.close();
+        } catch (Throwable t) {
+        }
     }
     
     @Override

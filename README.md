@@ -2,7 +2,6 @@
 
 ```java  
 
-usage: rct
  -b,--bytes <bytes>          limit memory output(--format mem) to keys
                              greater to or equal to this value (in bytes)
  -d,--db <num num...>        database number. multiple databases can be
@@ -73,22 +72,19 @@ usage: rdt
  -h,--help                   rdt usage.
  -k,--key <regex regex...>   keys to export. this can be a regex. if not
                              specified, all keys will be returned.
- -m,--merge <file file...>   merge multi file to one file. if file
-                             contains aof format. then will generate a
-                             mixed file that can read via redis-4.x+.
+ -m,--merge <file file...>   merge multi rdb files to one rdb file.
  -o,--out <file>             output file(--backup <uri> or --merge <file
-                             file...>).
+                             file...> specified). if --split <uri>
+                             specified. the <file> is the target path.
  -s,--split <uri>            split uri to multi file via cluster's
                              <node.conf>. eg:
                              redis://host:port?authPassword=foobar
-                             redis:///path/to/dump.rdb
-                             redis:///path/to/appendonly.aof.
+                             redis:///path/to/dump
  -t,--type <type type...>    data type to export. possible values are
                              string, hash, set, sortedset, list, module,
                              stream. multiple types can be provided. if
                              not specified, all data types will be
                              returned.
  -v,--version                rdt version.
-
 
 ```

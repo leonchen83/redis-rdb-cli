@@ -3,12 +3,11 @@ package com.moilioncircle.redis.cli.tool.util;
 
 import com.moilioncircle.redis.replicator.io.CRCOutputStream;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,7 +47,7 @@ public class NodeConf {
                 } else {
                     String name = args.get(0);
                     if (!map.containsKey(name)) {
-                        CRCOutputStream out = new CRCOutputStream(new BufferedOutputStream(new FileOutputStream(Paths.get(path, name + ".rdb").toFile())));
+                        CRCOutputStream out = OutputStreams.newCRCOutputStream(Paths.get(path, name + ".rdb").toFile());
                         map.put(name, out);
                         set.add(out);
                     }
@@ -124,6 +123,7 @@ public class NodeConf {
                 }
             }
         } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
     

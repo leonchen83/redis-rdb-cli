@@ -17,13 +17,8 @@ import java.util.List;
  * @author Baoyi Chen
  */
 public class KeyRdbVisitor extends AbstractRdbVisitor {
-    public KeyRdbVisitor(Replicator replicator,
-                         Configure configure,
-                         File out,
-                         List<Long> db,
-                         List<String> regexs,
-                         List<DataType> types,
-                         Escape escape) {
+    
+    public KeyRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escape escape) {
         super(replicator, configure, out, db, regexs, types, escape);
     }
     

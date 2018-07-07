@@ -4,7 +4,6 @@ import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.ext.CliRedisReplicator;
 import com.moilioncircle.redis.cli.tool.ext.rmt.MigRdbVisitor;
 import com.moilioncircle.redis.cli.tool.glossary.DataType;
-import com.moilioncircle.redis.cli.tool.util.Closes;
 import com.moilioncircle.redis.cli.tool.util.ProgressBar;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -101,7 +100,7 @@ public class RmtCommand extends AbstractCommand {
             Replicator r = new CliRedisReplicator(source, configure);
             dress(r, configure, migrate, db, regexs, DataType.parse(type), replace);
             AtomicReference<ProgressBar.Phase> phase = new AtomicReference<>(NOP);
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> Closes.closeQuietly(r)));
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> CliRedisReplicator.closeQuietly(r)));
             r.addRawByteListener(b -> bar.react(b.length, phase.get()));
             r.addEventListener((rep, event) -> {
                 if (event instanceof PreFullSyncEvent) {
@@ -115,7 +114,7 @@ public class RmtCommand extends AbstractCommand {
                 }
                 if (event instanceof PostFullSyncEvent) {
                     if (!db.isEmpty() || !type.isEmpty() || !regexs.isEmpty()) {
-                        Closes.closeQuietly(rep);
+                        CliRedisReplicator.closeQuietly(rep);
                     }
                 }
             });

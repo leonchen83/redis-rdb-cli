@@ -48,15 +48,7 @@ public enum Format {
         }
     }
     
-    public void dress(Replicator r,
-                      Configure conf,
-                      File output,
-                      List<Long> db,
-                      List<String> regexs,
-                      Long largest,
-                      Long bytes,
-                      List<DataType> types,
-                      Escape escape) {
+    public void dress(Replicator r, Configure conf, File output, List<Long> db, List<String> regexs, Long largest, Long bytes, List<DataType> types, Escape escape) {
         switch (this) {
             case KEY:
                 r.setRdbVisitor(new KeyRdbVisitor(r, conf, output, db, regexs, types, escape));

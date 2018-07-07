@@ -29,13 +29,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
     
     private final int batch;
     
-    public RespRdbVisitor(Replicator replicator,
-                          Configure configure,
-                          File out,
-                          List<Long> db,
-                          List<String> regexs,
-                          List<DataType> types,
-                          Escape escape) {
+    public RespRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escape escape) {
         super(replicator, configure, out, db, regexs, types, escape);
         this.batch = configure.getBatchSize();
     }

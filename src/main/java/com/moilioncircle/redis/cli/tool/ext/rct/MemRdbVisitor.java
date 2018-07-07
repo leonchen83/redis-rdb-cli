@@ -17,8 +17,6 @@ import com.moilioncircle.redis.replicator.io.RawByteListener;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.BaseRdbParser;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
-import com.moilioncircle.redis.replicator.rdb.datatype.Module;
-import com.moilioncircle.redis.replicator.rdb.module.ModuleParser;
 import com.moilioncircle.redis.replicator.rdb.skip.SkipRdbParser;
 import com.moilioncircle.redis.replicator.util.ByteArray;
 import com.moilioncircle.redis.replicator.util.Strings;
@@ -27,12 +25,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 
 import static com.moilioncircle.redis.cli.tool.ext.rct.MemRdbVisitor.Tuple2Ex;
-import static com.moilioncircle.redis.replicator.Constants.MODULE_SET;
 import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
 import static com.moilioncircle.redis.replicator.Constants.STREAM_ITEM_FLAG_DELETED;
 import static com.moilioncircle.redis.replicator.Constants.STREAM_ITEM_FLAG_SAMEFIELDS;
@@ -44,20 +40,11 @@ import static com.moilioncircle.redis.replicator.rdb.datatype.ExpiredType.NONE;
  */
 public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2Ex>, EventListener {
     
+    private Size size;
+    private final Long bytes;
     private final CmpHeap<Tuple2Ex> heap;
     
-    private final Long bytes;
-    
-    private Size size;
-    
-    public MemRdbVisitor(Replicator replicator,
-                         Configure configure,
-                         File out,
-                         List<Long> db,
-                         List<String> regexs,
-                         List<DataType> types,
-                         Escape escape,
-                         Long largest, Long bytes) {
+    public MemRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escape escape, Long largest, Long bytes) {
         super(replicator, configure, out, db, regexs, types, escape);
         this.bytes = bytes;
         this.heap = new CmpHeap<>(largest == null ? -1 : largest.intValue());
@@ -497,29 +484,26 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     
     @Override
     protected Event doApplyModule(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        BaseRdbParser parser = new BaseRdbParser(in);
-        char[] c = new char[9];
-        long moduleid = parser.rdbLoadLen().len;
-        for (int i = 0; i < c.length; i++) {
-            c[i] = MODULE_SET[(int) (moduleid >>> (10 + (c.length - 1 - i) * 6) & 63)];
-        }
-        String moduleName = new String(c);
-        int moduleVersion = (int) (moduleid & 1023);
-        ModuleParser<? extends Module> moduleParser = lookupModuleParser(moduleName, moduleVersion);
-        if (moduleParser == null) {
-            throw new NoSuchElementException("module parser[" + moduleName + ", " + moduleVersion + "] not register. rdb type: [RDB_TYPE_MODULE]");
-        }
-        moduleParser.parse(in, 1);
-        return new DummyKeyValuePair();
+        LengthRawByteListener listener = new LengthRawByteListener();
+        replicator.addRawByteListener(listener);
+        super.doApplyModule(in, db, version, key, contains, type);
+        replicator.removeRawByteListener(listener);
+        DummyKeyValuePair kv = new DummyKeyValuePair();
+        kv.setDb(db);
+        kv.setValueRdbType(type);
+        kv.setKey(key);
+        kv.setValue(listener.getLength());
+        kv.setContains(contains);
+        kv.setLength(1);
+        kv.setMax(listener.getLength());
+        return kv;
     }
     
     @Override
     protected Event doApplyModule2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        SkipRdbParser skip = new SkipRdbParser(in);
         LengthRawByteListener listener = new LengthRawByteListener();
         replicator.addRawByteListener(listener);
-        skip.rdbLoadLen();
-        skip.rdbLoadCheckModuleValue();
+        super.doApplyModule2(in, db, version, key, contains, type);
         replicator.removeRawByteListener(listener);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setDb(db);

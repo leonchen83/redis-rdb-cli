@@ -1,9 +1,9 @@
 package com.moilioncircle.redis.cli.tool.cmd;
 
 import com.moilioncircle.redis.cli.tool.conf.Configure;
+import com.moilioncircle.redis.cli.tool.ext.CliRedisReplicator;
 import com.moilioncircle.redis.cli.tool.glossary.DataType;
 import com.moilioncircle.redis.cli.tool.glossary.Type;
-import com.moilioncircle.redis.cli.tool.util.Closes;
 import com.moilioncircle.redis.cli.tool.util.ProgressBar;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.PostFullSyncEvent;
@@ -111,14 +111,14 @@ public class RdtCommand extends AbstractCommand {
     
             List<Replicator> list = rdtType.dress(configure, split, backup, merge, output, db, regexs, conf, DataType.parse(type));
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                for (Replicator r : list) Closes.closeQuietly(r);
+                for (Replicator r : list) CliRedisReplicator.closeQuietly(r);
             }));
     
             for (Replicator r : list) {
                 r.addEventListener((rep, event) -> {
                     if (event instanceof PreFullSyncEvent)
                         rep.addRawByteListener(b -> bar.react(b.length, RDB));
-                    if (event instanceof PostFullSyncEvent) Closes.close(rep);
+                    if (event instanceof PostFullSyncEvent) CliRedisReplicator.close(rep);
                 });
                 r.open();
             }

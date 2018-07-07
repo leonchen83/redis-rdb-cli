@@ -6,30 +6,30 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author Baoyi Chen
  */
 public class ProgressBar {
-
+    
     public enum Phase {
         RDB, AOF, NOP
     }
-
+    
     private final long total;
     private volatile long last;
     private volatile boolean bit;
     private volatile double percentage;
     private AtomicLong num = new AtomicLong();
     private volatile long access = System.currentTimeMillis();
-
+    
     public ProgressBar(long total) {
         this.total = total;
     }
-
+    
     public void react(long num, Phase phase) {
         react(num, true, phase);
     }
-
+    
     public void react(long num, boolean increment, Phase phase) {
         react(num, total <= 0 ? 0 : Processes.width(), increment, phase);
     }
-
+    
     public void react(long num, int len, boolean increment, Phase phase) {
         if (increment)
             this.num.addAndGet(num);
@@ -48,7 +48,7 @@ public class ProgressBar {
             show(prev, next, len, this.num.get(), phase);
         }
     }
-
+    
     private void show(double prev, double next, int len, long num, Phase phase) {
         long now = System.currentTimeMillis();
         long elapsed = now - access;
@@ -103,11 +103,11 @@ public class ProgressBar {
         System.out.print('\r');
         System.out.print(builder.toString());
     }
-
+    
     public static String pretty(long bytes) {
         return pretty(bytes, true);
     }
-
+    
     public static String pretty(long bytes, boolean si) {
         int unit = si ? 1000 : 1024;
         if (bytes < unit) return bytes + " B";

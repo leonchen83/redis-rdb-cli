@@ -28,13 +28,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
     private boolean hasdb = false;
     private boolean firstkey = true;
     
-    public JsonRdbVisitor(Replicator replicator,
-                          Configure configure,
-                          File out,
-                          List<Long> db,
-                          List<String> regexs,
-                          List<DataType> types,
-                          Escape escape) {
+    public JsonRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escape escape) {
         super(replicator, configure, out, db, regexs, types, escape);
     }
     

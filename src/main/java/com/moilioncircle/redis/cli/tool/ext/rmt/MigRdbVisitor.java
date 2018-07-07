@@ -43,18 +43,11 @@ public class MigRdbVisitor extends AbstractRdbVisitor implements EventListener {
     private final Pool<ClientPool.Client> pool;
     private final AtomicInteger dbnum = new AtomicInteger(-1);
     
-    public MigRdbVisitor(Replicator replicator,
-                         Configure configure,
-                         String uri,
-                         List<Long> db,
-                         List<String> regexs,
-                         List<DataType> types,
-                         boolean replace) throws Exception {
+    public MigRdbVisitor(Replicator replicator, Configure configure, String uri, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) throws Exception {
         super(replicator, configure, db, regexs, types);
         this.replace = replace;
         this.uri = new RedisURI(uri);
         Configuration config = Configuration.valueOf(this.uri);
-        
         int timeout = configure.getTimeout();
         String password = config.getAuthPassword();
         this.pool = ClientPool.create(this.uri.getHost(), this.uri.getPort(), password, timeout);

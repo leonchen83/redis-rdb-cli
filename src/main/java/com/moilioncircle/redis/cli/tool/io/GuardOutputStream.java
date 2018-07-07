@@ -1,7 +1,7 @@
 package com.moilioncircle.redis.cli.tool.io;
 
 import com.moilioncircle.redis.cli.tool.glossary.Guard;
-import com.moilioncircle.redis.cli.tool.util.Closes;
+import com.moilioncircle.redis.cli.tool.util.OutputStreams;
 import com.moilioncircle.redis.replicator.util.ByteBuilder;
 
 import java.io.IOException;
@@ -33,9 +33,9 @@ public class GuardOutputStream extends OutputStream {
     }
     
     public void reset(OutputStream out) {
-        Closes.closeQuietly(this.out);
+        OutputStreams.closeQuietly(this.out);
         this.out = out;
-        this.builder = ByteBuilder.allocate(cap);
+        this.builder.clear();
     }
     
     public byte[] array() {

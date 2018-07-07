@@ -4,7 +4,7 @@ import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.ext.AbstractRdbVisitor;
 import com.moilioncircle.redis.cli.tool.glossary.DataType;
 import com.moilioncircle.redis.cli.tool.glossary.Guard;
-import com.moilioncircle.redis.cli.tool.util.Closes;
+import com.moilioncircle.redis.cli.tool.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.PostFullSyncEvent;
@@ -23,25 +23,17 @@ import java.util.function.Supplier;
  */
 public class BackupRdbVisitor extends AbstractRdbVisitor {
     
-    public BackupRdbVisitor(Replicator replicator,
-                            Configure configure,
-                            List<Long> db,
-                            List<String> regexs,
-                            List<DataType> types,
-                            Supplier<OutputStream> supplier) {
+    public BackupRdbVisitor(Replicator replicator, Configure configure, List<Long> db, List<String> regexs, List<DataType> types, Supplier<OutputStream> supplier) {
         super(replicator, configure, db, regexs, types, supplier);
         this.replicator.addEventListener((rep, event) -> {
             if (event instanceof PreFullSyncEvent) {
                 listener.reset(supplier.get());
             }
             if (event instanceof PostFullSyncEvent) {
-                CRCOutputStream out = listener.getInternal();
-                try {
-                    out.write(255); // eof
-                    out.write(out.getCRC64());
-                } catch (IOException e) {
-                }
-                Closes.closeQuietly(out);
+                CRCOutputStream out = listener.getOutputStream();
+                OutputStreams.writeQuietly((byte) 255, out);
+                OutputStreams.writeQuietly(out.getCRC64(), out);
+                OutputStreams.closeQuietly(out);
             }
         });
     }

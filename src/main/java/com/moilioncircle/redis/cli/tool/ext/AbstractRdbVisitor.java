@@ -4,9 +4,8 @@ import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.cli.tool.glossary.DataType;
 import com.moilioncircle.redis.cli.tool.glossary.Escape;
-import com.moilioncircle.redis.cli.tool.util.Closes;
+import com.moilioncircle.redis.cli.tool.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Replicator;
-import com.moilioncircle.redis.replicator.UncheckedIOException;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.PreFullSyncEvent;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
@@ -58,48 +57,34 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
     
     // common
     protected Set<Long> db;
-    protected List<DataType> types;
     protected Set<String> keys;
     protected Configure configure;
+    protected List<DataType> types;
     protected List<Pattern> regexs;
     //rct
-    protected OutputStream out;
     protected Escape escape;
+    protected OutputStream out;
     //rdt
     protected GuardRawByteListener listener;
     
     /**
      * rct
      */
-    public AbstractRdbVisitor(Replicator replicator,
-                              Configure configure,
-                              File output,
-                              List<Long> db,
-                              List<String> regexs,
-                              List<DataType> types,
-                              Escape escape) {
+    public AbstractRdbVisitor(Replicator replicator, Configure configure, File output, List<Long> db, List<String> regexs, List<DataType> types, Escape escape) {
         this(replicator, configure, db, regexs, types);
         this.escape = escape;
         replicator.addEventListener((rep, event) -> {
             if (!(event instanceof PreFullSyncEvent)) return;
-            try {
-                Closes.closeQuietly(this.out);
-                this.out = new BufferedOutputStream(new FileOutputStream(output));
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
+            OutputStreams.closeQuietly(this.out);
+            this.out = OutputStreams.call(() -> new BufferedOutputStream(new FileOutputStream(output)));
         });
-        replicator.addCloseListener(rep -> Closes.closeQuietly(out));
+        replicator.addCloseListener(rep -> OutputStreams.closeQuietly(out));
     }
     
     /**
      * rmt
      */
-    public AbstractRdbVisitor(Replicator replicator,
-                              Configure configure,
-                              List<Long> db,
-                              List<String> regexs,
-                              List<DataType> types) {
+    public AbstractRdbVisitor(Replicator replicator, Configure configure, List<Long> db, List<String> regexs, List<DataType> types) {
         super(replicator);
         this.types = types;
         this.configure = configure;
@@ -111,12 +96,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
     /**
      * rdt
      */
-    public AbstractRdbVisitor(Replicator replicator,
-                              Configure configure,
-                              List<Long> db,
-                              List<String> regexs,
-                              List<DataType> types,
-                              Supplier<OutputStream> supplier) {
+    public AbstractRdbVisitor(Replicator replicator, Configure configure, List<Long> db, List<String> regexs, List<DataType> types, Supplier<OutputStream> supplier) {
         this(replicator, configure, db, regexs, types);
         this.listener = new GuardRawByteListener(supplier.get());
         this.replicator.addRawByteListener(listener);
