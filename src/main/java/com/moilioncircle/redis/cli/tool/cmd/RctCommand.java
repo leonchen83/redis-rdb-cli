@@ -109,7 +109,6 @@ public class RctCommand extends AbstractCommand {
                     rep.addRawByteListener(b -> bar.react(b.length, RDB));
                 if (event instanceof PostFullSyncEvent) Closes.close(rep);
             });
-            r.addCloseListener(rep -> System.out.println('\n'));
             r.open();
         }
     }

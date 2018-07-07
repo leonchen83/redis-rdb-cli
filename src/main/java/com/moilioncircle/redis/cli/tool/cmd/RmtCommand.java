@@ -113,8 +113,12 @@ public class RmtCommand extends AbstractCommand {
                 } else {
                     phase.set(AOF);
                 }
+                if (event instanceof PostFullSyncEvent) {
+                    if (!db.isEmpty() || !type.isEmpty() || !regexs.isEmpty()) {
+                        Closes.closeQuietly(rep);
+                    }
+                }
             });
-            r.addCloseListener(rep -> System.out.println('\n'));
             r.open();
         }
     }
