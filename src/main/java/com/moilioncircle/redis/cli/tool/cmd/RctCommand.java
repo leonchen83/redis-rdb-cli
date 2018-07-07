@@ -23,7 +23,7 @@ import static com.moilioncircle.redis.cli.tool.util.ProgressBar.Phase.RDB;
  * @author Baoyi Chen
  */
 public class RctCommand extends AbstractCommand {
-
+    
     private static final Option HELP = Option.builder("h").longOpt("help").required(false).hasArg(false).desc("rct usage.").build();
     private static final Option VERSION = Option.builder("v").longOpt("version").required(false).hasArg(false).desc("rct version.").build();
     private static final Option FORMAT = Option.builder("f").longOpt("format").required(false).hasArg().argName("format").type(String.class).desc("format to export. valid commands are json, dump, key, keyval, mem and resp").build();
@@ -36,12 +36,12 @@ public class RctCommand extends AbstractCommand {
     private static final Option BYTES = Option.builder("b").longOpt("bytes").required(false).hasArgs().argName("bytes").type(Number.class).desc("limit memory output(--format mem) to keys greater to or equal to this value (in bytes)").build();
     private static final Option LARGEST = Option.builder("l").longOpt("largest").required(false).hasArg().argName("n").type(Number.class).desc("limit memory output(--format mem) to only the top n keys (by size).").build();
     private static final Option ESCAPE = Option.builder("e").longOpt("escape").required(false).hasArg().argName("escape").type(String.class).desc("escape strings to encoding: raw (default), redis.").build();
-
+    
     @Override
     public String name() {
         return "rct";
     }
-
+    
     public RctCommand() {
         addOption(HELP);
         addOption(VERSION);
@@ -56,7 +56,7 @@ public class RctCommand extends AbstractCommand {
         addOption(LARGEST);
         addOption(ESCAPE);
     }
-
+    
     @Override
     protected void doExecute(CommandLine line) throws Exception {
         if (line.hasOption("help")) {
@@ -69,32 +69,32 @@ public class RctCommand extends AbstractCommand {
             if (!line.hasOption("format")) {
                 sb.append("f ");
             }
-
+    
             if (!line.hasOption("in") && !line.hasOption("source")) {
                 sb.append("[i or s] ");
             }
-
+    
             if (!line.hasOption("out")) {
                 sb.append("o ");
             }
-
+    
             if (sb.length() > 0) {
                 writeLine("Missing required options: " + sb.toString() + ", `rct -h` for more information.");
                 return;
             }
-
+    
             File input = line.getOption("in");
             String source = line.getOption("source");
             File output = line.getOption("out");
             String format = line.getOption("format");
-
+    
             List<Long> db = line.getOptions("db");
             Long bytes = line.getOption("bytes");
             Long largest = line.getOption("largest");
             String escape = line.getOption("escape");
             List<String> type = line.getOptions("type");
             List<String> regexs = line.getOptions("key");
-
+    
             if (source == null && input != null) {
                 URI u = input.toURI();
                 source = new URI("redis", u.getRawAuthority(), u.getRawPath(), u.getRawQuery(), u.getRawFragment()).toString();
@@ -112,7 +112,7 @@ public class RctCommand extends AbstractCommand {
             r.open();
         }
     }
-
+    
     public static void run(String[] args) throws Exception {
         RctCommand command = new RctCommand();
         command.execute(args);

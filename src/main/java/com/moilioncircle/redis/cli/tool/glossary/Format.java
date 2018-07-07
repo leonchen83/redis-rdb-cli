@@ -22,13 +22,13 @@ public enum Format {
     JSON("json"),
     RESP("resp"),
     KEYVAL("keyval");
-
+    
     private String value;
-
+    
     Format(String value) {
         this.value = value;
     }
-
+    
     public static Format parse(String format) {
         switch (format) {
             case "key":
@@ -47,7 +47,7 @@ public enum Format {
                 throw new AssertionError("Unsupported format '" + format + "'");
         }
     }
-
+    
     public void dress(Replicator r,
                       Configure conf,
                       File output,
@@ -56,7 +56,7 @@ public enum Format {
                       Long largest,
                       Long bytes,
                       List<DataType> types,
-                      Escape escape) throws Exception {
+                      Escape escape) {
         switch (this) {
             case KEY:
                 r.setRdbVisitor(new KeyRdbVisitor(r, conf, output, db, regexs, types, escape));

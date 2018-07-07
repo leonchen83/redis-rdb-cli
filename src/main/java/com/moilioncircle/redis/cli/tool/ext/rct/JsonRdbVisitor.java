@@ -11,28 +11,23 @@ import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.BaseRdbParser;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
-import com.moilioncircle.redis.replicator.rdb.datatype.Module;
-import com.moilioncircle.redis.replicator.rdb.module.ModuleParser;
-import com.moilioncircle.redis.replicator.rdb.skip.SkipRdbParser;
 import com.moilioncircle.redis.replicator.util.Strings;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.NoSuchElementException;
 
-import static com.moilioncircle.redis.replicator.Constants.MODULE_SET;
 import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
 
 /**
  * @author Baoyi Chen
  */
 public class JsonRdbVisitor extends AbstractRdbVisitor {
-
+    
     private boolean first = true;
     private boolean hasdb = false;
     private boolean firstkey = true;
-
+    
     public JsonRdbVisitor(Replicator replicator,
                           Configure configure,
                           File out,
@@ -42,31 +37,31 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
                           Escape escape) {
         super(replicator, configure, out, db, regexs, types, escape);
     }
-
+    
     private void emit(byte[] field, double value) throws IOException {
         emitString(field);
         out.write(':');
         escape.encode(value, out);
     }
-
+    
     private void emit(byte[] field, byte[] value) throws IOException {
         emitString(field);
         out.write(':');
         emitString(value);
     }
-
+    
     private void emitString(byte[] str) throws IOException {
         out.write('"');
         escape.encode(str, out);
         out.write('"');
     }
-
+    
     @Override
     public String applyMagic(RedisInputStream in) throws IOException {
         out.write('[');
         return super.applyMagic(in);
     }
-
+    
     @Override
     public DB applySelectDB(RedisInputStream in, int version) throws IOException {
         if (!first) {
@@ -81,14 +76,14 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         DB db = super.applySelectDB(in, version);
         return db;
     }
-
+    
     @Override
     public long applyEof(RedisInputStream in, int version) throws IOException {
         if (hasdb) out.write('}');
         out.write(']');
         return super.applyEof(in, version);
     }
-
+    
     @Override
     protected Event doApplyString(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         if (!firstkey) {
@@ -105,7 +100,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         kv.setKey(key);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         if (!firstkey) {
@@ -136,7 +131,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplySet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         if (!firstkey) {
@@ -167,7 +162,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyZSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         if (!firstkey) {
@@ -199,7 +194,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyZSet2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         if (!firstkey) {
@@ -231,7 +226,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyHash(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         if (!firstkey) {
@@ -263,7 +258,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyHashZipMap(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         if (!firstkey) {
@@ -295,7 +290,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyListZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         if (!firstkey) {
@@ -308,7 +303,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         out.write('[');
         BaseRdbParser parser = new BaseRdbParser(in);
         RedisInputStream stream = new RedisInputStream(parser.rdbLoadPlainStringObject());
-
+        
         BaseRdbParser.LenHelper.zlbytes(stream); // zlbytes
         BaseRdbParser.LenHelper.zltail(stream); // zltail
         int zllen = BaseRdbParser.LenHelper.zllen(stream);
@@ -333,7 +328,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplySetIntSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         if (!firstkey) {
@@ -378,7 +373,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyZSetZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         if (!firstkey) {
@@ -418,7 +413,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyHashZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         if (!firstkey) {
@@ -458,7 +453,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyListQuickList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         if (!firstkey) {
@@ -474,7 +469,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         long len = parser.rdbLoadLen().len;
         for (int i = 0; i < len; i++) {
             RedisInputStream stream = new RedisInputStream(parser.rdbGenericLoadStringObject(RDB_LOAD_NONE));
-
+    
             BaseRdbParser.LenHelper.zlbytes(stream); // zlbytes
             BaseRdbParser.LenHelper.zltail(stream); // zltail
             int zllen = BaseRdbParser.LenHelper.zllen(stream);
@@ -499,7 +494,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyModule(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         if (!firstkey) {
@@ -512,19 +507,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         out.write('"');
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape)) {
             replicator.addRawByteListener(listener);
-            BaseRdbParser parser = new BaseRdbParser(in);
-            char[] c = new char[9];
-            long moduleid = parser.rdbLoadLen().len;
-            for (int i = 0; i < c.length; i++) {
-                c[i] = MODULE_SET[(int) (moduleid >>> (10 + (c.length - 1 - i) * 6) & 63)];
-            }
-            String moduleName = new String(c);
-            int moduleVersion = (int) (moduleid & 1023);
-            ModuleParser<? extends Module> moduleParser = lookupModuleParser(moduleName, moduleVersion);
-            if (moduleParser == null) {
-                throw new NoSuchElementException("module parser[" + moduleName + ", " + moduleVersion + "] not register. rdb type: [RDB_TYPE_MODULE]");
-            }
-            moduleParser.parse(in, 1);
+            super.doApplyModule(in, db, version, key, contains, type);
             replicator.removeRawByteListener(listener);
         }
         out.write('"');
@@ -535,7 +518,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyModule2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         if (!firstkey) {
@@ -548,9 +531,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         out.write('"');
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape)) {
             replicator.addRawByteListener(listener);
-            SkipRdbParser skip = new SkipRdbParser(in);
-            skip.rdbLoadLen();
-            skip.rdbLoadCheckModuleValue();
+            super.doApplyModule2(in, db, version, key, contains, type);
             replicator.removeRawByteListener(listener);
         }
         out.write('"');
@@ -561,7 +542,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyStreamListPacks(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         if (!firstkey) {
@@ -574,36 +555,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         out.write('"');
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape)) {
             replicator.addRawByteListener(listener);
-            SkipRdbParser skip = new SkipRdbParser(in);
-            long listPacks = skip.rdbLoadLen().len;
-            while (listPacks-- > 0) {
-                skip.rdbLoadPlainStringObject();
-                skip.rdbLoadPlainStringObject();
-            }
-            skip.rdbLoadLen();
-            skip.rdbLoadLen();
-            skip.rdbLoadLen();
-            long groupCount = skip.rdbLoadLen().len;
-            while (groupCount-- > 0) {
-                skip.rdbLoadPlainStringObject();
-                skip.rdbLoadLen();
-                skip.rdbLoadLen();
-                long groupPel = skip.rdbLoadLen().len;
-                while (groupPel-- > 0) {
-                    in.skip(16);
-                    skip.rdbLoadMillisecondTime();
-                    skip.rdbLoadLen();
-                }
-                long consumerCount = skip.rdbLoadLen().len;
-                while (consumerCount-- > 0) {
-                    skip.rdbLoadPlainStringObject();
-                    skip.rdbLoadMillisecondTime();
-                    long consumerPel = skip.rdbLoadLen().len;
-                    while (consumerPel-- > 0) {
-                        in.skip(16);
-                    }
-                }
-            }
+            super.doApplyStreamListPacks(in, db, version, key, contains, type);
             replicator.removeRawByteListener(listener);
         }
         out.write('"');

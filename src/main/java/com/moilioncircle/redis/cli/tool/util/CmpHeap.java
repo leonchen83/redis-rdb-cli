@@ -9,21 +9,21 @@ import java.util.function.Consumer;
 /**
  * @author Baoyi Chen
  */
-public class MinHeap<T extends Comparable<T>> {
-
+public class CmpHeap<T extends Comparable<T>> {
+    
     private final int n;
     private final List<T> ary;
     private Consumer<T> consumer;
-
+    
     public void setConsumer(Consumer<T> consumer) {
         this.consumer = consumer;
     }
-
-    public MinHeap(int n) {
+    
+    public CmpHeap(int n) {
         this.n = n;
         this.ary = new ArrayList<>();
     }
-
+    
     private void heapify(List<T> ary, int idx) {
         int l = idx == 0 ? 1 : (idx << 1);
         int r = idx == 0 ? 2 : (idx << 1) + 1;
@@ -46,13 +46,13 @@ public class MinHeap<T extends Comparable<T>> {
             heapify(ary, min);
         }
     }
-
-    private void builtMinHeap(List<T> a) {
+    
+    private void build(List<T> a) {
         for (int i = (a.size() - 1) / 2; i >= 0; i--) {
             heapify(a, i);
         }
     }
-
+    
     public void add(T t) {
         if (n <= 0) {
             if (consumer != null) consumer.accept(t);
@@ -63,16 +63,16 @@ public class MinHeap<T extends Comparable<T>> {
             return;
         }
         if (ary.size() == n) {
-            builtMinHeap(ary);
+            build(ary);
         }
         if (ary.get(0).compareTo(t) < 0) {
             ary.set(0, t);
             heapify(ary, 0);
         }
     }
-
-    public List<T> get() {
-        Collections.sort(ary, Comparator.reverseOrder());
+    
+    public List<T> get(boolean sort) {
+        if (sort) Collections.sort(ary, Comparator.reverseOrder());
         return ary;
     }
 }

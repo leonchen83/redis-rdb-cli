@@ -1,7 +1,7 @@
 package com.moilioncircle.redis.cli.tool.ext;
 
 import com.moilioncircle.redis.cli.tool.glossary.Guard;
-import com.moilioncircle.redis.cli.tool.util.io.GuardOutputStream;
+import com.moilioncircle.redis.cli.tool.io.GuardOutputStream;
 import com.moilioncircle.redis.replicator.io.RawByteListener;
 
 import java.io.IOException;

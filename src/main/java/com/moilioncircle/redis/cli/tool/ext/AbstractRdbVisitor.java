@@ -529,33 +529,152 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         }
     }
     
-    protected abstract Event doApplyZSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
+    protected Event doApplyString(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        new SkipRdbParser(in).rdbLoadEncodedStringObject();
+        return new DummyKeyValuePair();
+    }
     
-    protected abstract Event doApplySet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
+    protected Event doApplyList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        SkipRdbParser skipParser = new SkipRdbParser(in);
+        long len = skipParser.rdbLoadLen().len;
+        while (len > 0) {
+            skipParser.rdbLoadEncodedStringObject();
+            len--;
+        }
+        return new DummyKeyValuePair();
+    }
     
-    protected abstract Event doApplyList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
+    protected Event doApplySet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        SkipRdbParser skipParser = new SkipRdbParser(in);
+        long len = skipParser.rdbLoadLen().len;
+        while (len > 0) {
+            skipParser.rdbLoadEncodedStringObject();
+            len--;
+        }
+        return new DummyKeyValuePair();
+    }
     
-    protected abstract Event doApplyString(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
+    protected Event doApplyZSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        SkipRdbParser skipParser = new SkipRdbParser(in);
+        long len = skipParser.rdbLoadLen().len;
+        while (len > 0) {
+            skipParser.rdbLoadEncodedStringObject();
+            skipParser.rdbLoadDoubleValue();
+            len--;
+        }
+        return new DummyKeyValuePair();
+    }
     
-    protected abstract Event doApplyZSet2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
+    protected Event doApplyZSet2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        SkipRdbParser skipParser = new SkipRdbParser(in);
+        long len = skipParser.rdbLoadLen().len;
+        while (len > 0) {
+            skipParser.rdbLoadEncodedStringObject();
+            skipParser.rdbLoadBinaryDoubleValue();
+            len--;
+        }
+        return new DummyKeyValuePair();
+    }
     
-    protected abstract Event doApplyHash(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
+    protected Event doApplyHash(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        SkipRdbParser skipParser = new SkipRdbParser(in);
+        long len = skipParser.rdbLoadLen().len;
+        while (len > 0) {
+            skipParser.rdbLoadEncodedStringObject();
+            skipParser.rdbLoadEncodedStringObject();
+            len--;
+        }
+        return new DummyKeyValuePair();
+    }
     
-    protected abstract Event doApplyHashZipMap(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
+    protected Event doApplyHashZipMap(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        new SkipRdbParser(in).rdbLoadPlainStringObject();
+        return new DummyKeyValuePair();
+    }
     
-    protected abstract Event doApplyListZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
+    protected Event doApplyListZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        new SkipRdbParser(in).rdbLoadPlainStringObject();
+        return new DummyKeyValuePair();
+    }
     
-    protected abstract Event doApplySetIntSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
+    protected Event doApplySetIntSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        new SkipRdbParser(in).rdbLoadPlainStringObject();
+        return new DummyKeyValuePair();
+    }
     
-    protected abstract Event doApplyZSetZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
+    protected Event doApplyZSetZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        new SkipRdbParser(in).rdbLoadPlainStringObject();
+        return new DummyKeyValuePair();
+    }
     
-    protected abstract Event doApplyHashZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
+    protected Event doApplyHashZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        new SkipRdbParser(in).rdbLoadPlainStringObject();
+        return new DummyKeyValuePair();
+    }
     
-    protected abstract Event doApplyListQuickList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
+    protected Event doApplyListQuickList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        SkipRdbParser skipParser = new SkipRdbParser(in);
+        long len = skipParser.rdbLoadLen().len;
+        for (int i = 0; i < len; i++) {
+            skipParser.rdbGenericLoadStringObject();
+        }
+        return new DummyKeyValuePair();
+    }
     
-    protected abstract Event doApplyModule(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
+    protected Event doApplyModule(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        SkipRdbParser skipParser = new SkipRdbParser(in);
+        char[] c = new char[9];
+        long moduleid = skipParser.rdbLoadLen().len;
+        for (int i = 0; i < c.length; i++) {
+            c[i] = MODULE_SET[(int) (moduleid >>> (10 + (c.length - 1 - i) * 6) & 63)];
+        }
+        String moduleName = new String(c);
+        int moduleVersion = (int) (moduleid & 1023);
+        ModuleParser<? extends Module> moduleParser = lookupModuleParser(moduleName, moduleVersion);
+        if (moduleParser == null) {
+            throw new NoSuchElementException("module parser[" + moduleName + ", " + moduleVersion + "] not register. rdb type: [RDB_TYPE_MODULE]");
+        }
+        moduleParser.parse(in, 1);
+        return new DummyKeyValuePair();
+    }
     
-    protected abstract Event doApplyModule2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
+    protected Event doApplyModule2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        SkipRdbParser skipRdbParser = new SkipRdbParser(in);
+        skipRdbParser.rdbLoadCheckModuleValue();
+        return new DummyKeyValuePair();
+    }
     
-    protected abstract Event doApplyStreamListPacks(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException;
+    protected Event doApplyStreamListPacks(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        SkipRdbParser skipParser = new SkipRdbParser(in);
+        long listPacks = skipParser.rdbLoadLen().len;
+        while (listPacks-- > 0) {
+            skipParser.rdbLoadPlainStringObject();
+            skipParser.rdbLoadPlainStringObject();
+        }
+        skipParser.rdbLoadLen();
+        skipParser.rdbLoadLen();
+        skipParser.rdbLoadLen();
+        long groupCount = skipParser.rdbLoadLen().len;
+        while (groupCount-- > 0) {
+            skipParser.rdbLoadPlainStringObject();
+            skipParser.rdbLoadLen();
+            skipParser.rdbLoadLen();
+            long groupPel = skipParser.rdbLoadLen().len;
+            while (groupPel-- > 0) {
+                in.skip(16);
+                skipParser.rdbLoadMillisecondTime();
+                skipParser.rdbLoadLen();
+            }
+            long consumerCount = skipParser.rdbLoadLen().len;
+            while (consumerCount-- > 0) {
+                skipParser.rdbLoadPlainStringObject();
+                skipParser.rdbLoadMillisecondTime();
+                long consumerPel = skipParser.rdbLoadLen().len;
+                while (consumerPel-- > 0) {
+                    in.skip(16);
+                }
+            }
+        }
+        return new DummyKeyValuePair();
+    }
 }

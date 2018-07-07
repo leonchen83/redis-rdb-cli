@@ -5,7 +5,7 @@ import com.moilioncircle.redis.cli.tool.ext.AbstractRdbVisitor;
 import com.moilioncircle.redis.cli.tool.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.cli.tool.glossary.DataType;
 import com.moilioncircle.redis.cli.tool.glossary.Escape;
-import com.moilioncircle.redis.cli.tool.util.MinHeap;
+import com.moilioncircle.redis.cli.tool.util.CmpHeap;
 import com.moilioncircle.redis.cli.tool.util.type.Tuple2;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.UncheckedIOException;
@@ -43,13 +43,13 @@ import static com.moilioncircle.redis.replicator.rdb.datatype.ExpiredType.NONE;
  * @author Baoyi Chen
  */
 public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2Ex>, EventListener {
-
-    private final MinHeap<Tuple2Ex> heap;
-
+    
+    private final CmpHeap<Tuple2Ex> heap;
+    
     private final Long bytes;
-
+    
     private Size size;
-
+    
     public MemRdbVisitor(Replicator replicator,
                          Configure configure,
                          File out,
@@ -60,11 +60,11 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
                          Long largest, Long bytes) {
         super(replicator, configure, out, db, regexs, types, escape);
         this.bytes = bytes;
-        this.heap = new MinHeap<>(largest == null ? -1 : largest.intValue());
+        this.heap = new CmpHeap<>(largest == null ? -1 : largest.intValue());
         this.heap.setConsumer(this);
         this.replicator.addEventListener(this);
     }
-
+    
     @Override
     public void accept(Tuple2Ex tuple) {
         try {
@@ -94,7 +94,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             throw new UncheckedIOException(e);
         }
     }
-
+    
     @Override
     public void onEvent(Replicator replicator, Event event) {
         if (event instanceof DummyKeyValuePair) {
@@ -103,7 +103,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             dkv.setValue(dkv.getValue() + size.object(dkv.getKey(), dkv.getExpiredType() != NONE));
             if (bytes == null || dkv.getValue() >= bytes) heap.add(new Tuple2Ex(dkv.getValue(), dkv));
         } else if (event instanceof PostFullSyncEvent) {
-            for (Tuple2Ex tuple : heap.get()) accept(tuple);
+            for (Tuple2Ex tuple : heap.get(true)) accept(tuple);
         } else if (event instanceof PreFullSyncEvent) {
             // header
             // database,type,key,size_in_bytes,encoding,num_elements,len_largest_element
@@ -129,14 +129,14 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             }
         }
     }
-
+    
     @Override
     public int applyVersion(RedisInputStream in) throws IOException {
         int version = super.applyVersion(in);
         this.size = new Size(version);
         return version;
     }
-
+    
     @Override
     protected Event doApplyString(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -151,7 +151,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(size.element(val));
         return kv;
     }
-
+    
     @Override
     protected Event doApplyList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -176,7 +176,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(max);
         return kv;
     }
-
+    
     @Override
     protected Event doApplySet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -201,7 +201,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(max);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyZSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -228,7 +228,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(max);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyZSet2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -255,7 +255,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(max);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyHash(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -283,7 +283,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(max);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyHashZipMap(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -327,7 +327,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             length++;
         }
     }
-
+    
     @Override
     protected Event doApplyListZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -355,7 +355,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(max);
         return kv;
     }
-
+    
     @Override
     protected Event doApplySetIntSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -391,7 +391,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(max);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyZSetZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -424,7 +424,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(max);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyHashZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -458,7 +458,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(max);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyListQuickList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -494,7 +494,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(max);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyModule(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -512,7 +512,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         moduleParser.parse(in, 1);
         return new DummyKeyValuePair();
     }
-
+    
     @Override
     protected Event doApplyModule2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         SkipRdbParser skip = new SkipRdbParser(in);
@@ -531,7 +531,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(listener.getLength());
         return kv;
     }
-
+    
     @Override
     protected Event doApplyStreamListPacks(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         long length = 0;
@@ -553,7 +553,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
                 tempFields[i] = listPackEntry(listPack);
             }
             listPackEntry(listPack); // 0
-
+    
             long total = count + deleted;
             while (total-- > 0) {
                 int flag = Integer.parseInt(Strings.toString(listPackEntry(listPack)));
@@ -620,44 +620,44 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(max);
         return kv;
     }
-
+    
     static class Tuple2Ex extends Tuple2<Long, DummyKeyValuePair> implements Comparable<Tuple2Ex> {
-
+        
         public Tuple2Ex(Long v1, DummyKeyValuePair v2) {
             super(v1, v2);
         }
-
+        
         @Override
         public int compareTo(Tuple2Ex that) {
             return Long.compare(this.getV1(), that.getV1());
         }
     }
-
+    
     private static class LengthRawByteListener implements RawByteListener {
         private long length;
-
+        
         @Override
         public void handle(byte... rawBytes) {
             length += rawBytes.length;
         }
-
+        
         public long getLength() {
             return length;
         }
     }
-
+    
     public static class Size {
-
+        
         private int version;
-
+        
         public Size(int version) {
             this.version = version;
         }
-
+        
         public long robj() {
             return 8 + 8;
         }
-
+        
         public long string(byte[] bytes) {
             try {
                 long num = Long.parseLong(Strings.toString(bytes));
@@ -681,46 +681,46 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
                 return malloc(len + 1 + 16 + 1);
             }
         }
-
+        
         public long object(byte[] key, boolean expiry) {
             return hashEntry() + string(key) + robj() + expiry(expiry);
         }
-
+        
         public long expiry(boolean expiry) {
             if (!expiry) return 0;
             return hashEntry() + 8;
         }
-
+        
         public long hash(long size) {
             return (long) (4 + 7 * 8 + 4 * 8 + power(size) * 8 * 1.5);
         }
-
+        
         public long hashEntry() {
             return 2 * 8 + 8;
         }
-
+        
         public long linkedlist() {
             return 8 + 5 * 8;
         }
-
+        
         public long quicklist(long zip_count) {
             long quicklist = 2 * 8 + 8 + 2 * 4;
             long quickitem = 4 * 8 + 8 + 2 * 4;
             return quicklist + zip_count * quickitem;
         }
-
+        
         public long linkedlistEntry() {
             return 3 * 8;
         }
-
+        
         public long skiplist(long size) {
             return 2 * 8 + hash(size) + (2 * 8 + 16);
         }
-
+        
         public long skiplistEntry() {
             return hashEntry() + 2 * 8 + 8 + (8 + 8) * random();
         }
-
+        
         public long power(long size) {
             long power = 1;
             while (power <= size) {
@@ -728,7 +728,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             }
             return power;
         }
-
+        
         public long random() {
             long level = 1;
             int r = ThreadLocalRandom.current().nextInt(0xFFFF);
@@ -738,7 +738,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             }
             return Math.max(level, 32);
         }
-    
+        
         public long element(byte[] element) {
             try {
                 Integer.parseInt(Strings.toString(element));
@@ -747,14 +747,14 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
                 return element.length;
             }
         }
-
+        
         public long malloc(long size) {
             int idx = Arrays.binarySearch(JEMALLOC_SIZE, size);
             if (idx < 0) idx = -idx - 1;
             long alloc = idx < JEMALLOC_SIZE.length ? JEMALLOC_SIZE[idx] : size;
             return alloc;
         }
-
+        
         public static final long[] JEMALLOC_SIZE = new long[]{
                 8L, 16L, 24L, 32L, 40L, 48L, 56L, 64L, 80L, 96L, 112L, 128L, 160L, 192L, 224L, 256L, 320L, 384L, 448L, 512L, 640L, 768L, 896L, 1024L,
                 1280L, 1536L, 1792L, 2048L, 2560L, 3072L, 3584L, 4096L, 5120L, 6144L, 7168L, 8192L, 10240L, 12288L, 14336L, 16384L, 20480L, 24576L,

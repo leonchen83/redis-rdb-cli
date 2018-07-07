@@ -29,41 +29,39 @@ import static redis.clients.jedis.Protocol.toByteArray;
  * @author Baoyi Chen
  */
 public class ClientPool implements Consumer<Client>, Supplier<Client>, Predicate<Client> {
-
+    
     private static final Logger logger = LoggerFactory.getLogger(ClientPool.class);
-
+    
     private final int port;
     private final String host;
     private final int timeout;
     private final String password;
-
+    
     private ClientPool(String host, int port, String password, int timeout) {
         this.host = host;
         this.port = port;
         this.timeout = timeout;
         this.password = password;
     }
-
+    
     public static Pool<Client> create(String host, int port, String password, int timeout) {
         ClientPool cp = new ClientPool(host, port, password, timeout);
         PoolValidation pv = new PoolValidation((byte) (RELEASE | ACQUIRE | PULSE));
         PoolBuilder<Client> builder = new PoolBuilder<>();
         builder.validator(cp).supplier(cp).consumer(cp).validation(pv);
-        Pool<Client> pool = builder.build("redis.pool");
-        Lifecyclet.start(pool);
-        return pool;
+        return Lifecyclet.start(builder.build("redis.pool"));
     }
-
+    
     @Override
     public void accept(Client client) {
         Closes.closeQuietly(client);
     }
-
+    
     @Override
     public boolean test(Client client) {
         return !client.broken.get();
     }
-
+    
     @Override
     public Client get() {
         Client client = new Client(host, port, timeout);
@@ -76,17 +74,17 @@ public class ClientPool implements Consumer<Client>, Supplier<Client>, Predicate
         }
         return client;
     }
-
+    
     public static class Client extends redis.clients.jedis.Client {
-
+        
         private AtomicBoolean broken = new AtomicBoolean(false);
-
+        
         public Client(final String host, final int port, int timeout) {
             super(host, port);
             setSoTimeout(timeout);
             setConnectionTimeout(timeout);
         }
-
+        
         public String send(Protocol.Command cmd, final byte[]... args) {
             try {
                 sendCommand(cmd, args);
@@ -99,11 +97,11 @@ public class ClientPool implements Consumer<Client>, Supplier<Client>, Predicate
                 return e.getMessage();
             }
         }
-
+        
         public String send(final byte[] cmd, final byte[]... args) {
             return send(Protocol.Command.valueOf(Strings.toString(cmd).toUpperCase()), args);
         }
-
+        
         public String restore(byte[] key, long expired, byte[] dumped, boolean replace) {
             if (!replace) {
                 return send(RESTORE, key, toByteArray(expired), dumped);
