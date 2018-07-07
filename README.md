@@ -73,9 +73,10 @@ usage: rdt
  -k,--key <regex regex...>   keys to export. this can be a regex. if not
                              specified, all keys will be returned.
  -m,--merge <file file...>   merge multi rdb files to one rdb file.
- -o,--out <file>             output file(--backup <uri> or --merge <file
-                             file...> specified). if --split <uri>
-                             specified. the <file> is the target path.
+ -o,--out <file>             if --backup <uri> or --merge <file file...>
+                             specified. the <file> is the target file. if
+                             --split <uri> specified. the <file> is the
+                             target path.
  -s,--split <uri>            split uri to multi file via cluster's
                              <node.conf>. eg:
                              redis://host:port?authPassword=foobar

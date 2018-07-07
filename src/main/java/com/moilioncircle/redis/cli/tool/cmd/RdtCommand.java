@@ -27,7 +27,7 @@ public class RdtCommand extends AbstractCommand {
     private static final Option SPLIT = Option.builder("s").longOpt("split").required(false).hasArg().argName("uri").type(String.class).desc("split uri to multi file via cluster's <node.conf>. eg: redis://host:port?authPassword=foobar redis:///path/to/dump").build();
     private static final Option MERGE = Option.builder("m").longOpt("merge").required(false).hasArgs().argName("file file...").valueSeparator(' ').type(File.class).desc("merge multi rdb files to one rdb file.").build();
     private static final Option BACKUP = Option.builder("b").longOpt("backup").required(false).hasArg().argName("uri").type(String.class).desc("backup uri to local rdb file. eg: redis://host:port?authPassword=foobar redis:///path/to/dump.rdb").build();
-    private static final Option OUTPUT = Option.builder("o").longOpt("out").required(false).hasArg().argName("file").type(String.class).desc("output file(--backup <uri> or --merge <file file...> specified). if --split <uri> specified. the <file> is the target path.").build();
+    private static final Option OUTPUT = Option.builder("o").longOpt("out").required(false).hasArg().argName("file").type(String.class).desc("if --backup <uri> or --merge <file file...> specified. the <file> is the target file. if --split <uri> specified. the <file> is the target path.").build();
     private static final Option CONFIG = Option.builder("c").longOpt("config").required(false).hasArg().argName("file").type(File.class).desc("redis cluster's <node.conf> file(--split <file>).").build();
     private static final Option DB = Option.builder("d").longOpt("db").required(false).hasArg().argName("num num...").valueSeparator(' ').type(Number.class).desc("database number. multiple databases can be provided. if not specified, all databases will be included.").build();
     private static final Option KEY = Option.builder("k").longOpt("key").required(false).hasArg().argName("regex regex...").valueSeparator(' ').type(String.class).desc("keys to export. this can be a regex. if not specified, all keys will be returned.").build();
@@ -70,6 +70,11 @@ public class RdtCommand extends AbstractCommand {
                 return;
             }
     
+            if (output == null) {
+                writeLine("Missing required options: o, `rdt -h` for more information.");
+                return;
+            }
+            
             if (split != null && backup != null && !merge.isEmpty()) {
                 writeLine("Invalid options: s or b or m, `rdt -h` for more information.");
                 return;
@@ -77,11 +82,6 @@ public class RdtCommand extends AbstractCommand {
     
             if ((split != null && backup != null) || (backup != null && !merge.isEmpty()) || (split != null && !merge.isEmpty())) {
                 writeLine("Invalid options: s or b or m, `rdt -h` for more information.");
-                return;
-            }
-    
-            if (output == null) {
-                writeLine("Missing required options: o, `rdt -h` for more information.");
                 return;
             }
             
@@ -102,8 +102,16 @@ public class RdtCommand extends AbstractCommand {
                 }
                 rdtType = Type.SPLIT;
             } else if (backup != null) {
+                if (!Paths.get(output).toFile().isFile()) {
+                    writeLine("Invalid options: o, `rdt -h` for more information.");
+                    return;
+                }
                 rdtType = Type.BACKUP;
             } else if (merge != null) {
+                if (!Paths.get(output).toFile().isFile()) {
+                    writeLine("Invalid options: o, `rdt -h` for more information.");
+                    return;
+                }
                 rdtType = Type.MERGE;
             }
     

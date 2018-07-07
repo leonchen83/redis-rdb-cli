@@ -52,7 +52,7 @@ public enum Type {
                     URI u = file.toURI();
                     RedisURI mergeUri = new RedisURI(new URI("redis", u.getRawAuthority(), u.getRawPath(), u.getRawQuery(), u.getRawFragment()).toString());
                     if (mergeUri.getFileType() == null || mergeUri.getFileType() != RDB) {
-                        throw new UnsupportedOperationException("Invalid options: --merge <file file...> must be a rdb file.");
+                        throw new UnsupportedOperationException("Invalid options: --merge <file file...> must be rdb file.");
                     }
                     Replicator r = new CliRedisReplicator(mergeUri, configure);
                     r.setRdbVisitor(new MergeRdbVisitor(r, configure, db, regexs, types, () -> out));

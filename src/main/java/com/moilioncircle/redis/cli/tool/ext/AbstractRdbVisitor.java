@@ -17,9 +17,7 @@ import com.moilioncircle.redis.replicator.rdb.module.ModuleParser;
 import com.moilioncircle.redis.replicator.rdb.skip.SkipRdbParser;
 import com.moilioncircle.redis.replicator.util.Strings;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashSet;
@@ -68,20 +66,6 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
     protected GuardRawByteListener listener;
     
     /**
-     * rct
-     */
-    public AbstractRdbVisitor(Replicator replicator, Configure configure, File output, List<Long> db, List<String> regexs, List<DataType> types, Escape escape) {
-        this(replicator, configure, db, regexs, types);
-        this.escape = escape;
-        replicator.addEventListener((rep, event) -> {
-            if (!(event instanceof PreFullSyncEvent)) return;
-            OutputStreams.closeQuietly(this.out);
-            this.out = OutputStreams.call(() -> new BufferedOutputStream(new FileOutputStream(output)));
-        });
-        replicator.addCloseListener(rep -> OutputStreams.closeQuietly(out));
-    }
-    
-    /**
      * rmt
      */
     public AbstractRdbVisitor(Replicator replicator, Configure configure, List<Long> db, List<String> regexs, List<DataType> types) {
@@ -91,6 +75,20 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         this.db = new HashSet<>(db);
         this.keys = new HashSet<>(regexs);
         this.regexs = regexs.stream().map(Pattern::compile).collect(toList());
+    }
+    
+    /**
+     * rct
+     */
+    public AbstractRdbVisitor(Replicator replicator, Configure configure, File output, List<Long> db, List<String> regexs, List<DataType> types, Escape escape) {
+        this(replicator, configure, db, regexs, types);
+        this.escape = escape;
+        replicator.addEventListener((rep, event) -> {
+            if (!(event instanceof PreFullSyncEvent)) return;
+            OutputStreams.closeQuietly(this.out);
+            this.out = OutputStreams.newBufferedOutputStream(output);
+        });
+        replicator.addCloseListener(rep -> OutputStreams.closeQuietly(out));
     }
     
     /**

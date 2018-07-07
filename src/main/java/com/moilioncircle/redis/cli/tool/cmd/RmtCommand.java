@@ -122,13 +122,7 @@ public class RmtCommand extends AbstractCommand {
         }
     }
     
-    private void dress(Replicator r,
-                       Configure conf,
-                       String migrate,
-                       List<Long> db,
-                       List<String> regexs,
-                       List<DataType> types,
-                       boolean replace) throws Exception {
+    private void dress(Replicator r, Configure conf, String migrate, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) throws Exception {
         r.setRdbVisitor(new MigRdbVisitor(r, conf, migrate, db, regexs, types, replace));
         // ignore PING REPLCONF GETACK
         r.addCommandParser(CommandName.name("PING"), new PingParser());
