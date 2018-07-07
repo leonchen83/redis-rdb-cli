@@ -2,11 +2,11 @@ package com.moilioncircle.redis.cli.tool.ext.rmt;
 
 import cn.nextop.lite.pool.Pool;
 import cn.nextop.lite.pool.glossary.Lifecyclet;
-import com.moilioncircle.redis.cli.tool.cmd.glossary.Type;
 import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.ext.AbstractRdbVisitor;
 import com.moilioncircle.redis.cli.tool.ext.AsyncEventListener;
 import com.moilioncircle.redis.cli.tool.ext.GuardRawByteListener;
+import com.moilioncircle.redis.cli.tool.glossary.DataType;
 import com.moilioncircle.redis.cli.tool.util.pooling.ClientPool;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.RedisURI;
@@ -53,7 +53,7 @@ public class MigRdbVisitor extends AbstractRdbVisitor implements EventListener {
                          String uri,
                          List<Long> db,
                          List<String> regexs,
-                         List<Type> types,
+                         List<DataType> types,
                          boolean replace) throws Exception {
         super(replicator, configure, db, regexs, types);
         this.replace = replace;

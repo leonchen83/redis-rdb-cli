@@ -1,11 +1,11 @@
 package com.moilioncircle.redis.cli.tool.ext.rct;
 
-import com.moilioncircle.redis.cli.tool.cmd.glossary.Escape;
-import com.moilioncircle.redis.cli.tool.cmd.glossary.Type;
 import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.ext.AbstractRdbVisitor;
 import com.moilioncircle.redis.cli.tool.ext.DumpRawByteListener;
 import com.moilioncircle.redis.cli.tool.ext.datatype.DummyKeyValuePair;
+import com.moilioncircle.redis.cli.tool.glossary.DataType;
+import com.moilioncircle.redis.cli.tool.glossary.Escape;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
@@ -33,7 +33,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
                             File out,
                             List<Long> db,
                             List<String> regexs,
-                            List<Type> types,
+                            List<DataType> types,
                             Escape escape) {
         super(replicator, configure, out, db, regexs, types, escape);
     }

@@ -1,6 +1,6 @@
 package com.moilioncircle.redis.cli.tool.util.io;
 
-import com.moilioncircle.redis.cli.tool.cmd.glossary.Escape;
+import com.moilioncircle.redis.cli.tool.glossary.Escape;
 
 import java.io.IOException;
 import java.io.OutputStream;

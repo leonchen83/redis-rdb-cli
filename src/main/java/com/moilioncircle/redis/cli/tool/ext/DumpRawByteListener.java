@@ -1,6 +1,6 @@
 package com.moilioncircle.redis.cli.tool.ext;
 
-import com.moilioncircle.redis.cli.tool.cmd.glossary.Escape;
+import com.moilioncircle.redis.cli.tool.glossary.Escape;
 import com.moilioncircle.redis.cli.tool.util.io.CRCOutputStream;
 import com.moilioncircle.redis.replicator.io.RawByteListener;
 

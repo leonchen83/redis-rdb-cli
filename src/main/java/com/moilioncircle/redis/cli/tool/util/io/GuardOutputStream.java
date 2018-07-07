@@ -1,13 +1,14 @@
 package com.moilioncircle.redis.cli.tool.util.io;
 
+import com.moilioncircle.redis.cli.tool.glossary.Guard;
 import com.moilioncircle.redis.cli.tool.util.Closes;
 import com.moilioncircle.redis.replicator.util.ByteBuilder;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
-import static com.moilioncircle.redis.cli.tool.util.io.Guard.DRAIN;
-import static com.moilioncircle.redis.cli.tool.util.io.Guard.SAVE;
+import static com.moilioncircle.redis.cli.tool.glossary.Guard.DRAIN;
+import static com.moilioncircle.redis.cli.tool.glossary.Guard.SAVE;
 
 
 /**
@@ -47,14 +48,14 @@ public class GuardOutputStream extends OutputStream {
             if (builder.length() > 0) {
                 byte[] ary = builder.array();
                 out.write(ary);
-                builder = ByteBuilder.allocate(cap);
+                builder.clear();
             }
             out.write(b);
         } else if (guard == SAVE) {
             builder.put((byte) b);
         } else {
             if (builder.length() > 0) {
-                builder = ByteBuilder.allocate(cap);
+                builder.clear();
             }
         }
     }

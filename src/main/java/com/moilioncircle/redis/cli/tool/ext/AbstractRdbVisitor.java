@@ -1,9 +1,9 @@
 package com.moilioncircle.redis.cli.tool.ext;
 
-import com.moilioncircle.redis.cli.tool.cmd.glossary.Escape;
-import com.moilioncircle.redis.cli.tool.cmd.glossary.Type;
 import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.ext.datatype.DummyKeyValuePair;
+import com.moilioncircle.redis.cli.tool.glossary.DataType;
+import com.moilioncircle.redis.cli.tool.glossary.Escape;
 import com.moilioncircle.redis.cli.tool.util.Closes;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.UncheckedIOException;
@@ -30,9 +30,9 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
-import static com.moilioncircle.redis.cli.tool.util.io.Guard.DRAIN;
-import static com.moilioncircle.redis.cli.tool.util.io.Guard.PASS;
-import static com.moilioncircle.redis.cli.tool.util.io.Guard.SAVE;
+import static com.moilioncircle.redis.cli.tool.glossary.Guard.DRAIN;
+import static com.moilioncircle.redis.cli.tool.glossary.Guard.PASS;
+import static com.moilioncircle.redis.cli.tool.glossary.Guard.SAVE;
 import static com.moilioncircle.redis.replicator.Constants.MODULE_SET;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_HASH;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_HASH_ZIPLIST;
@@ -58,7 +58,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
     
     // common
     protected Set<Long> db;
-    protected List<Type> types;
+    protected List<DataType> types;
     protected Set<String> keys;
     protected Configure configure;
     protected List<Pattern> regexs;
@@ -76,7 +76,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
                               File output,
                               List<Long> db,
                               List<String> regexs,
-                              List<Type> types,
+                              List<DataType> types,
                               Escape escape) {
         this(replicator, configure, db, regexs, types);
         this.escape = escape;
@@ -99,7 +99,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
                               Configure configure,
                               List<Long> db,
                               List<String> regexs,
-                              List<Type> types) {
+                              List<DataType> types) {
         super(replicator);
         this.types = types;
         this.configure = configure;
@@ -115,7 +115,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
                               Configure configure,
                               List<Long> db,
                               List<String> regexs,
-                              List<Type> types,
+                              List<DataType> types,
                               Supplier<OutputStream> supplier) {
         this(replicator, configure, db, regexs, types);
         this.listener = new GuardRawByteListener(supplier.get());
@@ -126,7 +126,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
     }
     
     protected boolean contains(int type) {
-        return Type.contains(types, type);
+        return DataType.contains(types, type);
     }
     
     protected boolean contains(long db) {

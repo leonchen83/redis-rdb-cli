@@ -1,9 +1,9 @@
 package com.moilioncircle.redis.cli.tool.cmd;
 
-import com.moilioncircle.redis.cli.tool.cmd.glossary.Type;
 import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.ext.CliRedisReplicator;
 import com.moilioncircle.redis.cli.tool.ext.rmt.MigRdbVisitor;
+import com.moilioncircle.redis.cli.tool.glossary.DataType;
 import com.moilioncircle.redis.cli.tool.util.Closes;
 import com.moilioncircle.redis.cli.tool.util.ProgressBar;
 import com.moilioncircle.redis.replicator.RedisURI;
@@ -99,7 +99,7 @@ public class RmtCommand extends AbstractCommand {
             ProgressBar bar = new ProgressBar(-1);
             Configure configure = Configure.bind();
             Replicator r = new CliRedisReplicator(source, configure);
-            dress(r, configure, migrate, db, regexs, Type.parse(type), replace);
+            dress(r, configure, migrate, db, regexs, DataType.parse(type), replace);
             AtomicReference<ProgressBar.Phase> phase = new AtomicReference<>(NOP);
             Runtime.getRuntime().addShutdownHook(new Thread(() -> Closes.closeQuietly(r)));
             r.addRawByteListener(b -> bar.react(b.length, phase.get()));
@@ -124,7 +124,7 @@ public class RmtCommand extends AbstractCommand {
                        String migrate,
                        List<Long> db,
                        List<String> regexs,
-                       List<Type> types,
+                       List<DataType> types,
                        boolean replace) throws Exception {
         r.setRdbVisitor(new MigRdbVisitor(r, conf, migrate, db, regexs, types, replace));
         // ignore PING REPLCONF GETACK

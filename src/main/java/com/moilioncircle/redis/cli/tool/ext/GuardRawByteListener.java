@@ -1,6 +1,6 @@
 package com.moilioncircle.redis.cli.tool.ext;
 
-import com.moilioncircle.redis.cli.tool.util.io.Guard;
+import com.moilioncircle.redis.cli.tool.glossary.Guard;
 import com.moilioncircle.redis.cli.tool.util.io.GuardOutputStream;
 import com.moilioncircle.redis.replicator.io.RawByteListener;
 
@@ -19,8 +19,8 @@ public class GuardRawByteListener implements RawByteListener {
     private OutputStream internal;
     
     public GuardRawByteListener(OutputStream internal) {
-        this.internal = internal;
         this.out = new GuardOutputStream(8192, internal);
+        reset(internal);
     }
     
     public <T extends OutputStream> T getInternal() {
@@ -29,11 +29,13 @@ public class GuardRawByteListener implements RawByteListener {
     
     public GuardRawByteListener(byte type, int version, OutputStream out) throws IOException {
         this.out = new GuardOutputStream(8192, out);
+        reset(out);
         this.out.write((int) type);
         this.version = version;
     }
     
     public void reset(OutputStream out) {
+        this.internal = out;
         this.out.reset(out);
     }
     

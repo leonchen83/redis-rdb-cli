@@ -1,4 +1,4 @@
-package com.moilioncircle.redis.cli.tool.cmd.glossary;
+package com.moilioncircle.redis.cli.tool.glossary;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

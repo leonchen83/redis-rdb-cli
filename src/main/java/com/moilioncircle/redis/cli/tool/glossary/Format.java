@@ -1,4 +1,4 @@
-package com.moilioncircle.redis.cli.tool.cmd.glossary;
+package com.moilioncircle.redis.cli.tool.glossary;
 
 import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.ext.rct.DumpRdbVisitor;
@@ -55,7 +55,7 @@ public enum Format {
                       List<String> regexs,
                       Long largest,
                       Long bytes,
-                      List<Type> types,
+                      List<DataType> types,
                       Escape escape) throws Exception {
         switch (this) {
             case KEY:

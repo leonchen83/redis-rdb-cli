@@ -1,4 +1,4 @@
-package com.moilioncircle.redis.cli.tool.cmd.glossary;
+package com.moilioncircle.redis.cli.tool.glossary;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,7 @@ import static java.util.Arrays.asList;
 /**
  * @author Baoyi Chen
  */
-public enum Type {
+public enum DataType {
     
     ALL("all"),
     SET("set"),
@@ -21,7 +21,7 @@ public enum Type {
     
     private String value;
     
-    Type(String value) {
+    DataType(String value) {
         this.value = value;
     }
     
@@ -29,20 +29,20 @@ public enum Type {
         return value;
     }
     
-    public static List<Type> parse(List<String> list) {
+    public static List<DataType> parse(List<String> list) {
         if (list.isEmpty()) return asList(ALL);
-        List<Type> r = new ArrayList<>(list.size());
-        for (String name : list) r.add(Type.parse(name));
+        List<DataType> r = new ArrayList<>(list.size());
+        for (String name : list) r.add(DataType.parse(name));
         return r;
     }
     
-    public static boolean contains(List<Type> list, int rdb) {
+    public static boolean contains(List<DataType> list, int rdb) {
         if (list.isEmpty()) return true;
-        for (Type type : list) if (type.contains(rdb)) return true;
+        for (DataType type : list) if (type.contains(rdb)) return true;
         return false;
     }
     
-    public static Type parse(String type) {
+    public static DataType parse(String type) {
         switch (type) {
             case "all":
                 return ALL;
@@ -66,7 +66,7 @@ public enum Type {
         }
     }
     
-    public static Type parse(int type) {
+    public static DataType parse(int type) {
         switch (type) {
             case 0:
                 return STRING;

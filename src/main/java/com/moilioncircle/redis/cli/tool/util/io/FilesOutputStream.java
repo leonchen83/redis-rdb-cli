@@ -1,11 +1,14 @@
 package com.moilioncircle.redis.cli.tool.util.io;
 
+import com.moilioncircle.redis.cli.tool.util.NodeConf;
+import com.moilioncircle.redis.replicator.io.CRCOutputStream;
+
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static com.moilioncircle.redis.cli.tool.util.CRC16.crc16;
 
@@ -16,19 +19,18 @@ public class FilesOutputStream extends OutputStream {
     
     private byte[] key;
     
-    private List<CRCOutputStream> list = new ArrayList<>();
-    private Map<Integer, CRCOutputStream> map = new HashMap<>();
+    private Set<CRCOutputStream> set = new HashSet<>();
+    private Map<Short, CRCOutputStream> map = new HashMap<>();
     
-    public FilesOutputStream(String conf) {
-        // TODO
+    public FilesOutputStream(String path, String conf) {
+        NodeConf.parse(path, conf, set, map);
     }
     
     public void shard(byte[] key) {
         this.key = key;
-        
     }
     
-    public int slot(byte[] key) {
+    private short slot(byte[] key) {
         if (key == null) return 0;
         int st = -1, ed = -1;
         for (int i = 0, len = key.length; i < len; i++) {
@@ -39,14 +41,14 @@ public class FilesOutputStream extends OutputStream {
             }
         }
         if (st >= 0 && ed >= 0 && ed > st + 1)
-            return crc16(key, st + 1, ed) & 16383;
-        return crc16(key) & 16383;
+            return (short) (crc16(key, st + 1, ed) & 16383);
+        return (short) (crc16(key) & 16383);
     }
     
     @Override
     public void write(int b) throws IOException {
         if (key == null) {
-            for (OutputStream out : list) {
+            for (OutputStream out : set) {
                 out.write(b);
             }
         } else {
@@ -60,7 +62,7 @@ public class FilesOutputStream extends OutputStream {
     
     public void write(byte[] b, int off, int len) throws IOException {
         if (key == null) {
-            for (OutputStream out : list) {
+            for (OutputStream out : set) {
                 out.write(b);
             }
         } else {
@@ -70,7 +72,7 @@ public class FilesOutputStream extends OutputStream {
     
     public void flush() throws IOException {
         if (key == null) {
-            for (OutputStream out : list) {
+            for (OutputStream out : set) {
                 out.flush();
             }
         } else {
@@ -79,19 +81,19 @@ public class FilesOutputStream extends OutputStream {
     }
     
     public void close() throws IOException {
-        for (OutputStream out : list) {
+        for (OutputStream out : set) {
             out.close();
         }
     }
     
     public void writeCRC() {
         try {
-            for (CRCOutputStream out : list) {
+            for (CRCOutputStream out : set) {
+                out.write(255); // eof
                 byte[] bytes = out.getCRC64();
                 out.write(bytes);
             }
         } catch (IOException e) {
         }
-        
     }
 }

@@ -1,10 +1,10 @@
 package com.moilioncircle.redis.cli.tool.ext.rct;
 
-import com.moilioncircle.redis.cli.tool.cmd.glossary.Escape;
-import com.moilioncircle.redis.cli.tool.cmd.glossary.Type;
 import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.ext.AbstractRdbVisitor;
 import com.moilioncircle.redis.cli.tool.ext.datatype.DummyKeyValuePair;
+import com.moilioncircle.redis.cli.tool.glossary.DataType;
+import com.moilioncircle.redis.cli.tool.glossary.Escape;
 import com.moilioncircle.redis.cli.tool.util.MinHeap;
 import com.moilioncircle.redis.cli.tool.util.type.Tuple2;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -55,7 +55,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
                          File out,
                          List<Long> db,
                          List<String> regexs,
-                         List<Type> types,
+                         List<DataType> types,
                          Escape escape,
                          Long largest, Long bytes) {
         super(replicator, configure, out, db, regexs, types, escape);
@@ -71,13 +71,13 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             DummyKeyValuePair kv = tuple.getV2();
             escape.encode(kv.getDb().getDbNumber(), out);
             out.write(',');
-            escape.encode(Type.parse(kv.getValueRdbType()).getValue().getBytes(), out);
+            escape.encode(DataType.parse(kv.getValueRdbType()).getValue().getBytes(), out);
             out.write(',');
             escape.encode(kv.getKey(), out);
             out.write(',');
             escape.encode(tuple.getV1(), out);
             out.write(',');
-            escape.encode(Type.type(kv.getValueRdbType()).getBytes(), out);
+            escape.encode(DataType.type(kv.getValueRdbType()).getBytes(), out);
             out.write(',');
             escape.encode(kv.getLength(), out);
             out.write(',');

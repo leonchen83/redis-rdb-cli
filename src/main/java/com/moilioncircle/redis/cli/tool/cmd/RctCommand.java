@@ -1,10 +1,10 @@
 package com.moilioncircle.redis.cli.tool.cmd;
 
-import com.moilioncircle.redis.cli.tool.cmd.glossary.Escape;
-import com.moilioncircle.redis.cli.tool.cmd.glossary.Format;
-import com.moilioncircle.redis.cli.tool.cmd.glossary.Type;
 import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.ext.CliRedisReplicator;
+import com.moilioncircle.redis.cli.tool.glossary.DataType;
+import com.moilioncircle.redis.cli.tool.glossary.Escape;
+import com.moilioncircle.redis.cli.tool.glossary.Format;
 import com.moilioncircle.redis.cli.tool.util.Closes;
 import com.moilioncircle.redis.cli.tool.util.ProgressBar;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -102,7 +102,7 @@ public class RctCommand extends AbstractCommand {
             ProgressBar bar = new ProgressBar(-1);
             Configure configure = Configure.bind();
             Replicator r = new CliRedisReplicator(source, configure);
-            Format.parse(format).dress(r, configure, output, db, regexs, largest, bytes, Type.parse(type), Escape.parse(escape));
+            Format.parse(format).dress(r, configure, output, db, regexs, largest, bytes, DataType.parse(type), Escape.parse(escape));
             Runtime.getRuntime().addShutdownHook(new Thread(() -> Closes.closeQuietly(r)));
             r.addEventListener((rep, event) -> {
                 if (event instanceof PreFullSyncEvent)

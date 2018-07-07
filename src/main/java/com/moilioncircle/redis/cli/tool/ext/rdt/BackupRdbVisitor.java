@@ -6,10 +6,10 @@ import com.moilioncircle.redis.cli.tool.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.cli.tool.glossary.DataType;
 import com.moilioncircle.redis.cli.tool.glossary.Guard;
 import com.moilioncircle.redis.cli.tool.util.Closes;
-import com.moilioncircle.redis.cli.tool.util.io.FilesOutputStream;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.PostFullSyncEvent;
+import com.moilioncircle.redis.replicator.io.CRCOutputStream;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
 import com.moilioncircle.redis.replicator.rdb.datatype.Module;
@@ -27,27 +27,26 @@ import static com.moilioncircle.redis.replicator.Constants.MODULE_SET;
 /**
  * @author Baoyi Chen
  */
-public class SplitRdbVisitor extends AbstractRdbVisitor {
+public class BackupRdbVisitor extends AbstractRdbVisitor {
     
-    public SplitRdbVisitor(Replicator replicator,
-                           Configure configure,
-                           List<Long> db,
-                           List<String> regexs,
-                           List<DataType> types,
-                           Supplier<OutputStream> supplier) {
+    public BackupRdbVisitor(Replicator replicator,
+                            Configure configure,
+                            List<Long> db,
+                            List<String> regexs,
+                            List<DataType> types,
+                            Supplier<OutputStream> supplier) {
         super(replicator, configure, db, regexs, types, supplier);
         this.replicator.addEventListener((rep, event) -> {
             if (event instanceof PostFullSyncEvent) {
-                FilesOutputStream out = listener.getInternal();
-                out.writeCRC();
+                CRCOutputStream out = listener.getInternal();
+                try {
+                    out.write(255); // eof
+                    out.write(out.getCRC64());
+                } catch (IOException e) {
+                }
                 Closes.closeQuietly(out);
             }
         });
-    }
-    
-    private void shard(byte[] key) {
-        FilesOutputStream out = listener.getInternal();
-        out.shard(key);
     }
     
     @Override
@@ -102,14 +101,12 @@ public class SplitRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     public Event doApplyString(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        shard(key);
         new SkipRdbParser(in).rdbLoadEncodedStringObject();
         return new DummyKeyValuePair();
     }
     
     @Override
     public Event doApplyList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        shard(key);
         SkipRdbParser skipParser = new SkipRdbParser(in);
         long len = skipParser.rdbLoadLen().len;
         while (len > 0) {
@@ -121,7 +118,6 @@ public class SplitRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     public Event doApplySet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        shard(key);
         SkipRdbParser skipParser = new SkipRdbParser(in);
         long len = skipParser.rdbLoadLen().len;
         while (len > 0) {
@@ -133,7 +129,6 @@ public class SplitRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     public Event doApplyZSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        shard(key);
         SkipRdbParser skipParser = new SkipRdbParser(in);
         long len = skipParser.rdbLoadLen().len;
         while (len > 0) {
@@ -146,7 +141,6 @@ public class SplitRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     public Event doApplyZSet2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        shard(key);
         SkipRdbParser skipParser = new SkipRdbParser(in);
         long len = skipParser.rdbLoadLen().len;
         while (len > 0) {
@@ -159,7 +153,6 @@ public class SplitRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     public Event doApplyHash(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        shard(key);
         SkipRdbParser skipParser = new SkipRdbParser(in);
         long len = skipParser.rdbLoadLen().len;
         while (len > 0) {
@@ -172,42 +165,36 @@ public class SplitRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     public Event doApplyHashZipMap(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        shard(key);
         new SkipRdbParser(in).rdbLoadPlainStringObject();
         return new DummyKeyValuePair();
     }
     
     @Override
     public Event doApplyListZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        shard(key);
         new SkipRdbParser(in).rdbLoadPlainStringObject();
         return new DummyKeyValuePair();
     }
     
     @Override
     public Event doApplySetIntSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        shard(key);
         new SkipRdbParser(in).rdbLoadPlainStringObject();
         return new DummyKeyValuePair();
     }
     
     @Override
     public Event doApplyZSetZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        shard(key);
         new SkipRdbParser(in).rdbLoadPlainStringObject();
         return new DummyKeyValuePair();
     }
     
     @Override
     public Event doApplyHashZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        shard(key);
         new SkipRdbParser(in).rdbLoadPlainStringObject();
         return new DummyKeyValuePair();
     }
     
     @Override
     public Event doApplyListQuickList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        shard(key);
         SkipRdbParser skipParser = new SkipRdbParser(in);
         long len = skipParser.rdbLoadLen().len;
         for (int i = 0; i < len; i++) {
@@ -218,7 +205,6 @@ public class SplitRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     public Event doApplyModule(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        shard(key);
         SkipRdbParser skipParser = new SkipRdbParser(in);
         char[] c = new char[9];
         long moduleid = skipParser.rdbLoadLen().len;
@@ -237,7 +223,6 @@ public class SplitRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     public Event doApplyModule2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        shard(key);
         SkipRdbParser skipRdbParser = new SkipRdbParser(in);
         skipRdbParser.rdbLoadCheckModuleValue();
         return new DummyKeyValuePair();
@@ -245,7 +230,6 @@ public class SplitRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     public Event doApplyStreamListPacks(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        shard(key);
         SkipRdbParser skipParser = new SkipRdbParser(in);
         long listPacks = skipParser.rdbLoadLen().len;
         while (listPacks-- > 0) {
@@ -278,5 +262,4 @@ public class SplitRdbVisitor extends AbstractRdbVisitor {
         }
         return new DummyKeyValuePair();
     }
-    
 }
