@@ -10,6 +10,7 @@ import com.moilioncircle.redis.cli.tool.util.io.FilesOutputStream;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.PostFullSyncEvent;
+import com.moilioncircle.redis.replicator.event.PreFullSyncEvent;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
 import com.moilioncircle.redis.replicator.rdb.datatype.Module;
@@ -37,6 +38,9 @@ public class SplitRdbVisitor extends AbstractRdbVisitor {
                            Supplier<OutputStream> supplier) {
         super(replicator, configure, db, regexs, types, supplier);
         this.replicator.addEventListener((rep, event) -> {
+            if (event instanceof PreFullSyncEvent) {
+                listener.reset(supplier.get());
+            }
             if (event instanceof PostFullSyncEvent) {
                 FilesOutputStream out = listener.getInternal();
                 out.writeCRC();

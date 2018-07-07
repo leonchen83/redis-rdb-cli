@@ -120,9 +120,6 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         this(replicator, configure, db, regexs, types);
         this.listener = new GuardRawByteListener(supplier.get());
         this.replicator.addRawByteListener(listener);
-        this.replicator.addEventListener((rep, event) -> {
-            if (event instanceof PreFullSyncEvent) listener.reset(supplier.get());
-        });
     }
     
     protected boolean contains(int type) {

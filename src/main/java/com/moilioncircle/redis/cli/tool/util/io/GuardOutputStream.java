@@ -24,7 +24,8 @@ public class GuardOutputStream extends OutputStream {
     
     public GuardOutputStream(int cap, OutputStream out) {
         this.cap = cap;
-        reset(out);
+        this.out = out;
+        this.builder = ByteBuilder.allocate(cap);
     }
     
     public void setGuard(Guard guard) {

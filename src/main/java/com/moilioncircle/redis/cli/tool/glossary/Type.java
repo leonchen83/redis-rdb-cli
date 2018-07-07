@@ -7,6 +7,7 @@ import com.moilioncircle.redis.cli.tool.ext.rdt.MergeRdbVisitor;
 import com.moilioncircle.redis.cli.tool.ext.rdt.SplitRdbVisitor;
 import com.moilioncircle.redis.cli.tool.util.Closes;
 import com.moilioncircle.redis.cli.tool.util.io.FilesOutputStream;
+import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.io.CRCOutputStream;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
@@ -21,6 +22,9 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static com.moilioncircle.redis.replicator.FileType.AOF;
+import static com.moilioncircle.redis.replicator.FileType.RDB;
 
 /**
  * @author Baoyi Chen
@@ -56,7 +60,10 @@ public enum Type {
                 out.write((max < 10 ? "000" + max : "00" + max).getBytes());
                 for (File file : merge) {
                     URI u = file.toURI();
-                    String mergeUri = new URI("redis", u.getRawAuthority(), u.getRawPath(), u.getRawQuery(), u.getRawFragment()).toString();
+                    RedisURI mergeUri = new RedisURI(new URI("redis", u.getRawAuthority(), u.getRawPath(), u.getRawQuery(), u.getRawFragment()).toString());
+                    if (mergeUri.getFileType() == null || mergeUri.getFileType() != RDB) {
+                        throw new UnsupportedOperationException("Invalid options: --merge <file file...> must be a rdb file.");
+                    }
                     Replicator r = new CliRedisReplicator(mergeUri, configure);
                     r.setRdbVisitor(new MergeRdbVisitor(r, configure, db, regexs, types, () -> out));
                     list.add(r);
@@ -71,10 +78,18 @@ public enum Type {
                 });
                 return list;
             case SPLIT:
+                RedisURI splitUri = new RedisURI(backup);
+                if (splitUri.getFileType() == AOF) {
+                    throw new UnsupportedOperationException("Invalid options: --split <uri> must be 'redis://host:port' or 'redis:///path/to/dump.rdb'.");
+                }
                 Replicator r = new CliRedisReplicator(split, configure);
                 r.setRdbVisitor(new SplitRdbVisitor(r, configure, db, regexs, types, () -> new FilesOutputStream(output, conf)));
                 return Arrays.asList(r);
             case BACKUP:
+                RedisURI backupUri = new RedisURI(backup);
+                if (backupUri.getFileType() != null) {
+                    throw new UnsupportedOperationException("Invalid options: --backup <uri> must be 'redis://host:port'.");
+                }
                 r = new CliRedisReplicator(backup, configure);
                 r.setRdbVisitor(new BackupRdbVisitor(r, configure, db, regexs, types, () -> {
                     try {

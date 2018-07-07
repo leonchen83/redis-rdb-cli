@@ -19,17 +19,17 @@ public class GuardRawByteListener implements RawByteListener {
     private OutputStream internal;
     
     public GuardRawByteListener(OutputStream internal) {
+        this.internal = internal;
         this.out = new GuardOutputStream(8192, internal);
-        reset(internal);
     }
     
     public <T extends OutputStream> T getInternal() {
         return (T) this.internal;
     }
     
-    public GuardRawByteListener(byte type, int version, OutputStream out) throws IOException {
-        this.out = new GuardOutputStream(8192, out);
-        reset(out);
+    public GuardRawByteListener(byte type, int version, OutputStream internal) throws IOException {
+        this.internal = internal;
+        this.out = new GuardOutputStream(8192, internal);
         this.out.write((int) type);
         this.version = version;
     }
