@@ -46,17 +46,13 @@ public class NodeConf {
                     // pass
                 } else {
                     String name = args.get(0);
-                    if (!map.containsKey(name)) {
-                        CRCOutputStream out = OutputStreams.newCRCOutputStream(Paths.get(path, name + ".rdb").toFile());
-                        map.put(name, out);
-                        set.add(out);
-                    }
                     String hostAndPort = args.get(1);
                     int cIdx = hostAndPort.indexOf(":");
                     int aIdx = hostAndPort.indexOf("@");
                     hostAndPort.substring(0, cIdx); // ip
                     parseInt(hostAndPort.substring(aIdx + 1)); // port
-                    
+    
+                    boolean master = false;
                     for (String role : args.get(2).split(",")) {
                         switch (role) {
                             case "noflags":
@@ -74,7 +70,7 @@ public class NodeConf {
                                 // pass
                                 break;
                             case "master":
-                                // pass
+                                master = true;
                                 break;
                             case "handshake":
                                 // pass
@@ -86,6 +82,12 @@ public class NodeConf {
                             default:
                                 // pass
                         }
+                    }
+    
+                    if (!map.containsKey(name) && master) {
+                        CRCOutputStream out = OutputStreams.newCRCOutputStream(Paths.get(path, name + ".rdb").toFile());
+                        map.put(name, out);
+                        set.add(out);
                     }
                     
                     if (!args.get(3).equals("-")) {
