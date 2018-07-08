@@ -4,6 +4,7 @@ import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.ext.CliRedisReplicator;
 import com.moilioncircle.redis.cli.tool.ext.rmt.MigRdbVisitor;
 import com.moilioncircle.redis.cli.tool.glossary.DataType;
+import com.moilioncircle.redis.cli.tool.glossary.Phase;
 import com.moilioncircle.redis.cli.tool.util.ProgressBar;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -22,9 +23,9 @@ import java.net.URI;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.moilioncircle.redis.cli.tool.util.ProgressBar.Phase.AOF;
-import static com.moilioncircle.redis.cli.tool.util.ProgressBar.Phase.NOP;
-import static com.moilioncircle.redis.cli.tool.util.ProgressBar.Phase.RDB;
+import static com.moilioncircle.redis.cli.tool.glossary.Phase.AOF;
+import static com.moilioncircle.redis.cli.tool.glossary.Phase.NOP;
+import static com.moilioncircle.redis.cli.tool.glossary.Phase.RDB;
 
 /**
  * @author Baoyi Chen
@@ -99,7 +100,7 @@ public class RmtCommand extends AbstractCommand {
             Configure configure = Configure.bind();
             Replicator r = new CliRedisReplicator(source, configure);
             dress(r, configure, migrate, db, regexs, DataType.parse(type), replace);
-            AtomicReference<ProgressBar.Phase> phase = new AtomicReference<>(NOP);
+            AtomicReference<Phase> phase = new AtomicReference<>(NOP);
             Runtime.getRuntime().addShutdownHook(new Thread(() -> CliRedisReplicator.closeQuietly(r)));
             r.addRawByteListener(b -> bar.react(b.length, phase.get()));
             r.addEventListener((rep, event) -> {

@@ -25,7 +25,7 @@ import static com.moilioncircle.redis.replicator.FileType.RDB;
 /**
  * @author Baoyi Chen
  */
-public enum Type {
+public enum Action {
     NONE,
     SPLIT,
     MERGE,

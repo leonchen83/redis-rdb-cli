@@ -16,7 +16,7 @@ import java.io.File;
 import java.net.URI;
 import java.util.List;
 
-import static com.moilioncircle.redis.cli.tool.util.ProgressBar.Phase.RDB;
+import static com.moilioncircle.redis.cli.tool.glossary.Phase.RDB;
 
 /**
  * @author Baoyi Chen

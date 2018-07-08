@@ -2,8 +2,8 @@ package com.moilioncircle.redis.cli.tool.cmd;
 
 import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.ext.CliRedisReplicator;
+import com.moilioncircle.redis.cli.tool.glossary.Action;
 import com.moilioncircle.redis.cli.tool.glossary.DataType;
-import com.moilioncircle.redis.cli.tool.glossary.Type;
 import com.moilioncircle.redis.cli.tool.util.ProgressBar;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.PostFullSyncEvent;
@@ -15,7 +15,7 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.util.List;
 
-import static com.moilioncircle.redis.cli.tool.util.ProgressBar.Phase.RDB;
+import static com.moilioncircle.redis.cli.tool.glossary.Phase.RDB;
 
 /**
  * @author Baoyi Chen
@@ -86,7 +86,7 @@ public class RdtCommand extends AbstractCommand {
             }
             
             Configure configure = Configure.bind();
-            Type rdtType = Type.NONE;
+            Action rdtType = Action.NONE;
             if (split != null) {
                 if (!Paths.get(output).toFile().isDirectory()) {
                     writeLine("Invalid options: o, `rdt -h` for more information.");
@@ -100,19 +100,19 @@ public class RdtCommand extends AbstractCommand {
                     writeLine("Invalid options: c, `rdt -h` for more information.");
                     return;
                 }
-                rdtType = Type.SPLIT;
+                rdtType = Action.SPLIT;
             } else if (backup != null) {
                 if (!Paths.get(output).toFile().isFile()) {
                     writeLine("Invalid options: o, `rdt -h` for more information.");
                     return;
                 }
-                rdtType = Type.BACKUP;
+                rdtType = Action.BACKUP;
             } else if (merge != null) {
                 if (!Paths.get(output).toFile().isFile()) {
                     writeLine("Invalid options: o, `rdt -h` for more information.");
                     return;
                 }
-                rdtType = Type.MERGE;
+                rdtType = Action.MERGE;
             }
     
             ProgressBar bar = new ProgressBar(-1);

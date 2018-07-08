@@ -112,19 +112,19 @@ public class OutputStreams {
         }
     }
     
-    public static CRCOutputStream newCRCOutputStream(String file) {
-        return call(() -> newCRCOutputStream(new File(file)));
-    }
-    
-    public static CRCOutputStream newCRCOutputStream(File file) {
-        return call(() -> new CRCOutputStream(new BufferedOutputStream(new FileOutputStream(file))));
-    }
-    
     public static BufferedOutputStream newBufferedOutputStream(String file) {
         return call(() -> newBufferedOutputStream(new File(file)));
     }
     
     public static BufferedOutputStream newBufferedOutputStream(File file) {
         return call(() -> new BufferedOutputStream(new FileOutputStream(file)));
+    }
+    
+    public static CRCOutputStream newCRCOutputStream(String file) {
+        return call(() -> newCRCOutputStream(new File(file)));
+    }
+    
+    public static CRCOutputStream newCRCOutputStream(File file) {
+        return call(() -> new CRCOutputStream(new BufferedOutputStream(new FileOutputStream(file))));
     }
 }

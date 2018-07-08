@@ -56,23 +56,6 @@ public class ClientPool implements Consumer<Client>, Supplier<Client>, Predicate
         closeQuietly(client);
     }
     
-    public static void close(Client client) {
-        if (client == null) return;
-        try {
-            client.close();
-        } catch (Throwable txt) {
-            throw new RuntimeException(txt);
-        }
-    }
-    
-    public static void closeQuietly(Client client) {
-        if (client == null) return;
-        try {
-            client.close();
-        } catch (Throwable t) {
-        }
-    }
-    
     @Override
     public boolean test(Client client) {
         return !client.broken.get();
@@ -89,6 +72,23 @@ public class ClientPool implements Consumer<Client>, Supplier<Client>, Predicate
             if (r != null) logger.error("ping[{}:{}] failed. reason:{}", host, port, r);
         }
         return client;
+    }
+    
+    public static void close(Client client) {
+        if (client == null) return;
+        try {
+            client.close();
+        } catch (Throwable txt) {
+            throw new RuntimeException(txt);
+        }
+    }
+    
+    public static void closeQuietly(Client client) {
+        if (client == null) return;
+        try {
+            client.close();
+        } catch (Throwable t) {
+        }
     }
     
     public static class Client extends redis.clients.jedis.Client {

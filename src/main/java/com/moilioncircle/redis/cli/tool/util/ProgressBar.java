@@ -1,15 +1,13 @@
 package com.moilioncircle.redis.cli.tool.util;
 
+import com.moilioncircle.redis.cli.tool.glossary.Phase;
+
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author Baoyi Chen
  */
 public class ProgressBar {
-    
-    public enum Phase {
-        RDB, AOF, NOP
-    }
     
     private final long total;
     private volatile long last;
