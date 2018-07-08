@@ -80,7 +80,7 @@ Options:
  -b,--backup <uri>           backup uri to local rdb file. eg:
                              redis://host:port?authPassword=foobar
                              redis:///path/to/dump.rdb
- -c,--config <file>          redis cluster's <node.conf> file(--split
+ -c,--config <file>          redis cluster's <nodes.conf> file(--split
                              <file>).
  -d,--db <num num...>        database number. multiple databases can be
                              provided. if not specified, all databases
@@ -95,7 +95,7 @@ Options:
                              --split <uri> specified. the <file> is the
                              target path.
  -s,--split <uri>            split uri to multi file via cluster's
-                             <node.conf>. eg:
+                             <nodes.conf>. eg:
                              redis://host:port?authPassword=foobar
                              redis:///path/to/dump
  -t,--type <type type...>    data type to export. possible values are
@@ -107,7 +107,7 @@ Options:
 Examples:
  rdt -b redis://127.0.0.1:6379 -o ./dump.rdb -k user.*
  rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
- rdt -i ./dump.rdb -c ./node.conf -o /path/to/folder -t hash -d 0
- rdt -s redis://127.0.0.1:6379 -c ./node.conf -o /path/to/folder -d 0
+ rdt -i ./dump.rdb -c ./nodes.conf -o /path/to/folder -t hash -d 0
+ rdt -s redis://127.0.0.1:6379 -c ./nodes.conf -o /path/to/folder -d 0
 
 ```

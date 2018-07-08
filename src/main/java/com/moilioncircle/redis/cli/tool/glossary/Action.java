@@ -31,7 +31,7 @@ public enum Action {
     MERGE,
     BACKUP;
     
-    public List<Replicator> dress(Configure configure, String split, String backup, List<File> merge, String output, List<Long> db, List<String> regexs, String conf, List<DataType> types) throws Exception {
+    public List<Replicator> dress(Configure configure, String split, String backup, List<File> merge, String output, List<Long> db, List<String> regexs, File conf, List<DataType> types) throws Exception {
         switch (this) {
             case MERGE:
                 if (merge.isEmpty()) return Arrays.asList();
@@ -66,7 +66,7 @@ public enum Action {
                 });
                 return list;
             case SPLIT:
-                RedisURI splitUri = new RedisURI(backup);
+                RedisURI splitUri = new RedisURI(split);
                 if (splitUri.getFileType() == AOF) {
                     throw new UnsupportedOperationException("Invalid options: --split <uri> must be 'redis://host:port' or 'redis:///path/to/dump.rdb'.");
                 }

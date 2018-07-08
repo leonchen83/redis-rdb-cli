@@ -22,9 +22,9 @@ import static java.lang.Integer.parseInt;
  */
 public class NodeConf {
     
-    public static void parse(String path, String conf, Set<CRCOutputStream> set, Map<Short, CRCOutputStream> result) {
+    public static void parse(String path, File conf, Set<CRCOutputStream> set, Map<Short, CRCOutputStream> result) {
         Map<String, CRCOutputStream> map = new HashMap<>();
-        try (BufferedReader r = new BufferedReader(new FileReader(new File(conf)))) {
+        try (BufferedReader r = new BufferedReader(new FileReader(conf))) {
             String line;
             while ((line = r.readLine()) != null) {
                 List<String> args = parseLine(line);

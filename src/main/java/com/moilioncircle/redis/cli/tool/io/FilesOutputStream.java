@@ -4,6 +4,7 @@ import com.moilioncircle.redis.cli.tool.util.NodeConf;
 import com.moilioncircle.redis.cli.tool.util.OutputStreams;
 import com.moilioncircle.redis.replicator.io.CRCOutputStream;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
@@ -23,7 +24,7 @@ public class FilesOutputStream extends OutputStream {
     private Set<CRCOutputStream> set = new HashSet<>();
     private Map<Short, CRCOutputStream> map = new HashMap<>();
     
-    public FilesOutputStream(String path, String conf) {
+    public FilesOutputStream(String path, File conf) {
         NodeConf.parse(path, conf, set, map);
     }
     

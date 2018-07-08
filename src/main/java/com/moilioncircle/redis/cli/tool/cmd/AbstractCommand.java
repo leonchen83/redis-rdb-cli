@@ -28,6 +28,7 @@ public abstract class AbstractCommand implements Command {
             org.apache.commons.cli.CommandLine line = parser.parse(options, args);
             doExecute(new CommandLine(line));
         } catch (Exception e) {
+            e.printStackTrace();
             if (e.getMessage() != null) {
                 writeLine(e.getMessage());
             } else {
