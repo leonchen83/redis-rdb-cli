@@ -1,9 +1,15 @@
 package com.moilioncircle.redis.cli.tool.cmd;
 
+import com.moilioncircle.redis.replicator.FileType;
+import com.moilioncircle.redis.replicator.RedisURI;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import static com.moilioncircle.redis.cli.tool.cmd.Version.VERSION;
 
@@ -35,6 +41,24 @@ public abstract class AbstractCommand implements Command {
                 throw e;
             }
         }
+    }
+    
+    protected String normalize(String source, String message) throws URISyntaxException {
+        return normalize(source, message);
+    }
+    
+    protected String normalize(String source, FileType type, String message) throws URISyntaxException {
+        RedisURI uri;
+        try {
+            uri = new RedisURI(source);
+        } catch (Throwable e) {
+            URI u = new File(source).toURI();
+            uri = new RedisURI(new URI("redis", u.getRawAuthority(), u.getRawPath(), u.getRawQuery(), u.getRawFragment()).toString());
+        }
+        if (uri != null && (uri.getFileType() == null || type == null || uri.getFileType() == type)) {
+            return source;
+        }
+        throw new AssertionError(message);
     }
     
     protected void write(String message) throws Exception {

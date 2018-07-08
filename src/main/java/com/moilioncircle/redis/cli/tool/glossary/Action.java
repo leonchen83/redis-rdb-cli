@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.moilioncircle.redis.replicator.FileType.AOF;
 import static com.moilioncircle.redis.replicator.FileType.RDB;
 
 /**
@@ -66,10 +65,6 @@ public enum Action {
                 });
                 return list;
             case SPLIT:
-                RedisURI splitUri = new RedisURI(split);
-                if (splitUri.getFileType() == AOF) {
-                    throw new UnsupportedOperationException("Invalid options: --split <uri> must be 'redis://host:port' or 'redis:///path/to/dump.rdb'.");
-                }
                 Replicator r = new CliRedisReplicator(split, configure);
                 r.setRdbVisitor(new SplitRdbVisitor(r, configure, db, regexs, types, () -> new FilesOutputStream(output, conf)));
                 return Arrays.asList(r);
