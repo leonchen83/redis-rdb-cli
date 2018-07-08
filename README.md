@@ -107,7 +107,7 @@ Options:
 Examples:
  rdt -b redis://127.0.0.1:6379 -o ./dump.rdb -k user.*
  rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
- rdt -i ./dump.rdb -c ./node.conf -o /path/to/folder -t hash
- rdt -s redis://127.0.0.1:6379 -c ./node.conf -o /path/to/folder -d 0 1
+ rdt -i ./dump.rdb -c ./node.conf -o /path/to/folder -t hash -d 0
+ rdt -s redis://127.0.0.1:6379 -c ./node.conf -o /path/to/folder -d 0
 
 ```
