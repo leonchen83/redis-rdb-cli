@@ -36,7 +36,7 @@ public class RdtCommand extends AbstractCommand {
     private static final Option TYPE = Option.builder("t").longOpt("type").required(false).hasArgs().argName("type type...").valueSeparator(' ').type(String.class).desc("data type to export. possible values are string, hash, set, sortedset, list, module, stream. multiple types can be provided. if not specified, all data types will be returned.").build();
     
     private static final String HEADER = "rdt [-b <uri> | [-s <uri> | -i <file>] -c <file> | -m <file file...>] -o <file> [-d <num num...>] [-k <regex regex...>] [-t <type type...>]";
-    private static final String EXAMPLE = "Examples:\nrdt -b redis://127.0.0.1:6379 -o ./dump.rdb -k user.*\nrdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash\nrdt -i ./dump.rdb -c ./node.conf -o /path/to/folder -t hash\nrdt -s redis://127.0.0.1:6379 -c ./node.conf -o /path/to/folder -d 0 1\n";
+    private static final String EXAMPLE = "Examples:\n rdt -b redis://127.0.0.1:6379 -o ./dump.rdb -k user.*\n rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash\n rdt -i ./dump.rdb -c ./node.conf -o /path/to/folder -t hash\n rdt -s redis://127.0.0.1:6379 -c ./node.conf -o /path/to/folder -d 0 1\n";
     
     public RdtCommand() {
         addOption(HELP);

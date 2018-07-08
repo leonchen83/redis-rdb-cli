@@ -32,9 +32,9 @@ Options:
                              returned.
  -v,--version                rct version.
 Examples:
-rct -f resp -s redis://127.0.0.1:6379 -o ./target.aof -d 0 1
-rct -f json -i ./dump.rdb -o ./target.json -k user.* product.*
-rct -f mem -i ./dump.rdb -o ./target.aof -e redis -t list -l 10 -b 1024
+ rct -f resp -s redis://127.0.0.1:6379 -o ./target.aof -d 0 1
+ rct -f json -i ./dump.rdb -o ./target.json -k user.* product.*
+ rct -f mem -i ./dump.rdb -o ./target.aof -e redis -t list -l 10 -b 1024
 
 ```
 
@@ -66,8 +66,8 @@ Options:
                              returned.
  -v,--version                rmt version.
 Examples:
-rmt -s redis://120.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0
-rmt -i ./dump.rdb -m redis://127.0.0.1:6380 -t string -r
+ rmt -s redis://120.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0
+ rmt -i ./dump.rdb -m redis://127.0.0.1:6380 -t string -r
 
 ```
 
@@ -105,9 +105,9 @@ Options:
                              returned.
  -v,--version                rdt version.
 Examples:
-rdt -b redis://127.0.0.1:6379 -o ./dump.rdb -k user.*
-rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
-rdt -i ./dump.rdb -c ./node.conf -o /path/to/folder -t hash
-rdt -s redis://127.0.0.1:6379 -c ./node.conf -o /path/to/folder -d 0 1
+ rdt -b redis://127.0.0.1:6379 -o ./dump.rdb -k user.*
+ rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
+ rdt -i ./dump.rdb -c ./node.conf -o /path/to/folder -t hash
+ rdt -s redis://127.0.0.1:6379 -c ./node.conf -o /path/to/folder -d 0 1
 
 ```
