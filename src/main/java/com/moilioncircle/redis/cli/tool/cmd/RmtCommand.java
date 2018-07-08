@@ -2,7 +2,7 @@ package com.moilioncircle.redis.cli.tool.cmd;
 
 import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.ext.CliRedisReplicator;
-import com.moilioncircle.redis.cli.tool.ext.rmt.MigRdbVisitor;
+import com.moilioncircle.redis.cli.tool.ext.rmt.MigrateRdbVisitor;
 import com.moilioncircle.redis.cli.tool.glossary.DataType;
 import com.moilioncircle.redis.cli.tool.glossary.Phase;
 import com.moilioncircle.redis.cli.tool.util.ProgressBar;
@@ -119,7 +119,7 @@ public class RmtCommand extends AbstractCommand {
     }
     
     private void dress(Replicator r, Configure conf, String migrate, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) throws Exception {
-        r.setRdbVisitor(new MigRdbVisitor(r, conf, migrate, db, regexs, types, replace));
+        r.setRdbVisitor(new MigrateRdbVisitor(r, conf, migrate, db, regexs, types, replace));
         // ignore PING REPLCONF GETACK
         r.addCommandParser(CommandName.name("PING"), new PingParser());
         r.addCommandParser(CommandName.name("REPLCONF"), new ReplConfParser());

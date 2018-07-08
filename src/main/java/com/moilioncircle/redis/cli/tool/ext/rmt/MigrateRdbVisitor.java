@@ -34,16 +34,16 @@ import static redis.clients.jedis.Protocol.toByteArray;
 /**
  * @author Baoyi Chen
  */
-public class MigRdbVisitor extends AbstractRdbVisitor implements EventListener {
+public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListener {
     
-    private static final Logger logger = LoggerFactory.getLogger(MigRdbVisitor.class);
+    private static final Logger logger = LoggerFactory.getLogger(MigrateRdbVisitor.class);
     
     private final RedisURI uri;
     private final boolean replace;
     private final Pool<ClientPool.Client> pool;
     private final AtomicInteger dbnum = new AtomicInteger(-1);
     
-    public MigRdbVisitor(Replicator replicator, Configure configure, String uri, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) throws Exception {
+    public MigrateRdbVisitor(Replicator replicator, Configure configure, String uri, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) throws Exception {
         super(replicator, configure, db, regexs, types);
         this.replace = replace;
         this.uri = new RedisURI(uri);
