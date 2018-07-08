@@ -43,10 +43,6 @@ public abstract class AbstractCommand implements Command {
         }
     }
     
-    protected String normalize(String source, String message) throws URISyntaxException {
-        return normalize(source, message);
-    }
-    
     protected String normalize(String source, FileType type, String message) throws URISyntaxException {
         RedisURI uri;
         try {

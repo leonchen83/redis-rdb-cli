@@ -6,6 +6,7 @@ import com.moilioncircle.redis.cli.tool.ext.rmt.MigrateRdbVisitor;
 import com.moilioncircle.redis.cli.tool.glossary.DataType;
 import com.moilioncircle.redis.cli.tool.glossary.Phase;
 import com.moilioncircle.redis.cli.tool.util.ProgressBar;
+import com.moilioncircle.redis.replicator.FileType;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.cmd.CommandName;
@@ -32,7 +33,7 @@ public class RmtCommand extends AbstractCommand {
     
     private static final Option HELP = Option.builder("h").longOpt("help").required(false).hasArg(false).desc("rmt usage.").build();
     private static final Option VERSION = Option.builder("v").longOpt("version").required(false).hasArg(false).desc("rmt version.").build();
-    private static final Option SOURCE = Option.builder("s").longOpt("source").required(false).hasArg().argName("source").type(String.class).desc("<source> eg:\n /path/to/dump.rdb /path/to/appendonly.aof redis://host:port?authPassword=foobar redis:///path/to/dump.rdb redis:///path/to/appendonly.aof ").build();
+    private static final Option SOURCE = Option.builder("s").longOpt("source").required(false).hasArg().argName("source").type(String.class).desc("<source> eg:\n /path/to/dump.rdb redis://host:port?authPassword=foobar redis:///path/to/dump.rdb").build();
     private static final Option REPLACE = Option.builder("r").longOpt("replace").required(false).desc("replace exist key value. if not specified, default value is false.").build();
     private static final Option MIGRATE = Option.builder("m").longOpt("migrate").required(false).hasArg().argName("uri").type(String.class).desc("migrate to uri. eg: redis://host:port?authPassword=foobar.").build();
     private static final Option DB = Option.builder("d").longOpt("db").required(false).hasArg().argName("num num...").valueSeparator(' ').type(Number.class).desc("database number. multiple databases can be provided. if not specified, all databases will be included.").build();
@@ -40,7 +41,7 @@ public class RmtCommand extends AbstractCommand {
     private static final Option TYPE = Option.builder("t").longOpt("type").required(false).hasArgs().argName("type type...").valueSeparator(' ').type(String.class).desc("data type to export. possible values are string, hash, set, sortedset, list, module, stream. multiple types can be provided. if not specified, all data types will be returned.").build();
     
     private static final String HEADER = "rmt -s <source> -m <uri> [-d <num num...>] [-k <regex regex...>] [-t <type type...>]";
-    private static final String EXAMPLE = "Examples:\n rmt -s redis://120.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0\n rmt -s ./dump.rdb -m redis://127.0.0.1:6380 -t string -r\n";
+    private static final String EXAMPLE = "Examples:\n rmt -s redis://120.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0\n rmt -s ./dump.rdb -m redis://127.0.0.1:6380 -t string -r\n rmt -s ./appendonly.aof -m redis://127.0.0.1:6380\n";
     
     public RmtCommand() {
         addOption(HELP);
@@ -84,7 +85,7 @@ public class RmtCommand extends AbstractCommand {
             boolean replace = line.hasOption("replace");
             List<String> regexs = line.getOptions("key");
     
-            source = normalize(source, "Invalid options: s. Try `rmt -h` for more information.");
+            source = normalize(source, FileType.RDB, "Invalid options: s. Try `rmt -h` for more information.");
             
             RedisURI uri = new RedisURI(migrate);
             if (uri.getFileType() != null) {
