@@ -42,6 +42,9 @@ public class RmtCommand extends AbstractCommand {
     private static final Option KEY = Option.builder("k").longOpt("key").required(false).hasArg().argName("regex regex...").valueSeparator(' ').type(String.class).desc("keys to export. this can be a regex. if not specified, all keys will be returned.").build();
     private static final Option TYPE = Option.builder("t").longOpt("type").required(false).hasArgs().argName("type type...").valueSeparator(' ').type(String.class).desc("data type to export. possible values are string, hash, set, sortedset, list, module, stream. multiple types can be provided. if not specified, all data types will be returned.").build();
     
+    private static final String HEADER = "rmt [-s <uri> | -i <file>] -m <uri> [-d <num num...>] [-k <regex regex...>] [-t <type type...>]";
+    private static final String EXAMPLE = "Examples:\nrmt -s redis://120.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0\nrmt -i ./dump.rdb -m redis://127.0.0.1:6380 -t string -r\n";
+    
     public RmtCommand() {
         addOption(HELP);
         addOption(VERSION);
@@ -58,7 +61,7 @@ public class RmtCommand extends AbstractCommand {
     protected void doExecute(CommandLine line) throws Exception {
         if (line.hasOption("help")) {
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("rmt", options);
+            formatter.printHelp(HEADER, "Options:", options, EXAMPLE);
         } else if (line.hasOption("version")) {
             writeLine(version());
         } else {

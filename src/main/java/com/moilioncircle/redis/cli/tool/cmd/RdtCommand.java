@@ -12,6 +12,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 
 import java.io.File;
+import java.net.URI;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -25,6 +26,7 @@ public class RdtCommand extends AbstractCommand {
     private static final Option HELP = Option.builder("h").longOpt("help").required(false).hasArg(false).desc("rdt usage.").build();
     private static final Option VERSION = Option.builder("v").longOpt("version").required(false).hasArg(false).desc("rdt version.").build();
     private static final Option SPLIT = Option.builder("s").longOpt("split").required(false).hasArg().argName("uri").type(String.class).desc("split uri to multi file via cluster's <node.conf>. eg: redis://host:port?authPassword=foobar redis:///path/to/dump").build();
+    private static final Option INPUT = Option.builder("i").longOpt("in").required(false).hasArg().argName("file").type(File.class).desc("input file.").build();
     private static final Option MERGE = Option.builder("m").longOpt("merge").required(false).hasArgs().argName("file file...").valueSeparator(' ').type(File.class).desc("merge multi rdb files to one rdb file.").build();
     private static final Option BACKUP = Option.builder("b").longOpt("backup").required(false).hasArg().argName("uri").type(String.class).desc("backup uri to local rdb file. eg: redis://host:port?authPassword=foobar redis:///path/to/dump.rdb").build();
     private static final Option OUTPUT = Option.builder("o").longOpt("out").required(false).hasArg().argName("file").type(String.class).desc("if --backup <uri> or --merge <file file...> specified. the <file> is the target file. if --split <uri> specified. the <file> is the target path.").build();
@@ -33,10 +35,14 @@ public class RdtCommand extends AbstractCommand {
     private static final Option KEY = Option.builder("k").longOpt("key").required(false).hasArg().argName("regex regex...").valueSeparator(' ').type(String.class).desc("keys to export. this can be a regex. if not specified, all keys will be returned.").build();
     private static final Option TYPE = Option.builder("t").longOpt("type").required(false).hasArgs().argName("type type...").valueSeparator(' ').type(String.class).desc("data type to export. possible values are string, hash, set, sortedset, list, module, stream. multiple types can be provided. if not specified, all data types will be returned.").build();
     
+    private static final String HEADER = "rdt [-b <uri> | [-s <uri> | -i <file>] -c <file> | -m <file file...>] -o <file> [-d <num num...>] [-k <regex regex...>] [-t <type type...>]";
+    private static final String EXAMPLE = "Examples:\nrdt -b redis://127.0.0.1:6379 -o ./dump.rdb -k user.*\nrdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash\nrdt -i ./dump.rdb -c ./node.conf -o /path/to/folder -t hash\nrdt -s redis://127.0.0.1:6379 -c ./node.conf -o /path/to/folder -d 0 1\n";
+    
     public RdtCommand() {
         addOption(HELP);
         addOption(VERSION);
         addOption(SPLIT);
+        addOption(INPUT);
         addOption(MERGE);
         addOption(BACKUP);
         addOption(OUTPUT);
@@ -50,10 +56,11 @@ public class RdtCommand extends AbstractCommand {
     protected void doExecute(CommandLine line) throws Exception {
         if (line.hasOption("help")) {
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("rdt", options);
+            formatter.printHelp(HEADER, "Options:", options, EXAMPLE);
         } else if (line.hasOption("version")) {
             writeLine(version());
         } else {
+            File input = line.getOption("in");
             String split = line.getOption("split");
             String backup = line.getOption("backup");
             List<File> merge = line.getOptions("merge");
@@ -65,7 +72,7 @@ public class RdtCommand extends AbstractCommand {
             String conf = line.getOption("config");
             String output = line.getOption("out");
     
-            if (split == null && backup == null && merge.isEmpty()) {
+            if (split == null && input == null && backup == null && merge.isEmpty()) {
                 writeLine("Missing required options: s or b or m, `rdt -h` for more information.");
                 return;
             }
@@ -76,18 +83,36 @@ public class RdtCommand extends AbstractCommand {
             }
             
             if (split != null && backup != null && !merge.isEmpty()) {
-                writeLine("Invalid options: s or b or m, `rdt -h` for more information.");
+                writeLine("Invalid options: [s | i] or b or m, `rdt -h` for more information.");
                 return;
             }
     
+            if (input != null && backup != null && !merge.isEmpty()) {
+                writeLine("Invalid options: [s | i] or b or m, `rdt -h` for more information.");
+                return;
+            }
+            
             if ((split != null && backup != null) || (backup != null && !merge.isEmpty()) || (split != null && !merge.isEmpty())) {
-                writeLine("Invalid options: s or b or m, `rdt -h` for more information.");
+                writeLine("Invalid options: [s | i] or b or m, `rdt -h` for more information.");
+                return;
+            }
+    
+            if ((input != null && backup != null) || (backup != null && !merge.isEmpty()) || (input != null && !merge.isEmpty())) {
+                writeLine("Invalid options: [s | i] or b or m, `rdt -h` for more information.");
                 return;
             }
             
             Configure configure = Configure.bind();
             Action rdtType = Action.NONE;
-            if (split != null) {
+            if (split != null || input != null) {
+                if (split != null && input != null) {
+                    writeLine("Invalid options: [s | i] or b or m, `rdt -h` for more information.");
+                    return;
+                }
+                if (input != null) {
+                    URI u = input.toURI();
+                    split = new URI("redis", u.getRawAuthority(), u.getRawPath(), u.getRawQuery(), u.getRawFragment()).toString();
+                }
                 if (!Paths.get(output).toFile().isDirectory()) {
                     writeLine("Invalid options: o, `rdt -h` for more information.");
                     return;
