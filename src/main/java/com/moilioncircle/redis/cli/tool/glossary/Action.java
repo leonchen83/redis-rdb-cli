@@ -69,10 +69,6 @@ public enum Action {
                 r.setRdbVisitor(new SplitRdbVisitor(r, configure, db, regexs, types, () -> new FilesOutputStream(output, conf)));
                 return Arrays.asList(r);
             case BACKUP:
-                RedisURI backupUri = new RedisURI(backup);
-                if (backupUri.getFileType() != null) {
-                    throw new UnsupportedOperationException("Invalid options: --backup <uri> must be 'redis://host:port'.");
-                }
                 r = new CliRedisReplicator(backup, configure);
                 r.setRdbVisitor(new BackupRdbVisitor(r, configure, db, regexs, types, () -> OutputStreams.newCRCOutputStream(output)));
                 return Arrays.asList(r);
