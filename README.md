@@ -14,7 +14,7 @@ Options:
  -e,--escape <escape>        escape strings to encoding: raw (default),
                              redis.
  -f,--format <format>        format to export. valid commands are json,
-                             dump, key, keyval, mem and resp
+                             diff, dump, key, keyval, mem and resp
  -h,--help                   rct usage.
  -k,--key <regex regex...>   keys to export. this can be a regex. if not
                              specified, all keys will be returned.
