@@ -11,6 +11,8 @@ public enum Escape {
     RAW("raw"),
     REDIS("redis");
 
+    private static final char[] NUMERALS = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+
     private String value;
 
     Escape(String value) {
@@ -62,24 +64,26 @@ public enum Escape {
                 } else if (b == 7) {
                     out.write('\\');
                     out.write('a');
-                } else if (b == '"') {
-                    out.write('\\');
-                    out.write('"');
-                } else if (b == '\'') {
-                    out.write('\\');
-                    out.write('\'');
-                } else if (b == '\\') {
-                    out.write('\\');
-                    out.write('\\');
-                } else if (!((b >= 33 && b <= 126) || (b >= 161 && b <= 255))) {
+                } else if ((b == 34 || b == 39 || b == 92 || b <= 32 || b >= 127)) {
+                    // encode " ' \ unprintable and space
                     out.write('\\');
                     out.write('x');
-                    out.write(Integer.toHexString(b & 0xFF).getBytes());
+                    b = b & 0xFF;
+                    int ma = b / 16;
+                    int mi = b % 16;
+                    out.write(NUMERALS[ma]);
+                    out.write(NUMERALS[mi]);
                 } else {
                     out.write(b);
                 }
                 break;
         }
+    }
+
+    public static void main(String[] args) {
+        System.out.println((char) 34);
+        System.out.println((char) 39);
+        System.out.println((char) 92);
     }
 
     public void encode(byte[] bytes, int off, int len, OutputStream out) throws IOException {
@@ -90,7 +94,7 @@ public enum Escape {
                 break;
             case REDIS:
                 for (int i = off; i < len; i++) {
-                    encode(bytes[i], out);
+                    encode(bytes[i] & 0xFF, out);
                 }
                 break;
             default:
