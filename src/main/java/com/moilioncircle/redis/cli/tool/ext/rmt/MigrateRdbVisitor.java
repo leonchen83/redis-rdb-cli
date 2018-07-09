@@ -14,7 +14,9 @@ import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.cmd.impl.DefaultCommand;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
+import com.moilioncircle.redis.replicator.event.PostCommandSyncEvent;
 import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
+import com.moilioncircle.redis.replicator.event.PreCommandSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
@@ -37,7 +39,7 @@ import static redis.clients.jedis.Protocol.toByteArray;
 public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListener {
     
     private static final Logger logger = LoggerFactory.getLogger(MigrateRdbVisitor.class);
-
+    
     private final boolean replace;
     private final Pool<ClientPool.Client> pool;
     private final AtomicInteger dbnum = new AtomicInteger(-1);
@@ -60,9 +62,9 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
             dbnum.set(-1);
             return;
         }
-        if (event instanceof PostRdbSyncEvent) {
-            return;
-        }
+        if (event instanceof PostRdbSyncEvent) return;
+        if (event instanceof PreCommandSyncEvent) return;
+        if (event instanceof PostCommandSyncEvent) return;
         retry(event, configure.getMigrateRetryTime());
     }
     
