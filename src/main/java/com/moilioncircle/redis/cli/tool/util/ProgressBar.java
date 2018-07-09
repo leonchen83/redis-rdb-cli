@@ -2,52 +2,60 @@ package com.moilioncircle.redis.cli.tool.util;
 
 import com.moilioncircle.redis.cli.tool.glossary.Phase;
 
+import java.io.File;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author Baoyi Chen
  */
 public class ProgressBar {
-    
+
     private final long total;
     private volatile long last;
     private volatile boolean bit;
     private volatile double percentage;
     private AtomicLong num = new AtomicLong();
     private volatile long access = System.currentTimeMillis();
-    
+
     public ProgressBar(long total) {
         this.total = total;
     }
-    
+
+    public void react(long num) {
+        react(num, true, null, null);
+    }
+
     public void react(long num, Phase phase) {
-        react(num, true, phase);
+        react(num, true, phase, null);
     }
-    
-    public void react(long num, boolean increment, Phase phase) {
-        react(num, total <= 0 ? 0 : Processes.width(), increment, phase);
+
+    public void react(long num, Phase phase, File file) {
+        react(num, true, phase, file);
     }
-    
-    public void react(long num, int len, boolean increment, Phase phase) {
+
+    public void react(long num, boolean increment, Phase phase, File file) {
+        react(num, total <= 0 ? 0 : Processes.width(), increment, phase, file);
+    }
+
+    public void react(long num, int len, boolean increment, Phase phase, File file) {
         if (increment)
             this.num.addAndGet(num);
         else
             this.num.set(num);
         if (total <= 0) {
-            show(0, 0, len, this.num.get(), phase);
+            show(0, 0, len, this.num.get(), phase, file);
             return;
         }
-        assert total > 0;
         double percentage = this.num.get() / (double) total * 100;
         if (this.percentage != percentage) {
             double prev = this.percentage;
             this.percentage = percentage;
             double next = this.percentage;
-            show(prev, next, len, this.num.get(), phase);
+            show(prev, next, len, this.num.get(), phase, file);
         }
     }
-    
-    private void show(double prev, double next, int len, long num, Phase phase) {
+
+    private void show(double prev, double next, int len, long num, Phase phase, File file) {
         long now = System.currentTimeMillis();
         long elapsed = now - access;
         if (elapsed < 1000) return;
@@ -68,6 +76,10 @@ public class ProgressBar {
                 builder.append('|');
                 builder.append(phase);
             }
+            if (file != null) {
+                builder.append('|');
+                builder.append(file.getName());
+            }
         } else {
             builder.append('/').append(pretty(total)).append('|');
             if ((int) next < 10) {
@@ -80,6 +92,10 @@ public class ProgressBar {
             if (phase != null) {
                 builder.append('|');
                 builder.append(phase);
+            }
+            if (file != null) {
+                builder.append('|');
+                builder.append(file.getName());
             }
             builder.append(']');
             int used = builder.length();
@@ -101,11 +117,11 @@ public class ProgressBar {
         System.out.print('\r');
         System.out.print(builder.toString());
     }
-    
+
     public static String pretty(long bytes) {
         return pretty(bytes, true);
     }
-    
+
     public static String pretty(long bytes, boolean si) {
         int unit = si ? 1000 : 1024;
         if (bytes < unit) return bytes + " B";

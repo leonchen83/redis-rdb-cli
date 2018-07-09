@@ -10,6 +10,7 @@ import java.util.List;
 /**
  * @author Baoyi Chen
  */
+@SuppressWarnings("unchecked")
 public class CommandLine {
 
     private org.apache.commons.cli.CommandLine line;

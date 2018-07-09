@@ -67,8 +67,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         firstkey = true;
         hasdb = true;
         out.write('{');
-        DB db = super.applySelectDB(in, version);
-        return db;
+        return super.applySelectDB(in, version);
     }
     
     @Override
@@ -499,6 +498,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         emitString(key);
         out.write(':');
         out.write('"');
+        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape)) {
             replicator.addRawByteListener(listener);
             super.doApplyModule(in, db, version, key, contains, type);
@@ -523,6 +523,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         emitString(key);
         out.write(':');
         out.write('"');
+        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape)) {
             replicator.addRawByteListener(listener);
             super.doApplyModule2(in, db, version, key, contains, type);
@@ -547,6 +548,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         emitString(key);
         out.write(':');
         out.write('"');
+        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape)) {
             replicator.addRawByteListener(listener);
             super.doApplyStreamListPacks(in, db, version, key, contains, type);

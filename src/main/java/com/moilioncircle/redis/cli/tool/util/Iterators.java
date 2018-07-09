@@ -23,6 +23,7 @@ import java.util.NoSuchElementException;
  * @author Leon Chen
  * @since 1.0.0
  */
+@SuppressWarnings("unchecked")
 public class Iterators {
 
     public static Iterator<?> EMPTY = new Iterator<Object>() {
@@ -36,10 +37,6 @@ public class Iterators {
             return null;
         }
     };
-
-    public static <T> Iterator<T> iterator(T t) {
-        return iterator(t);
-    }
 
     @SafeVarargs
     public static <T> Iterator<T> iterator(final T... t) {

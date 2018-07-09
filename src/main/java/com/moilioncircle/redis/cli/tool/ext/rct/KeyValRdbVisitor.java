@@ -309,6 +309,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
     public Event doApplyModule(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         emit(key);
         out.write(' ');
+        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape)) {
             replicator.addRawByteListener(listener);
             super.doApplyModule(in, db, version, key, contains, type);
@@ -322,6 +323,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
     public Event doApplyModule2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         emit(key);
         out.write(' ');
+        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape)) {
             replicator.addRawByteListener(listener);
             super.doApplyModule2(in, db, version, key, contains, type);
@@ -340,6 +342,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
     public Event doApplyStreamListPacks(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         emit(key);
         out.write(' ');
+        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape)) {
             replicator.addRawByteListener(listener);
             super.doApplyStreamListPacks(in, db, version, key, contains, type);

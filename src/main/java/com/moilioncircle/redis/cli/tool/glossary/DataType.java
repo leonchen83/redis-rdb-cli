@@ -3,13 +3,13 @@ package com.moilioncircle.redis.cli.tool.glossary;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 
 /**
  * @author Baoyi Chen
  */
 public enum DataType {
-    
+
     ALL("all"),
     SET("set"),
     LIST("list"),
@@ -18,30 +18,30 @@ public enum DataType {
     MODULE("module"),
     STREAM("stream"),
     SORTEDSET("sortedset");
-    
+
     private String value;
-    
+
     DataType(String value) {
         this.value = value;
     }
-    
+
     public String getValue() {
         return value;
     }
-    
+
     public static List<DataType> parse(List<String> list) {
-        if (list.isEmpty()) return asList(ALL);
+        if (list.isEmpty()) return singletonList(ALL);
         List<DataType> r = new ArrayList<>(list.size());
         for (String name : list) r.add(DataType.parse(name));
         return r;
     }
-    
+
     public static boolean contains(List<DataType> list, int rdb) {
         if (list.isEmpty()) return true;
         for (DataType type : list) if (type.contains(rdb)) return true;
         return false;
     }
-    
+
     public static DataType parse(String type) {
         switch (type) {
             case "all":
@@ -62,10 +62,10 @@ public enum DataType {
                 return SORTEDSET;
             default:
                 throw new AssertionError("Unsupported type '" + type + "'");
-            
+
         }
     }
-    
+
     public static DataType parse(int type) {
         switch (type) {
             case 0:
@@ -94,7 +94,7 @@ public enum DataType {
                 throw new AssertionError(type);
         }
     }
-    
+
     public boolean contains(int type) {
         switch (this) {
             case ALL:
@@ -116,7 +116,7 @@ public enum DataType {
         }
         return false;
     }
-    
+
     public static String type(int type) {
         switch (type) {
             case 0:

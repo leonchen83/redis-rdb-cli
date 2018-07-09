@@ -17,6 +17,10 @@ public enum Escape {
         this.value = value;
     }
 
+    public String getValue() {
+        return this.value;
+    }
+
     public static Escape parse(String escape) {
         if (escape == null) return RAW;
         switch (escape) {
@@ -37,7 +41,7 @@ public enum Escape {
         encode(String.valueOf(value).getBytes(), out);
     }
 
-    public void encode(byte b, OutputStream out) throws IOException {
+    public void encode(int b, OutputStream out) throws IOException {
         switch (this) {
             case RAW:
                 out.write(b);

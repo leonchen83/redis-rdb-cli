@@ -10,20 +10,17 @@ import java.io.OutputStream;
 import static com.moilioncircle.redis.cli.tool.glossary.Guard.DRAIN;
 import static com.moilioncircle.redis.cli.tool.glossary.Guard.SAVE;
 
-
 /**
  * @author Baoyi Chen
  */
 public class GuardOutputStream extends OutputStream {
     
-    private final int cap;
     private OutputStream out;
     private Guard guard = SAVE;
     private ByteBuilder builder;
     
     
     public GuardOutputStream(int cap, OutputStream out) {
-        this.cap = cap;
         this.out = out;
         this.builder = ByteBuilder.allocate(cap);
     }

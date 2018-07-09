@@ -96,7 +96,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
      */
     public AbstractRdbVisitor(Replicator replicator, Configure configure, List<Long> db, List<String> regexs, List<DataType> types, Supplier<OutputStream> supplier) {
         this(replicator, configure, db, regexs, types);
-        this.listener = new GuardRawByteListener(supplier.get());
+        this.listener = new GuardRawByteListener(configure.getBufferSize(), supplier.get());
         this.replicator.addRawByteListener(listener);
     }
     

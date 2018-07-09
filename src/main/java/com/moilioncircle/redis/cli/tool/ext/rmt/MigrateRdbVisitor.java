@@ -37,8 +37,7 @@ import static redis.clients.jedis.Protocol.toByteArray;
 public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListener {
     
     private static final Logger logger = LoggerFactory.getLogger(MigrateRdbVisitor.class);
-    
-    private final RedisURI uri;
+
     private final boolean replace;
     private final Pool<ClientPool.Client> pool;
     private final AtomicInteger dbnum = new AtomicInteger(-1);
@@ -46,11 +45,11 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     public MigrateRdbVisitor(Replicator replicator, Configure configure, String uri, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) throws Exception {
         super(replicator, configure, db, regexs, types);
         this.replace = replace;
-        this.uri = new RedisURI(uri);
-        Configuration config = Configuration.valueOf(this.uri);
+        RedisURI uri1 = new RedisURI(uri);
+        Configuration config = Configuration.valueOf(uri1);
         int timeout = configure.getTimeout();
         String password = config.getAuthPassword();
-        this.pool = ClientPool.create(this.uri.getHost(), this.uri.getPort(), password, timeout);
+        this.pool = ClientPool.create(uri1.getHost(), uri1.getPort(), password, timeout);
         this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure));
         this.replicator.addCloseListener(e -> Lifecyclet.stopQuietly(this.pool));
     }
@@ -116,7 +115,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     
     @Override
     protected Event doApplyString(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, null);
+        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, configure.getBufferSize(), null);
         replicator.addRawByteListener(listener);
         super.doApplyString(in, db, version, key, contains, type);
         replicator.removeRawByteListener(listener);
@@ -130,7 +129,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     
     @Override
     protected Event doApplyList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, null);
+        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, configure.getBufferSize(), null);
         replicator.addRawByteListener(listener);
         super.doApplyList(in, db, version, key, contains, type);
         replicator.removeRawByteListener(listener);
@@ -144,7 +143,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     
     @Override
     protected Event doApplySet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, null);
+        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, configure.getBufferSize(), null);
         replicator.addRawByteListener(listener);
         super.doApplySet(in, db, version, key, contains, type);
         replicator.removeRawByteListener(listener);
@@ -158,7 +157,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     
     @Override
     protected Event doApplyZSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, null);
+        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, configure.getBufferSize(), null);
         replicator.addRawByteListener(listener);
         super.doApplyZSet(in, db, version, key, contains, type);
         replicator.removeRawByteListener(listener);
@@ -172,7 +171,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     
     @Override
     protected Event doApplyZSet2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, null);
+        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, configure.getBufferSize(), null);
         replicator.addRawByteListener(listener);
         super.doApplyZSet2(in, db, version, key, contains, type);
         replicator.removeRawByteListener(listener);
@@ -186,7 +185,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     
     @Override
     protected Event doApplyHash(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, null);
+        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, configure.getBufferSize(), null);
         replicator.addRawByteListener(listener);
         super.doApplyHash(in, db, version, key, contains, type);
         replicator.removeRawByteListener(listener);
@@ -200,7 +199,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     
     @Override
     protected Event doApplyHashZipMap(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, null);
+        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, configure.getBufferSize(), null);
         replicator.addRawByteListener(listener);
         super.doApplyHashZipMap(in, db, version, key, contains, type);
         replicator.removeRawByteListener(listener);
@@ -214,7 +213,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     
     @Override
     protected Event doApplyListZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, null);
+        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, configure.getBufferSize(), null);
         replicator.addRawByteListener(listener);
         super.doApplyListZipList(in, db, version, key, contains, type);
         replicator.removeRawByteListener(listener);
@@ -228,7 +227,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     
     @Override
     protected Event doApplySetIntSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, null);
+        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, configure.getBufferSize(), null);
         replicator.addRawByteListener(listener);
         super.doApplyListZipList(in, db, version, key, contains, type);
         replicator.removeRawByteListener(listener);
@@ -242,7 +241,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     
     @Override
     protected Event doApplyZSetZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, null);
+        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, configure.getBufferSize(), null);
         replicator.addRawByteListener(listener);
         super.doApplyZSetZipList(in, db, version, key, contains, type);
         replicator.removeRawByteListener(listener);
@@ -256,7 +255,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     
     @Override
     protected Event doApplyHashZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, null);
+        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, configure.getBufferSize(), null);
         replicator.addRawByteListener(listener);
         super.doApplyHashZipList(in, db, version, key, contains, type);
         replicator.removeRawByteListener(listener);
@@ -270,7 +269,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     
     @Override
     protected Event doApplyListQuickList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, null);
+        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, configure.getBufferSize(), null);
         replicator.addRawByteListener(listener);
         super.doApplyListQuickList(in, db, version, key, contains, type);
         replicator.removeRawByteListener(listener);
@@ -284,7 +283,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     
     @Override
     protected Event doApplyModule(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, null);
+        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, configure.getBufferSize(), null);
         replicator.addRawByteListener(listener);
         super.doApplyModule(in, db, version, key, contains, type);
         replicator.removeRawByteListener(listener);
@@ -298,7 +297,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     
     @Override
     protected Event doApplyModule2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, null);
+        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, configure.getBufferSize(), null);
         replicator.addRawByteListener(listener);
         super.doApplyModule2(in, db, version, key, contains, type);
         replicator.removeRawByteListener(listener);
@@ -312,7 +311,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     
     @Override
     protected Event doApplyStreamListPacks(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, null);
+        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, configure.getBufferSize(), null);
         replicator.addRawByteListener(listener);
         super.doApplyStreamListPacks(in, db, version, key, contains, type);
         replicator.removeRawByteListener(listener);

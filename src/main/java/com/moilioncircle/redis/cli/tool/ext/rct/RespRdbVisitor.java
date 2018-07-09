@@ -26,14 +26,14 @@ import static com.moilioncircle.redis.replicator.Constants.STAR;
  * @author Baoyi Chen
  */
 public class RespRdbVisitor extends AbstractRdbVisitor {
-    
+
     private final int batch;
-    
+
     public RespRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escape escape) {
         super(replicator, configure, out, db, regexs, types, escape);
         this.batch = configure.getBatchSize();
     }
-    
+
     @Override
     public DB applySelectDB(RedisInputStream in, int version) throws IOException {
         DB db = super.applySelectDB(in, version);
@@ -41,7 +41,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         emit("select", String.valueOf(dbnum));
         return db;
     }
-    
+
     @Override
     public Event applyExpireTime(RedisInputStream in, DB db, int version) throws IOException {
         DummyKeyValuePair kv = (DummyKeyValuePair) super.applyExpireTime(in, db, version);
@@ -49,7 +49,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         emit("expireat".getBytes(), kv.getKey(), String.valueOf(kv.getExpiredSeconds() * 1000).getBytes());
         return kv;
     }
-    
+
     @Override
     public Event applyExpireTimeMs(RedisInputStream in, DB db, int version) throws IOException {
         DummyKeyValuePair kv = (DummyKeyValuePair) super.applyExpireTimeMs(in, db, version);
@@ -57,13 +57,13 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         emit("expireat".getBytes(), kv.getKey(), String.valueOf(kv.getExpiredMs()).getBytes());
         return kv;
     }
-    
+
     private void emit(String command, String key, String... args) throws IOException {
         byte[][] ary = new byte[args.length][];
         for (int i = 0; i < args.length; i++) ary[i] = args[i].getBytes();
         emit(command.getBytes(), key.getBytes(), ary);
     }
-    
+
     private void emit(byte[] command, byte[] key, byte[]... ary) throws IOException {
         byte[][] args = new byte[ary.length + 1][];
         System.arraycopy(ary, 0, args, 1, ary.length);
@@ -91,7 +91,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             out.write('\n');
         }
     }
-    
+
     @Override
     protected Event doApplyString(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -104,7 +104,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-    
+
     @Override
     protected Event doApplyList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -127,7 +127,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-    
+
     @Override
     protected Event doApplySet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -150,7 +150,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-    
+
     @Override
     protected Event doApplyZSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -175,7 +175,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-    
+
     @Override
     protected Event doApplyZSet2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -200,7 +200,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-    
+
     @Override
     protected Event doApplyHash(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -225,7 +225,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-    
+
     @Override
     protected Event doApplyHashZipMap(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -271,12 +271,12 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             }
         }
     }
-    
+
     @Override
     protected Event doApplyListZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
         RedisInputStream stream = new RedisInputStream(parser.rdbLoadPlainStringObject());
-        
+
         BaseRdbParser.LenHelper.zlbytes(stream); // zlbytes
         BaseRdbParser.LenHelper.zltail(stream); // zltail
         int zllen = BaseRdbParser.LenHelper.zllen(stream);
@@ -301,12 +301,12 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-    
+
     @Override
     protected Event doApplySetIntSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
         RedisInputStream stream = new RedisInputStream(parser.rdbLoadPlainStringObject());
-        
+
         List<byte[]> list = new ArrayList<>();
         int encoding = BaseRdbParser.LenHelper.encoding(stream);
         long lenOfContent = BaseRdbParser.LenHelper.lenOfContent(stream);
@@ -339,7 +339,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-    
+
     @Override
     protected Event doApplyZSetZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -372,7 +372,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-    
+
     @Override
     protected Event doApplyHashZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -405,7 +405,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-    
+
     @Override
     protected Event doApplyListQuickList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -413,7 +413,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         long len = parser.rdbLoadLen().len;
         for (int i = 0; i < len; i++) {
             RedisInputStream stream = new RedisInputStream(parser.rdbGenericLoadStringObject(RDB_LOAD_NONE));
-    
+
             BaseRdbParser.LenHelper.zlbytes(stream); // zlbytes
             BaseRdbParser.LenHelper.zltail(stream); // zltail
             int zllen = BaseRdbParser.LenHelper.zllen(stream);
@@ -438,10 +438,11 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-    
+
     @Override
     protected Event doApplyModule(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, null);
+        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, configure.getBufferSize(), null);
         replicator.addRawByteListener(listener);
         super.doApplyModule(in, db, version, key, contains, type);
         replicator.removeRawByteListener(listener);
@@ -453,10 +454,11 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-    
+
     @Override
     protected Event doApplyModule2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, null);
+        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, configure.getBufferSize(), null);
         replicator.addRawByteListener(listener);
         super.doApplyModule2(in, db, version, key, contains, type);
         replicator.removeRawByteListener(listener);
@@ -468,10 +470,11 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-    
+
     @Override
     protected Event doApplyStreamListPacks(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, null);
+        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        GuardRawByteListener listener = new GuardRawByteListener((byte) type, version, configure.getBufferSize(), null);
         replicator.addRawByteListener(listener);
         super.doApplyStreamListPacks(in, db, version, key, contains, type);
         replicator.removeRawByteListener(listener);
