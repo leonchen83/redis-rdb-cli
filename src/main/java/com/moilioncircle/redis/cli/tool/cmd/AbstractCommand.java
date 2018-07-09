@@ -51,7 +51,7 @@ public abstract class AbstractCommand implements Command {
             uri = new RedisURI(new URI("redis", u.getRawAuthority(), u.getRawPath(), u.getRawQuery(), u.getRawFragment()).toString());
         }
         if (uri != null && (uri.getFileType() == null || type == null || uri.getFileType() == type)) {
-            return source;
+            return uri.toString();
         }
         throw new AssertionError(message);
     }
