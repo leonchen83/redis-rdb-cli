@@ -107,6 +107,7 @@ public class RctCommand extends AbstractCommand {
                 if (event instanceof PostRdbSyncEvent) CliRedisReplicator.close(rep);
             });
             r.open();
+            System.out.println();
         }
     }
     

@@ -111,6 +111,7 @@ public class RmtCommand extends AbstractCommand {
                 }
             });
             r.open();
+            System.out.println();
         }
     }
     

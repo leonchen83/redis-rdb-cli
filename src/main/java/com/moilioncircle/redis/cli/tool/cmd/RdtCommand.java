@@ -133,6 +133,7 @@ public class RdtCommand extends AbstractCommand {
                 });
                 tuple.getV1().open();
             }
+            System.out.println();
         }
     }
     
