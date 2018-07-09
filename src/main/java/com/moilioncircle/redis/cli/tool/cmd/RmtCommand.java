@@ -14,8 +14,8 @@ import com.moilioncircle.redis.replicator.cmd.parser.DefaultCommandParser;
 import com.moilioncircle.redis.replicator.cmd.parser.PingParser;
 import com.moilioncircle.redis.replicator.cmd.parser.ReplConfParser;
 import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
+import com.moilioncircle.redis.replicator.event.PreCommandSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
-import com.moilioncircle.redis.replicator.rdb.datatype.KeyValuePair;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 
@@ -103,16 +103,11 @@ public class RmtCommand extends AbstractCommand {
                 if (event instanceof PreRdbSyncEvent) {
                     phase.set(RDB);
                 } else if (event instanceof PostRdbSyncEvent) {
-                    phase.set(AOF);
-                } else if (event instanceof KeyValuePair<?, ?>) {
-                    phase.set(RDB);
-                } else {
-                    phase.set(AOF);
-                }
-                if (event instanceof PostRdbSyncEvent) {
                     if (!db.isEmpty() || !type.isEmpty() || !regexs.isEmpty()) {
                         CliRedisReplicator.closeQuietly(rep);
                     }
+                } else if (event instanceof PreCommandSyncEvent) {
+                    phase.set(AOF);
                 }
             });
             r.open();
