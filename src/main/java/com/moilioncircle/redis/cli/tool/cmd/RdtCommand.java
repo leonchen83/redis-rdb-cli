@@ -8,8 +8,8 @@ import com.moilioncircle.redis.cli.tool.util.ProgressBar;
 import com.moilioncircle.redis.cli.tool.util.type.Tuple2;
 import com.moilioncircle.redis.replicator.FileType;
 import com.moilioncircle.redis.replicator.Replicator;
-import com.moilioncircle.redis.replicator.event.PostFullSyncEvent;
-import com.moilioncircle.redis.replicator.event.PreFullSyncEvent;
+import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
+import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 
@@ -122,9 +122,9 @@ public class RdtCommand extends AbstractCommand {
 
             for (Tuple2<Replicator, File> tuple : list) {
                 tuple.getV1().addEventListener((rep, event) -> {
-                    if (event instanceof PreFullSyncEvent)
+                    if (event instanceof PreRdbSyncEvent)
                         rep.addRawByteListener(b -> bar.react(b.length, RDB, tuple.getV2()));
-                    if (event instanceof PostFullSyncEvent) CliRedisReplicator.close(rep);
+                    if (event instanceof PostRdbSyncEvent) CliRedisReplicator.close(rep);
                 });
                 tuple.getV1().open();
             }

@@ -7,7 +7,7 @@ import com.moilioncircle.redis.cli.tool.glossary.Escape;
 import com.moilioncircle.redis.cli.tool.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
-import com.moilioncircle.redis.replicator.event.PreFullSyncEvent;
+import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.BaseRdbParser;
 import com.moilioncircle.redis.replicator.rdb.DefaultRdbVisitor;
@@ -84,7 +84,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         this(replicator, configure, db, regexs, types);
         this.escape = escape;
         replicator.addEventListener((rep, event) -> {
-            if (!(event instanceof PreFullSyncEvent)) return;
+            if (!(event instanceof PreRdbSyncEvent)) return;
             OutputStreams.closeQuietly(this.out);
             this.out = OutputStreams.newBufferedOutputStream(output);
         });

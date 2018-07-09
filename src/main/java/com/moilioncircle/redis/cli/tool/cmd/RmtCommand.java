@@ -13,8 +13,8 @@ import com.moilioncircle.redis.replicator.cmd.CommandName;
 import com.moilioncircle.redis.replicator.cmd.parser.DefaultCommandParser;
 import com.moilioncircle.redis.replicator.cmd.parser.PingParser;
 import com.moilioncircle.redis.replicator.cmd.parser.ReplConfParser;
-import com.moilioncircle.redis.replicator.event.PostFullSyncEvent;
-import com.moilioncircle.redis.replicator.event.PreFullSyncEvent;
+import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
+import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.rdb.datatype.KeyValuePair;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
@@ -100,16 +100,16 @@ public class RmtCommand extends AbstractCommand {
             Runtime.getRuntime().addShutdownHook(new Thread(() -> CliRedisReplicator.closeQuietly(r)));
             r.addRawByteListener(b -> bar.react(b.length, phase.get()));
             r.addEventListener((rep, event) -> {
-                if (event instanceof PreFullSyncEvent) {
+                if (event instanceof PreRdbSyncEvent) {
                     phase.set(RDB);
-                } else if (event instanceof PostFullSyncEvent) {
+                } else if (event instanceof PostRdbSyncEvent) {
                     phase.set(AOF);
                 } else if (event instanceof KeyValuePair<?, ?>) {
                     phase.set(RDB);
                 } else {
                     phase.set(AOF);
                 }
-                if (event instanceof PostFullSyncEvent) {
+                if (event instanceof PostRdbSyncEvent) {
                     if (!db.isEmpty() || !type.isEmpty() || !regexs.isEmpty()) {
                         CliRedisReplicator.closeQuietly(rep);
                     }

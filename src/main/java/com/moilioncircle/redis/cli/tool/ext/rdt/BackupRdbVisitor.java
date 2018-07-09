@@ -7,8 +7,8 @@ import com.moilioncircle.redis.cli.tool.glossary.Guard;
 import com.moilioncircle.redis.cli.tool.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
-import com.moilioncircle.redis.replicator.event.PostFullSyncEvent;
-import com.moilioncircle.redis.replicator.event.PreFullSyncEvent;
+import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
+import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.io.CRCOutputStream;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
@@ -26,10 +26,10 @@ public class BackupRdbVisitor extends AbstractRdbVisitor {
     public BackupRdbVisitor(Replicator replicator, Configure configure, List<Long> db, List<String> regexs, List<DataType> types, Supplier<OutputStream> supplier) {
         super(replicator, configure, db, regexs, types, supplier);
         this.replicator.addEventListener((rep, event) -> {
-            if (event instanceof PreFullSyncEvent) {
+            if (event instanceof PreRdbSyncEvent) {
                 listener.reset(supplier.get());
             }
-            if (event instanceof PostFullSyncEvent) {
+            if (event instanceof PostRdbSyncEvent) {
                 CRCOutputStream out = listener.getOutputStream();
                 OutputStreams.writeQuietly((byte) 255, out);
                 OutputStreams.writeQuietly(out.getCRC64(), out);

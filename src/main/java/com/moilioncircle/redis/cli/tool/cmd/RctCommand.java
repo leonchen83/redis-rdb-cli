@@ -8,8 +8,8 @@ import com.moilioncircle.redis.cli.tool.glossary.Format;
 import com.moilioncircle.redis.cli.tool.util.ProgressBar;
 import com.moilioncircle.redis.replicator.FileType;
 import com.moilioncircle.redis.replicator.Replicator;
-import com.moilioncircle.redis.replicator.event.PostFullSyncEvent;
-import com.moilioncircle.redis.replicator.event.PreFullSyncEvent;
+import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
+import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 
@@ -102,9 +102,9 @@ public class RctCommand extends AbstractCommand {
             Format.parse(format).dress(r, configure, output, db, regexs, largest, bytes, DataType.parse(type), Escape.parse(escape));
             Runtime.getRuntime().addShutdownHook(new Thread(() -> CliRedisReplicator.closeQuietly(r)));
             r.addEventListener((rep, event) -> {
-                if (event instanceof PreFullSyncEvent)
+                if (event instanceof PreRdbSyncEvent)
                     rep.addRawByteListener(b -> bar.react(b.length, RDB));
-                if (event instanceof PostFullSyncEvent) CliRedisReplicator.close(rep);
+                if (event instanceof PostRdbSyncEvent) CliRedisReplicator.close(rep);
             });
             r.open();
         }

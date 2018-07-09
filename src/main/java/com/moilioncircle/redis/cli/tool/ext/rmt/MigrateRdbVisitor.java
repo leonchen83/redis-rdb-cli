@@ -14,8 +14,8 @@ import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.cmd.impl.DefaultCommand;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
-import com.moilioncircle.redis.replicator.event.PostFullSyncEvent;
-import com.moilioncircle.redis.replicator.event.PreFullSyncEvent;
+import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
+import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
 import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
@@ -56,11 +56,11 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     
     @Override
     public void onEvent(Replicator replicator, Event event) {
-        if (event instanceof PreFullSyncEvent) {
+        if (event instanceof PreRdbSyncEvent) {
             dbnum.set(-1);
             return;
         }
-        if (event instanceof PostFullSyncEvent) {
+        if (event instanceof PostRdbSyncEvent) {
             return;
         }
         retry(event, configure.getMigrateRetryTime());
