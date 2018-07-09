@@ -41,6 +41,8 @@ public enum Format {
                 return KEY;
             case "mem":
                 return MEM;
+            case "diff":
+                return DIFF;
             case "dump":
                 return DUMP;
             case "json":
@@ -65,7 +67,6 @@ public enum Format {
             case JSON:
                 r.setRdbVisitor(new JsonRdbVisitor(r, conf, output, db, regexs, types, escape));
                 break;
-            
             case DUMP:
                 r.setRdbVisitor(new DumpRdbVisitor(r, conf, output, db, regexs, types, escape));
                 break;
