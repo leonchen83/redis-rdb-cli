@@ -282,6 +282,7 @@ public class Configure {
     public String toString() {
         return "CliConfig{" +
                 "batchSize=" + batchSize +
+                ", dumpRdbVersion=" + dumpRdbVersion +
                 ", timeout=" + timeout +
                 ", rcvBuf=" + rcvBuf +
                 ", sndBuf=" + sndBuf +
