@@ -30,7 +30,7 @@ import static com.moilioncircle.redis.cli.tool.glossary.Phase.RDB;
  * @author Baoyi Chen
  */
 public class RmtCommand extends AbstractCommand {
-    
+
     private static final Option HELP = Option.builder("h").longOpt("help").required(false).hasArg(false).desc("rmt usage.").build();
     private static final Option VERSION = Option.builder("v").longOpt("version").required(false).hasArg(false).desc("rmt version.").build();
     private static final Option SOURCE = Option.builder("s").longOpt("source").required(false).hasArg().argName("source").type(String.class).desc("<source> eg:\n /path/to/dump.rdb redis://host:port?authPassword=foobar redis:///path/to/dump.rdb").build();
@@ -39,10 +39,10 @@ public class RmtCommand extends AbstractCommand {
     private static final Option DB = Option.builder("d").longOpt("db").required(false).hasArg().argName("num num...").valueSeparator(' ').type(Number.class).desc("database number. multiple databases can be provided. if not specified, all databases will be included.").build();
     private static final Option KEY = Option.builder("k").longOpt("key").required(false).hasArg().argName("regex regex...").valueSeparator(' ').type(String.class).desc("keys to export. this can be a regex. if not specified, all keys will be returned.").build();
     private static final Option TYPE = Option.builder("t").longOpt("type").required(false).hasArgs().argName("type type...").valueSeparator(' ').type(String.class).desc("data type to export. possible values are string, hash, set, sortedset, list, module, stream. multiple types can be provided. if not specified, all data types will be returned.").build();
-    
+
     private static final String HEADER = "rmt -s <source> -m <uri> [-d <num num...>] [-k <regex regex...>] [-t <type type...>]";
     private static final String EXAMPLE = "Examples:\n rmt -s redis://120.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0\n rmt -s ./dump.rdb -m redis://127.0.0.1:6380 -t string -r\n rmt -s ./appendonly.aof -m redis://127.0.0.1:6380\n";
-    
+
     public RmtCommand() {
         addOption(HELP);
         addOption(VERSION);
@@ -53,7 +53,7 @@ public class RmtCommand extends AbstractCommand {
         addOption(KEY);
         addOption(TYPE);
     }
-    
+
     @Override
     protected void doExecute(CommandLine line) throws Exception {
         if (line.hasOption("help")) {
@@ -63,58 +63,58 @@ public class RmtCommand extends AbstractCommand {
             writeLine(version());
         } else {
             StringBuilder sb = new StringBuilder();
-    
+
             if (!line.hasOption("source")) {
                 sb.append("s ");
             }
-    
+
             if (!line.hasOption("migrate")) {
                 sb.append("m ");
             }
-    
+
             if (sb.length() > 0) {
                 writeLine("Missing required options: " + sb.toString() + ". Try `rmt -h` for more information.");
                 return;
             }
-    
+
             String migrate = line.getOption("migrate");
             String source = line.getOption("source");
-    
+
             List<Long> db = line.getOptions("db");
             List<String> type = line.getOptions("type");
             boolean replace = line.hasOption("replace");
             List<String> regexs = line.getOptions("key");
-    
+
             source = normalize(source, FileType.RDB, "Invalid options: s. Try `rmt -h` for more information.");
-            
+
             RedisURI uri = new RedisURI(migrate);
             if (uri.getFileType() != null) {
                 writeLine("Invalid options: m. Try `rmt -h` for more information.");
                 return;
             }
-            ProgressBar bar = new ProgressBar(-1);
-            Configure configure = Configure.bind();
-            Replicator r = new CliRedisReplicator(source, configure);
-            dress(r, configure, migrate, db, regexs, DataType.parse(type), replace);
-            AtomicReference<Phase> phase = new AtomicReference<>(NOP);
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> CliRedisReplicator.closeQuietly(r)));
-            r.addRawByteListener(b -> bar.react(b.length, phase.get()));
-            r.addEventListener((rep, event) -> {
-                if (event instanceof PreRdbSyncEvent) {
-                    phase.set(RDB);
-                } else if (event instanceof PostRdbSyncEvent) {
-                    if (!db.isEmpty() || !type.isEmpty() || !regexs.isEmpty()) {
-                        CliRedisReplicator.closeQuietly(rep);
+            try (ProgressBar bar = new ProgressBar(-1)) {
+                Configure configure = Configure.bind();
+                Replicator r = new CliRedisReplicator(source, configure);
+                dress(r, configure, migrate, db, regexs, DataType.parse(type), replace);
+                AtomicReference<Phase> phase = new AtomicReference<>(NOP);
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> CliRedisReplicator.closeQuietly(r)));
+                r.addRawByteListener(b -> bar.react(b.length, phase.get()));
+                r.addEventListener((rep, event) -> {
+                    if (event instanceof PreRdbSyncEvent) {
+                        phase.set(RDB);
+                    } else if (event instanceof PostRdbSyncEvent) {
+                        if (!db.isEmpty() || !type.isEmpty() || !regexs.isEmpty()) {
+                            CliRedisReplicator.closeQuietly(rep);
+                        }
+                    } else if (event instanceof PreCommandSyncEvent) {
+                        phase.set(AOF);
                     }
-                } else if (event instanceof PreCommandSyncEvent) {
-                    phase.set(AOF);
-                }
-            });
-            r.open();
-            System.out.println();
+                });
+                r.open();
+            }
         }
     }
-    
+
     private void dress(Replicator r, Configure conf, String migrate, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) throws Exception {
         r.setRdbVisitor(new MigrateRdbVisitor(r, conf, migrate, db, regexs, types, replace));
         // ignore PING REPLCONF GETACK
@@ -203,12 +203,12 @@ public class RmtCommand extends AbstractCommand {
         r.addCommandParser(CommandName.name("XGROUP"), new DefaultCommandParser());
         r.addCommandParser(CommandName.name("XTRIM"), new DefaultCommandParser());
     }
-    
+
     @Override
     public String name() {
         return "rmt";
     }
-    
+
     public static void run(String[] args) throws Exception {
         RmtCommand command = new RmtCommand();
         command.execute(args);

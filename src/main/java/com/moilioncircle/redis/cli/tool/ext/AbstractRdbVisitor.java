@@ -52,7 +52,7 @@ import static java.util.stream.Collectors.toList;
  * @author Baoyi Chen
  */
 public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
-    
+
     // common
     protected Set<Long> db;
     protected Set<String> keys;
@@ -64,7 +64,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
     protected OutputStream out;
     //rdt
     protected GuardRawByteListener listener;
-    
+
     /**
      * rmt
      */
@@ -76,7 +76,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         this.keys = new HashSet<>(regexs);
         this.regexs = regexs.stream().map(Pattern::compile).collect(toList());
     }
-    
+
     /**
      * rct
      */
@@ -90,7 +90,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         });
         replicator.addCloseListener(rep -> OutputStreams.closeQuietly(out));
     }
-    
+
     /**
      * rdt
      */
@@ -99,15 +99,15 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         this.listener = new GuardRawByteListener(configure.getBufferSize(), supplier.get());
         this.replicator.addRawByteListener(listener);
     }
-    
+
     protected boolean contains(int type) {
         return DataType.contains(types, type);
     }
-    
+
     protected boolean contains(long db) {
         return this.db.isEmpty() || this.db.contains(db);
     }
-    
+
     protected boolean contains(String key) {
         if (keys.isEmpty() || keys.contains(key)) return true;
         for (Pattern pattern : regexs) {
@@ -115,11 +115,21 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         }
         return false;
     }
-    
+
     protected boolean contains(long db, int type, String key) {
         return contains(db) && contains(type) && contains(key);
     }
-    
+
+    protected void delimiter(OutputStream out) throws IOException {
+        out.write(configure.getDelimiter());
+    }
+
+    protected void quote(byte[] bytes, OutputStream out) throws IOException {
+        out.write(configure.getQuote());
+        escape.encode(bytes, out, configure);
+        out.write(configure.getQuote());
+    }
+
     @Override
     public Event applyString(RedisInputStream in, DB db, int version) throws IOException {
         try {
@@ -140,7 +150,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-    
+
     @Override
     public Event applyList(RedisInputStream in, DB db, int version) throws IOException {
         try {
@@ -165,7 +175,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-    
+
     @Override
     public Event applySet(RedisInputStream in, DB db, int version) throws IOException {
         try {
@@ -190,7 +200,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-    
+
     @Override
     public Event applyZSet(RedisInputStream in, DB db, int version) throws IOException {
         try {
@@ -216,7 +226,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-    
+
     @Override
     public Event applyZSet2(RedisInputStream in, DB db, int version) throws IOException {
         try {
@@ -242,7 +252,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-    
+
     @Override
     public Event applyHash(RedisInputStream in, DB db, int version) throws IOException {
         try {
@@ -268,7 +278,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-    
+
     @Override
     public Event applyHashZipMap(RedisInputStream in, DB db, int version) throws IOException {
         try {
@@ -289,7 +299,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-    
+
     @Override
     public Event applyListZipList(RedisInputStream in, DB db, int version) throws IOException {
         try {
@@ -310,7 +320,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-    
+
     @Override
     public Event applySetIntSet(RedisInputStream in, DB db, int version) throws IOException {
         try {
@@ -331,7 +341,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-    
+
     @Override
     public Event applyZSetZipList(RedisInputStream in, DB db, int version) throws IOException {
         try {
@@ -352,7 +362,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-    
+
     @Override
     public Event applyHashZipList(RedisInputStream in, DB db, int version) throws IOException {
         try {
@@ -373,7 +383,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-    
+
     @Override
     public Event applyListQuickList(RedisInputStream in, DB db, int version) throws IOException {
         try {
@@ -397,7 +407,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-    
+
     @Override
     public Event applyModule(RedisInputStream in, DB db, int version) throws IOException {
         try {
@@ -429,7 +439,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-    
+
     @Override
     public Event applyModule2(RedisInputStream in, DB db, int version) throws IOException {
         try {
@@ -452,11 +462,11 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-    
+
     protected ModuleParser<? extends Module> lookupModuleParser(String moduleName, int moduleVersion) {
         return replicator.getModuleParser(moduleName, moduleVersion);
     }
-    
+
     @Override
     @SuppressWarnings("resource")
     public Event applyStreamListPacks(RedisInputStream in, DB db, int version) throws IOException {
@@ -506,12 +516,12 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-    
+
     protected Event doApplyString(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         new SkipRdbParser(in).rdbLoadEncodedStringObject();
         return new DummyKeyValuePair();
     }
-    
+
     protected Event doApplyList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         SkipRdbParser skipParser = new SkipRdbParser(in);
         long len = skipParser.rdbLoadLen().len;
@@ -521,7 +531,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         }
         return new DummyKeyValuePair();
     }
-    
+
     protected Event doApplySet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         SkipRdbParser skipParser = new SkipRdbParser(in);
         long len = skipParser.rdbLoadLen().len;
@@ -531,7 +541,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         }
         return new DummyKeyValuePair();
     }
-    
+
     protected Event doApplyZSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         SkipRdbParser skipParser = new SkipRdbParser(in);
         long len = skipParser.rdbLoadLen().len;
@@ -542,7 +552,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         }
         return new DummyKeyValuePair();
     }
-    
+
     protected Event doApplyZSet2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         SkipRdbParser skipParser = new SkipRdbParser(in);
         long len = skipParser.rdbLoadLen().len;
@@ -553,7 +563,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         }
         return new DummyKeyValuePair();
     }
-    
+
     protected Event doApplyHash(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         SkipRdbParser skipParser = new SkipRdbParser(in);
         long len = skipParser.rdbLoadLen().len;
@@ -564,32 +574,32 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         }
         return new DummyKeyValuePair();
     }
-    
+
     protected Event doApplyHashZipMap(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         new SkipRdbParser(in).rdbLoadPlainStringObject();
         return new DummyKeyValuePair();
     }
-    
+
     protected Event doApplyListZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         new SkipRdbParser(in).rdbLoadPlainStringObject();
         return new DummyKeyValuePair();
     }
-    
+
     protected Event doApplySetIntSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         new SkipRdbParser(in).rdbLoadPlainStringObject();
         return new DummyKeyValuePair();
     }
-    
+
     protected Event doApplyZSetZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         new SkipRdbParser(in).rdbLoadPlainStringObject();
         return new DummyKeyValuePair();
     }
-    
+
     protected Event doApplyHashZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         new SkipRdbParser(in).rdbLoadPlainStringObject();
         return new DummyKeyValuePair();
     }
-    
+
     protected Event doApplyListQuickList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         SkipRdbParser skipParser = new SkipRdbParser(in);
         long len = skipParser.rdbLoadLen().len;
@@ -598,7 +608,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         }
         return new DummyKeyValuePair();
     }
-    
+
     protected Event doApplyModule(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         SkipRdbParser skipParser = new SkipRdbParser(in);
         char[] c = new char[9];
@@ -615,13 +625,13 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         moduleParser.parse(in, 1);
         return new DummyKeyValuePair();
     }
-    
+
     protected Event doApplyModule2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         SkipRdbParser skipRdbParser = new SkipRdbParser(in);
         skipRdbParser.rdbLoadCheckModuleValue();
         return new DummyKeyValuePair();
     }
-    
+
     protected Event doApplyStreamListPacks(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         SkipRdbParser skipParser = new SkipRdbParser(in);
         long listPacks = skipParser.rdbLoadLen().len;

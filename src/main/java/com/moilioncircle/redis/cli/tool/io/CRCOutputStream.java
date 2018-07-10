@@ -1,5 +1,6 @@
 package com.moilioncircle.redis.cli.tool.io;
 
+import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.glossary.Escape;
 
 import java.io.IOException;
@@ -16,10 +17,12 @@ public class CRCOutputStream extends OutputStream {
     private long checksum = 0L;
     private final Escape escape;
     private final OutputStream out;
+    private final Configure configure;
 
-    public CRCOutputStream(OutputStream out, Escape escape) {
+    public CRCOutputStream(OutputStream out, Escape escape, Configure configure) {
         this.out = out;
         this.escape = escape;
+        this.configure = configure;
     }
 
     public byte[] getCRC64() {
@@ -28,7 +31,7 @@ public class CRCOutputStream extends OutputStream {
 
     @Override
     public void write(int b) throws IOException {
-        escape.encode(b & 0xFF, out);
+        escape.encode(b & 0xFF, out, configure);
         checksum = crc64(new byte[]{(byte) b}, checksum);
     }
 
@@ -37,7 +40,7 @@ public class CRCOutputStream extends OutputStream {
     }
 
     public void write(byte[] b, int off, int len) throws IOException {
-        escape.encode(b, off, len, out);
+        escape.encode(b, off, len, out, configure);
         checksum = crc64(b, off, len, checksum);
     }
 

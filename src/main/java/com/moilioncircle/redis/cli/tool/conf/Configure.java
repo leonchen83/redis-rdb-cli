@@ -47,6 +47,16 @@ public class Configure {
     private int batchSize = 128;
 
     /**
+     * rct quote
+     */
+    private byte quote = '"';
+
+    /**
+     * rct delimiter
+     */
+    private byte delimiter = ',';
+
+    /**
      * timeout
      */
     private int timeout = 30000;
@@ -107,6 +117,22 @@ public class Configure {
 
     public void setBatchSize(int batchSize) {
         this.batchSize = batchSize;
+    }
+
+    public byte getQuote() {
+        return quote;
+    }
+
+    public void setQuote(byte quote) {
+        this.quote = quote;
+    }
+
+    public byte getDelimiter() {
+        return delimiter;
+    }
+
+    public void setDelimiter(byte delimiter) {
+        this.delimiter = delimiter;
     }
 
     public int getTimeout() {
@@ -221,9 +247,11 @@ public class Configure {
 
     public static Configure bind(Properties properties) {
         Configure conf = new Configure(properties);
-        conf.migrateRetryTime = getInt(conf, "migrate_retry_time", 1, true);
         conf.batchSize = getInt(conf, "batch_size", 128, true);
+        conf.migrateRetryTime = getInt(conf, "migrate_retry_time", 1, true);
         conf.dumpRdbVersion = getInt(conf, "dump_rdb_version", -1, true);
+        conf.quote = (byte) getString(conf, "quote", "\"", true).charAt(0);
+        conf.delimiter = (byte) getString(conf, "delimiter", ",", true).charAt(0);
         conf.retryTime = getInt(conf, "retry_time", 5, true);
         conf.retryInterval = getInt(conf, "retry_interval", 1000, true);
         conf.timeout = getInt(conf, "timeout", 30000, true);
@@ -280,9 +308,10 @@ public class Configure {
 
     @Override
     public String toString() {
-        return "CliConfig{" +
+        return "Configure{" +
                 "batchSize=" + batchSize +
-                ", dumpRdbVersion=" + dumpRdbVersion +
+                ", quote=" + (char) quote +
+                ", delimiter=" + (char) delimiter +
                 ", timeout=" + timeout +
                 ", rcvBuf=" + rcvBuf +
                 ", sndBuf=" + sndBuf +
@@ -291,6 +320,7 @@ public class Configure {
                 ", retryInterval=" + retryInterval +
                 ", bufferSize=" + bufferSize +
                 ", asyncCacheSize=" + asyncCacheSize +
+                ", dumpRdbVersion=" + dumpRdbVersion +
                 ", verbose=" + verbose +
                 ", heartbeat=" + heartbeat +
                 '}';

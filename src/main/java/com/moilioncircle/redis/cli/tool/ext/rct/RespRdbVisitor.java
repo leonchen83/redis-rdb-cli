@@ -73,7 +73,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         out.write('\r');
         out.write('\n');
         out.write(DOLLAR);
-        byte[] c = escape.encode(command);
+        byte[] c = escape.encode(command, configure);
         out.write(String.valueOf(c.length).getBytes());
         out.write('\r');
         out.write('\n');
@@ -82,7 +82,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         out.write('\n');
         for (final byte[] arg : args) {
             out.write(DOLLAR);
-            byte[] a = escape.encode(arg);
+            byte[] a = escape.encode(arg, configure);
             out.write(String.valueOf(a.length).getBytes());
             out.write('\r');
             out.write('\n');

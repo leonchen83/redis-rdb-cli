@@ -2,13 +2,16 @@ package com.moilioncircle.redis.cli.tool.util;
 
 import com.moilioncircle.redis.cli.tool.glossary.Phase;
 
+import java.io.Closeable;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicLong;
+
+import static com.moilioncircle.redis.cli.tool.util.Strings.pretty;
 
 /**
  * @author Baoyi Chen
  */
-public class ProgressBar {
+public class ProgressBar implements Closeable {
 
     private final long total;
     private volatile long last;
@@ -118,15 +121,8 @@ public class ProgressBar {
         System.out.print(builder.toString());
     }
 
-    public static String pretty(long bytes) {
-        return pretty(bytes, true);
-    }
-
-    public static String pretty(long bytes, boolean si) {
-        int unit = si ? 1000 : 1024;
-        if (bytes < unit) return bytes + " B";
-        int exp = (int) (Math.log(bytes) / Math.log(unit));
-        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
-        return String.format("%.1f%sB", bytes / Math.pow(unit, exp), pre);
+    @Override
+    public void close() {
+        System.out.println();
     }
 }

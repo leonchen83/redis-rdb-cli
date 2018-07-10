@@ -22,13 +22,8 @@ import java.util.function.Supplier;
  * @author Baoyi Chen
  */
 public class SplitRdbVisitor extends AbstractRdbVisitor {
-    
-    public SplitRdbVisitor(Replicator replicator,
-                           Configure configure,
-                           List<Long> db,
-                           List<String> regexs,
-                           List<DataType> types,
-                           Supplier<OutputStream> supplier) {
+
+    public SplitRdbVisitor(Replicator replicator, Configure configure, List<Long> db, List<String> regexs, List<DataType> types, Supplier<OutputStream> supplier) {
         super(replicator, configure, db, regexs, types, supplier);
         this.replicator.addEventListener((rep, event) -> {
             if (event instanceof PreRdbSyncEvent) {

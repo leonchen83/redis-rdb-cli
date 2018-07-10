@@ -1,5 +1,7 @@
 package com.moilioncircle.redis.cli.tool.glossary;
 
+import com.moilioncircle.redis.cli.tool.conf.Configure;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -24,7 +26,7 @@ public enum Escape {
     }
 
     public static Escape parse(String escape) {
-        if (escape == null) return RAW;
+        if (escape == null) return REDIS;
         switch (escape) {
             case "raw":
                 return RAW;
@@ -35,15 +37,15 @@ public enum Escape {
         }
     }
 
-    public void encode(double value, OutputStream out) throws IOException {
-        encode(String.valueOf(value).getBytes(), out);
+    public void encode(double value, OutputStream out, Configure configure) throws IOException {
+        encode(String.valueOf(value).getBytes(), out, configure);
     }
 
-    public void encode(long value, OutputStream out) throws IOException {
-        encode(String.valueOf(value).getBytes(), out);
+    public void encode(long value, OutputStream out, Configure configure) throws IOException {
+        encode(String.valueOf(value).getBytes(), out, configure);
     }
 
-    public void encode(int b, OutputStream out) throws IOException {
+    public void encode(int b, OutputStream out, Configure configure) throws IOException {
         switch (this) {
             case RAW:
                 out.write(b);
@@ -64,7 +66,7 @@ public enum Escape {
                 } else if (b == 7) {
                     out.write('\\');
                     out.write('a');
-                } else if ((b == 34 || b == 39 || b == 92 || b <= 32 || b >= 127)) {
+                } else if (b == 34 || b == 39 || b == 92 || b <= 32 || b >= 127 || b == configure.getDelimiter() || b == configure.getQuote()) {
                     // encode " ' \ unprintable and space
                     out.write('\\');
                     out.write('x');
@@ -80,7 +82,7 @@ public enum Escape {
         }
     }
 
-    public void encode(byte[] bytes, int off, int len, OutputStream out) throws IOException {
+    public void encode(byte[] bytes, int off, int len, OutputStream out, Configure configure) throws IOException {
         if (bytes == null) return;
         switch (this) {
             case RAW:
@@ -88,7 +90,7 @@ public enum Escape {
                 break;
             case REDIS:
                 for (int i = off; i < len; i++) {
-                    encode(bytes[i] & 0xFF, out);
+                    encode(bytes[i] & 0xFF, out, configure);
                 }
                 break;
             default:
@@ -96,13 +98,14 @@ public enum Escape {
         }
     }
 
-    public void encode(byte[] bytes, OutputStream out) throws IOException {
-        encode(bytes, 0, bytes.length, out);
+    public void encode(byte[] bytes, OutputStream out, Configure configure) throws IOException {
+        if (bytes == null) return;
+        encode(bytes, 0, bytes.length, out, configure);
     }
 
-    public byte[] encode(byte[] bytes) throws IOException {
+    public byte[] encode(byte[] bytes, Configure configure) throws IOException {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream(bytes.length)) {
-            encode(bytes, 0, bytes.length, out);
+            encode(bytes, 0, bytes.length, out, configure);
             return out.toByteArray();
         }
     }
