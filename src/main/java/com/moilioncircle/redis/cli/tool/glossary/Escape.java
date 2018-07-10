@@ -80,12 +80,6 @@ public enum Escape {
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println((char) 34);
-        System.out.println((char) 39);
-        System.out.println((char) 92);
-    }
-
     public void encode(byte[] bytes, int off, int len, OutputStream out) throws IOException {
         if (bytes == null) return;
         switch (this) {
