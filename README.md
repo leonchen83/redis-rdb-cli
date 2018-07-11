@@ -1,6 +1,10 @@
 # redis-cli-tool
 
-## Requirement
+## Binary release
+
+[binary releases](https://github.com/leonchen83/redis-cli-tool/releases)
+
+## Compile requirement
 
 ```java  
 
@@ -9,7 +13,7 @@ maven-3.3.1+
 
 ```
 
-## Install & Run
+## Compile & run
 
 ```java  
     cd redis-cli-tool
