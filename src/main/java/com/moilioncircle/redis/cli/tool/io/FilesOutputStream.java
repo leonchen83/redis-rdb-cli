@@ -26,6 +26,8 @@ public class FilesOutputStream extends OutputStream {
 
     public FilesOutputStream(String path, File conf) {
         NodeConf.parse(path, conf, set, map);
+        if (map.size() != 16384)
+            throw new UnsupportedOperationException("slots size : " + map.size() + ", expected 16384.");
     }
 
     public void shard(byte[] key) {
