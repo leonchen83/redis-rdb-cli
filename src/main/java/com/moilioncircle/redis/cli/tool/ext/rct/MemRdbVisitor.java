@@ -643,12 +643,10 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         }
         
         public long string(byte[] bytes) {
-            try {
-                //TODO
-                long num = Long.parseLong(Strings.toString(bytes));
+            long num = parseLong(bytes);
+            if (num != -1) {
                 if (num < 10000) return 0;
                 else return 8;
-            } catch (NumberFormatException e) {
             }
             long len = bytes.length;
             if (version < 7) {
@@ -708,7 +706,15 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         
         public long power(long size) {
             long p = 1;
-            while (p <= size) p <<= 1;
+            long tmp = p;
+            while (tmp <= size) {
+                tmp <<= 1;
+                if (tmp <= 0) {
+                    return p;
+                } else {
+                    p = tmp;
+                }
+            }
             return p;
         }
         
@@ -723,13 +729,29 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         }
         
         public long element(byte[] element) {
-            try {
-                //TODO
-                Integer.parseInt(Strings.toString(element));
+            if (parseLong(element) != -1) {
                 return 8;
-            } catch (NumberFormatException e) {
+            } else {
                 return element.length;
             }
+        }
+    
+        public long parseLong(byte[] array) {
+            if (array == null) return -1L;
+            long t = 0L;
+            for (int i = 0; i < array.length; i++) {
+                if (array[i] >= '0' && array[i] <= '9') {
+                    t = t * (long) Math.pow(10, i) + array[i] - 48;
+                    if (t < 0) return -1L;
+                } else {
+                    return -1L;
+                }
+            }
+            return t;
+        }
+    
+        public static void main(String[] args) {
+            System.out.println(Math.pow(10, 0));
         }
         
         public long malloc(long size) {
