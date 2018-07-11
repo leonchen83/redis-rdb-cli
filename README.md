@@ -1,4 +1,24 @@
+# redis-cli-tool
 
+## Requirement
+
+```java  
+
+jdk 1.8+
+maven-3.3.1+
+
+```
+
+## Install & Run
+
+```java  
+    cd redis-cli-tool
+    mvn clean install -Dmaven.test.skip=true
+    cd target/redis-cli-tool/bin
+    ./rct -h 
+```
+
+## Usage
 
 ```java  
 
