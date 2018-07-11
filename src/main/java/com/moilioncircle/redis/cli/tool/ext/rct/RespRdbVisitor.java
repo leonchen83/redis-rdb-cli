@@ -29,13 +29,13 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
     
     private final int batch;
     
+    private static final byte[] ZERO = "0".getBytes();
     private static final byte[] SET = "set".getBytes();
-    private static final byte[] RPUSH = "rpush".getBytes();
     private static final byte[] SADD = "sadd".getBytes();
     private static final byte[] ZADD = "zadd".getBytes();
+    private static final byte[] RPUSH = "rpush".getBytes();
     private static final byte[] HMSET = "hmset".getBytes();
     private static final byte[] RESTORE = "restore".getBytes();
-    private static final byte[] ZERO = "0".getBytes();
     
     public RespRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types) {
         super(replicator, configure, out, db, regexs, types, Escape.REDIS);
