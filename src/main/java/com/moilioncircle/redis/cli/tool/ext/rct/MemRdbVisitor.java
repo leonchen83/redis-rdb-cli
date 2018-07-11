@@ -644,6 +644,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         
         public long string(byte[] bytes) {
             try {
+                //TODO
                 long num = Long.parseLong(Strings.toString(bytes));
                 if (num < 10000) return 0;
                 else return 8;
@@ -723,6 +724,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         
         public long element(byte[] element) {
             try {
+                //TODO
                 Integer.parseInt(Strings.toString(element));
                 return 8;
             } catch (NumberFormatException e) {
