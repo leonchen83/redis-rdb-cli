@@ -643,9 +643,9 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         }
         
         public long string(byte[] bytes) {
-            long num = parseLong(bytes);
-            if (num != -1) {
-                if (num < 10000) return 0;
+            long[] num = parseLong(bytes);
+            if (num[1] != -1) {
+                if (num[0] < 10000) return 0;
                 else return 8;
             }
             long len = bytes.length;
@@ -729,25 +729,35 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         }
         
         public long element(byte[] element) {
-            if (parseLong(element) != -1) {
+            if (parseLong(element)[1] != -1) {
                 return 8;
             } else {
                 return element.length;
             }
         }
     
-        public long parseLong(byte[] array) {
-            if (array == null) return -1L;
+        public long[] parseLong(byte[] array) {
+            long[] err = new long[]{-1L, -1L};
+            if (array == null) return err;
             long t = 0L;
-            for (int i = 0; i < array.length; i++) {
+            long sig = 1L;
+            int i = 0;
+            if (array[0] == '-') {
+                sig = -1L;
+                i = 1;
+            } else if (array[0] == '+') {
+                sig = 1L;
+                i = 1;
+            }
+            for (; i < array.length; i++) {
                 if (array[i] >= '0' && array[i] <= '9') {
                     t = t * (long) Math.pow(10, i) + array[i] - 48;
-                    if (t < 0) return -1L;
+                    if (t < 0) return err;
                 } else {
-                    return -1L;
+                    return err;
                 }
             }
-            return t;
+            return new long[]{t * sig, 1L};
         }
     
         public static void main(String[] args) {
