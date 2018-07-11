@@ -38,9 +38,9 @@ public class RdtCommand extends AbstractCommand {
     private static final Option TYPE = Option.builder("t").longOpt("type").required(false).hasArgs().argName("type type...").valueSeparator(' ').type(String.class).desc("data type to export. possible values are string, hash, set, sortedset, list, module, stream. multiple types can be provided. if not specified, all data types will be returned.").build();
 
     private static final String HEADER = "rdt [-b <source> | -s <source> -c <file> | -m <file file...>] -o <file> [-d <num num...>] [-k <regex regex...>] [-t <type type...>]";
-    private static final String EXAMPLE = "examples:\n rdt -b ./dump.rdb -o ./dump.rdb1 -d 0 1\n rdt -b redis://127.0.0.1:6379 -o ./dump.rdb -k user.*\n rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash\n rdt -s ./dump.rdb -c ./nodes.conf -o /path/to/folder -t hash -d 0\n rdt -s redis://127.0.0.1:6379 -c ./nodes.conf -o /path/to/folder -d 0\n";
+    private static final String EXAMPLE = "\nexamples:\n rdt -b ./dump.rdb -o ./dump.rdb1 -d 0 1\n rdt -b redis://127.0.0.1:6379 -o ./dump.rdb -k user.*\n rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash\n rdt -s ./dump.rdb -c ./nodes.conf -o /path/to/folder -t hash -d 0\n rdt -s redis://127.0.0.1:6379 -c ./nodes.conf -o /path/to/folder -d 0\n";
 
-    public RdtCommand() {
+    private RdtCommand() {
         addOption(HELP);
         addOption(VERSION);
         addOption(SPLIT);
@@ -57,7 +57,7 @@ public class RdtCommand extends AbstractCommand {
     protected void doExecute(CommandLine line) throws Exception {
         if (line.hasOption("help")) {
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp(HEADER, "options:", options, EXAMPLE);
+            formatter.printHelp(HEADER, "\noptions:", options, EXAMPLE);
         } else if (line.hasOption("version")) {
             writeLine(version());
         } else {

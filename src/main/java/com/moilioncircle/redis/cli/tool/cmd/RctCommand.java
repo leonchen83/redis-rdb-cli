@@ -36,14 +36,14 @@ public class RctCommand extends AbstractCommand {
     private static final Option ESCAPE = Option.builder("e").longOpt("escape").required(false).hasArg().argName("escape").type(String.class).desc("escape strings to encoding: redis (default), raw.").build();
 
     private static final String HEADER = "rct -f <format> -s <source> -o <file> [-d <num num...>] [-e <escape>] [-k <regex regex...>] [-t <type type...>] [-b <bytes>] [-l <n>]";
-    private static final String EXAMPLE = "examples:\n rct -f resp -s redis://127.0.0.1:6379 -o ./target.aof -d 0 1\n rct -f json -s ./dump.rdb -o ./target.json -k user.* product.*\n rct -f mem -s ./dump.rdb -o ./target.aof -e redis -t list -l 10 -b 1024\n";
+    private static final String EXAMPLE = "\nexamples:\n rct -f resp -s redis://127.0.0.1:6379 -o ./target.aof -d 0 1\n rct -f json -s ./dump.rdb -o ./target.json -k user.* product.*\n rct -f mem -s ./dump.rdb -o ./target.aof -e redis -t list -l 10 -b 1024\n";
 
     @Override
     public String name() {
         return "rct";
     }
 
-    public RctCommand() {
+    private RctCommand() {
         addOption(HELP);
         addOption(VERSION);
         addOption(FORMAT);
@@ -61,7 +61,7 @@ public class RctCommand extends AbstractCommand {
     protected void doExecute(CommandLine line) throws Exception {
         if (line.hasOption("help")) {
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp(HEADER, "options:", options, EXAMPLE);
+            formatter.printHelp(HEADER, "\noptions:", options, EXAMPLE);
         } else if (line.hasOption("version")) {
             writeLine(version());
         } else {
