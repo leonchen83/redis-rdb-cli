@@ -35,8 +35,8 @@ options:
  -d,--db <num num...>        database number. multiple databases can be
                              provided. if not specified, all databases
                              will be included.
- -e,--escape <escape>        escape strings to encoding: redis (default),
-                             raw.
+ -e,--escape <escape>        escape strings to encoding: raw (default),
+                             redis.
  -f,--format <format>        format to export. valid commands are json,
                              diff, dump, key, keyval, mem and resp
  -h,--help                   rct usage.

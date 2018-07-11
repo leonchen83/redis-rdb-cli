@@ -33,7 +33,7 @@ public class RctCommand extends AbstractCommand {
     private static final Option TYPE = Option.builder("t").longOpt("type").required(false).hasArgs().argName("type type...").valueSeparator(' ').type(String.class).desc("data type to export. possible values are string, hash, set, sortedset, list, module, stream. multiple types can be provided. if not specified, all data types will be returned.").build();
     private static final Option BYTES = Option.builder("b").longOpt("bytes").required(false).hasArgs().argName("bytes").type(Number.class).desc("limit memory output(--format mem) to keys greater to or equal to this value (in bytes)").build();
     private static final Option LARGEST = Option.builder("l").longOpt("largest").required(false).hasArg().argName("n").type(Number.class).desc("limit memory output(--format mem) to only the top n keys (by size).").build();
-    private static final Option ESCAPE = Option.builder("e").longOpt("escape").required(false).hasArg().argName("escape").type(String.class).desc("escape strings to encoding: redis (default), raw.").build();
+    private static final Option ESCAPE = Option.builder("e").longOpt("escape").required(false).hasArg().argName("escape").type(String.class).desc("escape strings to encoding: raw (default), redis.").build();
 
     private static final String HEADER = "rct -f <format> -s <source> -o <file> [-d <num num...>] [-e <escape>] [-k <regex regex...>] [-t <type type...>] [-b <bytes>] [-l <n>]";
     private static final String EXAMPLE = "\nexamples:\n rct -f resp -s redis://127.0.0.1:6379 -o ./target.aof -d 0 1\n rct -f json -s ./dump.rdb -o ./target.json -k user.* product.*\n rct -f mem -s ./dump.rdb -o ./target.aof -e redis -t list -l 10 -b 1024\n";

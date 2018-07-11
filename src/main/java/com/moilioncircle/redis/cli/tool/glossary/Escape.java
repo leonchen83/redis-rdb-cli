@@ -26,7 +26,7 @@ public enum Escape {
     }
 
     public static Escape parse(String escape) {
-        if (escape == null) return REDIS;
+        if (escape == null) return RAW;
         switch (escape) {
             case "raw":
                 return RAW;
