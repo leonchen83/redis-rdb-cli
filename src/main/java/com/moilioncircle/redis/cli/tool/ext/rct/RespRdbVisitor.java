@@ -35,7 +35,9 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
     private static final byte[] ZADD = "zadd".getBytes();
     private static final byte[] RPUSH = "rpush".getBytes();
     private static final byte[] HMSET = "hmset".getBytes();
+    private static final byte[] SELECT = "select".getBytes();
     private static final byte[] RESTORE = "restore".getBytes();
+    private static final byte[] EXPIREAT = "expireat".getBytes();
     
     public RespRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types) {
         super(replicator, configure, out, db, regexs, types, Escape.REDIS);
@@ -46,7 +48,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
     public DB applySelectDB(RedisInputStream in, int version) throws IOException {
         DB db = super.applySelectDB(in, version);
         long dbnum = db.getDbNumber();
-        emit("select".getBytes(), String.valueOf(dbnum).getBytes());
+        emit(SELECT, String.valueOf(dbnum).getBytes());
         return db;
     }
     
@@ -54,7 +56,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
     public Event applyExpireTime(RedisInputStream in, DB db, int version) throws IOException {
         DummyKeyValuePair kv = (DummyKeyValuePair) super.applyExpireTime(in, db, version);
         if (!kv.isContains() || kv.getKey() == null) return kv;
-        emit("expireat".getBytes(), kv.getKey(), String.valueOf(kv.getExpiredSeconds() * 1000).getBytes());
+        emit(EXPIREAT, kv.getKey(), String.valueOf(kv.getExpiredSeconds() * 1000).getBytes());
         return kv;
     }
     
@@ -62,7 +64,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
     public Event applyExpireTimeMs(RedisInputStream in, DB db, int version) throws IOException {
         DummyKeyValuePair kv = (DummyKeyValuePair) super.applyExpireTimeMs(in, db, version);
         if (!kv.isContains() || kv.getKey() == null) return kv;
-        emit("expireat".getBytes(), kv.getKey(), String.valueOf(kv.getExpiredMs()).getBytes());
+        emit(EXPIREAT, kv.getKey(), String.valueOf(kv.getExpiredMs()).getBytes());
         return kv;
     }
     
