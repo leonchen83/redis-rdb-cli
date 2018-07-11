@@ -3,7 +3,6 @@ package com.moilioncircle.redis.cli.tool.util;
 import com.moilioncircle.redis.cli.tool.glossary.Phase;
 
 import java.io.Closeable;
-import java.io.File;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.moilioncircle.redis.cli.tool.util.Strings.pretty;
@@ -16,6 +15,8 @@ public class ProgressBar implements Closeable {
     private final long total;
     private volatile long last;
     private volatile boolean bit;
+    private volatile Phase phase;
+    private volatile String file;
     private volatile double percentage;
     private AtomicLong num = new AtomicLong();
     private volatile long access = System.currentTimeMillis();
@@ -32,37 +33,41 @@ public class ProgressBar implements Closeable {
         react(num, true, phase, null);
     }
 
-    public void react(long num, Phase phase, File file) {
+    public void react(long num, Phase phase, String file) {
         react(num, true, phase, file);
     }
 
-    public void react(long num, boolean increment, Phase phase, File file) {
+    public void react(long num, boolean increment, Phase phase, String file) {
         react(num, total <= 0 ? 0 : Processes.width(), increment, phase, file);
     }
 
-    public void react(long num, int len, boolean increment, Phase phase, File file) {
+    public void react(long num, int len, boolean increment, Phase phase, String file) {
         if (increment)
             this.num.addAndGet(num);
         else
             this.num.set(num);
         if (total <= 0) {
-            show(0, 0, len, this.num.get(), phase, file);
+            show(-1, -1, len, this.num.get(), phase, file);
             return;
         }
         double percentage = this.num.get() / (double) total * 100;
-        double prev = this.percentage;
+        int prev = (int) this.percentage;
         this.percentage = percentage;
-        double next = this.percentage;
+        int next = (int) this.percentage;
         show(prev, next, len, this.num.get(), phase, file);
     }
 
-    private void show(double prev, double next, int len, long num, Phase phase, File file) {
+    private void show(int prev, int next, int len, long num, Phase phase, String file) {
         long now = System.currentTimeMillis();
         long elapsed = now - access;
-        if (elapsed < 1000) return;
+
+        if (elapsed < 1000 && prev == next &&
+                (file == null || file.equals(this.file)) && this.phase == phase) return;
         int speed = (int) ((double) (num - last) / elapsed * 1000);
-        last = num;
-        access = now;
+        this.last = num;
+        this.file = file;
+        this.access = now;
+        this.phase = phase;
         StringBuilder builder = new StringBuilder();
         if (bit) {
             builder.append('/');
@@ -79,16 +84,16 @@ public class ProgressBar implements Closeable {
             }
             if (file != null) {
                 builder.append('|');
-                builder.append(file.getName());
+                builder.append(file);
             }
         } else {
             builder.append('/').append(pretty(total)).append('|');
-            if ((int) next < 10) {
-                builder.append(' ').append(' ').append((int) next).append('%');
-            } else if ((int) next < 100) {
-                builder.append(' ').append((int) next).append('%');
+            if (next < 10) {
+                builder.append(' ').append(' ').append(next).append('%');
+            } else if (next < 100) {
+                builder.append(' ').append(next).append('%');
             } else {
-                builder.append((int) next).append('%');
+                builder.append(next).append('%');
             }
             if (phase != null) {
                 builder.append('|');
@@ -96,7 +101,7 @@ public class ProgressBar implements Closeable {
             }
             if (file != null) {
                 builder.append('|');
-                builder.append(file.getName());
+                builder.append(file);
             }
             builder.append(']');
             int used = builder.length();

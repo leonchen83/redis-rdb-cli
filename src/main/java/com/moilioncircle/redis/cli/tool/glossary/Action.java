@@ -31,8 +31,8 @@ public enum Action {
     MERGE,
     BACKUP;
 
-    public List<Tuple2<Replicator, File>> dress(Configure configure, String split, String backup, List<File> merge, String output, List<Long> db, List<String> regexs, File conf, List<DataType> types) throws Exception {
-        List<Tuple2<Replicator, File>> list = new ArrayList<>();
+    public List<Tuple2<Replicator, String>> dress(Configure configure, String split, String backup, List<File> merge, String output, List<Long> db, List<String> regexs, File conf, List<DataType> types) throws Exception {
+        List<Tuple2<Replicator, String>> list = new ArrayList<>();
         switch (this) {
             case MERGE:
                 if (merge.isEmpty()) return list;
@@ -56,11 +56,11 @@ public enum Action {
                     }
                     Replicator r = new CliRedisReplicator(mergeUri, configure);
                     r.setRdbVisitor(new MergeRdbVisitor(r, configure, db, regexs, types, () -> out));
-                    list.add(Tuples.of(r, file));
+                    list.add(Tuples.of(r, file.getName()));
                 }
                 // tail
                 list.get(list.size() - 1).getV1().addCloseListener(r -> {
-                    OutputStreams.writeQuietly((byte) 255, out);
+                    OutputStreams.writeQuietly(0xFF, out);
                     OutputStreams.writeQuietly(out.getCRC64(), out);
                     OutputStreams.closeQuietly(out);
                 });

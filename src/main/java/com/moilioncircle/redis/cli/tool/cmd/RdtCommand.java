@@ -119,16 +119,17 @@ public class RdtCommand extends AbstractCommand {
             }
 
             try (ProgressBar bar = new ProgressBar(-1)) {
-                List<Tuple2<Replicator, File>> list = rdtType.dress(configure, split, backup, merge, output, db, regexs, conf, DataType.parse(type));
+                List<Tuple2<Replicator, String>> list = rdtType.dress(configure, split, backup, merge, output, db, regexs, conf, DataType.parse(type));
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                    for (Tuple2<Replicator, File> tuple : list) CliRedisReplicator.closeQuietly(tuple.getV1());
+                    for (Tuple2<Replicator, String> tuple : list) CliRedisReplicator.closeQuietly(tuple.getV1());
                 }));
 
-                for (Tuple2<Replicator, File> tuple : list) {
+                for (Tuple2<Replicator, String> tuple : list) {
+                    tuple.getV1().addExceptionListener((rep, t, e) -> { throw new RuntimeException(t); });
                     tuple.getV1().addEventListener((rep, event) -> {
                         if (event instanceof PreRdbSyncEvent)
                             rep.addRawByteListener(b -> bar.react(b.length, RDB, tuple.getV2()));
-                        if (event instanceof PostRdbSyncEvent) CliRedisReplicator.close(rep);
+                        if (event instanceof PostRdbSyncEvent) CliRedisReplicator.closeQuietly(rep);
                     });
                     tuple.getV1().open();
                 }

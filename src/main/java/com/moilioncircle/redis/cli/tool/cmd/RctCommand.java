@@ -99,12 +99,13 @@ public class RctCommand extends AbstractCommand {
             try (ProgressBar bar = new ProgressBar(-1)) {
                 Configure configure = Configure.bind();
                 Replicator r = new CliRedisReplicator(source, configure);
+                r.addExceptionListener((rep, t, e) -> { throw new RuntimeException(t); });
                 Format.parse(format).dress(r, configure, output, db, regexs, largest, bytes, DataType.parse(type), Escape.parse(escape));
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> CliRedisReplicator.closeQuietly(r)));
                 r.addEventListener((rep, event) -> {
                     if (event instanceof PreRdbSyncEvent)
                         rep.addRawByteListener(b -> bar.react(b.length, RDB));
-                    if (event instanceof PostRdbSyncEvent) CliRedisReplicator.close(rep);
+                    if (event instanceof PostRdbSyncEvent) CliRedisReplicator.closeQuietly(rep);
                 });
                 r.open();
             }

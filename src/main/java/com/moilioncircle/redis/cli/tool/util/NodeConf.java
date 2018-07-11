@@ -7,7 +7,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,7 +20,7 @@ import static java.lang.Integer.parseInt;
  * @author Baoyi Chen
  */
 public class NodeConf {
-    
+
     public static void parse(String path, File conf, Set<CRCOutputStream> set, Map<Short, CRCOutputStream> result) {
         Map<String, CRCOutputStream> map = new HashMap<>();
         try (BufferedReader r = new BufferedReader(new FileReader(conf))) {
@@ -51,7 +50,7 @@ public class NodeConf {
                     int aIdx = hostAndPort.indexOf("@");
                     hostAndPort.substring(0, cIdx); // ip
                     parseInt(hostAndPort.substring(aIdx + 1)); // port
-    
+
                     boolean master = false;
                     for (String role : args.get(2).split(",")) {
                         switch (role) {
@@ -83,22 +82,22 @@ public class NodeConf {
                                 // pass
                         }
                     }
-    
+
                     if (!map.containsKey(name) && master) {
                         CRCOutputStream out = OutputStreams.newCRCOutputStream(Paths.get(path, name + ".rdb").toFile());
                         map.put(name, out);
                         set.add(out);
                     }
-                    
+
                     if (!args.get(3).equals("-")) {
                         args.get(3); // slave
                         // pass
                     }
-                    
+
                     // args.get(4); pingTime
                     // args.get(5); pongTime
                     // args.get(6); configEpoch
-                    
+
                     for (int i = 8; i < args.size(); i++) {
                         int st, ed;
                         String arg = args.get(i);
@@ -112,7 +111,7 @@ public class NodeConf {
                             } else {
                                 // pass
                             }
-                            continue;
+                            throw new UnsupportedOperationException(conf.getName() + " must not contains migrating slot.");
                         } else if (arg.contains("-")) {
                             int idx = arg.indexOf("-");
                             st = parseInt(arg.substring(0, idx));
@@ -125,10 +124,10 @@ public class NodeConf {
                 }
             }
         } catch (IOException e) {
-            throw new UncheckedIOException(e);
+            throw new UnsupportedOperationException(e.getMessage(), e);
         }
     }
-    
+
     public static List<String> parseLine(String line) {
         List<String> args = new ArrayList<>();
         if (line.length() == 0 || line.equals("\n")) return args;

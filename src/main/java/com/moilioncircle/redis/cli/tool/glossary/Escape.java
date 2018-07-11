@@ -37,14 +37,6 @@ public enum Escape {
         }
     }
 
-    public void encode(double value, OutputStream out, Configure configure) throws IOException {
-        encode(String.valueOf(value).getBytes(), out, configure);
-    }
-
-    public void encode(long value, OutputStream out, Configure configure) throws IOException {
-        encode(String.valueOf(value).getBytes(), out, configure);
-    }
-
     public void encode(int b, OutputStream out, Configure configure) throws IOException {
         switch (this) {
             case RAW:
@@ -66,7 +58,8 @@ public enum Escape {
                 } else if (b == 7) {
                     out.write('\\');
                     out.write('a');
-                } else if (b == 34 || b == 39 || b == 92 || b <= 32 || b >= 127 || b == configure.getDelimiter() || b == configure.getQuote()) {
+                } else if (b == 34 || b == 39 || b == 92 || b <= 32 || b >= 127 ||
+                        b == configure.getDelimiter() || b == configure.getQuote()) {
                     // encode " ' \ unprintable and space
                     out.write('\\');
                     out.write('x');
@@ -82,6 +75,26 @@ public enum Escape {
         }
     }
 
+    public byte[] encode(byte[] bytes, Configure configure) throws IOException {
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream(bytes.length)) {
+            encode(bytes, 0, bytes.length, out, configure);
+            return out.toByteArray();
+        }
+    }
+
+    public void encode(long value, OutputStream out, Configure configure) throws IOException {
+        encode(String.valueOf(value).getBytes(), out, configure);
+    }
+
+    public void encode(double value, OutputStream out, Configure configure) throws IOException {
+        encode(String.valueOf(value).getBytes(), out, configure);
+    }
+
+    public void encode(byte[] bytes, OutputStream out, Configure configure) throws IOException {
+        if (bytes == null) return;
+        encode(bytes, 0, bytes.length, out, configure);
+    }
+
     public void encode(byte[] bytes, int off, int len, OutputStream out, Configure configure) throws IOException {
         if (bytes == null) return;
         switch (this) {
@@ -95,18 +108,6 @@ public enum Escape {
                 break;
             default:
                 throw new AssertionError(this);
-        }
-    }
-
-    public void encode(byte[] bytes, OutputStream out, Configure configure) throws IOException {
-        if (bytes == null) return;
-        encode(bytes, 0, bytes.length, out, configure);
-    }
-
-    public byte[] encode(byte[] bytes, Configure configure) throws IOException {
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream(bytes.length)) {
-            encode(bytes, 0, bytes.length, out, configure);
-            return out.toByteArray();
         }
     }
 }

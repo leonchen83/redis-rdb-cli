@@ -98,6 +98,7 @@ public class RmtCommand extends AbstractCommand {
                 dress(r, configure, migrate, db, regexs, DataType.parse(type), replace);
                 AtomicReference<Phase> phase = new AtomicReference<>(NOP);
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> CliRedisReplicator.closeQuietly(r)));
+                r.addExceptionListener((rep, t, e) -> { throw new RuntimeException(t); });
                 r.addRawByteListener(b -> bar.react(b.length, phase.get()));
                 r.addEventListener((rep, event) -> {
                     if (event instanceof PreRdbSyncEvent) {
