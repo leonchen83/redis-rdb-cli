@@ -50,12 +50,10 @@ public class ProgressBar implements Closeable {
             return;
         }
         double percentage = this.num.get() / (double) total * 100;
-        if (this.percentage != percentage) {
-            double prev = this.percentage;
-            this.percentage = percentage;
-            double next = this.percentage;
-            show(prev, next, len, this.num.get(), phase, file);
-        }
+        double prev = this.percentage;
+        this.percentage = percentage;
+        double next = this.percentage;
+        show(prev, next, len, this.num.get(), phase, file);
     }
 
     private void show(double prev, double next, int len, long num, Phase phase, File file) {
