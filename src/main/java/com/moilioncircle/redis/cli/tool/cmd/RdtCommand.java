@@ -125,7 +125,9 @@ public class RdtCommand extends AbstractCommand {
                 }));
 
                 for (Tuple2<Replicator, String> tuple : list) {
-                    tuple.getV1().addExceptionListener((rep, t, e) -> { throw new RuntimeException(t); });
+                    tuple.getV1().addExceptionListener((rep, tx, e) -> {
+                        throw new RuntimeException(tx.getMessage(), tx);
+                    });
                     tuple.getV1().addEventListener((rep, event) -> {
                         if (event instanceof PreRdbSyncEvent)
                             rep.addRawByteListener(b -> bar.react(b.length, RDB, tuple.getV2()));

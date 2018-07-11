@@ -17,23 +17,23 @@ import static com.moilioncircle.redis.cli.tool.cmd.Version.VERSION;
  * @author Baoyi Chen
  */
 public abstract class AbstractCommand implements Command {
-    
+
     protected Options options = new Options();
-    
+
     protected abstract void doExecute(CommandLine line) throws Exception;
-    
+
     @Override
     public void addOption(Option option) {
         options.addOption(option);
     }
-    
+
     @Override
     public void execute(String[] args) throws Exception {
         CommandLineParser parser = new DefaultParser();
         try {
             org.apache.commons.cli.CommandLine line = parser.parse(options, args);
             doExecute(new CommandLine(line));
-        } catch (Exception e) {
+        } catch (Throwable e) {
             if (e.getMessage() != null) {
                 writeLine(e.getMessage());
             } else {
@@ -41,7 +41,7 @@ public abstract class AbstractCommand implements Command {
             }
         }
     }
-    
+
     protected String normalize(String source, FileType type, String message) throws URISyntaxException {
         RedisURI uri;
         try {
@@ -55,16 +55,16 @@ public abstract class AbstractCommand implements Command {
         }
         throw new AssertionError(message);
     }
-    
+
     protected void write(String message) throws Exception {
         System.out.print(message);
         System.out.flush();
     }
-    
+
     protected void writeLine(String message) throws Exception {
         System.out.println(message);
     }
-    
+
     protected String version() {
         StringBuilder builder = new StringBuilder();
         builder.append("redis cli tool: ").append(VERSION).append("\n");
