@@ -61,6 +61,9 @@ public enum Format {
             case DIFF:
                 r.setRdbVisitor(new DiffRdbVisitor(r, conf, output, db, regexs, types));
                 break;
+            case RESP:
+                r.setRdbVisitor(new RespRdbVisitor(r, conf, output, db, regexs, types));
+                break;
             case KEY:
                 r.setRdbVisitor(new KeyRdbVisitor(r, conf, output, db, regexs, types, escape));
                 break;
@@ -69,9 +72,6 @@ public enum Format {
                 break;
             case DUMP:
                 r.setRdbVisitor(new DumpRdbVisitor(r, conf, output, db, regexs, types, escape));
-                break;
-            case RESP:
-                r.setRdbVisitor(new RespRdbVisitor(r, conf, output, db, regexs, types, escape));
                 break;
             case KEYVAL:
                 r.setRdbVisitor(new KeyValRdbVisitor(r, conf, output, db, regexs, types, escape));

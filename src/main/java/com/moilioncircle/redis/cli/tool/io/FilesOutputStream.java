@@ -1,5 +1,6 @@
 package com.moilioncircle.redis.cli.tool.io;
 
+import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.util.NodeConf;
 import com.moilioncircle.redis.cli.tool.util.OutputStreams;
 import com.moilioncircle.redis.replicator.io.CRCOutputStream;
@@ -18,22 +19,22 @@ import static com.moilioncircle.redis.cli.tool.util.CRC16.crc16;
  * @author Baoyi Chen
  */
 public class FilesOutputStream extends OutputStream {
-
+    
     private byte[] key;
-
+    
     private Set<CRCOutputStream> set = new HashSet<>();
     private Map<Short, CRCOutputStream> map = new HashMap<>();
-
-    public FilesOutputStream(String path, File conf) {
-        NodeConf.parse(path, conf, set, map);
+    
+    public FilesOutputStream(String path, File conf, Configure configure) {
+        NodeConf.parse(path, conf, set, map, configure);
         if (map.size() != 16384)
             throw new UnsupportedOperationException("slots size : " + map.size() + ", expected 16384.");
     }
-
+    
     public void shard(byte[] key) {
         this.key = key;
     }
-
+    
     private short slot(byte[] key) {
         if (key == null) return 0;
         int st = -1, ed = -1;
@@ -48,7 +49,7 @@ public class FilesOutputStream extends OutputStream {
             return (short) (crc16(key, st + 1, ed) & 16383);
         return (short) (crc16(key) & 16383);
     }
-
+    
     @Override
     public void write(int b) throws IOException {
         if (key == null) {
@@ -59,11 +60,11 @@ public class FilesOutputStream extends OutputStream {
             map.get(slot(key)).write(b);
         }
     }
-
+    
     public void write(byte[] b) throws IOException {
         write(b, 0, b.length);
     }
-
+    
     public void write(byte[] b, int off, int len) throws IOException {
         if (key == null) {
             for (OutputStream out : set) {
@@ -73,7 +74,7 @@ public class FilesOutputStream extends OutputStream {
             map.get(slot(key)).write(b);
         }
     }
-
+    
     public void flush() throws IOException {
         if (key == null) {
             for (OutputStream out : set) {
@@ -83,13 +84,13 @@ public class FilesOutputStream extends OutputStream {
             map.get(slot(key)).flush();
         }
     }
-
+    
     public void close() throws IOException {
         for (OutputStream out : set) {
             out.close();
         }
     }
-
+    
     public void writeCRC() {
         for (CRCOutputStream out : set) {
             OutputStreams.writeQuietly(0xFF, out);

@@ -30,13 +30,13 @@ public enum Action {
     SPLIT,
     MERGE,
     BACKUP;
-
+    
     public List<Tuple2<Replicator, String>> dress(Configure configure, String split, String backup, List<File> merge, String output, List<Long> db, List<String> regexs, File conf, List<DataType> types) throws Exception {
         List<Tuple2<Replicator, String>> list = new ArrayList<>();
         switch (this) {
             case MERGE:
                 if (merge.isEmpty()) return list;
-                CRCOutputStream out = OutputStreams.newCRCOutputStream(output);
+                CRCOutputStream out = OutputStreams.newCRCOutputStream(output, configure.getBufferSize());
                 int max = 0;
                 for (File file : merge) {
                     try (RedisInputStream in = new RedisInputStream(new FileInputStream(file))) {
@@ -67,12 +67,12 @@ public enum Action {
                 return list;
             case SPLIT:
                 Replicator r = new CliRedisReplicator(split, configure);
-                r.setRdbVisitor(new SplitRdbVisitor(r, configure, db, regexs, types, () -> new FilesOutputStream(output, conf)));
+                r.setRdbVisitor(new SplitRdbVisitor(r, configure, db, regexs, types, () -> new FilesOutputStream(output, conf, configure)));
                 list.add(Tuples.of(r, null));
                 return list;
             case BACKUP:
                 r = new CliRedisReplicator(backup, configure);
-                r.setRdbVisitor(new BackupRdbVisitor(r, configure, db, regexs, types, () -> OutputStreams.newCRCOutputStream(output)));
+                r.setRdbVisitor(new BackupRdbVisitor(r, configure, db, regexs, types, () -> OutputStreams.newCRCOutputStream(output, configure.getBufferSize())));
                 list.add(Tuples.of(r, null));
                 return list;
             case NONE:

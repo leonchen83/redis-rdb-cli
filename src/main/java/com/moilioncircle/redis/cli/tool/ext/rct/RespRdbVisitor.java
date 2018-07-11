@@ -26,22 +26,30 @@ import static com.moilioncircle.redis.replicator.Constants.STAR;
  * @author Baoyi Chen
  */
 public class RespRdbVisitor extends AbstractRdbVisitor {
-
+    
     private final int batch;
-
-    public RespRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escape escape) {
-        super(replicator, configure, out, db, regexs, types, escape);
+    
+    private static final byte[] SET = "set".getBytes();
+    private static final byte[] RPUSH = "rpush".getBytes();
+    private static final byte[] SADD = "sadd".getBytes();
+    private static final byte[] ZADD = "zadd".getBytes();
+    private static final byte[] HMSET = "hmset".getBytes();
+    private static final byte[] RESTORE = "restore".getBytes();
+    private static final byte[] ZERO = "0".getBytes();
+    
+    public RespRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types) {
+        super(replicator, configure, out, db, regexs, types, Escape.REDIS);
         this.batch = configure.getBatchSize();
     }
-
+    
     @Override
     public DB applySelectDB(RedisInputStream in, int version) throws IOException {
         DB db = super.applySelectDB(in, version);
         long dbnum = db.getDbNumber();
-        emit("select", String.valueOf(dbnum));
+        emit("select".getBytes(), String.valueOf(dbnum).getBytes());
         return db;
     }
-
+    
     @Override
     public Event applyExpireTime(RedisInputStream in, DB db, int version) throws IOException {
         DummyKeyValuePair kv = (DummyKeyValuePair) super.applyExpireTime(in, db, version);
@@ -49,7 +57,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         emit("expireat".getBytes(), kv.getKey(), String.valueOf(kv.getExpiredSeconds() * 1000).getBytes());
         return kv;
     }
-
+    
     @Override
     public Event applyExpireTimeMs(RedisInputStream in, DB db, int version) throws IOException {
         DummyKeyValuePair kv = (DummyKeyValuePair) super.applyExpireTimeMs(in, db, version);
@@ -57,19 +65,10 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         emit("expireat".getBytes(), kv.getKey(), String.valueOf(kv.getExpiredMs()).getBytes());
         return kv;
     }
-
-    private void emit(String command, String key, String... args) throws IOException {
-        byte[][] ary = new byte[args.length][];
-        for (int i = 0; i < args.length; i++) ary[i] = args[i].getBytes();
-        emit(command.getBytes(), key.getBytes(), ary);
-    }
-
-    private void emit(byte[] command, byte[] key, byte[]... ary) throws IOException {
-        byte[][] args = new byte[ary.length + 1][];
-        System.arraycopy(ary, 0, args, 1, ary.length);
-        args[0] = key;
+    
+    private void emit(byte[] command, byte[] key) throws IOException {
         out.write(STAR);
-        out.write(String.valueOf(args.length + 1).getBytes());
+        out.write(String.valueOf(3).getBytes());
         out.write('\r');
         out.write('\n');
         out.write(DOLLAR);
@@ -80,7 +79,108 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         out.write(c);
         out.write('\r');
         out.write('\n');
-        for (final byte[] arg : args) {
+        out.write(DOLLAR);
+        byte[] k = escape.encode(key, configure);
+        out.write(String.valueOf(k.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(k);
+        out.write('\r');
+        out.write('\n');
+    }
+    
+    private void emit(byte[] command, byte[] key, byte[] ary) throws IOException {
+        out.write(STAR);
+        out.write(String.valueOf(3).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        byte[] c = escape.encode(command, configure);
+        out.write(String.valueOf(c.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(c);
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        byte[] k = escape.encode(key, configure);
+        out.write(String.valueOf(k.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(k);
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        byte[] a = escape.encode(ary, configure);
+        out.write(String.valueOf(a.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(a);
+        out.write('\r');
+        out.write('\n');
+    }
+    
+    private void emit(byte[] command, byte[] key, byte[] ary1, byte[] ary2) throws IOException {
+        out.write(STAR);
+        out.write(String.valueOf(3).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        byte[] c = escape.encode(command, configure);
+        out.write(String.valueOf(c.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(c);
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        byte[] k = escape.encode(key, configure);
+        out.write(String.valueOf(k.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(k);
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        byte[] a = escape.encode(ary1, configure);
+        out.write(String.valueOf(a.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(a);
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        byte[] b = escape.encode(ary2, configure);
+        out.write(String.valueOf(b.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(b);
+        out.write('\r');
+        out.write('\n');
+    }
+    
+    private void emit(byte[] command, byte[] key, List<byte[]> ary) throws IOException {
+        out.write(STAR);
+        out.write(String.valueOf(ary.size() + 2).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        byte[] c = escape.encode(command, configure);
+        out.write(String.valueOf(c.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(c);
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        byte[] k = escape.encode(key, configure);
+        out.write(String.valueOf(k.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(k);
+        out.write('\r');
+        out.write('\n');
+        for (final byte[] arg : ary) {
             out.write(DOLLAR);
             byte[] a = escape.encode(arg, configure);
             out.write(String.valueOf(a.length).getBytes());
@@ -91,12 +191,12 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             out.write('\n');
         }
     }
-
+    
     @Override
     protected Event doApplyString(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
         byte[] val = parser.rdbLoadEncodedStringObject().first();
-        emit("set".getBytes(), key, val);
+        emit(SET, key, val);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setDb(db);
         kv.setValueRdbType(type);
@@ -104,7 +204,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -114,12 +214,12 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             byte[] element = parser.rdbLoadEncodedStringObject().first();
             list.add(element);
             if (list.size() == batch) {
-                emit("rpush".getBytes(), key, list.toArray(new byte[0][]));
+                emit(RPUSH, key, list);
                 list.clear();
             }
             len--;
         }
-        if (!list.isEmpty()) emit("rpush".getBytes(), key, list.toArray(new byte[0][]));
+        if (!list.isEmpty()) emit(RPUSH, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setDb(db);
         kv.setValueRdbType(type);
@@ -127,7 +227,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplySet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -137,12 +237,12 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             byte[] element = parser.rdbLoadEncodedStringObject().first();
             list.add(element);
             if (list.size() == batch) {
-                emit("sadd".getBytes(), key, list.toArray(new byte[0][]));
+                emit(SADD, key, list);
                 list.clear();
             }
             len--;
         }
-        if (!list.isEmpty()) emit("sadd".getBytes(), key, list.toArray(new byte[0][]));
+        if (!list.isEmpty()) emit(SADD, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setDb(db);
         kv.setValueRdbType(type);
@@ -150,7 +250,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyZSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -162,12 +262,12 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             list.add(String.valueOf(score).getBytes());
             list.add(element);
             if (list.size() == 2 * batch) {
-                emit("zadd".getBytes(), key, list.toArray(new byte[0][]));
+                emit(ZADD, key, list);
                 list.clear();
             }
             len--;
         }
-        if (!list.isEmpty()) emit("zadd".getBytes(), key, list.toArray(new byte[0][]));
+        if (!list.isEmpty()) emit(ZADD, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setDb(db);
         kv.setValueRdbType(type);
@@ -175,7 +275,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyZSet2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -187,12 +287,12 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             list.add(String.valueOf(score).getBytes());
             list.add(element);
             if (list.size() == 2 * batch) {
-                emit("zadd".getBytes(), key, list.toArray(new byte[0][]));
+                emit(ZADD, key, list);
                 list.clear();
             }
             len--;
         }
-        if (!list.isEmpty()) emit("zadd".getBytes(), key, list.toArray(new byte[0][]));
+        if (!list.isEmpty()) emit(ZADD, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setDb(db);
         kv.setValueRdbType(type);
@@ -200,7 +300,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyHash(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -212,12 +312,12 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             list.add(field);
             list.add(value);
             if (list.size() == 2 * batch) {
-                emit("hmset".getBytes(), key, list.toArray(new byte[0][]));
+                emit(HMSET, key, list);
                 list.clear();
             }
             len--;
         }
-        if (!list.isEmpty()) emit("hmset".getBytes(), key, list.toArray(new byte[0][]));
+        if (!list.isEmpty()) emit(HMSET, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setDb(db);
         kv.setValueRdbType(type);
@@ -225,7 +325,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyHashZipMap(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -236,7 +336,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             int zmEleLen = BaseRdbParser.LenHelper.zmElementLen(stream);
             if (zmEleLen == 255) {
                 if (!list.isEmpty()) {
-                    emit("hmset".getBytes(), key, list.toArray(new byte[0][]));
+                    emit(HMSET, key, list);
                     list.clear();
                 }
                 DummyKeyValuePair kv = new DummyKeyValuePair();
@@ -251,7 +351,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             if (zmEleLen == 255) {
                 list.add(field);
                 list.add(null);
-                emit("hmset".getBytes(), key, list.toArray(new byte[0][]));
+                emit(HMSET, key, list);
                 list.clear();
                 DummyKeyValuePair kv = new DummyKeyValuePair();
                 kv.setDb(db);
@@ -266,17 +366,17 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             list.add(field);
             list.add(value);
             if (list.size() == 2 * batch) {
-                emit("hmset".getBytes(), key, list.toArray(new byte[0][]));
+                emit(HMSET, key, list);
                 list = new ArrayList<>();
             }
         }
     }
-
+    
     @Override
     protected Event doApplyListZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
         RedisInputStream stream = new RedisInputStream(parser.rdbLoadPlainStringObject());
-
+        
         BaseRdbParser.LenHelper.zlbytes(stream); // zlbytes
         BaseRdbParser.LenHelper.zltail(stream); // zltail
         int zllen = BaseRdbParser.LenHelper.zllen(stream);
@@ -285,7 +385,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             byte[] e = BaseRdbParser.StringHelper.zipListEntry(stream);
             list.add(e);
             if (list.size() == batch) {
-                emit("rpush".getBytes(), key, list.toArray(new byte[0][]));
+                emit(RPUSH, key, list);
                 list.clear();
             }
         }
@@ -293,7 +393,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         if (zlend != 255) {
             throw new AssertionError("zlend expect 255 but " + zlend);
         }
-        if (!list.isEmpty()) emit("rpush".getBytes(), key, list.toArray(new byte[0][]));
+        if (!list.isEmpty()) emit(RPUSH, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setDb(db);
         kv.setValueRdbType(type);
@@ -301,12 +401,12 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplySetIntSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
         RedisInputStream stream = new RedisInputStream(parser.rdbLoadPlainStringObject());
-
+        
         List<byte[]> list = new ArrayList<>();
         int encoding = BaseRdbParser.LenHelper.encoding(stream);
         long lenOfContent = BaseRdbParser.LenHelper.lenOfContent(stream);
@@ -327,11 +427,11 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             }
             list.add(element.getBytes());
             if (list.size() == batch) {
-                emit("sadd".getBytes(), key, list.toArray(new byte[0][]));
+                emit(SADD, key, list);
                 list.clear();
             }
         }
-        if (!list.isEmpty()) emit("sadd".getBytes(), key, list.toArray(new byte[0][]));
+        if (!list.isEmpty()) emit(SADD, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setDb(db);
         kv.setValueRdbType(type);
@@ -339,7 +439,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyZSetZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -356,7 +456,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             list.add(String.valueOf(score).getBytes());
             list.add(element);
             if (list.size() == 2 * batch) {
-                emit("zadd".getBytes(), key, list.toArray(new byte[0][]));
+                emit(ZADD, key, list);
                 list.clear();
             }
         }
@@ -364,7 +464,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         if (zlend != 255) {
             throw new AssertionError("zlend expect 255 but " + zlend);
         }
-        if (!list.isEmpty()) emit("zadd".getBytes(), key, list.toArray(new byte[0][]));
+        if (!list.isEmpty()) emit(ZADD, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setDb(db);
         kv.setValueRdbType(type);
@@ -372,7 +472,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyHashZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -389,7 +489,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             list.add(field);
             list.add(value);
             if (list.size() == 2 * batch) {
-                emit("hmset".getBytes(), key, list.toArray(new byte[0][]));
+                emit(HMSET, key, list);
                 list.clear();
             }
         }
@@ -397,7 +497,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         if (zlend != 255) {
             throw new AssertionError("zlend expect 255 but " + zlend);
         }
-        if (!list.isEmpty()) emit("hmset".getBytes(), key, list.toArray(new byte[0][]));
+        if (!list.isEmpty()) emit(HMSET, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setDb(db);
         kv.setValueRdbType(type);
@@ -405,7 +505,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyListQuickList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -413,7 +513,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         long len = parser.rdbLoadLen().len;
         for (int i = 0; i < len; i++) {
             RedisInputStream stream = new RedisInputStream(parser.rdbGenericLoadStringObject(RDB_LOAD_NONE));
-
+    
             BaseRdbParser.LenHelper.zlbytes(stream); // zlbytes
             BaseRdbParser.LenHelper.zltail(stream); // zltail
             int zllen = BaseRdbParser.LenHelper.zllen(stream);
@@ -421,7 +521,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
                 byte[] e = BaseRdbParser.StringHelper.zipListEntry(stream);
                 list.add(e);
                 if (list.size() == batch) {
-                    emit("rpush".getBytes(), key, list.toArray(new byte[0][]));
+                    emit(RPUSH, key, list);
                     list.clear();
                 }
             }
@@ -430,7 +530,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
                 throw new AssertionError("zlend expect 255 but " + zlend);
             }
         }
-        if (!list.isEmpty()) emit("rpush".getBytes(), key, list.toArray(new byte[0][]));
+        if (!list.isEmpty()) emit(RPUSH, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setDb(db);
         kv.setValueRdbType(type);
@@ -438,7 +538,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyModule(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
@@ -446,7 +546,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         replicator.addRawByteListener(listener);
         super.doApplyModule(in, db, version, key, contains, type);
         replicator.removeRawByteListener(listener);
-        emit("restore".getBytes(), key, "0".getBytes(), listener.getBytes());
+        emit(RESTORE, key, ZERO, listener.getBytes());
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setDb(db);
         kv.setValueRdbType(type);
@@ -454,7 +554,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyModule2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
@@ -462,7 +562,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         replicator.addRawByteListener(listener);
         super.doApplyModule2(in, db, version, key, contains, type);
         replicator.removeRawByteListener(listener);
-        emit("restore".getBytes(), key, "0".getBytes(), listener.getBytes());
+        emit(RESTORE, key, ZERO, listener.getBytes());
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setDb(db);
         kv.setValueRdbType(type);
@@ -470,7 +570,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyStreamListPacks(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
@@ -478,7 +578,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         replicator.addRawByteListener(listener);
         super.doApplyStreamListPacks(in, db, version, key, contains, type);
         replicator.removeRawByteListener(listener);
-        emit("restore".getBytes(), key, "0".getBytes(), listener.getBytes());
+        emit(RESTORE, key, ZERO, listener.getBytes());
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setDb(db);
         kv.setValueRdbType(type);
