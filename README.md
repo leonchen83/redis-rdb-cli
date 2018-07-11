@@ -5,7 +5,7 @@
 usage: rct -f <format> -s <source> -o <file> [-d <num num...>] [-e
            <escape>] [-k <regex regex...>] [-t <type type...>] [-b
            <bytes>] [-l <n>]
-Options:
+options:
  -b,--bytes <bytes>          limit memory output(--format mem) to keys
                              greater to or equal to this value (in bytes)
  -d,--db <num num...>        database number. multiple databases can be
@@ -31,7 +31,7 @@ Options:
                              not specified, all data types will be
                              returned.
  -v,--version                rct version.
-Examples:
+examples:
  rct -f resp -s redis://127.0.0.1:6379 -o ./target.aof -d 0 1
  rct -f json -s ./dump.rdb -o ./target.json -k user.* product.*
  rct -f mem -s ./dump.rdb -o ./target.aof -e redis -t list -l 10 -b 1024
@@ -43,7 +43,7 @@ Examples:
 
 usage: rmt -s <source> -m <uri> [-d <num num...>] [-k <regex regex...>]
            [-t <type type...>]
-Options:
+options:
  -d,--db <num num...>        database number. multiple databases can be
                              provided. if not specified, all databases
                              will be included.
@@ -65,7 +65,7 @@ Options:
                              not specified, all data types will be
                              returned.
  -v,--version                rmt version.
-Examples:
+examples:
  rmt -s redis://120.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0
  rmt -s ./dump.rdb -m redis://127.0.0.1:6380 -t string -r
 
@@ -76,7 +76,7 @@ Examples:
 usage: rdt [-b <source> | -s <source> -c <file> | -m <file file...>] -o
            <file> [-d <num num...>] [-k <regex regex...>] [-t <type
            type...>]
-Options:
+options:
  -b,--backup <source>        backup <source> to local rdb file. eg:
                              /path/to/dump.rdb
                              redis://host:port?authPassword=foobar
@@ -105,7 +105,7 @@ Options:
                              not specified, all data types will be
                              returned.
  -v,--version                rdt version.
-Examples:
+examples:
  rdt -b ./dump.rdb -o ./dump.rdb1 -d 0 1
  rdt -b redis://127.0.0.1:6379 -o ./dump.rdb -k user.*
  rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
