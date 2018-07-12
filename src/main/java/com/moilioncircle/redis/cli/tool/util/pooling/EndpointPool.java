@@ -121,7 +121,6 @@ public class EndpointPool implements Consumer<Endpoint>, Supplier<Endpoint>, Pre
                     out.write(' ');
                     out.write(String.valueOf(db).getBytes());
                     out.write('\n');
-                    out.flush();
                 } catch (IOException e) {
                     throw new AssertionError(e.getMessage(), e);
                 }
@@ -135,7 +134,6 @@ public class EndpointPool implements Consumer<Endpoint>, Supplier<Endpoint>, Pre
                     out.write(' ');
                     Escape.REDIS.encode(password.getBytes(), out, configure);
                     out.write('\n');
-                    out.flush();
                 } catch (IOException e) {
                     throw new AssertionError(e.getMessage(), e);
                 }
@@ -151,7 +149,6 @@ public class EndpointPool implements Consumer<Endpoint>, Supplier<Endpoint>, Pre
                     out.write(' ');
                     out.write(String.valueOf(ms).getBytes());
                     out.write('\n');
-                    out.flush();
                 } catch (IOException e) {
                     throw new AssertionError(e.getMessage(), e);
                 }
@@ -163,7 +160,6 @@ public class EndpointPool implements Consumer<Endpoint>, Supplier<Endpoint>, Pre
                 try {
                     out.write(PING);
                     out.write('\n');
-                    out.flush();
                 } catch (IOException e) {
                     throw new AssertionError(e.getMessage(), e);
                 }
@@ -173,6 +169,7 @@ public class EndpointPool implements Consumer<Endpoint>, Supplier<Endpoint>, Pre
         public String send(Consumer<OutputStream> consumer) {
             try {
                 consumer.accept(out);
+                out.flush();
                 parse(new RedisInputStream(in));
                 return null;
             } catch (UncheckedIOException | IOException e) {
