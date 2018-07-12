@@ -14,7 +14,7 @@ import java.util.concurrent.Callable;
  * @author Baoyi Chen
  */
 public class OutputStreams {
-
+    
     public static void close(OutputStream out) {
         if (out == null) return;
         try {
@@ -25,7 +25,7 @@ public class OutputStreams {
             throw new RuntimeException(txt.getMessage(), txt);
         }
     }
-
+    
     public static void closeQuietly(OutputStream out) {
         if (out == null) return;
         try {
@@ -33,7 +33,7 @@ public class OutputStreams {
         } catch (Throwable t) {
         }
     }
-
+    
     public static void write(byte b, OutputStream out) {
         if (out == null) return;
         try {
@@ -44,7 +44,7 @@ public class OutputStreams {
             throw new RuntimeException(txt.getMessage(), txt);
         }
     }
-
+    
     public static void writeQuietly(int b, OutputStream out) {
         if (out == null) return;
         try {
@@ -52,7 +52,7 @@ public class OutputStreams {
         } catch (Throwable t) {
         }
     }
-
+    
     public static void write(byte b[], OutputStream out) {
         if (out == null) return;
         try {
@@ -63,7 +63,7 @@ public class OutputStreams {
             throw new RuntimeException(txt.getMessage(), txt);
         }
     }
-
+    
     public static void writeQuietly(byte b[], OutputStream out) {
         if (out == null) return;
         try {
@@ -71,7 +71,7 @@ public class OutputStreams {
         } catch (Throwable t) {
         }
     }
-
+    
     public static void write(byte b[], int off, int len, OutputStream out) {
         if (out == null) return;
         try {
@@ -82,7 +82,7 @@ public class OutputStreams {
             throw new RuntimeException(txt.getMessage(), txt);
         }
     }
-
+    
     public static void writeQuietly(byte b[], int off, int len, OutputStream out) {
         if (out == null) return;
         try {
@@ -90,8 +90,27 @@ public class OutputStreams {
         } catch (Throwable t) {
         }
     }
-
-    public static <T extends OutputStream> T call(Callable<T> callable) {
+    
+    public static void flushQuietly(OutputStream out) {
+        if (out == null) return;
+        try {
+            out.flush();
+        } catch (Throwable t) {
+        }
+    }
+    
+    public static void flush(OutputStream out) {
+        if (out == null) return;
+        try {
+            out.flush();
+        } catch (IOException t) {
+            throw new RuntimeException(t.getMessage(), t);
+        } catch (Throwable txt) {
+            throw new RuntimeException(txt.getMessage(), txt);
+        }
+    }
+    
+    public static <T> T call(Callable<T> callable) {
         if (callable == null) return null;
         try {
             return callable.call();
@@ -101,8 +120,8 @@ public class OutputStreams {
             throw new RuntimeException(txt.getMessage(), txt);
         }
     }
-
-    public static <T extends OutputStream> T callQuietly(Callable<T> callable) {
+    
+    public static <T> T callQuietly(Callable<T> callable) {
         if (callable == null) return null;
         try {
             return callable.call();

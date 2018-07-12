@@ -15,6 +15,8 @@ import com.moilioncircle.redis.replicator.net.RedisSocketFactory;
 import com.moilioncircle.redis.replicator.util.ByteBuilder;
 import com.moilioncircle.redis.replicator.util.Strings;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,19 +42,19 @@ import static com.moilioncircle.redis.replicator.Constants.STAR;
  * @author Baoyi Chen
  */
 public class EndpointPool implements Consumer<Endpoint>, Supplier<Endpoint>, Predicate<Endpoint> {
-
+    
     private final int port;
     private final String host;
     private final Configuration conf;
     private final Configure configure;
-
+    
     private EndpointPool(String host, int port, Configuration conf, Configure configure) {
         this.host = host;
         this.port = port;
         this.conf = conf;
         this.configure = configure;
     }
-
+    
     public static Pool<Endpoint> create(String host, int port, Configuration conf, Configure configure) {
         EndpointPool sp = new EndpointPool(host, port, conf, configure);
         PoolValidation pv = new PoolValidation((byte) (RELEASE | ACQUIRE | PULSE));
@@ -60,44 +62,44 @@ public class EndpointPool implements Consumer<Endpoint>, Supplier<Endpoint>, Pre
         builder.validator(sp).supplier(sp).consumer(sp).validation(pv);
         return Lifecyclet.start(builder.build("redis.pool"));
     }
-
+    
     @Override
     public void accept(Endpoint socket) {
         closeQuietly(socket);
     }
-
+    
     @Override
     public boolean test(Endpoint socket) {
         return !socket.broken.get();
     }
-
+    
     @Override
     public Endpoint get() {
         return new Endpoint(host, port, 0, conf, configure);
     }
-
+    
     public static class Endpoint implements Closeable {
-
+        
         private static final byte[] AUTH = "auth".getBytes();
         private static final byte[] PING = "ping".getBytes();
         private static final byte[] SELECT = "select".getBytes();
         private static final byte[] EXPIREAT = "expireat".getBytes();
-
+        
         private AtomicBoolean broken = new AtomicBoolean(false);
-
+        
         private final Socket socket;
         private final InputStream in;
         private final OutputStream out;
         private final Configure configure;
         private final RedisCodec codec = new RedisCodec();
-
+        
         public Endpoint(String host, int port, int db, Configuration conf, Configure configure) {
             try {
                 this.configure = configure;
                 RedisSocketFactory factory = new RedisSocketFactory(conf);
                 this.socket = factory.createSocket(host, port, conf.getConnectionTimeout());
-                this.in = this.socket.getInputStream();
-                this.out = this.socket.getOutputStream();
+                this.in = new BufferedInputStream(this.socket.getInputStream(), configure.getBufferSize());
+                this.out = new BufferedOutputStream(this.socket.getOutputStream(), configure.getBufferSize());
                 if (conf.getAuthPassword() != null) {
                     String r = auth(conf.getAuthPassword());
                     if (r != null) throw new IOException(r);
@@ -111,7 +113,7 @@ public class EndpointPool implements Consumer<Endpoint>, Supplier<Endpoint>, Pre
                 throw new AssertionError(e.getMessage(), e);
             }
         }
-
+        
         public String select(int db) {
             return send(out -> {
                 try {
@@ -125,7 +127,7 @@ public class EndpointPool implements Consumer<Endpoint>, Supplier<Endpoint>, Pre
                 }
             });
         }
-
+        
         public String auth(String password) {
             return send(out -> {
                 try {
@@ -139,7 +141,7 @@ public class EndpointPool implements Consumer<Endpoint>, Supplier<Endpoint>, Pre
                 }
             });
         }
-
+        
         public String expireat(byte[] key, long ms) {
             return send(out -> {
                 try {
@@ -155,7 +157,7 @@ public class EndpointPool implements Consumer<Endpoint>, Supplier<Endpoint>, Pre
                 }
             });
         }
-
+        
         public String ping() {
             return send(out -> {
                 try {
@@ -167,7 +169,7 @@ public class EndpointPool implements Consumer<Endpoint>, Supplier<Endpoint>, Pre
                 }
             });
         }
-
+        
         public String send(Consumer<OutputStream> consumer) {
             try {
                 consumer.accept(out);
@@ -180,7 +182,7 @@ public class EndpointPool implements Consumer<Endpoint>, Supplier<Endpoint>, Pre
                 return e.getMessage();
             }
         }
-
+        
         public String send(byte[] command, byte[]... ary) {
             try {
                 emit(command, ary);
@@ -193,7 +195,7 @@ public class EndpointPool implements Consumer<Endpoint>, Supplier<Endpoint>, Pre
                 return e.getMessage();
             }
         }
-
+        
         private void emit(byte[] command, byte[][] ary) throws IOException {
             out.write(STAR);
             out.write(String.valueOf(ary.length + 1).getBytes());
@@ -219,14 +221,14 @@ public class EndpointPool implements Consumer<Endpoint>, Supplier<Endpoint>, Pre
             }
             out.flush();
         }
-
+        
         @Override
         public void close() throws IOException {
             Sockets.closeQuietly(in);
             Sockets.closeQuietly(out);
             Sockets.closeQuietly(socket);
         }
-
+        
         public Object parse(RedisInputStream in) throws IOException {
             while (true) {
                 int c = in.read();
@@ -314,17 +316,17 @@ public class EndpointPool implements Consumer<Endpoint>, Supplier<Endpoint>, Pre
                         }
                     default:
                         throw new AssertionError("expect [$,:,*,+,-] but: " + (char) c);
-
+    
                 }
             }
         }
-
+        
         private static final class ReplyException extends RuntimeException {
             public ReplyException(String message) {
                 super(message);
             }
         }
-
+        
         public static void close(Endpoint socket) {
             if (socket == null) return;
             try {
@@ -333,7 +335,7 @@ public class EndpointPool implements Consumer<Endpoint>, Supplier<Endpoint>, Pre
                 throw new RuntimeException(txt);
             }
         }
-
+        
         public static void closeQuietly(Endpoint socket) {
             if (socket == null) return;
             try {

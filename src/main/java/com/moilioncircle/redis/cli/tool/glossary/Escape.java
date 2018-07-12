@@ -23,6 +23,8 @@ public enum Escape {
         return this.value;
     }
     
+    private static final char[] NUMERALS = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+    
     public static Escape parse(String escape) {
         if (escape == null) return RAW;
         switch (escape) {
@@ -61,7 +63,10 @@ public enum Escape {
                     // encode " ' \ unprintable and space
                     out.write('\\');
                     out.write('x');
-                    out.write(Integer.toHexString(b & 0xFF).getBytes());
+                    int ma = b / 16;
+                    int mi = b % 16;
+                    out.write(NUMERALS[ma]);
+                    out.write(NUMERALS[mi]);
                 } else {
                     out.write(b);
                 }

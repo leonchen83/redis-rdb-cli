@@ -6,6 +6,7 @@ import com.moilioncircle.redis.cli.tool.ext.DumpRawByteListener;
 import com.moilioncircle.redis.cli.tool.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.cli.tool.glossary.DataType;
 import com.moilioncircle.redis.cli.tool.glossary.Escape;
+import com.moilioncircle.redis.cli.tool.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -30,20 +31,20 @@ import static com.moilioncircle.redis.cli.tool.util.pooling.EndpointPool.Endpoin
  * @author Baoyi Chen
  */
 public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListener {
-
+    
     private static final Logger logger = LoggerFactory.getLogger(MigrateRdbVisitor.class);
-
+    
     private static final byte[] ZERO = "0".getBytes();
     private static final byte[] RESTORE = "restore".getBytes();
     private static final byte[] REPLACE = "replace".getBytes();
-
+    
     private int db = 0;
     private int retry = 0;
     private Endpoint endpoint;
     private final RedisURI uri;
     private final boolean replace;
     private final Configuration configuration;
-
+    
     public MigrateRdbVisitor(Replicator replicator, Configure configure, String uri, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) throws Exception {
         super(replicator, configure, db, regexs, types);
         this.replace = replace;
@@ -53,7 +54,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         this.configuration = configure.merge(Configuration.valueOf(this.uri));
         this.replicator.addCloseListener(e -> Endpoint.closeQuietly(this.endpoint));
     }
-
+    
     protected String retry(Function<Endpoint, String> func, int times) {
         try {
             return func.apply(endpoint);
@@ -67,7 +68,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
             throw e;
         }
     }
-
+    
     @Override
     public void onEvent(Replicator replicator, Event event) {
         if (event instanceof PreRdbSyncEvent) {
@@ -80,7 +81,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
             if (r != null) logger.error("[{}] failed. reason:{}", Strings.toString(dc.getCommand()), r);
         }
     }
-
+    
     @Override
     public DB applySelectDB(RedisInputStream in, int version) throws IOException {
         DB db = super.applySelectDB(in, version);
@@ -89,7 +90,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         if (r != null) logger.error("[select] {} failed. reason:{}", db.getDbNumber(), r);
         return db;
     }
-
+    
     @Override
     public Event applyExpireTime(RedisInputStream in, DB db, int version) throws IOException {
         DummyKeyValuePair kv = (DummyKeyValuePair) super.applyExpireTime(in, db, version);
@@ -98,7 +99,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         if (r != null) logger.error("[expireat] {} failed. reason:{}", Strings.toString(kv.getKey()), r);
         return kv;
     }
-
+    
     @Override
     public Event applyExpireTimeMs(RedisInputStream in, DB db, int version) throws IOException {
         DummyKeyValuePair kv = (DummyKeyValuePair) super.applyExpireTimeMs(in, db, version);
@@ -107,30 +108,36 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         if (r != null) logger.error("[expireat] {} failed. reason:{}", Strings.toString(kv.getKey()), r);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyString(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
-                out.write(RESTORE);
-                out.write(' ');
+            OutputStreams.write(RESTORE, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.call(() -> {
                 Escape.REDIS.encode(key, out, configure);
-                out.write(' ');
-                out.write(ZERO);
-                out.write(' ');
+                return null;
+            });
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write(ZERO, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 replicator.addRawByteListener(listener);
                 super.doApplyString(in, db, version, key, contains, type);
                 replicator.removeRawByteListener(listener);
-                if (replace) {
-                    out.write(' ');
-                    out.write(REPLACE);
-                }
-                out.write('\n');
-                out.flush();
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
+            OutputStreams.write((byte) '"', out);
+            if (replace) {
+                OutputStreams.write((byte) ' ', out);
+                OutputStreams.write(REPLACE, out);
+            }
+            OutputStreams.write((byte) '\n', out);
         }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
@@ -141,30 +148,36 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
-                out.write(RESTORE);
-                out.write(' ');
+            OutputStreams.write(RESTORE, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.call(() -> {
                 Escape.REDIS.encode(key, out, configure);
-                out.write(' ');
-                out.write(ZERO);
-                out.write(' ');
+                return null;
+            });
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write(ZERO, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 replicator.addRawByteListener(listener);
                 super.doApplyList(in, db, version, key, contains, type);
                 replicator.removeRawByteListener(listener);
-                if (replace) {
-                    out.write(' ');
-                    out.write(REPLACE);
-                }
-                out.write('\n');
-                out.flush();
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
+            OutputStreams.write((byte) '"', out);
+            if (replace) {
+                OutputStreams.write((byte) ' ', out);
+                OutputStreams.write(REPLACE, out);
+            }
+            OutputStreams.write((byte) '\n', out);
         }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
@@ -175,30 +188,36 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplySet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
-                out.write(RESTORE);
-                out.write(' ');
+            OutputStreams.write(RESTORE, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.call(() -> {
                 Escape.REDIS.encode(key, out, configure);
-                out.write(' ');
-                out.write(ZERO);
-                out.write(' ');
+                return null;
+            });
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write(ZERO, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 replicator.addRawByteListener(listener);
                 super.doApplySet(in, db, version, key, contains, type);
                 replicator.removeRawByteListener(listener);
-                if (replace) {
-                    out.write(' ');
-                    out.write(REPLACE);
-                }
-                out.write('\n');
-                out.flush();
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
+            OutputStreams.write((byte) '"', out);
+            if (replace) {
+                OutputStreams.write((byte) ' ', out);
+                OutputStreams.write(REPLACE, out);
+            }
+            OutputStreams.write((byte) '\n', out);
         }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
@@ -209,30 +228,36 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyZSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
-                out.write(RESTORE);
-                out.write(' ');
+            OutputStreams.write(RESTORE, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.call(() -> {
                 Escape.REDIS.encode(key, out, configure);
-                out.write(' ');
-                out.write(ZERO);
-                out.write(' ');
+                return null;
+            });
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write(ZERO, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 replicator.addRawByteListener(listener);
                 super.doApplyZSet(in, db, version, key, contains, type);
                 replicator.removeRawByteListener(listener);
-                if (replace) {
-                    out.write(' ');
-                    out.write(REPLACE);
-                }
-                out.write('\n');
-                out.flush();
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
+            OutputStreams.write((byte) '"', out);
+            if (replace) {
+                OutputStreams.write((byte) ' ', out);
+                OutputStreams.write(REPLACE, out);
+            }
+            OutputStreams.write((byte) '\n', out);
         }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
@@ -243,30 +268,36 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyZSet2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
-                out.write(RESTORE);
-                out.write(' ');
+            OutputStreams.write(RESTORE, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.call(() -> {
                 Escape.REDIS.encode(key, out, configure);
-                out.write(' ');
-                out.write(ZERO);
-                out.write(' ');
+                return null;
+            });
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write(ZERO, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 replicator.addRawByteListener(listener);
                 super.doApplyZSet2(in, db, version, key, contains, type);
                 replicator.removeRawByteListener(listener);
-                if (replace) {
-                    out.write(' ');
-                    out.write(REPLACE);
-                }
-                out.write('\n');
-                out.flush();
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
+            OutputStreams.write((byte) '"', out);
+            if (replace) {
+                OutputStreams.write((byte) ' ', out);
+                OutputStreams.write(REPLACE, out);
+            }
+            OutputStreams.write((byte) '\n', out);
         }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
@@ -277,30 +308,36 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyHash(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
-                out.write(RESTORE);
-                out.write(' ');
+            OutputStreams.write(RESTORE, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.call(() -> {
                 Escape.REDIS.encode(key, out, configure);
-                out.write(' ');
-                out.write(ZERO);
-                out.write(' ');
+                return null;
+            });
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write(ZERO, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 replicator.addRawByteListener(listener);
                 super.doApplyHash(in, db, version, key, contains, type);
                 replicator.removeRawByteListener(listener);
-                if (replace) {
-                    out.write(' ');
-                    out.write(REPLACE);
-                }
-                out.write('\n');
-                out.flush();
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
+            OutputStreams.write((byte) '"', out);
+            if (replace) {
+                OutputStreams.write((byte) ' ', out);
+                OutputStreams.write(REPLACE, out);
+            }
+            OutputStreams.write((byte) '\n', out);
         }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
@@ -311,30 +348,36 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyHashZipMap(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
-                out.write(RESTORE);
-                out.write(' ');
+            OutputStreams.write(RESTORE, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.call(() -> {
                 Escape.REDIS.encode(key, out, configure);
-                out.write(' ');
-                out.write(ZERO);
-                out.write(' ');
+                return null;
+            });
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write(ZERO, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 replicator.addRawByteListener(listener);
                 super.doApplyHashZipMap(in, db, version, key, contains, type);
                 replicator.removeRawByteListener(listener);
-                if (replace) {
-                    out.write(' ');
-                    out.write(REPLACE);
-                }
-                out.write('\n');
-                out.flush();
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
+            OutputStreams.write((byte) '"', out);
+            if (replace) {
+                OutputStreams.write((byte) ' ', out);
+                OutputStreams.write(REPLACE, out);
+            }
+            OutputStreams.write((byte) '\n', out);
         }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
@@ -345,30 +388,36 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyListZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
-                out.write(RESTORE);
-                out.write(' ');
+            OutputStreams.write(RESTORE, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.call(() -> {
                 Escape.REDIS.encode(key, out, configure);
-                out.write(' ');
-                out.write(ZERO);
-                out.write(' ');
+                return null;
+            });
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write(ZERO, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 replicator.addRawByteListener(listener);
                 super.doApplyListZipList(in, db, version, key, contains, type);
                 replicator.removeRawByteListener(listener);
-                if (replace) {
-                    out.write(' ');
-                    out.write(REPLACE);
-                }
-                out.write('\n');
-                out.flush();
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
+            OutputStreams.write((byte) '"', out);
+            if (replace) {
+                OutputStreams.write((byte) ' ', out);
+                OutputStreams.write(REPLACE, out);
+            }
+            OutputStreams.write((byte) '\n', out);
         }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
@@ -379,30 +428,36 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplySetIntSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
-                out.write(RESTORE);
-                out.write(' ');
+            OutputStreams.write(RESTORE, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.call(() -> {
                 Escape.REDIS.encode(key, out, configure);
-                out.write(' ');
-                out.write(ZERO);
-                out.write(' ');
+                return null;
+            });
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write(ZERO, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 replicator.addRawByteListener(listener);
                 super.doApplySetIntSet(in, db, version, key, contains, type);
                 replicator.removeRawByteListener(listener);
-                if (replace) {
-                    out.write(' ');
-                    out.write(REPLACE);
-                }
-                out.write('\n');
-                out.flush();
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
+            OutputStreams.write((byte) '"', out);
+            if (replace) {
+                OutputStreams.write((byte) ' ', out);
+                OutputStreams.write(REPLACE, out);
+            }
+            OutputStreams.write((byte) '\n', out);
         }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
@@ -413,30 +468,36 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyZSetZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
-                out.write(RESTORE);
-                out.write(' ');
+            OutputStreams.write(RESTORE, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.call(() -> {
                 Escape.REDIS.encode(key, out, configure);
-                out.write(' ');
-                out.write(ZERO);
-                out.write(' ');
+                return null;
+            });
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write(ZERO, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 replicator.addRawByteListener(listener);
                 super.doApplyZSetZipList(in, db, version, key, contains, type);
                 replicator.removeRawByteListener(listener);
-                if (replace) {
-                    out.write(' ');
-                    out.write(REPLACE);
-                }
-                out.write('\n');
-                out.flush();
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
+            OutputStreams.write((byte) '"', out);
+            if (replace) {
+                OutputStreams.write((byte) ' ', out);
+                OutputStreams.write(REPLACE, out);
+            }
+            OutputStreams.write((byte) '\n', out);
         }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
@@ -447,30 +508,36 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyHashZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
-                out.write(RESTORE);
-                out.write(' ');
+            OutputStreams.write(RESTORE, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.call(() -> {
                 Escape.REDIS.encode(key, out, configure);
-                out.write(' ');
-                out.write(ZERO);
-                out.write(' ');
+                return null;
+            });
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write(ZERO, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 replicator.addRawByteListener(listener);
                 super.doApplyHashZipList(in, db, version, key, contains, type);
                 replicator.removeRawByteListener(listener);
-                if (replace) {
-                    out.write(' ');
-                    out.write(REPLACE);
-                }
-                out.write('\n');
-                out.flush();
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
+            OutputStreams.write((byte) '"', out);
+            if (replace) {
+                OutputStreams.write((byte) ' ', out);
+                OutputStreams.write(REPLACE, out);
+            }
+            OutputStreams.write((byte) '\n', out);
         }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
@@ -481,30 +548,36 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyListQuickList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
-                out.write(RESTORE);
-                out.write(' ');
+            OutputStreams.write(RESTORE, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.call(() -> {
                 Escape.REDIS.encode(key, out, configure);
-                out.write(' ');
-                out.write(ZERO);
-                out.write(' ');
+                return null;
+            });
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write(ZERO, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 replicator.addRawByteListener(listener);
                 super.doApplyListQuickList(in, db, version, key, contains, type);
                 replicator.removeRawByteListener(listener);
-                if (replace) {
-                    out.write(' ');
-                    out.write(REPLACE);
-                }
-                out.write('\n');
-                out.flush();
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
+            OutputStreams.write((byte) '"', out);
+            if (replace) {
+                OutputStreams.write((byte) ' ', out);
+                OutputStreams.write(REPLACE, out);
+            }
+            OutputStreams.write((byte) '\n', out);
         }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
@@ -515,30 +588,36 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyModule(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
-                out.write(RESTORE);
-                out.write(' ');
+            OutputStreams.write(RESTORE, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.call(() -> {
                 Escape.REDIS.encode(key, out, configure);
-                out.write(' ');
-                out.write(ZERO);
-                out.write(' ');
+                return null;
+            });
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write(ZERO, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 replicator.addRawByteListener(listener);
                 super.doApplyModule(in, db, version, key, contains, type);
                 replicator.removeRawByteListener(listener);
-                if (replace) {
-                    out.write(' ');
-                    out.write(REPLACE);
-                }
-                out.write('\n');
-                out.flush();
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
+            OutputStreams.write((byte) '"', out);
+            if (replace) {
+                OutputStreams.write((byte) ' ', out);
+                OutputStreams.write(REPLACE, out);
+            }
+            OutputStreams.write((byte) '\n', out);
         }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
@@ -549,30 +628,36 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyModule2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
-                out.write(RESTORE);
-                out.write(' ');
+            OutputStreams.write(RESTORE, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.call(() -> {
                 Escape.REDIS.encode(key, out, configure);
-                out.write(' ');
-                out.write(ZERO);
-                out.write(' ');
+                return null;
+            });
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write(ZERO, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 replicator.addRawByteListener(listener);
                 super.doApplyModule2(in, db, version, key, contains, type);
                 replicator.removeRawByteListener(listener);
-                if (replace) {
-                    out.write(' ');
-                    out.write(REPLACE);
-                }
-                out.write('\n');
-                out.flush();
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
+            OutputStreams.write((byte) '"', out);
+            if (replace) {
+                OutputStreams.write((byte) ' ', out);
+                OutputStreams.write(REPLACE, out);
+            }
+            OutputStreams.write((byte) '\n', out);
         }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
@@ -583,30 +668,36 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         kv.setContains(contains);
         return kv;
     }
-
+    
     @Override
     protected Event doApplyStreamListPacks(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
-                out.write(RESTORE);
-                out.write(' ');
+            OutputStreams.write(RESTORE, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.call(() -> {
                 Escape.REDIS.encode(key, out, configure);
-                out.write(' ');
-                out.write(ZERO);
-                out.write(' ');
+                return null;
+            });
+            OutputStreams.write((byte) '"', out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write(ZERO, out);
+            OutputStreams.write((byte) ' ', out);
+            OutputStreams.write((byte) '"', out);
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 replicator.addRawByteListener(listener);
                 super.doApplyStreamListPacks(in, db, version, key, contains, type);
                 replicator.removeRawByteListener(listener);
-                if (replace) {
-                    out.write(' ');
-                    out.write(REPLACE);
-                }
-                out.write('\n');
-                out.flush();
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
+            OutputStreams.write((byte) '"', out);
+            if (replace) {
+                OutputStreams.write((byte) ' ', out);
+                OutputStreams.write(REPLACE, out);
+            }
+            OutputStreams.write((byte) '\n', out);
         }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
