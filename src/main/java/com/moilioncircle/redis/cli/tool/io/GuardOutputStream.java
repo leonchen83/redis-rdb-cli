@@ -14,31 +14,27 @@ import static com.moilioncircle.redis.cli.tool.glossary.Guard.SAVE;
  * @author Baoyi Chen
  */
 public class GuardOutputStream extends OutputStream {
-    
+
     private OutputStream out;
     private Guard guard = SAVE;
     private ByteBuilder builder;
-    
-    
+
+
     public GuardOutputStream(int cap, OutputStream out) {
         this.out = out;
         this.builder = ByteBuilder.allocate(cap);
     }
-    
+
     public void setGuard(Guard guard) {
         this.guard = guard;
     }
-    
+
     public void reset(OutputStream out) {
         OutputStreams.closeQuietly(this.out);
         this.out = out;
         this.builder.clear();
     }
-    
-    public byte[] array() {
-        return builder.array();
-    }
-    
+
     @Override
     public void write(int b) throws IOException {
         if (guard == DRAIN) {
@@ -57,19 +53,19 @@ public class GuardOutputStream extends OutputStream {
             }
         }
     }
-    
+
     public void write(byte[] b) throws IOException {
         write(b, 0, b.length);
     }
-    
+
     public void write(byte[] b, int off, int len) throws IOException {
         for (int i = off; i < len; i++) write(b[i]);
     }
-    
+
     public void flush() throws IOException {
         if (out != null) out.flush();
     }
-    
+
     public void close() throws IOException {
         if (out != null) out.close();
     }
