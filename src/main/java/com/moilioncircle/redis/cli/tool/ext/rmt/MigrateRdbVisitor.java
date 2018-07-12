@@ -45,10 +45,9 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         super(replicator, configure, db, regexs, types);
         this.replace = replace;
         this.uri = new RedisURI(uri);
-        this.configuration = configure.merge(Configuration.valueOf(this.uri));
-        this.socket = new Socket(this.uri.getHost(), this.uri.getPort(), configuration);
         this.replicator.addEventListener(this);
         this.replicator.addCloseListener(e -> Socket.closeQuietly(socket));
+        this.configuration = configure.merge(Configuration.valueOf(this.uri));
     }
 
     @Override
