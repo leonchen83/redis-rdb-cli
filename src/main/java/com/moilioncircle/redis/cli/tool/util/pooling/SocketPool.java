@@ -43,15 +43,17 @@ public class SocketPool implements Consumer<Socket>, Supplier<Socket>, Predicate
     private final int port;
     private final String host;
     private final Configuration conf;
+    private final Configure configure;
 
-    private SocketPool(String host, int port, Configuration conf) {
+    private SocketPool(String host, int port, Configuration conf, Configure configure) {
         this.host = host;
         this.port = port;
         this.conf = conf;
+        this.configure = configure;
     }
 
-    public static Pool<SocketPool.Socket> create(String host, int port, Configuration conf) {
-        SocketPool sp = new SocketPool(host, port, conf);
+    public static Pool<SocketPool.Socket> create(String host, int port, Configuration conf, Configure configure) {
+        SocketPool sp = new SocketPool(host, port, conf, configure);
         PoolValidation pv = new PoolValidation((byte) (RELEASE | ACQUIRE | PULSE));
         PoolBuilder<Socket> builder = new PoolBuilder<>();
         builder.validator(sp).supplier(sp).consumer(sp).validation(pv);
@@ -70,7 +72,7 @@ public class SocketPool implements Consumer<Socket>, Supplier<Socket>, Predicate
 
     @Override
     public Socket get() {
-        return new Socket(host, port, 0, conf);
+        return new Socket(host, port, 0, conf, configure);
     }
 
     public static class Socket implements Closeable {
@@ -84,11 +86,13 @@ public class SocketPool implements Consumer<Socket>, Supplier<Socket>, Predicate
 
         private final InputStream in;
         private final OutputStream out;
+        private final Configure configure;
         private final java.net.Socket socket;
         private final RedisCodec codec = new RedisCodec();
 
-        public Socket(String host, int port, int db, Configuration conf) {
+        public Socket(String host, int port, int db, Configuration conf, Configure configure) {
             try {
+                this.configure = configure;
                 RedisSocketFactory factory = new RedisSocketFactory(conf);
                 this.socket = factory.createSocket(host, port, conf.getConnectionTimeout());
                 this.in = this.socket.getInputStream();
@@ -126,7 +130,7 @@ public class SocketPool implements Consumer<Socket>, Supplier<Socket>, Predicate
                 try {
                     out.write(AUTH);
                     out.write(' ');
-                    out.write(password.getBytes());
+                    Escape.REDIS.encode(password.getBytes(), out, configure);
                     out.write('\n');
                     out.flush();
                 } catch (IOException e) {
@@ -135,7 +139,7 @@ public class SocketPool implements Consumer<Socket>, Supplier<Socket>, Predicate
             });
         }
 
-        public String expireat(byte[] key, long ms, Configure configure) {
+        public String expireat(byte[] key, long ms) {
             return send(out -> {
                 try {
                     out.write(EXPIREAT);
@@ -176,9 +180,9 @@ public class SocketPool implements Consumer<Socket>, Supplier<Socket>, Predicate
             }
         }
 
-        public String send(Configure configure, byte[] command, byte[]... ary) {
+        public String send(byte[] command, byte[]... ary) {
             try {
-                emit(command, ary, configure);
+                emit(command, ary);
                 parse(new RedisInputStream(in));
                 return null;
             } catch (UncheckedIOException | IOException e) {
@@ -189,7 +193,7 @@ public class SocketPool implements Consumer<Socket>, Supplier<Socket>, Predicate
             }
         }
 
-        private void emit(byte[] command, byte[][] ary, Configure configure) throws IOException {
+        private void emit(byte[] command, byte[][] ary) throws IOException {
             out.write(STAR);
             out.write(String.valueOf(ary.length + 1).getBytes());
             out.write('\r');

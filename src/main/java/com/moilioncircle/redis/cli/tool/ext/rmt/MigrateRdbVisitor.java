@@ -50,8 +50,8 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         this.uri = new RedisURI(uri);
         this.replicator.addEventListener(this);
         this.retry = configure.getMigrateRetryTime();
-        this.replicator.addCloseListener(e -> Socket.closeQuietly(socket));
         this.configuration = configure.merge(Configuration.valueOf(this.uri));
+        this.replicator.addCloseListener(e -> Socket.closeQuietly(this.socket));
     }
 
     protected String retry(Function<Socket, String> func, int times) {
@@ -61,7 +61,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
             times--;
             if (times >= 0) {
                 Socket.closeQuietly(socket);
-                socket = new Socket(this.uri.getHost(), this.uri.getPort(), db, configuration);
+                socket = new Socket(this.uri.getHost(), this.uri.getPort(), db, configuration, configure);
                 return retry(func, times);
             }
             throw e;
@@ -72,11 +72,11 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     public void onEvent(Replicator replicator, Event event) {
         if (event instanceof PreRdbSyncEvent) {
             Socket.closeQuietly(this.socket);
-            this.socket = new Socket(this.uri.getHost(), this.uri.getPort(), 0, configuration);
+            this.socket = new Socket(this.uri.getHost(), this.uri.getPort(), 0, configuration, configure);
         }
         if (event instanceof DefaultCommand) {
             DefaultCommand dc = (DefaultCommand) event;
-            String r = retry(s -> s.send(configure, dc.getCommand(), dc.getArgs()), retry);
+            String r = retry(s -> s.send(dc.getCommand(), dc.getArgs()), retry);
             if (r != null) logger.error("[{}] failed. reason:{}", Strings.toString(dc.getCommand()), r);
         }
     }
@@ -94,7 +94,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     public Event applyExpireTime(RedisInputStream in, DB db, int version) throws IOException {
         DummyKeyValuePair kv = (DummyKeyValuePair) super.applyExpireTime(in, db, version);
         if (!kv.isContains() || kv.getKey() == null) return kv;
-        String r = retry(s -> s.expireat(kv.getKey(), kv.getExpiredSeconds() * 1000, configure), retry);
+        String r = retry(s -> s.expireat(kv.getKey(), kv.getExpiredSeconds() * 1000), retry);
         if (r != null) logger.error("[expireat] {} failed. reason:{}", Strings.toString(kv.getKey()), r);
         return kv;
     }
@@ -103,7 +103,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     public Event applyExpireTimeMs(RedisInputStream in, DB db, int version) throws IOException {
         DummyKeyValuePair kv = (DummyKeyValuePair) super.applyExpireTimeMs(in, db, version);
         if (!kv.isContains() || kv.getKey() == null) return kv;
-        String r = retry(s -> s.expireat(kv.getKey(), kv.getExpiredMs(), configure), retry);
+        String r = retry(s -> s.expireat(kv.getKey(), kv.getExpiredMs()), retry);
         if (r != null) logger.error("[expireat] {} failed. reason:{}", Strings.toString(kv.getKey()), r);
         return kv;
     }
