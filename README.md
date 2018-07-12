@@ -29,6 +29,7 @@ maven-3.3.1+
 usage: rct -f <format> -s <source> -o <file> [-d <num num...>] [-e
            <escape>] [-k <regex regex...>] [-t <type type...>] [-b
            <bytes>] [-l <n>]
+
 options:
  -b,--bytes <bytes>          limit memory output(--format mem) to keys
                              greater to or equal to this value (in bytes)
@@ -37,8 +38,8 @@ options:
                              will be included.
  -e,--escape <escape>        escape strings to encoding: raw (default),
                              redis.
- -f,--format <format>        format to export. valid commands are json,
-                             diff, dump, key, keyval, mem and resp
+ -f,--format <format>        format to export. valid formats are json,
+                             diff, key, keyval, mem and resp
  -h,--help                   rct usage.
  -k,--key <regex regex...>   keys to export. this can be a regex. if not
                              specified, all keys will be returned.
@@ -55,6 +56,7 @@ options:
                              not specified, all data types will be
                              returned.
  -v,--version                rct version.
+
 examples:
  rct -f resp -s redis://127.0.0.1:6379 -o ./target.aof -d 0 1
  rct -f json -s ./dump.rdb -o ./target.json -k user.* product.*

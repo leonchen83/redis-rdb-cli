@@ -61,7 +61,7 @@ public enum DataType {
             case "sortedset":
                 return SORTEDSET;
             default:
-                throw new AssertionError("Unsupported type '" + type + "'");
+                throw new AssertionError("Unsupported data type '" + type + "'");
 
         }
     }
@@ -150,7 +150,7 @@ public enum DataType {
             case 15:
                 return "listpacks";
             default:
-                throw new AssertionError(type);
+                throw new AssertionError("Unsupported data storage type '" + type + "'");
         }
     }
 }

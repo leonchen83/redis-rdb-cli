@@ -78,7 +78,7 @@ public enum Action {
             case NONE:
                 return list;
             default:
-                throw new AssertionError(this);
+                throw new AssertionError("Unsupported action '" + this + "'");
         }
     }
 }
