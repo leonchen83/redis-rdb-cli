@@ -54,6 +54,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     @Override
     public void onEvent(Replicator replicator, Event event) {
         if (event instanceof PreRdbSyncEvent) {
+            Socket.closeQuietly(this.socket);
             this.socket = new Socket(this.uri.getHost(), this.uri.getPort(), configuration);
         }
         if (event instanceof DefaultCommand) {
