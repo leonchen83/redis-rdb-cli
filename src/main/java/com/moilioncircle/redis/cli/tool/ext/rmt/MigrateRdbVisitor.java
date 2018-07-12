@@ -110,8 +110,9 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplyString(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
                 Escape.REDIS.encode(key, out, configure);
@@ -143,8 +144,9 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplyList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
                 Escape.REDIS.encode(key, out, configure);
@@ -176,8 +178,9 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplySet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
                 Escape.REDIS.encode(key, out, configure);
@@ -209,8 +212,9 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplyZSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
                 Escape.REDIS.encode(key, out, configure);
@@ -242,8 +246,9 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplyZSet2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
                 Escape.REDIS.encode(key, out, configure);
@@ -275,8 +280,9 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplyHash(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
                 Escape.REDIS.encode(key, out, configure);
@@ -308,8 +314,9 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplyHashZipMap(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
                 Escape.REDIS.encode(key, out, configure);
@@ -341,8 +348,9 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplyListZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
                 Escape.REDIS.encode(key, out, configure);
@@ -374,8 +382,9 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplySetIntSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
                 Escape.REDIS.encode(key, out, configure);
@@ -407,8 +416,9 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplyZSetZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
                 Escape.REDIS.encode(key, out, configure);
@@ -440,8 +450,9 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplyHashZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
                 Escape.REDIS.encode(key, out, configure);
@@ -473,8 +484,9 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplyListQuickList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
                 Escape.REDIS.encode(key, out, configure);
@@ -506,8 +518,9 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplyModule(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
                 Escape.REDIS.encode(key, out, configure);
@@ -539,8 +552,9 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplyModule2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
                 Escape.REDIS.encode(key, out, configure);
@@ -572,8 +586,9 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplyStreamListPacks(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         String r = retry(s -> s.send(out -> {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, ver, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
                 Escape.REDIS.encode(key, out, configure);
