@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.Function;
 
-import static com.moilioncircle.redis.cli.tool.util.pooling.SocketPool.Socket;
+import static com.moilioncircle.redis.cli.tool.util.pooling.EndpointPool.Endpoint;
 
 /**
  * @author Baoyi Chen
@@ -39,7 +39,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     private int db = 0;
     private int retry = 0;
-    private Socket socket;
+    private Endpoint endpoint;
     private final RedisURI uri;
     private final boolean replace;
     private final Configuration configuration;
@@ -51,17 +51,17 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         this.replicator.addEventListener(this);
         this.retry = configure.getMigrateRetryTime();
         this.configuration = configure.merge(Configuration.valueOf(this.uri));
-        this.replicator.addCloseListener(e -> Socket.closeQuietly(this.socket));
+        this.replicator.addCloseListener(e -> Endpoint.closeQuietly(this.endpoint));
     }
 
-    protected String retry(Function<Socket, String> func, int times) {
+    protected String retry(Function<Endpoint, String> func, int times) {
         try {
-            return func.apply(socket);
+            return func.apply(endpoint);
         } catch (Throwable e) {
             times--;
             if (times >= 0) {
-                Socket.closeQuietly(socket);
-                socket = new Socket(this.uri.getHost(), this.uri.getPort(), db, configuration, configure);
+                Endpoint.closeQuietly(endpoint);
+                endpoint = new Endpoint(this.uri.getHost(), this.uri.getPort(), db, configuration, configure);
                 return retry(func, times);
             }
             throw e;
@@ -71,8 +71,8 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     @Override
     public void onEvent(Replicator replicator, Event event) {
         if (event instanceof PreRdbSyncEvent) {
-            Socket.closeQuietly(this.socket);
-            this.socket = new Socket(this.uri.getHost(), this.uri.getPort(), 0, configuration, configure);
+            Endpoint.closeQuietly(this.endpoint);
+            this.endpoint = new Endpoint(this.uri.getHost(), this.uri.getPort(), 0, configuration, configure);
         }
         if (event instanceof DefaultCommand) {
             DefaultCommand dc = (DefaultCommand) event;

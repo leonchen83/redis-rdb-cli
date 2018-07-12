@@ -19,6 +19,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.Socket;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -27,8 +28,8 @@ import java.util.function.Supplier;
 import static cn.nextop.lite.pool.PoolValidation.ACQUIRE;
 import static cn.nextop.lite.pool.PoolValidation.PULSE;
 import static cn.nextop.lite.pool.PoolValidation.RELEASE;
-import static com.moilioncircle.redis.cli.tool.util.pooling.SocketPool.Socket;
-import static com.moilioncircle.redis.cli.tool.util.pooling.SocketPool.Socket.closeQuietly;
+import static com.moilioncircle.redis.cli.tool.util.pooling.EndpointPool.Endpoint;
+import static com.moilioncircle.redis.cli.tool.util.pooling.EndpointPool.Endpoint.closeQuietly;
 import static com.moilioncircle.redis.replicator.Constants.COLON;
 import static com.moilioncircle.redis.replicator.Constants.DOLLAR;
 import static com.moilioncircle.redis.replicator.Constants.MINUS;
@@ -38,44 +39,44 @@ import static com.moilioncircle.redis.replicator.Constants.STAR;
 /**
  * @author Baoyi Chen
  */
-public class SocketPool implements Consumer<Socket>, Supplier<Socket>, Predicate<Socket> {
+public class EndpointPool implements Consumer<Endpoint>, Supplier<Endpoint>, Predicate<Endpoint> {
 
     private final int port;
     private final String host;
     private final Configuration conf;
     private final Configure configure;
 
-    private SocketPool(String host, int port, Configuration conf, Configure configure) {
+    private EndpointPool(String host, int port, Configuration conf, Configure configure) {
         this.host = host;
         this.port = port;
         this.conf = conf;
         this.configure = configure;
     }
 
-    public static Pool<SocketPool.Socket> create(String host, int port, Configuration conf, Configure configure) {
-        SocketPool sp = new SocketPool(host, port, conf, configure);
+    public static Pool<Endpoint> create(String host, int port, Configuration conf, Configure configure) {
+        EndpointPool sp = new EndpointPool(host, port, conf, configure);
         PoolValidation pv = new PoolValidation((byte) (RELEASE | ACQUIRE | PULSE));
-        PoolBuilder<Socket> builder = new PoolBuilder<>();
+        PoolBuilder<Endpoint> builder = new PoolBuilder<>();
         builder.validator(sp).supplier(sp).consumer(sp).validation(pv);
         return Lifecyclet.start(builder.build("redis.pool"));
     }
 
     @Override
-    public void accept(Socket socket) {
+    public void accept(Endpoint socket) {
         closeQuietly(socket);
     }
 
     @Override
-    public boolean test(Socket socket) {
+    public boolean test(Endpoint socket) {
         return !socket.broken.get();
     }
 
     @Override
-    public Socket get() {
-        return new Socket(host, port, 0, conf, configure);
+    public Endpoint get() {
+        return new Endpoint(host, port, 0, conf, configure);
     }
 
-    public static class Socket implements Closeable {
+    public static class Endpoint implements Closeable {
 
         private static final byte[] AUTH = "auth".getBytes();
         private static final byte[] PING = "ping".getBytes();
@@ -84,13 +85,13 @@ public class SocketPool implements Consumer<Socket>, Supplier<Socket>, Predicate
 
         private AtomicBoolean broken = new AtomicBoolean(false);
 
+        private final Socket socket;
         private final InputStream in;
         private final OutputStream out;
         private final Configure configure;
-        private final java.net.Socket socket;
         private final RedisCodec codec = new RedisCodec();
 
-        public Socket(String host, int port, int db, Configuration conf, Configure configure) {
+        public Endpoint(String host, int port, int db, Configuration conf, Configure configure) {
             try {
                 this.configure = configure;
                 RedisSocketFactory factory = new RedisSocketFactory(conf);
@@ -324,7 +325,7 @@ public class SocketPool implements Consumer<Socket>, Supplier<Socket>, Predicate
             }
         }
 
-        public static void close(Socket socket) {
+        public static void close(Endpoint socket) {
             if (socket == null) return;
             try {
                 socket.close();
@@ -333,7 +334,7 @@ public class SocketPool implements Consumer<Socket>, Supplier<Socket>, Predicate
             }
         }
 
-        public static void closeQuietly(Socket socket) {
+        public static void closeQuietly(Endpoint socket) {
             if (socket == null) return;
             try {
                 socket.close();
