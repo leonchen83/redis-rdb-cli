@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Function;
 
 import static com.moilioncircle.redis.cli.tool.util.pooling.SocketPool.Socket;
 
@@ -36,6 +37,8 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     private static final byte[] RESTORE = "restore".getBytes();
     private static final byte[] REPLACE = "replace".getBytes();
 
+    private int db = 0;
+    private int retry = 0;
     private Socket socket;
     private final RedisURI uri;
     private final boolean replace;
@@ -46,19 +49,34 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         this.replace = replace;
         this.uri = new RedisURI(uri);
         this.replicator.addEventListener(this);
+        this.retry = configure.getMigrateRetryTime();
         this.replicator.addCloseListener(e -> Socket.closeQuietly(socket));
         this.configuration = configure.merge(Configuration.valueOf(this.uri));
+    }
+
+    protected String retry(Function<Socket, String> func, int times) {
+        try {
+            return func.apply(socket);
+        } catch (Throwable e) {
+            times--;
+            if (times >= 0) {
+                Socket.closeQuietly(socket);
+                socket = new Socket(this.uri.getHost(), this.uri.getPort(), db, configuration);
+                return retry(func, times);
+            }
+            throw e;
+        }
     }
 
     @Override
     public void onEvent(Replicator replicator, Event event) {
         if (event instanceof PreRdbSyncEvent) {
             Socket.closeQuietly(this.socket);
-            this.socket = new Socket(this.uri.getHost(), this.uri.getPort(), configuration);
+            this.socket = new Socket(this.uri.getHost(), this.uri.getPort(), 0, configuration);
         }
         if (event instanceof DefaultCommand) {
             DefaultCommand dc = (DefaultCommand) event;
-            String r = socket.send(configure, dc.getCommand(), dc.getArgs());
+            String r = retry(s -> s.send(configure, dc.getCommand(), dc.getArgs()), retry);
             if (r != null) logger.error("[{}] failed. reason:{}", Strings.toString(dc.getCommand()), r);
         }
     }
@@ -66,7 +84,8 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     @Override
     public DB applySelectDB(RedisInputStream in, int version) throws IOException {
         DB db = super.applySelectDB(in, version);
-        String r = socket.select((int) db.getDbNumber());
+        this.db = (int) db.getDbNumber();
+        String r = retry(s -> s.select((int) db.getDbNumber()), retry);
         if (r != null) logger.error("[select] {} failed. reason:{}", db.getDbNumber(), r);
         return db;
     }
@@ -75,7 +94,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     public Event applyExpireTime(RedisInputStream in, DB db, int version) throws IOException {
         DummyKeyValuePair kv = (DummyKeyValuePair) super.applyExpireTime(in, db, version);
         if (!kv.isContains() || kv.getKey() == null) return kv;
-        String r = socket.expireat(kv.getKey(), kv.getExpiredSeconds() * 1000, configure);
+        String r = retry(s -> s.expireat(kv.getKey(), kv.getExpiredSeconds() * 1000, configure), retry);
         if (r != null) logger.error("[expireat] {} failed. reason:{}", Strings.toString(kv.getKey()), r);
         return kv;
     }
@@ -84,14 +103,14 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     public Event applyExpireTimeMs(RedisInputStream in, DB db, int version) throws IOException {
         DummyKeyValuePair kv = (DummyKeyValuePair) super.applyExpireTimeMs(in, db, version);
         if (!kv.isContains() || kv.getKey() == null) return kv;
-        String r = socket.expireat(kv.getKey(), kv.getExpiredMs(), configure);
+        String r = retry(s -> s.expireat(kv.getKey(), kv.getExpiredMs(), configure), retry);
         if (r != null) logger.error("[expireat] {} failed. reason:{}", Strings.toString(kv.getKey()), r);
         return kv;
     }
 
     @Override
     protected Event doApplyString(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        String r = socket.send(out -> {
+        String r = retry(s -> s.send(out -> {
             try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
@@ -111,7 +130,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
-        });
+        }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
         DummyKeyValuePair kv = new DummyKeyValuePair();
@@ -124,7 +143,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplyList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        String r = socket.send(out -> {
+        String r = retry(s -> s.send(out -> {
             try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
@@ -144,7 +163,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
-        });
+        }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
         DummyKeyValuePair kv = new DummyKeyValuePair();
@@ -157,7 +176,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplySet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        String r = socket.send(out -> {
+        String r = retry(s -> s.send(out -> {
             try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
@@ -177,7 +196,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
-        });
+        }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
         DummyKeyValuePair kv = new DummyKeyValuePair();
@@ -190,7 +209,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplyZSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        String r = socket.send(out -> {
+        String r = retry(s -> s.send(out -> {
             try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
@@ -210,7 +229,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
-        });
+        }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
         DummyKeyValuePair kv = new DummyKeyValuePair();
@@ -223,7 +242,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplyZSet2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        String r = socket.send(out -> {
+        String r = retry(s -> s.send(out -> {
             try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
@@ -243,7 +262,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
-        });
+        }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
         DummyKeyValuePair kv = new DummyKeyValuePair();
@@ -256,7 +275,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplyHash(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        String r = socket.send(out -> {
+        String r = retry(s -> s.send(out -> {
             try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
@@ -276,7 +295,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
-        });
+        }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
         DummyKeyValuePair kv = new DummyKeyValuePair();
@@ -289,7 +308,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplyHashZipMap(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        String r = socket.send(out -> {
+        String r = retry(s -> s.send(out -> {
             try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
@@ -309,7 +328,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
-        });
+        }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
         DummyKeyValuePair kv = new DummyKeyValuePair();
@@ -322,7 +341,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplyListZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        String r = socket.send(out -> {
+        String r = retry(s -> s.send(out -> {
             try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
@@ -342,7 +361,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
-        });
+        }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
         DummyKeyValuePair kv = new DummyKeyValuePair();
@@ -355,7 +374,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplySetIntSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        String r = socket.send(out -> {
+        String r = retry(s -> s.send(out -> {
             try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
@@ -375,7 +394,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
-        });
+        }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
         DummyKeyValuePair kv = new DummyKeyValuePair();
@@ -388,7 +407,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplyZSetZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        String r = socket.send(out -> {
+        String r = retry(s -> s.send(out -> {
             try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
@@ -408,7 +427,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
-        });
+        }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
         DummyKeyValuePair kv = new DummyKeyValuePair();
@@ -421,7 +440,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplyHashZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        String r = socket.send(out -> {
+        String r = retry(s -> s.send(out -> {
             try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
@@ -441,7 +460,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
-        });
+        }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
         DummyKeyValuePair kv = new DummyKeyValuePair();
@@ -454,7 +473,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplyListQuickList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        String r = socket.send(out -> {
+        String r = retry(s -> s.send(out -> {
             try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
@@ -474,7 +493,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
-        });
+        }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
         DummyKeyValuePair kv = new DummyKeyValuePair();
@@ -487,7 +506,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplyModule(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        String r = socket.send(out -> {
+        String r = retry(s -> s.send(out -> {
             try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
@@ -507,7 +526,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
-        });
+        }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
         DummyKeyValuePair kv = new DummyKeyValuePair();
@@ -520,7 +539,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplyModule2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        String r = socket.send(out -> {
+        String r = retry(s -> s.send(out -> {
             try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
@@ -540,7 +559,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
-        });
+        }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
         DummyKeyValuePair kv = new DummyKeyValuePair();
@@ -553,7 +572,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
 
     @Override
     protected Event doApplyStreamListPacks(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
-        String r = socket.send(out -> {
+        String r = retry(s -> s.send(out -> {
             try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
                 out.write(RESTORE);
                 out.write(' ');
@@ -573,7 +592,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
-        });
+        }), retry);
         if (r != null)
             logger.error("[restore] {} failed. reason:{}", Strings.toString(key), r);
         DummyKeyValuePair kv = new DummyKeyValuePair();

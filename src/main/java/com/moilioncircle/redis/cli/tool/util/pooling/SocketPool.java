@@ -70,7 +70,7 @@ public class SocketPool implements Consumer<Socket>, Supplier<Socket>, Predicate
 
     @Override
     public Socket get() {
-        return new Socket(host, port, conf);
+        return new Socket(host, port, 0, conf);
     }
 
     public static class Socket implements Closeable {
@@ -87,7 +87,7 @@ public class SocketPool implements Consumer<Socket>, Supplier<Socket>, Predicate
         private final java.net.Socket socket;
         private final RedisCodec codec = new RedisCodec();
 
-        public Socket(final String host, final int port, final Configuration conf) {
+        public Socket(String host, int port, int db, Configuration conf) {
             try {
                 RedisSocketFactory factory = new RedisSocketFactory(conf);
                 this.socket = factory.createSocket(host, port, conf.getConnectionTimeout());
@@ -100,6 +100,8 @@ public class SocketPool implements Consumer<Socket>, Supplier<Socket>, Predicate
                     String r = ping();
                     if (r != null) throw new IOException(r);
                 }
+                String r = select(db);
+                if (r != null) throw new IOException(r);
             } catch (IOException e) {
                 throw new AssertionError(e.getMessage(), e);
             }
