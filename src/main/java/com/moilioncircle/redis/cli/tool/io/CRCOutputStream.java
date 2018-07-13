@@ -31,7 +31,7 @@ public class CRCOutputStream extends OutputStream {
 
     @Override
     public void write(int b) throws IOException {
-        escape.encode(b & 0xFF, out, configure);
+        escape.encode(b, out, configure);
         checksum = crc64(new byte[]{(byte) b}, checksum);
     }
 

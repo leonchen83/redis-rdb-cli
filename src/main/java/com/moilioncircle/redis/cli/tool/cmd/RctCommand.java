@@ -16,8 +16,6 @@ import org.apache.commons.cli.Option;
 import java.io.File;
 import java.util.List;
 
-import static com.moilioncircle.redis.cli.tool.glossary.Phase.RDB;
-
 /**
  * @author Baoyi Chen
  */
@@ -104,7 +102,7 @@ public class RctCommand extends AbstractCommand {
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> CliRedisReplicator.closeQuietly(r)));
                 r.addEventListener((rep, event) -> {
                     if (event instanceof PreRdbSyncEvent)
-                        rep.addRawByteListener(b -> bar.react(b.length, RDB));
+                        rep.addRawByteListener(b -> bar.react(b.length));
                     if (event instanceof PostRdbSyncEvent) CliRedisReplicator.closeQuietly(rep);
                 });
                 r.open();

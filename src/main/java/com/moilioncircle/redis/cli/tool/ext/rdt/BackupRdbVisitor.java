@@ -11,6 +11,7 @@ import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.io.CRCOutputStream;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
+import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
 
 import java.io.IOException;
@@ -79,10 +80,10 @@ public class BackupRdbVisitor extends AbstractRdbVisitor {
     }
 
     @Override
-    public DB applyResizeDB(RedisInputStream in, DB db, int version) throws IOException {
+    public DB applyResizeDB(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         listener.setGuard(Guard.DRAIN);
         try {
-            return super.applyResizeDB(in, db, version);
+            return super.applyResizeDB(in, version, context);
         } finally {
             listener.setGuard(Guard.SAVE);
         }

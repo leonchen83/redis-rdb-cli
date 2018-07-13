@@ -9,7 +9,7 @@ import com.moilioncircle.redis.cli.tool.glossary.Escape;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
-import com.moilioncircle.redis.replicator.rdb.datatype.DB;
+import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,212 +25,212 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
     }
 
     @Override
-    public Event doApplyString(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    public Event doApplyString(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
-            super.doApplyString(in, db, version, key, contains, type);
+            super.doApplyString(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
         out.write('\n');
-        return new DummyKeyValuePair();
+        return context.valueOf(new DummyKeyValuePair());
     }
 
     @Override
-    public Event doApplyList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    public Event doApplyList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
-            super.doApplyList(in, db, version, key, contains, type);
+            super.doApplyList(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
         out.write('\n');
-        return new DummyKeyValuePair();
+        return context.valueOf(new DummyKeyValuePair());
     }
 
     @Override
-    public Event doApplySet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    public Event doApplySet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
-            super.doApplySet(in, db, version, key, contains, type);
+            super.doApplySet(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
         out.write('\n');
-        return new DummyKeyValuePair();
+        return context.valueOf(new DummyKeyValuePair());
     }
 
     @Override
-    public Event doApplyZSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    public Event doApplyZSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
-            super.doApplyZSet(in, db, version, key, contains, type);
+            super.doApplyZSet(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
         out.write('\n');
-        return new DummyKeyValuePair();
+        return context.valueOf(new DummyKeyValuePair());
     }
 
     @Override
-    public Event doApplyZSet2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    public Event doApplyZSet2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
-            super.doApplyZSet2(in, db, version, key, contains, type);
+            super.doApplyZSet2(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
         out.write('\n');
-        return new DummyKeyValuePair();
+        return context.valueOf(new DummyKeyValuePair());
     }
 
     @Override
-    public Event doApplyHash(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    public Event doApplyHash(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
-            super.doApplyHash(in, db, version, key, contains, type);
+            super.doApplyHash(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
         out.write('\n');
-        return new DummyKeyValuePair();
+        return context.valueOf(new DummyKeyValuePair());
     }
 
     @Override
-    public Event doApplyHashZipMap(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    public Event doApplyHashZipMap(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
-            super.doApplyHashZipMap(in, db, version, key, contains, type);
+            super.doApplyHashZipMap(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
         out.write('\n');
-        return new DummyKeyValuePair();
+        return context.valueOf(new DummyKeyValuePair());
     }
 
     @Override
-    public Event doApplyListZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    public Event doApplyListZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
-            super.doApplyListZipList(in, db, version, key, contains, type);
+            super.doApplyListZipList(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
         out.write('\n');
-        return new DummyKeyValuePair();
+        return context.valueOf(new DummyKeyValuePair());
     }
 
     @Override
-    public Event doApplySetIntSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    public Event doApplySetIntSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
-            super.doApplySetIntSet(in, db, version, key, contains, type);
+            super.doApplySetIntSet(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
         out.write('\n');
-        return new DummyKeyValuePair();
+        return context.valueOf(new DummyKeyValuePair());
     }
 
     @Override
-    public Event doApplyZSetZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    public Event doApplyZSetZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
-            super.doApplyZSetZipList(in, db, version, key, contains, type);
+            super.doApplyZSetZipList(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
         out.write('\n');
-        return new DummyKeyValuePair();
+        return context.valueOf(new DummyKeyValuePair());
     }
 
     @Override
-    public Event doApplyHashZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    public Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
-            super.doApplyHashZipList(in, db, version, key, contains, type);
+            super.doApplyHashZipList(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
         out.write('\n');
-        return new DummyKeyValuePair();
+        return context.valueOf(new DummyKeyValuePair());
     }
 
     @Override
-    public Event doApplyListQuickList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    public Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
-            super.doApplyListQuickList(in, db, version, key, contains, type);
+            super.doApplyListQuickList(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
         out.write('\n');
-        return new DummyKeyValuePair();
+        return context.valueOf(new DummyKeyValuePair());
     }
 
     @Override
-    public Event doApplyModule(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    public Event doApplyModule(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
-            super.doApplyModule(in, db, version, key, contains, type);
+            super.doApplyModule(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
         out.write('\n');
-        return new DummyKeyValuePair();
+        return context.valueOf(new DummyKeyValuePair());
     }
 
     @Override
-    public Event doApplyModule2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    public Event doApplyModule2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
-            super.doApplyModule2(in, db, version, key, contains, type);
+            super.doApplyModule2(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
         out.write('\n');
-        return new DummyKeyValuePair();
+        return context.valueOf(new DummyKeyValuePair());
     }
 
     @Override
-    public Event doApplyStreamListPacks(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    public Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
-            super.doApplyStreamListPacks(in, db, version, key, contains, type);
+            super.doApplyStreamListPacks(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
         out.write('\n');
-        return new DummyKeyValuePair();
+        return context.valueOf(new DummyKeyValuePair());
     }
 }

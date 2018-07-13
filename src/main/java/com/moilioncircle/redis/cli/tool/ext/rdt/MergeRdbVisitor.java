@@ -7,6 +7,7 @@ import com.moilioncircle.redis.cli.tool.glossary.Guard;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
+import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
 
 import java.io.IOException;
@@ -18,11 +19,11 @@ import java.util.function.Supplier;
  * @author Baoyi Chen
  */
 public class MergeRdbVisitor extends AbstractRdbVisitor {
-    
+
     public MergeRdbVisitor(Replicator replicator, Configure configure, List<Long> db, List<String> regexs, List<DataType> types, Supplier<OutputStream> supplier) {
         super(replicator, configure, db, regexs, types, supplier);
     }
-    
+
     @Override
     public int applyVersion(RedisInputStream in) throws IOException {
         listener.setGuard(Guard.PASS);
@@ -32,7 +33,7 @@ public class MergeRdbVisitor extends AbstractRdbVisitor {
             listener.setGuard(Guard.SAVE);
         }
     }
-    
+
     @Override
     public Event applyAux(RedisInputStream in, int version) throws IOException {
         listener.setGuard(Guard.PASS);
@@ -42,7 +43,7 @@ public class MergeRdbVisitor extends AbstractRdbVisitor {
             listener.setGuard(Guard.SAVE);
         }
     }
-    
+
     @Override
     public Event applyModuleAux(RedisInputStream in, int version) throws IOException {
         listener.setGuard(Guard.PASS);
@@ -52,7 +53,7 @@ public class MergeRdbVisitor extends AbstractRdbVisitor {
             listener.setGuard(Guard.SAVE);
         }
     }
-    
+
     @Override
     public DB applySelectDB(RedisInputStream in, int version) throws IOException {
         listener.setGuard(Guard.DRAIN);
@@ -62,12 +63,12 @@ public class MergeRdbVisitor extends AbstractRdbVisitor {
             listener.setGuard(Guard.SAVE);
         }
     }
-    
+
     @Override
-    public DB applyResizeDB(RedisInputStream in, DB db, int version) throws IOException {
+    public DB applyResizeDB(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         listener.setGuard(Guard.DRAIN);
         try {
-            return super.applyResizeDB(in, db, version);
+            return super.applyResizeDB(in, version, context);
         } finally {
             listener.setGuard(Guard.SAVE);
         }

@@ -10,6 +10,7 @@ import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.BaseRdbParser;
+import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
 import com.moilioncircle.redis.replicator.util.Strings;
 
@@ -78,7 +79,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
     }
 
     @Override
-    protected Event doApplyString(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    protected Event doApplyString(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
@@ -88,14 +89,13 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         byte[] val = parser.rdbLoadEncodedStringObject().first();
         emit(key, val);
         DummyKeyValuePair kv = new DummyKeyValuePair();
-        kv.setDb(db);
         kv.setValueRdbType(type);
         kv.setKey(key);
-        return kv;
+        return context.valueOf(kv);
     }
 
     @Override
-    protected Event doApplyList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    protected Event doApplyList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
@@ -118,15 +118,14 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         }
         out.write(']');
         DummyKeyValuePair kv = new DummyKeyValuePair();
-        kv.setDb(db);
         kv.setValueRdbType(type);
         kv.setKey(key);
         kv.setContains(contains);
-        return kv;
+        return context.valueOf(kv);
     }
 
     @Override
-    protected Event doApplySet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    protected Event doApplySet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
@@ -149,15 +148,14 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         }
         out.write(']');
         DummyKeyValuePair kv = new DummyKeyValuePair();
-        kv.setDb(db);
         kv.setValueRdbType(type);
         kv.setKey(key);
         kv.setContains(contains);
-        return kv;
+        return context.valueOf(kv);
     }
 
     @Override
-    protected Event doApplyZSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    protected Event doApplyZSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
@@ -181,15 +179,14 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         }
         out.write('}');
         DummyKeyValuePair kv = new DummyKeyValuePair();
-        kv.setDb(db);
         kv.setValueRdbType(type);
         kv.setKey(key);
         kv.setContains(contains);
-        return kv;
+        return context.valueOf(kv);
     }
 
     @Override
-    protected Event doApplyZSet2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    protected Event doApplyZSet2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
@@ -213,15 +210,14 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         }
         out.write('}');
         DummyKeyValuePair kv = new DummyKeyValuePair();
-        kv.setDb(db);
         kv.setValueRdbType(type);
         kv.setKey(key);
         kv.setContains(contains);
-        return kv;
+        return context.valueOf(kv);
     }
 
     @Override
-    protected Event doApplyHash(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    protected Event doApplyHash(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
@@ -245,15 +241,14 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         }
         out.write('}');
         DummyKeyValuePair kv = new DummyKeyValuePair();
-        kv.setDb(db);
         kv.setValueRdbType(type);
         kv.setKey(key);
         kv.setContains(contains);
-        return kv;
+        return context.valueOf(kv);
     }
 
     @Override
-    protected Event doApplyHashZipMap(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    protected Event doApplyHashZipMap(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
@@ -277,15 +272,14 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         }
         out.write('}');
         DummyKeyValuePair kv = new DummyKeyValuePair();
-        kv.setDb(db);
         kv.setValueRdbType(type);
         kv.setKey(key);
         kv.setContains(contains);
-        return kv;
+        return context.valueOf(kv);
     }
 
     @Override
-    protected Event doApplyListZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    protected Event doApplyListZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
@@ -315,15 +309,14 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         }
         out.write(']');
         DummyKeyValuePair kv = new DummyKeyValuePair();
-        kv.setDb(db);
         kv.setValueRdbType(type);
         kv.setKey(key);
         kv.setContains(contains);
-        return kv;
+        return context.valueOf(kv);
     }
 
     @Override
-    protected Event doApplySetIntSet(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    protected Event doApplySetIntSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
@@ -360,15 +353,14 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         }
         out.write(']');
         DummyKeyValuePair kv = new DummyKeyValuePair();
-        kv.setDb(db);
         kv.setValueRdbType(type);
         kv.setKey(key);
         kv.setContains(contains);
-        return kv;
+        return context.valueOf(kv);
     }
 
     @Override
-    protected Event doApplyZSetZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    protected Event doApplyZSetZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
@@ -400,15 +392,14 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         }
         out.write(']');
         DummyKeyValuePair kv = new DummyKeyValuePair();
-        kv.setDb(db);
         kv.setValueRdbType(type);
         kv.setKey(key);
         kv.setContains(contains);
-        return kv;
+        return context.valueOf(kv);
     }
 
     @Override
-    protected Event doApplyHashZipList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    protected Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
@@ -440,15 +431,14 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         }
         out.write('}');
         DummyKeyValuePair kv = new DummyKeyValuePair();
-        kv.setDb(db);
         kv.setValueRdbType(type);
         kv.setKey(key);
         kv.setContains(contains);
-        return kv;
+        return context.valueOf(kv);
     }
 
     @Override
-    protected Event doApplyListQuickList(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    protected Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
@@ -481,15 +471,14 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         }
         out.write(']');
         DummyKeyValuePair kv = new DummyKeyValuePair();
-        kv.setDb(db);
         kv.setValueRdbType(type);
         kv.setKey(key);
         kv.setContains(contains);
-        return kv;
+        return context.valueOf(kv);
     }
 
     @Override
-    protected Event doApplyModule(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    protected Event doApplyModule(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
@@ -501,20 +490,19 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
-            super.doApplyModule(in, db, version, key, contains, type);
+            super.doApplyModule(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
         out.write('"');
         DummyKeyValuePair kv = new DummyKeyValuePair();
-        kv.setDb(db);
         kv.setValueRdbType(type);
         kv.setKey(key);
         kv.setContains(contains);
-        return kv;
+        return context.valueOf(kv);
     }
 
     @Override
-    protected Event doApplyModule2(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    protected Event doApplyModule2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
@@ -526,20 +514,19 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
-            super.doApplyModule2(in, db, version, key, contains, type);
+            super.doApplyModule2(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
         out.write('"');
         DummyKeyValuePair kv = new DummyKeyValuePair();
-        kv.setDb(db);
         kv.setValueRdbType(type);
         kv.setKey(key);
         kv.setContains(contains);
-        return kv;
+        return context.valueOf(kv);
     }
 
     @Override
-    protected Event doApplyStreamListPacks(RedisInputStream in, DB db, int version, byte[] key, boolean contains, int type) throws IOException {
+    protected Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         if (!firstkey) {
             out.write(',');
             out.write('\n');
@@ -551,15 +538,14 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
-            super.doApplyStreamListPacks(in, db, version, key, contains, type);
+            super.doApplyStreamListPacks(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
         out.write('"');
         DummyKeyValuePair kv = new DummyKeyValuePair();
-        kv.setDb(db);
         kv.setValueRdbType(type);
         kv.setKey(key);
         kv.setContains(contains);
-        return kv;
+        return context.valueOf(kv);
     }
 }

@@ -3,28 +3,18 @@ package com.moilioncircle.redis.cli.tool.cmd;
 import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.ext.CliRedisReplicator;
 import com.moilioncircle.redis.cli.tool.ext.rmt.MigrateRdbVisitor;
-import com.moilioncircle.redis.cli.tool.glossary.DataType;
-import com.moilioncircle.redis.cli.tool.glossary.Phase;
 import com.moilioncircle.redis.cli.tool.util.ProgressBar;
 import com.moilioncircle.redis.replicator.FileType;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
-import com.moilioncircle.redis.replicator.cmd.CommandName;
-import com.moilioncircle.redis.replicator.cmd.parser.DefaultCommandParser;
-import com.moilioncircle.redis.replicator.cmd.parser.PingParser;
-import com.moilioncircle.redis.replicator.cmd.parser.ReplConfParser;
 import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
-import com.moilioncircle.redis.replicator.event.PreCommandSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
-import static com.moilioncircle.redis.cli.tool.glossary.Phase.AOF;
-import static com.moilioncircle.redis.cli.tool.glossary.Phase.NOP;
-import static com.moilioncircle.redis.cli.tool.glossary.Phase.RDB;
+import static com.moilioncircle.redis.cli.tool.glossary.DataType.parse;
 
 /**
  * @author Baoyi Chen
@@ -95,114 +85,17 @@ public class RmtCommand extends AbstractCommand {
             try (ProgressBar bar = new ProgressBar(-1)) {
                 Configure configure = Configure.bind();
                 Replicator r = new CliRedisReplicator(source, configure);
-                dress(r, configure, migrate, db, regexs, DataType.parse(type), replace);
-                AtomicReference<Phase> phase = new AtomicReference<>(NOP);
+                r.setRdbVisitor(new MigrateRdbVisitor(r, configure, migrate, db, regexs, parse(type), replace));
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> CliRedisReplicator.closeQuietly(r)));
                 r.addExceptionListener((rep, tx, e) -> { throw new RuntimeException(tx.getMessage(), tx); });
-                r.addRawByteListener(b -> bar.react(b.length, phase.get()));
                 r.addEventListener((rep, event) -> {
-                    if (event instanceof PreRdbSyncEvent) {
-                        phase.set(RDB);
-                    } else if (event instanceof PostRdbSyncEvent) {
-                        if (!db.isEmpty() || !type.isEmpty() || !regexs.isEmpty()) {
-                            CliRedisReplicator.closeQuietly(rep);
-                        }
-                    } else if (event instanceof PreCommandSyncEvent) {
-                        phase.set(AOF);
-                    }
+                    if (event instanceof PreRdbSyncEvent)
+                        rep.addRawByteListener(b -> bar.react(b.length));
+                    if (event instanceof PostRdbSyncEvent) CliRedisReplicator.closeQuietly(rep);
                 });
                 r.open();
             }
         }
-    }
-
-    private void dress(Replicator r, Configure conf, String migrate, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) throws Exception {
-        r.setRdbVisitor(new MigrateRdbVisitor(r, conf, migrate, db, regexs, types, replace));
-        // ignore PING REPLCONF GETACK
-        r.addCommandParser(CommandName.name("PING"), new PingParser());
-        r.addCommandParser(CommandName.name("REPLCONF"), new ReplConfParser());
-        //
-        r.addCommandParser(CommandName.name("APPEND"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("SET"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("SETEX"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("MSET"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("DEL"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("SADD"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("HMSET"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("HSET"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("LSET"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("EXPIRE"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("EXPIREAT"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("GETSET"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("HSETNX"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("MSETNX"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("PSETEX"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("SETNX"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("SETRANGE"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("HDEL"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("LPOP"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("LPUSH"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("LPUSHX"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("LRem"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("RPOP"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("RPUSH"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("RPUSHX"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("ZREM"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("RENAME"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("INCR"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("DECR"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("INCRBY"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("DECRBY"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("PERSIST"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("SELECT"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("FLUSHALL"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("FLUSHDB"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("HINCRBY"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("ZINCRBY"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("MOVE"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("SMOVE"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("PFADD"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("PFCOUNT"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("PFMERGE"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("SDIFFSTORE"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("SINTERSTORE"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("SUNIONSTORE"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("ZADD"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("ZINTERSTORE"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("ZUNIONSTORE"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("BRPOPLPUSH"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("LINSERT"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("RENAMENX"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("RESTORE"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("PEXPIRE"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("PEXPIREAT"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("GEOADD"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("EVAL"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("EVALSHA"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("SCRIPT"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("PUBLISH"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("BITOP"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("BITFIELD"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("SETBIT"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("SREM"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("UNLINK"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("SWAPDB"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("MULTI"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("EXEC"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("ZREMRANGEBYSCORE"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("ZREMRANGEBYRANK"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("ZREMRANGEBYLEX"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("LTRIM"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("SORT"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("RPOPLPUSH"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("ZPOPMIN"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("ZPOPMAX"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("XACK"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("XADD"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("XCLAIM"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("XDEL"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("XGROUP"), new DefaultCommandParser());
-        r.addCommandParser(CommandName.name("XTRIM"), new DefaultCommandParser());
     }
 
     @Override

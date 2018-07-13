@@ -12,19 +12,19 @@ import java.io.OutputStream;
 public enum Escape {
     RAW("raw"),
     REDIS("redis");
-    
+
     private String value;
-    
+
     Escape(String value) {
         this.value = value;
     }
-    
+
     public String getValue() {
         return this.value;
     }
-    
-    private static final char[] NUMERALS = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
-    
+
+    private static final byte[] NUMERALS = new byte[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+
     public static Escape parse(String escape) {
         if (escape == null) return RAW;
         switch (escape) {
@@ -36,8 +36,9 @@ public enum Escape {
                 throw new AssertionError("Unsupported escape '" + escape + "'");
         }
     }
-    
+
     public void encode(int b, OutputStream out, Configure configure) throws IOException {
+        b = b & 0xFF;
         switch (this) {
             case RAW:
                 out.write(b);
@@ -63,8 +64,8 @@ public enum Escape {
                     // encode " ' \ unprintable and space
                     out.write('\\');
                     out.write('x');
-                    int ma = b / 16;
-                    int mi = b % 16;
+                    int ma = b >>> 4;
+                    int mi = b & 0xF;
                     out.write(NUMERALS[ma]);
                     out.write(NUMERALS[mi]);
                 } else {
@@ -73,7 +74,7 @@ public enum Escape {
                 break;
         }
     }
-    
+
     public byte[] encode(byte[] bytes, Configure configure) throws IOException {
         switch (this) {
             case RAW:
@@ -87,20 +88,20 @@ public enum Escape {
                 throw new AssertionError(this);
         }
     }
-    
+
     public void encode(long value, OutputStream out, Configure configure) throws IOException {
         encode(String.valueOf(value).getBytes(), out, configure);
     }
-    
+
     public void encode(double value, OutputStream out, Configure configure) throws IOException {
         encode(String.valueOf(value).getBytes(), out, configure);
     }
-    
+
     public void encode(byte[] bytes, OutputStream out, Configure configure) throws IOException {
         if (bytes == null) return;
         encode(bytes, 0, bytes.length, out, configure);
     }
-    
+
     public void encode(byte[] bytes, int off, int len, OutputStream out, Configure configure) throws IOException {
         if (bytes == null) return;
         switch (this) {
@@ -109,7 +110,7 @@ public enum Escape {
                 break;
             case REDIS:
                 for (int i = off; i < len; i++) {
-                    encode(bytes[i] & 0xFF, out, configure);
+                    encode(bytes[i], out, configure);
                 }
                 break;
             default:

@@ -19,8 +19,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import static com.moilioncircle.redis.cli.tool.glossary.Phase.RDB;
-
 /**
  * @author Baoyi Chen
  */
@@ -130,7 +128,7 @@ public class RdtCommand extends AbstractCommand {
                     });
                     tuple.getV1().addEventListener((rep, event) -> {
                         if (event instanceof PreRdbSyncEvent)
-                            rep.addRawByteListener(b -> bar.react(b.length, RDB, tuple.getV2()));
+                            rep.addRawByteListener(b -> bar.react(b.length, tuple.getV2()));
                         if (event instanceof PostRdbSyncEvent) CliRedisReplicator.closeQuietly(rep);
                     });
                     tuple.getV1().open();

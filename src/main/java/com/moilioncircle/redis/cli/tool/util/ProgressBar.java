@@ -1,7 +1,5 @@
 package com.moilioncircle.redis.cli.tool.util;
 
-import com.moilioncircle.redis.cli.tool.glossary.Phase;
-
 import java.io.Closeable;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -15,7 +13,6 @@ public class ProgressBar implements Closeable {
     private final long total;
     private volatile long last;
     private volatile boolean bit;
-    private volatile Phase phase;
     private volatile String file;
     private volatile double percentage;
     private AtomicLong num = new AtomicLong();
@@ -26,48 +23,43 @@ public class ProgressBar implements Closeable {
     }
 
     public void react(long num) {
-        react(num, true, null, null);
+        react(num, true, null);
     }
 
-    public void react(long num, Phase phase) {
-        react(num, true, phase, null);
+    public void react(long num, String file) {
+        react(num, true, file);
     }
 
-    public void react(long num, Phase phase, String file) {
-        react(num, true, phase, file);
+    public void react(long num, boolean increment, String file) {
+        react(num, total <= 0 ? 0 : Processes.width(), increment, file);
     }
 
-    public void react(long num, boolean increment, Phase phase, String file) {
-        react(num, total <= 0 ? 0 : Processes.width(), increment, phase, file);
-    }
-
-    public void react(long num, int len, boolean increment, Phase phase, String file) {
+    public void react(long num, int len, boolean increment, String file) {
         if (increment)
             this.num.addAndGet(num);
         else
             this.num.set(num);
         if (total <= 0) {
-            show(-1, -1, len, this.num.get(), phase, file);
+            show(-1, -1, len, this.num.get(), file);
             return;
         }
         double percentage = this.num.get() / (double) total * 100;
         int prev = (int) this.percentage;
         this.percentage = percentage;
         int next = (int) this.percentage;
-        show(prev, next, len, this.num.get(), phase, file);
+        show(prev, next, len, this.num.get(), file);
     }
 
-    private void show(int prev, int next, int len, long num, Phase phase, String file) {
+    private void show(int prev, int next, int len, long num, String file) {
         long now = System.currentTimeMillis();
         long elapsed = now - access;
 
         if (elapsed < 1000 && prev == next &&
-                (file == null || file.equals(this.file)) && this.phase == phase) return;
+                (file == null || file.equals(this.file))) return;
         int speed = (int) ((double) (num - last) / elapsed * 1000);
         this.last = num;
         this.file = file;
         this.access = now;
-        this.phase = phase;
         StringBuilder builder = new StringBuilder();
         if (bit) {
             builder.append('/');
@@ -78,10 +70,6 @@ public class ProgressBar implements Closeable {
         }
         builder.append('[').append(pretty(num));
         if (total <= 0) {
-            if (phase != null) {
-                builder.append('|');
-                builder.append(phase);
-            }
             if (file != null) {
                 builder.append('|');
                 builder.append(file);
@@ -94,10 +82,6 @@ public class ProgressBar implements Closeable {
                 builder.append(' ').append(next).append('%');
             } else {
                 builder.append(next).append('%');
-            }
-            if (phase != null) {
-                builder.append('|');
-                builder.append(phase);
             }
             if (file != null) {
                 builder.append('|');
