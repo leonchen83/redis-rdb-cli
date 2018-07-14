@@ -33,8 +33,8 @@ public class OutputStreams {
         } catch (Throwable t) {
         }
     }
-
-    public static void write(byte b, OutputStream out) {
+    
+    public static void write(int b, OutputStream out) {
         if (out == null) return;
         try {
             out.write(b);

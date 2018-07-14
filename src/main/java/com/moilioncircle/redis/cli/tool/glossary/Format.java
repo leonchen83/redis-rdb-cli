@@ -2,6 +2,7 @@ package com.moilioncircle.redis.cli.tool.glossary;
 
 import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.ext.rct.DiffRdbVisitor;
+import com.moilioncircle.redis.cli.tool.ext.rct.DumpRdbVisitor;
 import com.moilioncircle.redis.cli.tool.ext.rct.JsonRdbVisitor;
 import com.moilioncircle.redis.cli.tool.ext.rct.KeyRdbVisitor;
 import com.moilioncircle.redis.cli.tool.ext.rct.KeyValRdbVisitor;
@@ -18,6 +19,7 @@ import java.util.List;
 public enum Format {
     KEY("key"),
     MEM("mem"),
+    DUMP("dump"),
     DIFF("diff"),
     JSON("json"),
     RESP("resp"),
@@ -39,6 +41,8 @@ public enum Format {
                 return KEY;
             case "mem":
                 return MEM;
+            case "dump":
+                return DUMP;
             case "diff":
                 return DIFF;
             case "json":
@@ -56,6 +60,9 @@ public enum Format {
         switch (this) {
             case DIFF:
                 r.setRdbVisitor(new DiffRdbVisitor(r, conf, output, db, regexs, types));
+                break;
+            case DUMP:
+                r.setRdbVisitor(new DumpRdbVisitor(r, conf, output, db, regexs, types));
                 break;
             case RESP:
                 r.setRdbVisitor(new RespRdbVisitor(r, conf, output, db, regexs, types));

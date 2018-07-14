@@ -39,7 +39,7 @@ options:
  -e,--escape <escape>        escape strings to encoding: raw (default),
                              redis.
  -f,--format <format>        format to export. valid formats are json,
-                             diff, key, keyval, mem and resp
+                             dump, diff, key, keyval, mem and resp
  -h,--help                   rct usage.
  -k,--key <regex regex...>   keys to export. this can be a regex. if not
                              specified, all keys will be returned.
@@ -69,6 +69,7 @@ examples:
 
 usage: rmt -s <source> -m <uri> [-d <num num...>] [-k <regex regex...>]
            [-t <type type...>]
+
 options:
  -d,--db <num num...>        database number. multiple databases can be
                              provided. if not specified, all databases
@@ -91,6 +92,7 @@ options:
                              not specified, all data types will be
                              returned.
  -v,--version                rmt version.
+
 examples:
  rmt -s redis://120.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0
  rmt -s ./dump.rdb -m redis://127.0.0.1:6380 -t string -r
@@ -102,6 +104,7 @@ examples:
 usage: rdt [-b <source> | -s <source> -c <file> | -m <file file...>] -o
            <file> [-d <num num...>] [-k <regex regex...>] [-t <type
            type...>]
+
 options:
  -b,--backup <source>        backup <source> to local rdb file. eg:
                              /path/to/dump.rdb
@@ -131,6 +134,7 @@ options:
                              not specified, all data types will be
                              returned.
  -v,--version                rdt version.
+
 examples:
  rdt -b ./dump.rdb -o ./dump.rdb1 -d 0 1
  rdt -b redis://127.0.0.1:6379 -o ./dump.rdb -k user.*
