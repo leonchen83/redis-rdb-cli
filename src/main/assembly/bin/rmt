@@ -22,7 +22,7 @@ log_dir="$base_dir"/log
 con_dir="$base_dir"/conf
 
 log_file="$con_dir"/log4j2.xml
-con_file="$con_dir"/cli.conf
+con_file="$con_dir"/redis-cli.conf
 
 for file in "$lib_dir"/*.jar;
 do

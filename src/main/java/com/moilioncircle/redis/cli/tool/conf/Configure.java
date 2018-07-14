@@ -26,7 +26,7 @@ public class Configure {
                 }
             } else {
                 ClassLoader loader = Configure.class.getClassLoader();
-                try (InputStream in = loader.getResourceAsStream("cli.conf")) {
+                try (InputStream in = loader.getResourceAsStream("redis-cli.conf")) {
                     properties.load(in);
                 }
             }
@@ -42,12 +42,12 @@ public class Configure {
     }
     
     /**
-     * --format resp batch size
+     * rct --format resp batch size
      */
     private int batchSize = 128;
     
     /**
-     * --format dump replace
+     * rct --format dump replace
      */
     private boolean dumpReplace = true;
     
@@ -60,6 +60,11 @@ public class Configure {
      * rct delimiter
      */
     private byte delimiter = ',';
+    
+    /**
+     * rmt --migrate
+     */
+    private int migrateBatchSize = 2048;
     
     /**
      * timeout
@@ -80,11 +85,6 @@ public class Configure {
      * connection retry times. if retries <= 0 then always retry
      */
     private int retryTime = 5;
-    
-    /**
-     * rmt --migrate
-     */
-    private int migratePipeSize = 2048;
     
     /**
      * retry time interval
@@ -180,12 +180,12 @@ public class Configure {
         this.retryTime = retryTime;
     }
     
-    public int getMigratePipeSize() {
-        return migratePipeSize;
+    public int getMigrateBatchSize() {
+        return migrateBatchSize;
     }
     
-    public void setMigratePipeSize(int migratePipeSize) {
-        this.migratePipeSize = migratePipeSize;
+    public void setMigrateBatchSize(int migrateBatchSize) {
+        this.migrateBatchSize = migrateBatchSize;
     }
     
     public int getRetryInterval() {
@@ -261,7 +261,7 @@ public class Configure {
     public static Configure bind(Properties properties) {
         Configure conf = new Configure(properties);
         conf.batchSize = getInt(conf, "batch_size", 128, true);
-        conf.migratePipeSize = getInt(conf, "migrate_pipe_size", 2048, true);
+        conf.migrateBatchSize = getInt(conf, "migrate_batch_size", 2048, true);
         conf.dumpRdbVersion = getInt(conf, "dump_rdb_version", -1, true);
         conf.dumpReplace = getBool(conf, "dump_replace", true, true);
         conf.quote = (byte) getString(conf, "quote", "\"", true).charAt(0);
@@ -331,7 +331,7 @@ public class Configure {
                 ", rcvBuf=" + rcvBuf +
                 ", sndBuf=" + sndBuf +
                 ", retryTime=" + retryTime +
-                ", migratePipeSize=" + migratePipeSize +
+                ", migrateBatchSize=" + migrateBatchSize +
                 ", retryInterval=" + retryInterval +
                 ", bufferSize=" + bufferSize +
                 ", asyncCacheSize=" + asyncCacheSize +

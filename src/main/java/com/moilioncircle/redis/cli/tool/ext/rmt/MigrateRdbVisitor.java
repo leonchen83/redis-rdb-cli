@@ -46,7 +46,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     public void onEvent(Replicator replicator, Event event) {
         if (event instanceof PreRdbSyncEvent) {
             Endpoint.closeQuietly(this.endpoint);
-            this.endpoint = new Endpoint(uri.getHost(), uri.getPort(), 0, configure.getMigratePipeSize(), configuration);
+            this.endpoint = new Endpoint(uri.getHost(), uri.getPort(), 0, configure.getMigrateBatchSize(), configuration);
         } else if (event instanceof PostRdbSyncEvent) {
             this.endpoint.flush();
         }
