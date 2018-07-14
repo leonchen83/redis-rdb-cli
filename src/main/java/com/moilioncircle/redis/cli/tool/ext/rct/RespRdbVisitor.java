@@ -39,8 +39,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
     @Override
     public DB applySelectDB(RedisInputStream in, int version) throws IOException {
         DB db = super.applySelectDB(in, version);
-        long dbnum = db.getDbNumber();
-        emit(out, SELECT, String.valueOf(dbnum).getBytes());
+        emit(out, SELECT, String.valueOf(db.getDbNumber()).getBytes());
         return db;
     }
     
@@ -417,11 +416,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             } else {
                 emit(out, RESTORE, key, ex, out.toByteArray());
             }
-            DummyKeyValuePair kv = new DummyKeyValuePair();
-            kv.setValueRdbType(type);
-            kv.setKey(key);
-            kv.setContains(contains);
-            return context.valueOf(kv);
+            return context.valueOf(new DummyKeyValuePair());
         }
     }
     
@@ -448,11 +443,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             } else {
                 emit(out, RESTORE, key, ex, out.toByteArray());
             }
-            DummyKeyValuePair kv = new DummyKeyValuePair();
-            kv.setValueRdbType(type);
-            kv.setKey(key);
-            kv.setContains(contains);
-            return context.valueOf(kv);
+            return context.valueOf(new DummyKeyValuePair());
         }
     }
     
@@ -479,11 +470,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             } else {
                 emit(out, RESTORE, key, ex, out.toByteArray());
             }
-            DummyKeyValuePair kv = new DummyKeyValuePair();
-            kv.setValueRdbType(type);
-            kv.setKey(key);
-            kv.setContains(contains);
-            return context.valueOf(kv);
+            return context.valueOf(new DummyKeyValuePair());
         }
     }
 }

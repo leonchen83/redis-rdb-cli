@@ -60,11 +60,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
             } else {
                 emit(out, RESTORE, key, ex, out.toByteArray());
             }
-            DummyKeyValuePair kv = new DummyKeyValuePair();
-            kv.setValueRdbType(type);
-            kv.setKey(key);
-            kv.setContains(contains);
-            return context.valueOf(kv);
+            return context.valueOf(new DummyKeyValuePair());
         }
     }
     
@@ -91,11 +87,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
             } else {
                 emit(out, RESTORE, key, ex, out.toByteArray());
             }
-            DummyKeyValuePair kv = new DummyKeyValuePair();
-            kv.setValueRdbType(type);
-            kv.setKey(key);
-            kv.setContains(contains);
-            return context.valueOf(kv);
+            return context.valueOf(new DummyKeyValuePair());
         }
     }
     
@@ -122,11 +114,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
             } else {
                 emit(out, RESTORE, key, ex, out.toByteArray());
             }
-            DummyKeyValuePair kv = new DummyKeyValuePair();
-            kv.setValueRdbType(type);
-            kv.setKey(key);
-            kv.setContains(contains);
-            return context.valueOf(kv);
+            return context.valueOf(new DummyKeyValuePair());
         }
     }
     
@@ -153,11 +141,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
             } else {
                 emit(out, RESTORE, key, ex, out.toByteArray());
             }
-            DummyKeyValuePair kv = new DummyKeyValuePair();
-            kv.setValueRdbType(type);
-            kv.setKey(key);
-            kv.setContains(contains);
-            return context.valueOf(kv);
+            return context.valueOf(new DummyKeyValuePair());
         }
     }
     
@@ -184,11 +168,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
             } else {
                 emit(out, RESTORE, key, ex, out.toByteArray());
             }
-            DummyKeyValuePair kv = new DummyKeyValuePair();
-            kv.setValueRdbType(type);
-            kv.setKey(key);
-            kv.setContains(contains);
-            return context.valueOf(kv);
+            return context.valueOf(new DummyKeyValuePair());
         }
     }
     
@@ -215,11 +195,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
             } else {
                 emit(out, RESTORE, key, ex, out.toByteArray());
             }
-            DummyKeyValuePair kv = new DummyKeyValuePair();
-            kv.setValueRdbType(type);
-            kv.setKey(key);
-            kv.setContains(contains);
-            return context.valueOf(kv);
+            return context.valueOf(new DummyKeyValuePair());
         }
     }
     
@@ -246,11 +222,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
             } else {
                 emit(out, RESTORE, key, ex, out.toByteArray());
             }
-            DummyKeyValuePair kv = new DummyKeyValuePair();
-            kv.setValueRdbType(type);
-            kv.setKey(key);
-            kv.setContains(contains);
-            return context.valueOf(kv);
+            return context.valueOf(new DummyKeyValuePair());
         }
     }
     
@@ -277,11 +249,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
             } else {
                 emit(out, RESTORE, key, ex, out.toByteArray());
             }
-            DummyKeyValuePair kv = new DummyKeyValuePair();
-            kv.setValueRdbType(type);
-            kv.setKey(key);
-            kv.setContains(contains);
-            return context.valueOf(kv);
+            return context.valueOf(new DummyKeyValuePair());
         }
     }
     
@@ -308,11 +276,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
             } else {
                 emit(out, RESTORE, key, ex, out.toByteArray());
             }
-            DummyKeyValuePair kv = new DummyKeyValuePair();
-            kv.setValueRdbType(type);
-            kv.setKey(key);
-            kv.setContains(contains);
-            return context.valueOf(kv);
+            return context.valueOf(new DummyKeyValuePair());
         }
     }
     
@@ -339,11 +303,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
             } else {
                 emit(out, RESTORE, key, ex, out.toByteArray());
             }
-            DummyKeyValuePair kv = new DummyKeyValuePair();
-            kv.setValueRdbType(type);
-            kv.setKey(key);
-            kv.setContains(contains);
-            return context.valueOf(kv);
+            return context.valueOf(new DummyKeyValuePair());
         }
     }
     
@@ -370,11 +330,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
             } else {
                 emit(out, RESTORE, key, ex, out.toByteArray());
             }
-            DummyKeyValuePair kv = new DummyKeyValuePair();
-            kv.setValueRdbType(type);
-            kv.setKey(key);
-            kv.setContains(contains);
-            return context.valueOf(kv);
+            return context.valueOf(new DummyKeyValuePair());
         }
     }
     
@@ -401,11 +357,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
             } else {
                 emit(out, RESTORE, key, ex, out.toByteArray());
             }
-            DummyKeyValuePair kv = new DummyKeyValuePair();
-            kv.setValueRdbType(type);
-            kv.setKey(key);
-            kv.setContains(contains);
-            return context.valueOf(kv);
+            return context.valueOf(new DummyKeyValuePair());
         }
     }
     
@@ -432,11 +384,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
             } else {
                 emit(out, RESTORE, key, ex, out.toByteArray());
             }
-            DummyKeyValuePair kv = new DummyKeyValuePair();
-            kv.setValueRdbType(type);
-            kv.setKey(key);
-            kv.setContains(contains);
-            return context.valueOf(kv);
+            return context.valueOf(new DummyKeyValuePair());
         }
     }
     
@@ -463,11 +411,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
             } else {
                 emit(out, RESTORE, key, ex, out.toByteArray());
             }
-            DummyKeyValuePair kv = new DummyKeyValuePair();
-            kv.setValueRdbType(type);
-            kv.setKey(key);
-            kv.setContains(contains);
-            return context.valueOf(kv);
+            return context.valueOf(new DummyKeyValuePair());
         }
     }
     
@@ -494,11 +438,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
             } else {
                 emit(out, RESTORE, key, ex, out.toByteArray());
             }
-            DummyKeyValuePair kv = new DummyKeyValuePair();
-            kv.setValueRdbType(type);
-            kv.setKey(key);
-            kv.setContains(contains);
-            return context.valueOf(kv);
+            return context.valueOf(new DummyKeyValuePair());
         }
     }
 }
