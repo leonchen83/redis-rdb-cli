@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
 import static com.moilioncircle.redis.cli.tool.glossary.Guard.DRAIN;
 import static com.moilioncircle.redis.cli.tool.glossary.Guard.PASS;
 import static com.moilioncircle.redis.cli.tool.glossary.Guard.SAVE;
+import static com.moilioncircle.redis.replicator.Constants.DOLLAR;
 import static com.moilioncircle.redis.replicator.Constants.MODULE_SET;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_HASH;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_HASH_ZIPLIST;
@@ -46,6 +47,7 @@ import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_STRING;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET_2;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET_ZIPLIST;
+import static com.moilioncircle.redis.replicator.Constants.STAR;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -128,6 +130,176 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         out.write(configure.getQuote());
         escape.encode(bytes, out, configure);
         out.write(configure.getQuote());
+    }
+    
+    protected void emit(byte[] command, byte[] key) throws IOException {
+        out.write(STAR);
+        out.write(String.valueOf(2).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        byte[] c = escape.encode(command, configure);
+        out.write(String.valueOf(c.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(c);
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        byte[] k = escape.encode(key, configure);
+        out.write(String.valueOf(k.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(k);
+        out.write('\r');
+        out.write('\n');
+    }
+    
+    protected void emit(byte[] command, byte[] key, byte[] ary) throws IOException {
+        out.write(STAR);
+        out.write(String.valueOf(3).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        byte[] c = escape.encode(command, configure);
+        out.write(String.valueOf(c.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(c);
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        byte[] k = escape.encode(key, configure);
+        out.write(String.valueOf(k.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(k);
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        byte[] a = escape.encode(ary, configure);
+        out.write(String.valueOf(a.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(a);
+        out.write('\r');
+        out.write('\n');
+    }
+    
+    protected void emit(byte[] command, byte[] key, byte[] ary1, byte[] ary2) throws IOException {
+        out.write(STAR);
+        out.write(String.valueOf(4).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        byte[] c = escape.encode(command, configure);
+        out.write(String.valueOf(c.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(c);
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        byte[] k = escape.encode(key, configure);
+        out.write(String.valueOf(k.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(k);
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        out.write(String.valueOf(ary1.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(ary1);
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        byte[] d = escape.encode(ary2, configure);
+        out.write(String.valueOf(d.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(d);
+        out.write('\r');
+        out.write('\n');
+    }
+    
+    protected void emit(byte[] command, byte[] key, byte[] ary1, byte[] ary2, byte[] ary3) throws IOException {
+        out.write(STAR);
+        out.write(String.valueOf(5).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        byte[] c = escape.encode(command, configure);
+        out.write(String.valueOf(c.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(c);
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        byte[] k = escape.encode(key, configure);
+        out.write(String.valueOf(k.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(k);
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        out.write(String.valueOf(ary1.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(ary1);
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        byte[] d = escape.encode(ary2, configure);
+        out.write(String.valueOf(d.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(d);
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        out.write(String.valueOf(ary3.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(ary3);
+        out.write('\r');
+        out.write('\n');
+    }
+    
+    protected void emit(byte[] command, byte[] key, List<byte[]> ary) throws IOException {
+        out.write(STAR);
+        out.write(String.valueOf(ary.size() + 2).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        byte[] c = escape.encode(command, configure);
+        out.write(String.valueOf(c.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(c);
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        byte[] k = escape.encode(key, configure);
+        out.write(String.valueOf(k.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(k);
+        out.write('\r');
+        out.write('\n');
+        for (final byte[] arg : ary) {
+            out.write(DOLLAR);
+            byte[] a = escape.encode(arg, configure);
+            out.write(String.valueOf(a.length).getBytes());
+            out.write('\r');
+            out.write('\n');
+            out.write(a);
+            out.write('\r');
+            out.write('\n');
+        }
     }
 
     @Override

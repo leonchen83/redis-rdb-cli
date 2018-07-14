@@ -20,9 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.moilioncircle.redis.replicator.Constants.DOLLAR;
 import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
-import static com.moilioncircle.redis.replicator.Constants.STAR;
 
 /**
  * @author Baoyi Chen
@@ -30,6 +28,7 @@ import static com.moilioncircle.redis.replicator.Constants.STAR;
 public class RespRdbVisitor extends AbstractRdbVisitor {
 
     private final int batch;
+    private final boolean replace;
 
     private static final byte[] ZERO = "0".getBytes();
     private static final byte[] SET = "set".getBytes();
@@ -45,138 +44,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
     public RespRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types) {
         super(replicator, configure, out, db, regexs, types, Escape.REDIS);
         this.batch = configure.getBatchSize();
-    }
-
-    private void emit(byte[] command, byte[] key) throws IOException {
-        out.write(STAR);
-        out.write(String.valueOf(2).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        byte[] c = escape.encode(command, configure);
-        out.write(String.valueOf(c.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(c);
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        byte[] k = escape.encode(key, configure);
-        out.write(String.valueOf(k.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(k);
-        out.write('\r');
-        out.write('\n');
-    }
-
-    private void emit(byte[] command, byte[] key, byte[] ary) throws IOException {
-        out.write(STAR);
-        out.write(String.valueOf(3).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        byte[] c = escape.encode(command, configure);
-        out.write(String.valueOf(c.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(c);
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        byte[] k = escape.encode(key, configure);
-        out.write(String.valueOf(k.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(k);
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        byte[] a = escape.encode(ary, configure);
-        out.write(String.valueOf(a.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(a);
-        out.write('\r');
-        out.write('\n');
-    }
-
-    private void emit(byte[] command, byte[] key, byte[] ary1, byte[] ary2, byte[] ary3) throws IOException {
-        out.write(STAR);
-        out.write(String.valueOf(5).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        byte[] c = escape.encode(command, configure);
-        out.write(String.valueOf(c.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(c);
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        byte[] k = escape.encode(key, configure);
-        out.write(String.valueOf(k.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(k);
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        out.write(String.valueOf(ary1.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(ary1);
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        byte[] d = escape.encode(ary2, configure);
-        out.write(String.valueOf(d.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(d);
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        out.write(String.valueOf(ary3.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(ary3);
-        out.write('\r');
-        out.write('\n');
-    }
-
-    private void emit(byte[] command, byte[] key, List<byte[]> ary) throws IOException {
-        out.write(STAR);
-        out.write(String.valueOf(ary.size() + 2).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        byte[] c = escape.encode(command, configure);
-        out.write(String.valueOf(c.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(c);
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        byte[] k = escape.encode(key, configure);
-        out.write(String.valueOf(k.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(k);
-        out.write('\r');
-        out.write('\n');
-        for (final byte[] arg : ary) {
-            out.write(DOLLAR);
-            byte[] a = escape.encode(arg, configure);
-            out.write(String.valueOf(a.length).getBytes());
-            out.write('\r');
-            out.write('\n');
-            out.write(a);
-            out.write('\r');
-            out.write('\n');
-        }
+        this.replace = configure.isDumpReplace();
     }
 
     @Override
@@ -539,6 +407,15 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
 
     @Override
     protected Event doApplyModule(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        byte[] ex = ZERO;
+        if (context.getExpiredValue() != null) {
+            long ms = context.getExpiredValue() - System.currentTimeMillis();
+            if (ms <= 0) {
+                return super.doApplyModule(in, version, key, contains, type, context);
+            } else {
+                ex = String.valueOf(ms).getBytes();
+            }
+        }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
             try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
@@ -546,7 +423,11 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
                 super.doApplyModule(in, version, key, contains, type, context);
                 replicator.removeRawByteListener(listener);
             }
-            emit(RESTORE, key, ZERO, out.toByteArray(), REPLACE);
+            if (replace) {
+                emit(RESTORE, key, ex, out.toByteArray(), REPLACE);
+            } else {
+                emit(RESTORE, key, ex, out.toByteArray());
+            }
             DummyKeyValuePair kv = new DummyKeyValuePair();
             kv.setValueRdbType(type);
             kv.setKey(key);
@@ -557,6 +438,15 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
 
     @Override
     protected Event doApplyModule2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        byte[] ex = ZERO;
+        if (context.getExpiredValue() != null) {
+            long ms = context.getExpiredValue() - System.currentTimeMillis();
+            if (ms <= 0) {
+                return super.doApplyModule2(in, version, key, contains, type, context);
+            } else {
+                ex = String.valueOf(ms).getBytes();
+            }
+        }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
             try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
@@ -564,7 +454,11 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
                 super.doApplyModule2(in, version, key, contains, type, context);
                 replicator.removeRawByteListener(listener);
             }
-            emit(RESTORE, key, ZERO, out.toByteArray(), REPLACE);
+            if (replace) {
+                emit(RESTORE, key, ex, out.toByteArray(), REPLACE);
+            } else {
+                emit(RESTORE, key, ex, out.toByteArray());
+            }
             DummyKeyValuePair kv = new DummyKeyValuePair();
             kv.setValueRdbType(type);
             kv.setKey(key);
@@ -575,6 +469,15 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
 
     @Override
     protected Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        byte[] ex = ZERO;
+        if (context.getExpiredValue() != null) {
+            long ms = context.getExpiredValue() - System.currentTimeMillis();
+            if (ms <= 0) {
+                return super.doApplyStreamListPacks(in, version, key, contains, type, context);
+            } else {
+                ex = String.valueOf(ms).getBytes();
+            }
+        }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
             try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
@@ -582,7 +485,11 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
                 super.doApplyStreamListPacks(in, version, key, contains, type, context);
                 replicator.removeRawByteListener(listener);
             }
-            emit(RESTORE, key, ZERO, out.toByteArray(), REPLACE);
+            if (replace) {
+                emit(RESTORE, key, ex, out.toByteArray(), REPLACE);
+            } else {
+                emit(RESTORE, key, ex, out.toByteArray());
+            }
             DummyKeyValuePair kv = new DummyKeyValuePair();
             kv.setValueRdbType(type);
             kv.setKey(key);

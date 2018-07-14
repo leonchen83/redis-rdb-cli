@@ -32,14 +32,14 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
     public JsonRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escape escape) {
         super(replicator, configure, out, db, regexs, types, escape);
     }
-
-    private void emit(byte[] field, double value) throws IOException {
+    
+    private void emitZSet(byte[] field, double value) throws IOException {
         emitString(field);
         out.write(':');
         escape.encode(value, out, configure);
     }
-
-    private void emit(byte[] field, byte[] value) throws IOException {
+    
+    private void emitField(byte[] field, byte[] value) throws IOException {
         emitString(field);
         out.write(':');
         emitString(value);
@@ -173,7 +173,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
             }
             byte[] element = parser.rdbLoadEncodedStringObject().first();
             double score = parser.rdbLoadDoubleValue();
-            emit(element, score);
+            emitZSet(element, score);
             flag = false;
             len--;
         }
@@ -204,7 +204,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
             }
             byte[] element = parser.rdbLoadEncodedStringObject().first();
             double score = parser.rdbLoadBinaryDoubleValue();
-            emit(element, score);
+            emitZSet(element, score);
             flag = false;
             len--;
         }
@@ -235,7 +235,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
             }
             byte[] field = parser.rdbLoadEncodedStringObject().first();
             byte[] value = parser.rdbLoadEncodedStringObject().first();
-            emit(field, value);
+            emitField(field, value);
             flag = false;
             len--;
         }
@@ -266,7 +266,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
             }
             byte[] field = parser.rdbLoadEncodedStringObject().first();
             byte[] value = parser.rdbLoadEncodedStringObject().first();
-            emit(field, value);
+            emitField(field, value);
             flag = false;
             len--;
         }
@@ -383,7 +383,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
             zllen--;
             double score = Double.valueOf(Strings.toString(BaseRdbParser.StringHelper.zipListEntry(stream)));
             zllen--;
-            emit(element, score);
+            emitZSet(element, score);
             flag = false;
         }
         int zlend = BaseRdbParser.LenHelper.zlend(stream);
@@ -422,7 +422,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
             zllen--;
             byte[] value = BaseRdbParser.StringHelper.zipListEntry(stream);
             zllen--;
-            emit(field, value);
+            emitField(field, value);
             flag = false;
         }
         int zlend = BaseRdbParser.LenHelper.zlend(stream);
