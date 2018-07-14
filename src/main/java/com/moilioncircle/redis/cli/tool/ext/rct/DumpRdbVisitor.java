@@ -29,16 +29,16 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     private static final byte[] REPLACE = "replace".getBytes();
     private static final byte[] RESTORE = "restore".getBytes();
     
-    public DumpRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types) {
+    public DumpRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) {
         super(replicator, configure, out, db, regexs, types, Escape.RAW);
-        this.replace = configure.isDumpReplace();
+        this.replace = replace;
     }
     
     @Override
     public DB applySelectDB(RedisInputStream in, int version) throws IOException {
         DB db = super.applySelectDB(in, version);
         long dbnum = db.getDbNumber();
-        emit(SELECT, String.valueOf(dbnum).getBytes());
+        emit(out, SELECT, String.valueOf(dbnum).getBytes());
         return db;
     }
     
@@ -61,9 +61,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(RESTORE, key, ex, out.toByteArray());
+                emit(out, RESTORE, key, ex, out.toByteArray());
             }
             DummyKeyValuePair kv = new DummyKeyValuePair();
             kv.setValueRdbType(type);
@@ -92,9 +92,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(RESTORE, key, ex, out.toByteArray());
+                emit(out, RESTORE, key, ex, out.toByteArray());
             }
             DummyKeyValuePair kv = new DummyKeyValuePair();
             kv.setValueRdbType(type);
@@ -123,9 +123,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(RESTORE, key, ex, out.toByteArray());
+                emit(out, RESTORE, key, ex, out.toByteArray());
             }
             DummyKeyValuePair kv = new DummyKeyValuePair();
             kv.setValueRdbType(type);
@@ -154,9 +154,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(RESTORE, key, ex, out.toByteArray());
+                emit(out, RESTORE, key, ex, out.toByteArray());
             }
             DummyKeyValuePair kv = new DummyKeyValuePair();
             kv.setValueRdbType(type);
@@ -185,9 +185,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(RESTORE, key, ex, out.toByteArray());
+                emit(out, RESTORE, key, ex, out.toByteArray());
             }
             DummyKeyValuePair kv = new DummyKeyValuePair();
             kv.setValueRdbType(type);
@@ -216,9 +216,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(RESTORE, key, ex, out.toByteArray());
+                emit(out, RESTORE, key, ex, out.toByteArray());
             }
             DummyKeyValuePair kv = new DummyKeyValuePair();
             kv.setValueRdbType(type);
@@ -247,9 +247,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(RESTORE, key, ex, out.toByteArray());
+                emit(out, RESTORE, key, ex, out.toByteArray());
             }
             DummyKeyValuePair kv = new DummyKeyValuePair();
             kv.setValueRdbType(type);
@@ -278,9 +278,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(RESTORE, key, ex, out.toByteArray());
+                emit(out, RESTORE, key, ex, out.toByteArray());
             }
             DummyKeyValuePair kv = new DummyKeyValuePair();
             kv.setValueRdbType(type);
@@ -309,9 +309,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(RESTORE, key, ex, out.toByteArray());
+                emit(out, RESTORE, key, ex, out.toByteArray());
             }
             DummyKeyValuePair kv = new DummyKeyValuePair();
             kv.setValueRdbType(type);
@@ -340,9 +340,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(RESTORE, key, ex, out.toByteArray());
+                emit(out, RESTORE, key, ex, out.toByteArray());
             }
             DummyKeyValuePair kv = new DummyKeyValuePair();
             kv.setValueRdbType(type);
@@ -371,9 +371,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(RESTORE, key, ex, out.toByteArray());
+                emit(out, RESTORE, key, ex, out.toByteArray());
             }
             DummyKeyValuePair kv = new DummyKeyValuePair();
             kv.setValueRdbType(type);
@@ -402,9 +402,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(RESTORE, key, ex, out.toByteArray());
+                emit(out, RESTORE, key, ex, out.toByteArray());
             }
             DummyKeyValuePair kv = new DummyKeyValuePair();
             kv.setValueRdbType(type);
@@ -433,9 +433,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(RESTORE, key, ex, out.toByteArray());
+                emit(out, RESTORE, key, ex, out.toByteArray());
             }
             DummyKeyValuePair kv = new DummyKeyValuePair();
             kv.setValueRdbType(type);
@@ -464,9 +464,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(RESTORE, key, ex, out.toByteArray());
+                emit(out, RESTORE, key, ex, out.toByteArray());
             }
             DummyKeyValuePair kv = new DummyKeyValuePair();
             kv.setValueRdbType(type);
@@ -495,9 +495,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(RESTORE, key, ex, out.toByteArray());
+                emit(out, RESTORE, key, ex, out.toByteArray());
             }
             DummyKeyValuePair kv = new DummyKeyValuePair();
             kv.setValueRdbType(type);

@@ -28,7 +28,7 @@ maven-3.3.1+
 
 usage: rct -f <format> -s <source> -o <file> [-d <num num...>] [-e
            <escape>] [-k <regex regex...>] [-t <type type...>] [-b
-           <bytes>] [-l <n>]
+           <bytes>] [-l <n>] [-r]
 
 options:
  -b,--bytes <bytes>          limit memory output(--format mem) to keys
@@ -46,6 +46,9 @@ options:
  -l,--largest <n>            limit memory output(--format mem) to only the
                              top n keys (by size).
  -o,--out <file>             output file.
+ -r,--replace                whether the generated aof with <replace>
+                             parameter(--format dump). if not specified,
+                             default value is false.
  -s,--source <source>        <source> eg:
                              /path/to/dump.rdb
                              redis://host:port?authPassword=foobar
@@ -58,6 +61,7 @@ options:
  -v,--version                rct version.
 
 examples:
+ rct -f dump -s ./dump.rdb -o ./appendonly.aof -r
  rct -f resp -s redis://127.0.0.1:6379 -o ./target.aof -d 0 1
  rct -f json -s ./dump.rdb -o ./target.json -k user.* product.*
  rct -f mem -s ./dump.rdb -o ./target.aof -e redis -t list -l 10 -b 1024
@@ -68,7 +72,7 @@ examples:
 ```java  
 
 usage: rmt -s <source> -m <uri> [-d <num num...>] [-k <regex regex...>]
-           [-t <type type...>]
+           [-t <type type...>] [-r]
 
 options:
  -d,--db <num num...>        database number. multiple databases can be
@@ -82,10 +86,9 @@ options:
  -r,--replace                replace exist key value. if not specified,
                              default value is false.
  -s,--source <source>        <source> eg:
-                             /path/to/dump.rdb /path/to/appendonly.aof
+                             /path/to/dump.rdb
                              redis://host:port?authPassword=foobar
                              redis:///path/to/dump.rdb
-                             redis:///path/to/appendonly.aof
  -t,--type <type type...>    data type to export. possible values are
                              string, hash, set, sortedset, list, module,
                              stream. multiple types can be provided. if

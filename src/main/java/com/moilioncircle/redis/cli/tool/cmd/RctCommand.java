@@ -20,7 +20,7 @@ import java.util.List;
  * @author Baoyi Chen
  */
 public class RctCommand extends AbstractCommand {
-
+    
     private static final Option HELP = Option.builder("h").longOpt("help").required(false).hasArg(false).desc("rct usage.").build();
     private static final Option VERSION = Option.builder("v").longOpt("version").required(false).hasArg(false).desc("rct version.").build();
     private static final Option FORMAT = Option.builder("f").longOpt("format").required(false).hasArg().argName("format").type(String.class).desc("format to export. valid formats are json, dump, diff, key, keyval, mem and resp").build();
@@ -32,15 +32,16 @@ public class RctCommand extends AbstractCommand {
     private static final Option BYTES = Option.builder("b").longOpt("bytes").required(false).hasArgs().argName("bytes").type(Number.class).desc("limit memory output(--format mem) to keys greater to or equal to this value (in bytes)").build();
     private static final Option LARGEST = Option.builder("l").longOpt("largest").required(false).hasArg().argName("n").type(Number.class).desc("limit memory output(--format mem) to only the top n keys (by size).").build();
     private static final Option ESCAPE = Option.builder("e").longOpt("escape").required(false).hasArg().argName("escape").type(String.class).desc("escape strings to encoding: raw (default), redis.").build();
-
-    private static final String HEADER = "rct -f <format> -s <source> -o <file> [-d <num num...>] [-e <escape>] [-k <regex regex...>] [-t <type type...>] [-b <bytes>] [-l <n>]";
-    private static final String EXAMPLE = "\nexamples:\n rct -f resp -s redis://127.0.0.1:6379 -o ./target.aof -d 0 1\n rct -f json -s ./dump.rdb -o ./target.json -k user.* product.*\n rct -f mem -s ./dump.rdb -o ./target.aof -e redis -t list -l 10 -b 1024\n";
-
+    private static final Option REPLACE = Option.builder("r").longOpt("replace").required(false).desc("whether the generated aof with <replace> parameter(--format dump). if not specified, default value is false.").build();
+    
+    private static final String HEADER = "rct -f <format> -s <source> -o <file> [-d <num num...>] [-e <escape>] [-k <regex regex...>] [-t <type type...>] [-b <bytes>] [-l <n>] [-r]";
+    private static final String EXAMPLE = "\nexamples:\n rct -f dump -s ./dump.rdb -o ./appendonly.aof -r\n rct -f resp -s redis://127.0.0.1:6379 -o ./target.aof -d 0 1\n rct -f json -s ./dump.rdb -o ./target.json -k user.* product.*\n rct -f mem -s ./dump.rdb -o ./target.aof -e redis -t list -l 10 -b 1024\n";
+    
     @Override
     public String name() {
         return "rct";
     }
-
+    
     private RctCommand() {
         addOption(HELP);
         addOption(VERSION);
@@ -51,10 +52,11 @@ public class RctCommand extends AbstractCommand {
         addOption(KEY);
         addOption(TYPE);
         addOption(BYTES);
+        addOption(REPLACE);
         addOption(LARGEST);
         addOption(ESCAPE);
     }
-
+    
     @Override
     protected void doExecute(CommandLine line) throws Exception {
         if (line.hasOption("help")) {
@@ -67,38 +69,41 @@ public class RctCommand extends AbstractCommand {
             if (!line.hasOption("format")) {
                 sb.append("f ");
             }
-
+    
             if (!line.hasOption("source")) {
                 sb.append("s ");
             }
-
+    
             if (!line.hasOption("out")) {
                 sb.append("o ");
             }
-
+    
             if (sb.length() > 0) {
                 writeLine("Missing required options: " + sb.toString() + ", Try `rct -h` for more information.");
                 return;
             }
-
+    
             String source = line.getOption("source");
             File output = line.getOption("out");
             String format = line.getOption("format");
-
+    
             List<Long> db = line.getOptions("db");
             Long bytes = line.getOption("bytes");
             Long largest = line.getOption("largest");
             String escape = line.getOption("escape");
             List<String> type = line.getOptions("type");
+            boolean replace = line.hasOption("replace");
             List<String> regexs = line.getOptions("key");
-
+    
             source = normalize(source, FileType.RDB, "Invalid options: s, Try `rct -h` for more information.");
-
+    
             try (ProgressBar bar = new ProgressBar(-1)) {
                 Configure configure = Configure.bind();
                 Replicator r = new CliRedisReplicator(source, configure);
-                r.addExceptionListener((rep, tx, e) -> { throw new RuntimeException(tx.getMessage(), tx); });
-                Format.parse(format).dress(r, configure, output, db, regexs, largest, bytes, DataType.parse(type), Escape.parse(escape));
+                r.addExceptionListener((rep, tx, e) -> {
+                    throw new RuntimeException(tx.getMessage(), tx);
+                });
+                Format.parse(format).dress(r, configure, output, db, regexs, largest, bytes, DataType.parse(type), Escape.parse(escape), replace);
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> CliRedisReplicator.closeQuietly(r)));
                 r.addEventListener((rep, event) -> {
                     if (event instanceof PreRdbSyncEvent)
@@ -109,7 +114,7 @@ public class RctCommand extends AbstractCommand {
             }
         }
     }
-
+    
     public static void run(String[] args) throws Exception {
         RctCommand command = new RctCommand();
         command.execute(args);

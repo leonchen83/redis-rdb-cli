@@ -132,91 +132,11 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         out.write(configure.getQuote());
     }
     
-    protected void emit(byte[] command, byte[] key) throws IOException {
-        out.write(STAR);
-        out.write(String.valueOf(2).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        out.write(String.valueOf(command.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(command);
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        out.write(String.valueOf(key.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(key);
-        out.write('\r');
-        out.write('\n');
+    protected void emit(OutputStream out, byte[] command) throws IOException {
+        emit(out, command, new byte[0][]);
     }
     
-    protected void emit(byte[] command, byte[] key, byte[] ary) throws IOException {
-        out.write(STAR);
-        out.write(String.valueOf(3).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        out.write(String.valueOf(command.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(command);
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        out.write(String.valueOf(key.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(key);
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        out.write(String.valueOf(ary.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(ary);
-        out.write('\r');
-        out.write('\n');
-    }
-    
-    protected void emit(byte[] command, byte[] key, byte[] ary1, byte[] ary2) throws IOException {
-        out.write(STAR);
-        out.write(String.valueOf(4).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        out.write(String.valueOf(command.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(command);
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        out.write(String.valueOf(key.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(key);
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        out.write(String.valueOf(ary1.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(ary1);
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        out.write(String.valueOf(ary2.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(ary2);
-        out.write('\r');
-        out.write('\n');
-    }
-    
-    protected void emit(byte[] command, byte[] key, byte[] ary1, byte[] ary2, byte[] ary3) throws IOException {
+    protected void emit(OutputStream out, byte[] command, byte[]... ary) throws IOException {
         out.write(STAR);
         out.write(String.valueOf(5).getBytes());
         out.write('\r');
@@ -228,37 +148,18 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         out.write(command);
         out.write('\r');
         out.write('\n');
-        out.write(DOLLAR);
-        out.write(String.valueOf(key.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(key);
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        out.write(String.valueOf(ary1.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(ary1);
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        out.write(String.valueOf(ary2.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(ary2);
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        out.write(String.valueOf(ary3.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(ary3);
-        out.write('\r');
-        out.write('\n');
+        for (final byte[] arg : ary) {
+            out.write(DOLLAR);
+            out.write(String.valueOf(arg.length).getBytes());
+            out.write('\r');
+            out.write('\n');
+            out.write(arg);
+            out.write('\r');
+            out.write('\n');
+        }
     }
     
-    protected void emit(byte[] command, byte[] key, List<byte[]> ary) throws IOException {
+    protected void emit(OutputStream out, byte[] command, byte[] key, List<byte[]> ary) throws IOException {
         out.write(STAR);
         out.write(String.valueOf(ary.size() + 2).getBytes());
         out.write('\r');
