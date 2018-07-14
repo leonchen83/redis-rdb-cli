@@ -30,7 +30,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     private static final byte[] RESTORE = "restore".getBytes();
     
     public DumpRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types) {
-        super(replicator, configure, out, db, regexs, types, Escape.REDIS);
+        super(replicator, configure, out, db, regexs, types, Escape.RAW);
         this.replace = configure.isDumpReplace();
     }
     

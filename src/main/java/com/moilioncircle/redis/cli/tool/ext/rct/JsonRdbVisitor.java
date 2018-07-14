@@ -87,7 +87,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         firstkey = false;
         BaseRdbParser parser = new BaseRdbParser(in);
         byte[] val = parser.rdbLoadEncodedStringObject().first();
-        emit(key, val);
+        emitField(key, val);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setValueRdbType(type);
         kv.setKey(key);

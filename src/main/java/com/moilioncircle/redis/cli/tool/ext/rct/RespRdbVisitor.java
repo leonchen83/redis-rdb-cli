@@ -42,7 +42,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
     private static final byte[] EXPIREAT = "expireat".getBytes();
 
     public RespRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types) {
-        super(replicator, configure, out, db, regexs, types, Escape.REDIS);
+        super(replicator, configure, out, db, regexs, types, Escape.RAW);
         this.batch = configure.getBatchSize();
         this.replace = configure.isDumpReplace();
     }

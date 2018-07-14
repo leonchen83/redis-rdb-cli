@@ -54,7 +54,7 @@ import static java.util.stream.Collectors.toList;
  * @author Baoyi Chen
  */
 public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
-
+    
     // common
     protected Set<Long> db;
     protected Set<String> keys;
@@ -66,7 +66,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
     protected OutputStream out;
     //rdt
     protected GuardRawByteListener listener;
-
+    
     /**
      * rmt
      */
@@ -78,7 +78,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         this.keys = new HashSet<>(regexs);
         this.regexs = regexs.stream().map(Pattern::compile).collect(toList());
     }
-
+    
     /**
      * rct
      */
@@ -92,7 +92,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         });
         replicator.addCloseListener(rep -> OutputStreams.closeQuietly(out));
     }
-
+    
     /**
      * rdt
      */
@@ -101,15 +101,15 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         this.listener = new GuardRawByteListener(configure.getBufferSize(), supplier.get());
         this.replicator.addRawByteListener(listener);
     }
-
+    
     protected boolean contains(int type) {
         return DataType.contains(types, type);
     }
-
+    
     protected boolean contains(long db) {
         return this.db.isEmpty() || this.db.contains(db);
     }
-
+    
     protected boolean contains(String key) {
         if (keys.isEmpty() || keys.contains(key)) return true;
         for (Pattern pattern : regexs) {
@@ -117,15 +117,15 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         }
         return false;
     }
-
+    
     protected boolean contains(long db, int type, String key) {
         return contains(db) && contains(type) && contains(key);
     }
-
+    
     protected void delimiter(OutputStream out) throws IOException {
         out.write(configure.getDelimiter());
     }
-
+    
     protected void quote(byte[] bytes, OutputStream out) throws IOException {
         out.write(configure.getQuote());
         escape.encode(bytes, out, configure);
@@ -138,19 +138,17 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         out.write('\r');
         out.write('\n');
         out.write(DOLLAR);
-        byte[] c = escape.encode(command, configure);
-        out.write(String.valueOf(c.length).getBytes());
+        out.write(String.valueOf(command.length).getBytes());
         out.write('\r');
         out.write('\n');
-        out.write(c);
+        out.write(command);
         out.write('\r');
         out.write('\n');
         out.write(DOLLAR);
-        byte[] k = escape.encode(key, configure);
-        out.write(String.valueOf(k.length).getBytes());
+        out.write(String.valueOf(key.length).getBytes());
         out.write('\r');
         out.write('\n');
-        out.write(k);
+        out.write(key);
         out.write('\r');
         out.write('\n');
     }
@@ -161,27 +159,24 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         out.write('\r');
         out.write('\n');
         out.write(DOLLAR);
-        byte[] c = escape.encode(command, configure);
-        out.write(String.valueOf(c.length).getBytes());
+        out.write(String.valueOf(command.length).getBytes());
         out.write('\r');
         out.write('\n');
-        out.write(c);
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        byte[] k = escape.encode(key, configure);
-        out.write(String.valueOf(k.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(k);
+        out.write(command);
         out.write('\r');
         out.write('\n');
         out.write(DOLLAR);
-        byte[] a = escape.encode(ary, configure);
-        out.write(String.valueOf(a.length).getBytes());
+        out.write(String.valueOf(key.length).getBytes());
         out.write('\r');
         out.write('\n');
-        out.write(a);
+        out.write(key);
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        out.write(String.valueOf(ary.length).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(ary);
         out.write('\r');
         out.write('\n');
     }
@@ -192,19 +187,17 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         out.write('\r');
         out.write('\n');
         out.write(DOLLAR);
-        byte[] c = escape.encode(command, configure);
-        out.write(String.valueOf(c.length).getBytes());
+        out.write(String.valueOf(command.length).getBytes());
         out.write('\r');
         out.write('\n');
-        out.write(c);
+        out.write(command);
         out.write('\r');
         out.write('\n');
         out.write(DOLLAR);
-        byte[] k = escape.encode(key, configure);
-        out.write(String.valueOf(k.length).getBytes());
+        out.write(String.valueOf(key.length).getBytes());
         out.write('\r');
         out.write('\n');
-        out.write(k);
+        out.write(key);
         out.write('\r');
         out.write('\n');
         out.write(DOLLAR);
@@ -229,19 +222,17 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         out.write('\r');
         out.write('\n');
         out.write(DOLLAR);
-        byte[] c = escape.encode(command, configure);
-        out.write(String.valueOf(c.length).getBytes());
+        out.write(String.valueOf(command.length).getBytes());
         out.write('\r');
         out.write('\n');
-        out.write(c);
+        out.write(command);
         out.write('\r');
         out.write('\n');
         out.write(DOLLAR);
-        byte[] k = escape.encode(key, configure);
-        out.write(String.valueOf(k.length).getBytes());
+        out.write(String.valueOf(key.length).getBytes());
         out.write('\r');
         out.write('\n');
-        out.write(k);
+        out.write(key);
         out.write('\r');
         out.write('\n');
         out.write(DOLLAR);
@@ -273,33 +264,30 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         out.write('\r');
         out.write('\n');
         out.write(DOLLAR);
-        byte[] c = escape.encode(command, configure);
-        out.write(String.valueOf(c.length).getBytes());
+        out.write(String.valueOf(command.length).getBytes());
         out.write('\r');
         out.write('\n');
-        out.write(c);
+        out.write(command);
         out.write('\r');
         out.write('\n');
         out.write(DOLLAR);
-        byte[] k = escape.encode(key, configure);
-        out.write(String.valueOf(k.length).getBytes());
+        out.write(String.valueOf(key.length).getBytes());
         out.write('\r');
         out.write('\n');
-        out.write(k);
+        out.write(key);
         out.write('\r');
         out.write('\n');
         for (final byte[] arg : ary) {
             out.write(DOLLAR);
-            byte[] a = escape.encode(arg, configure);
-            out.write(String.valueOf(a.length).getBytes());
+            out.write(String.valueOf(arg.length).getBytes());
             out.write('\r');
             out.write('\n');
-            out.write(a);
+            out.write(arg);
             out.write('\r');
             out.write('\n');
         }
     }
-
+    
     @Override
     public Event applyString(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         try {
@@ -319,7 +307,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-
+    
     @Override
     public Event applyList(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         try {
@@ -343,7 +331,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-
+    
     @Override
     public Event applySet(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         try {
@@ -367,7 +355,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-
+    
     @Override
     public Event applyZSet(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         try {
@@ -392,7 +380,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-
+    
     @Override
     public Event applyZSet2(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         try {
@@ -417,7 +405,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-
+    
     @Override
     public Event applyHash(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         try {
@@ -442,7 +430,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-
+    
     @Override
     public Event applyHashZipMap(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         try {
@@ -462,7 +450,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-
+    
     @Override
     public Event applyListZipList(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         try {
@@ -482,7 +470,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-
+    
     @Override
     public Event applySetIntSet(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         try {
@@ -502,7 +490,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-
+    
     @Override
     public Event applyZSetZipList(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         try {
@@ -522,7 +510,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-
+    
     @Override
     public Event applyHashZipList(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         try {
@@ -542,7 +530,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-
+    
     @Override
     public Event applyListQuickList(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         try {
@@ -565,7 +553,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-
+    
     @Override
     public Event applyModule(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         try {
@@ -596,7 +584,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-
+    
     @Override
     public Event applyModule2(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         try {
@@ -618,7 +606,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-
+    
     @Override
     @SuppressWarnings("resource")
     public Event applyStreamListPacks(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
@@ -667,12 +655,12 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
-
+    
     protected Event doApplyString(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         new SkipRdbParser(in).rdbLoadEncodedStringObject();
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     protected Event doApplyList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         SkipRdbParser skipParser = new SkipRdbParser(in);
         long len = skipParser.rdbLoadLen().len;
@@ -682,7 +670,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         }
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     protected Event doApplySet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         SkipRdbParser skipParser = new SkipRdbParser(in);
         long len = skipParser.rdbLoadLen().len;
@@ -692,7 +680,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         }
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     protected Event doApplyZSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         SkipRdbParser skipParser = new SkipRdbParser(in);
         long len = skipParser.rdbLoadLen().len;
@@ -703,7 +691,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         }
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     protected Event doApplyZSet2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         SkipRdbParser skipParser = new SkipRdbParser(in);
         long len = skipParser.rdbLoadLen().len;
@@ -714,7 +702,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         }
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     protected Event doApplyHash(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         SkipRdbParser skipParser = new SkipRdbParser(in);
         long len = skipParser.rdbLoadLen().len;
@@ -725,32 +713,32 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         }
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     protected Event doApplyHashZipMap(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         new SkipRdbParser(in).rdbLoadPlainStringObject();
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     protected Event doApplyListZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         new SkipRdbParser(in).rdbLoadPlainStringObject();
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     protected Event doApplySetIntSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         new SkipRdbParser(in).rdbLoadPlainStringObject();
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     protected Event doApplyZSetZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         new SkipRdbParser(in).rdbLoadPlainStringObject();
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     protected Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         new SkipRdbParser(in).rdbLoadPlainStringObject();
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     protected Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         SkipRdbParser skipParser = new SkipRdbParser(in);
         long len = skipParser.rdbLoadLen().len;
@@ -759,7 +747,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         }
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     protected Event doApplyModule(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         SkipRdbParser skipParser = new SkipRdbParser(in);
         char[] c = new char[9];
@@ -776,13 +764,13 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         moduleParser.parse(in, 1);
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     protected Event doApplyModule2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         SkipRdbParser skipRdbParser = new SkipRdbParser(in);
         skipRdbParser.rdbLoadCheckModuleValue();
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     protected Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         SkipRdbParser skipParser = new SkipRdbParser(in);
         long listPacks = skipParser.rdbLoadLen().len;
