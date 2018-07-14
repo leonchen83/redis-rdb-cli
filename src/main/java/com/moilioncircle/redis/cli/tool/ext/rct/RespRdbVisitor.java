@@ -49,7 +49,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
 
     private void emit(byte[] command, byte[] key) throws IOException {
         out.write(STAR);
-        out.write(String.valueOf(3).getBytes());
+        out.write(String.valueOf(2).getBytes());
         out.write('\r');
         out.write('\n');
         out.write(DOLLAR);
@@ -103,7 +103,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
 
     private void emit(byte[] command, byte[] key, byte[] ary1, byte[] ary2, byte[] ary3) throws IOException {
         out.write(STAR);
-        out.write(String.valueOf(3).getBytes());
+        out.write(String.valueOf(5).getBytes());
         out.write('\r');
         out.write('\n');
         out.write(DOLLAR);
