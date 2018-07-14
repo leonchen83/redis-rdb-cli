@@ -215,11 +215,10 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         out.write('\r');
         out.write('\n');
         out.write(DOLLAR);
-        byte[] d = escape.encode(ary2, configure);
-        out.write(String.valueOf(d.length).getBytes());
+        out.write(String.valueOf(ary2.length).getBytes());
         out.write('\r');
         out.write('\n');
-        out.write(d);
+        out.write(ary2);
         out.write('\r');
         out.write('\n');
     }
@@ -253,11 +252,10 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         out.write('\r');
         out.write('\n');
         out.write(DOLLAR);
-        byte[] d = escape.encode(ary2, configure);
-        out.write(String.valueOf(d.length).getBytes());
+        out.write(String.valueOf(ary2.length).getBytes());
         out.write('\r');
         out.write('\n');
-        out.write(d);
+        out.write(ary2);
         out.write('\r');
         out.write('\n');
         out.write(DOLLAR);
