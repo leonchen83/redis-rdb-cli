@@ -109,7 +109,7 @@ public enum Escape {
                 out.write(bytes, off, len);
                 break;
             case REDIS:
-                for (int i = off; i < len; i++) {
+                for (int i = off; i < off + len; i++) {
                     encode(bytes[i], out, configure);
                 }
                 break;

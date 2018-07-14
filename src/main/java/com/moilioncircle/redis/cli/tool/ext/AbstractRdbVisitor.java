@@ -584,7 +584,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
     protected Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         SkipRdbParser skipParser = new SkipRdbParser(in);
         long len = skipParser.rdbLoadLen().len;
-        for (int i = 0; i < len; i++) {
+        for (long i = 0; i < len; i++) {
             skipParser.rdbGenericLoadStringObject();
         }
         return context.valueOf(new DummyKeyValuePair());

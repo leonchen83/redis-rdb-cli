@@ -35,6 +35,6 @@ public class GuardRawByteListener implements RawByteListener {
 
     @Override
     public void handle(byte... raw) {
-        OutputStreams.writeQuietly(raw, out);
+        OutputStreams.write(raw, out);
     }
 }

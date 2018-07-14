@@ -68,10 +68,10 @@ public class FilesOutputStream extends OutputStream {
     public void write(byte[] b, int off, int len) throws IOException {
         if (key == null) {
             for (OutputStream out : set) {
-                out.write(b);
+                out.write(b, off, len);
             }
         } else {
-            map.get(slot(key)).write(b);
+            map.get(slot(key)).write(b, off, len);
         }
     }
     

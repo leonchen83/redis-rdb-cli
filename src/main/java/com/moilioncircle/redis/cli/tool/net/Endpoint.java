@@ -2,19 +2,19 @@ package com.moilioncircle.redis.cli.tool.net;
 
 import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.glossary.Escape;
+import com.moilioncircle.redis.cli.tool.io.BufferedOutputStream;
 import com.moilioncircle.redis.cli.tool.util.CloseableThread;
+import com.moilioncircle.redis.cli.tool.util.OutputStreams;
 import com.moilioncircle.redis.cli.tool.util.Sockets;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.UncheckedIOException;
 import com.moilioncircle.redis.replicator.cmd.RedisCodec;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
-import com.moilioncircle.redis.replicator.net.RedisSocketFactory;
 import com.moilioncircle.redis.replicator.util.ByteBuilder;
 import com.moilioncircle.redis.replicator.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -33,23 +33,23 @@ import static com.moilioncircle.redis.replicator.Constants.STAR;
  * @author Baoyi Chen
  */
 public class Endpoint implements Closeable, Runnable {
-
+    
     private static final Logger logger = LoggerFactory.getLogger(Endpoint.class);
-
+    
     private static final byte[] AUTH = "auth".getBytes();
     private static final byte[] PING = "ping".getBytes();
     private static final byte[] SELECT = "select".getBytes();
-
+    
     private final Socket socket;
     private final OutputStream out;
     private final RedisInputStream in;
     private final CloseableThread reader;
     private final RedisCodec codec = new RedisCodec();
     private final BlockingQueue<String> queue = new LinkedBlockingQueue<>();
-
+    
     public Endpoint(String host, int port, int db, Configuration conf, Configure configure) {
         try {
-            RedisSocketFactory factory = new RedisSocketFactory(conf);
+            CliSocketFactory factory = new CliSocketFactory(conf);
             this.socket = factory.createSocket(host, port, configure.getTimeout());
             this.in = new RedisInputStream(this.socket.getInputStream(), 64 * 1024);
             this.out = new BufferedOutputStream(this.socket.getOutputStream(), 64 * 1024);
@@ -67,19 +67,21 @@ public class Endpoint implements Closeable, Runnable {
         if (r != null) throw new AssertionError(r);
         reader = CloseableThread.open("reply reader", this);
     }
-
+    
     @Override
     public void run() {
         try {
-            String r = parse();
-            String prefix = queue.take();
-            if (r != null) logger.error("{} failed. reason : {}", prefix, r);
+            String prefix;
+            if ((prefix = queue.poll()) != null) {
+                String r = parse();
+                if (r != null) logger.error("{} failed. reason : {}", prefix, r);
+            }
         } catch (Throwable e) {
             close();
             throw new RuntimeException(e);
         }
     }
-
+    
     private String syncAuth(String password, Configure configure) {
         return syncSend(out -> {
             try {
@@ -92,7 +94,7 @@ public class Endpoint implements Closeable, Runnable {
             }
         });
     }
-
+    
     private String syncPing() {
         return syncSend(out -> {
             try {
@@ -103,7 +105,7 @@ public class Endpoint implements Closeable, Runnable {
             }
         });
     }
-
+    
     private String syncSelect(int db) {
         return syncSend(out -> {
             try {
@@ -116,7 +118,7 @@ public class Endpoint implements Closeable, Runnable {
             }
         });
     }
-
+    
     private String syncSend(Consumer<OutputStream> consumer) {
         try {
             consumer.accept(out);
@@ -127,9 +129,10 @@ public class Endpoint implements Closeable, Runnable {
             throw new AssertionError(e.getMessage(), e);
         }
     }
-
+    
     public void select(int db) {
         try {
+            out.write(' ');
             out.write(SELECT);
             out.write(' ');
             out.write(String.valueOf(db).getBytes());
@@ -140,9 +143,10 @@ public class Endpoint implements Closeable, Runnable {
         }
         queue.offer("select " + db);
     }
-
+    
     public void send(Consumer<OutputStream> consumer, byte[] key) {
         try {
+            OutputStreams.write((byte) ' ', out);
             consumer.accept(out);
         } catch (UncheckedIOException e) {
             close();
@@ -150,7 +154,7 @@ public class Endpoint implements Closeable, Runnable {
         }
         queue.offer("restore " + Strings.toString(key));
     }
-
+    
     @Override
     public void close() {
         CloseableThread.close(reader);
@@ -159,7 +163,7 @@ public class Endpoint implements Closeable, Runnable {
         Sockets.closeQuietly(socket);
         queue.clear();
     }
-
+    
     public String parse() throws IOException {
         while (true) {
             int c = in.read();
@@ -235,11 +239,11 @@ public class Endpoint implements Closeable, Runnable {
                     }
                 default:
                     throw new AssertionError("expect [$,:,*,+,-] but: " + (char) c);
-
+    
             }
         }
     }
-
+    
     public static void close(Endpoint endpoint) {
         if (endpoint == null) return;
         try {
@@ -248,7 +252,7 @@ public class Endpoint implements Closeable, Runnable {
             throw new RuntimeException(txt);
         }
     }
-
+    
     public static void closeQuietly(Endpoint endpoint) {
         if (endpoint == null) return;
         try {

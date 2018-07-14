@@ -25,7 +25,7 @@ public class DumpRawByteListener implements RawByteListener, Closeable {
     
     @Override
     public void handle(byte... rawBytes) {
-        OutputStreams.writeQuietly(rawBytes, out);
+        OutputStreams.write(rawBytes, out);
     }
     
     @Override
