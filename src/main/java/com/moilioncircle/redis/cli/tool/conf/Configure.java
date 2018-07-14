@@ -84,7 +84,7 @@ public class Configure {
     /**
      * rmt --migrate
      */
-    private int migrateRetryTime = 1;
+    private int migratePipeSize = 2048;
     
     /**
      * retry time interval
@@ -180,12 +180,12 @@ public class Configure {
         this.retryTime = retryTime;
     }
     
-    public int getMigrateRetryTime() {
-        return migrateRetryTime;
+    public int getMigratePipeSize() {
+        return migratePipeSize;
     }
     
-    public void setMigrateRetryTime(int migrateRetryTime) {
-        this.migrateRetryTime = migrateRetryTime;
+    public void setMigratePipeSize(int migratePipeSize) {
+        this.migratePipeSize = migratePipeSize;
     }
     
     public int getRetryInterval() {
@@ -261,7 +261,7 @@ public class Configure {
     public static Configure bind(Properties properties) {
         Configure conf = new Configure(properties);
         conf.batchSize = getInt(conf, "batch_size", 128, true);
-        conf.migrateRetryTime = getInt(conf, "migrate_retry_time", 1, true);
+        conf.migratePipeSize = getInt(conf, "migrate_pipe_size", 2048, true);
         conf.dumpRdbVersion = getInt(conf, "dump_rdb_version", -1, true);
         conf.dumpReplace = getBool(conf, "dump_replace", true, true);
         conf.quote = (byte) getString(conf, "quote", "\"", true).charAt(0);
@@ -331,7 +331,7 @@ public class Configure {
                 ", rcvBuf=" + rcvBuf +
                 ", sndBuf=" + sndBuf +
                 ", retryTime=" + retryTime +
-                ", migrateRetryTime=" + migrateRetryTime +
+                ", migratePipeSize=" + migratePipeSize +
                 ", retryInterval=" + retryInterval +
                 ", bufferSize=" + bufferSize +
                 ", asyncCacheSize=" + asyncCacheSize +

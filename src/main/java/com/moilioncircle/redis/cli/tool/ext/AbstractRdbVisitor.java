@@ -55,6 +55,17 @@ import static java.util.stream.Collectors.toList;
  */
 public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
     
+    protected static final byte[] ZERO = "0".getBytes();
+    protected static final byte[] SET = "set".getBytes();
+    protected static final byte[] SADD = "sadd".getBytes();
+    protected static final byte[] ZADD = "zadd".getBytes();
+    protected static final byte[] RPUSH = "rpush".getBytes();
+    protected static final byte[] HMSET = "hmset".getBytes();
+    protected static final byte[] SELECT = "select".getBytes();
+    protected static final byte[] REPLACE = "replace".getBytes();
+    protected static final byte[] RESTORE = "restore".getBytes();
+    protected static final byte[] EXPIREAT = "expireat".getBytes();
+    
     // common
     protected Set<Long> db;
     protected Set<String> keys;
@@ -86,9 +97,10 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         this(replicator, configure, db, regexs, types);
         this.escape = escape;
         replicator.addEventListener((rep, event) -> {
-            if (!(event instanceof PreRdbSyncEvent)) return;
-            OutputStreams.closeQuietly(this.out);
-            this.out = OutputStreams.newBufferedOutputStream(output, configure.getBufferSize());
+            if (event instanceof PreRdbSyncEvent) {
+                OutputStreams.closeQuietly(this.out);
+                this.out = OutputStreams.newBufferedOutputStream(output, configure.getBufferSize());
+            }
         });
         replicator.addCloseListener(rep -> OutputStreams.closeQuietly(out));
     }
@@ -130,10 +142,6 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         out.write(configure.getQuote());
         escape.encode(bytes, out, configure);
         out.write(configure.getQuote());
-    }
-    
-    protected void emit(OutputStream out, byte[] command) throws IOException {
-        emit(out, command, new byte[0][]);
     }
     
     protected void emit(OutputStream out, byte[] command, byte[]... ary) throws IOException {

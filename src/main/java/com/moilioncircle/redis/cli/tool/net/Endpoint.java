@@ -1,10 +1,9 @@
 package com.moilioncircle.redis.cli.tool.net;
 
 import com.moilioncircle.redis.cli.tool.io.BufferedOutputStream;
-import com.moilioncircle.redis.cli.tool.util.CloseableThread;
+import com.moilioncircle.redis.cli.tool.util.OutputStreams;
 import com.moilioncircle.redis.cli.tool.util.Sockets;
 import com.moilioncircle.redis.replicator.Configuration;
-import com.moilioncircle.redis.replicator.cmd.RedisCodec;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.util.ByteBuilder;
 import com.moilioncircle.redis.replicator.util.Strings;
@@ -15,9 +14,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.function.Consumer;
 
 import static com.moilioncircle.redis.replicator.Constants.COLON;
 import static com.moilioncircle.redis.replicator.Constants.DOLLAR;
@@ -28,24 +24,22 @@ import static com.moilioncircle.redis.replicator.Constants.STAR;
 /**
  * @author Baoyi Chen
  */
-public class Endpoint implements Closeable, Runnable {
+public class Endpoint implements Closeable {
     
     private static final Logger logger = LoggerFactory.getLogger(Endpoint.class);
     
     private static final byte[] AUTH = "auth".getBytes();
     private static final byte[] PING = "ping".getBytes();
     private static final byte[] SELECT = "select".getBytes();
-    private static final byte[] RESTORE = "restore".getBytes();
-    private static final byte[] REPLACE = "replace".getBytes();
     
+    private int count = 0;
+    private final int pipe;
     private final Socket socket;
     private final OutputStream out;
     private final RedisInputStream in;
-    private final CloseableThread reader;
-    private final RedisCodec codec = new RedisCodec();
-    private final BlockingQueue<String> queue = new LinkedBlockingQueue<>();
     
-    public Endpoint(String host, int port, int db, Configuration conf) {
+    public Endpoint(String host, int port, int db, int pipe, Configuration conf) {
+        this.pipe = pipe;
         try {
             CliSocketFactory factory = new CliSocketFactory(conf);
             this.socket = factory.createSocket(host, port, conf.getConnectionTimeout());
@@ -55,101 +49,72 @@ public class Endpoint implements Closeable, Runnable {
             throw new AssertionError(e.getMessage(), e);
         }
         if (conf.getAuthPassword() != null) {
-            String r = syncAuth(conf.getAuthPassword());
+            String r = send(AUTH, conf.getAuthPassword().getBytes());
             if (r != null) throw new AssertionError(r);
         } else {
-            String r = syncPing();
+            String r = send(PING);
             if (r != null) throw new AssertionError(r);
         }
-        String r = syncSelect(db);
+        String r = send(SELECT, String.valueOf(db).getBytes());
         if (r != null) throw new AssertionError(r);
-        reader = CloseableThread.open("reply reader", this);
     }
     
-    @Override
-    public void run() {
+    public String send(byte[] command, byte[]... ary) {
         try {
-            String prefix;
-            if ((prefix = queue.poll()) != null) {
-                String r = parse();
-                if (r != null) logger.error("{} failed. reason : {}", prefix, r);
-            }
-        } catch (Throwable e) {
-            close();
-            throw new RuntimeException(e);
-        }
-    }
-    
-    private String syncAuth(String password) {
-        return syncSend(out -> {
-            try {
-                emit(out, AUTH, password.getBytes());
-            } catch (IOException e) {
-                throw new AssertionError(e.getMessage(), e);
-            }
-        });
-    }
-    
-    private String syncPing() {
-        return syncSend(out -> {
-            try {
-                emit(out, PING);
-            } catch (IOException e) {
-                throw new AssertionError(e.getMessage(), e);
-            }
-        });
-    }
-    
-    private String syncSelect(int db) {
-        return syncSend(out -> {
-            try {
-                emit(out, SELECT, String.valueOf(db).getBytes());
-            } catch (IOException e) {
-                throw new AssertionError(e.getMessage(), e);
-            }
-        });
-    }
-    
-    private String syncSend(Consumer<OutputStream> consumer) {
-        try {
-            consumer.accept(out);
+            emit(out, command, ary);
             out.flush();
             return parse();
         } catch (Throwable e) {
-            close();
             throw new AssertionError(e.getMessage(), e);
         }
     }
     
-    public void select(int db) {
+    public void batch(byte[] command, byte[]... args) {
         try {
-            emit(out, SELECT, String.valueOf(db).getBytes());
+            emit(out, command, args);
+            count++;
+            if (count == pipe) flush();
         } catch (Throwable e) {
-            close();
             throw new AssertionError(e.getMessage(), e);
         }
-        queue.offer("select " + db);
     }
     
-    public void restore(byte[] key, byte[] ttl, byte[] dump, boolean replace) {
-        try {
-            if (replace) {
-                emit(out, RESTORE, key, ttl, dump, REPLACE);
-            } else {
-                emit(out, RESTORE, key, ttl, dump);
+    public void flush() {
+        if (count > 0) {
+            OutputStreams.flush(out);
+            for (int i = 0; i < count; i++) {
+                String r = parseQuietly();
+                if (r != null) logger.error(r);
             }
-        } catch (Throwable e) {
-            close();
-            throw new AssertionError(e.getMessage(), e);
+            count = 0;
         }
-        queue.offer("restore " + Strings.toString(key));
     }
     
-    protected void emit(OutputStream out, byte[] command) throws IOException {
-        emit(out, command, new byte[0][]);
+    @Override
+    public void close() {
+        Sockets.closeQuietly(in);
+        Sockets.closeQuietly(out);
+        Sockets.closeQuietly(socket);
     }
     
-    protected void emit(OutputStream out, byte[] command, byte[]... ary) throws IOException {
+    public static void close(Endpoint endpoint) {
+        if (endpoint == null) return;
+        try {
+            endpoint.close();
+        } catch (Throwable txt) {
+            throw new RuntimeException(txt);
+        }
+    }
+    
+    public static void closeQuietly(Endpoint endpoint) {
+        if (endpoint == null) return;
+        try {
+            endpoint.close();
+        } catch (Throwable txt) {
+        }
+    }
+    
+    private void emit(OutputStream out, byte[] command, byte[]... ary) throws IOException {
         out.write(STAR);
         out.write(String.valueOf(ary.length + 1).getBytes());
         out.write('\r');
@@ -172,22 +137,21 @@ public class Endpoint implements Closeable, Runnable {
         }
     }
     
-    @Override
-    public void close() {
-        CloseableThread.close(reader);
-        Sockets.closeQuietly(in);
-        Sockets.closeQuietly(out);
-        Sockets.closeQuietly(socket);
-        queue.clear();
+    private String parseQuietly() {
+        try {
+            return parse();
+        } catch (Throwable e) {
+            throw new AssertionError(e.getMessage(), e);
+        }
     }
     
-    public String parse() throws IOException {
+    private String parse() throws IOException {
         while (true) {
             int c = in.read();
             switch (c) {
                 case DOLLAR:
                     // RESP Bulk Strings
-                    ByteBuilder builder = ByteBuilder.allocate(128);
+                    ByteBuilder builder = ByteBuilder.allocate(32);
                     while (true) {
                         while ((c = in.read()) != '\r') {
                             builder.put((byte) c);
@@ -215,7 +179,7 @@ public class Endpoint implements Closeable, Runnable {
                     return null;
                 case STAR:
                     // RESP Arrays
-                    builder = ByteBuilder.allocate(128);
+                    builder = ByteBuilder.allocate(32);
                     while (true) {
                         while ((c = in.read()) != '\r') {
                             builder.put((byte) c);
@@ -243,13 +207,13 @@ public class Endpoint implements Closeable, Runnable {
                     }
                 case MINUS:
                     // RESP Errors
-                    builder = ByteBuilder.allocate(128);
+                    builder = ByteBuilder.allocate(32);
                     while (true) {
                         while ((c = in.read()) != '\r') {
                             builder.put((byte) c);
                         }
                         if ((c = in.read()) == '\n') {
-                            return Strings.toString(codec.decode(builder.array()));
+                            return Strings.toString(builder.array());
                         } else {
                             builder.put((byte) c);
                         }
@@ -258,23 +222,6 @@ public class Endpoint implements Closeable, Runnable {
                     throw new AssertionError("expect [$,:,*,+,-] but: " + (char) c);
     
             }
-        }
-    }
-    
-    public static void close(Endpoint endpoint) {
-        if (endpoint == null) return;
-        try {
-            endpoint.close();
-        } catch (Throwable txt) {
-            throw new RuntimeException(txt);
-        }
-    }
-    
-    public static void closeQuietly(Endpoint endpoint) {
-        if (endpoint == null) return;
-        try {
-            endpoint.close();
-        } catch (Throwable t) {
         }
     }
 }

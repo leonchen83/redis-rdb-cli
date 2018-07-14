@@ -29,7 +29,7 @@ public class BufferedOutputStream extends OutputStream {
     }
     
     public void write(byte[] b, int off, int len) throws IOException {
-        while (len > buf.length - count) {
+        while (len > 0) {
             int min = Math.min(len, buf.length - count);
             System.arraycopy(b, off, buf, count, min);
             count += min;
@@ -40,16 +40,6 @@ public class BufferedOutputStream extends OutputStream {
             }
             off += min;
             len -= min;
-        }
-        
-        if (len > 0) {
-            System.arraycopy(b, off, buf, count, len);
-            count += len;
-            if (count == buf.length) {
-                out.write(buf, 0, count);
-                out.flush();
-                count = 0;
-            }
         }
     }
     

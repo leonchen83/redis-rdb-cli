@@ -30,17 +30,6 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
     private final int batch;
     private final boolean replace;
     
-    private static final byte[] ZERO = "0".getBytes();
-    private static final byte[] SET = "set".getBytes();
-    private static final byte[] SADD = "sadd".getBytes();
-    private static final byte[] ZADD = "zadd".getBytes();
-    private static final byte[] RPUSH = "rpush".getBytes();
-    private static final byte[] HMSET = "hmset".getBytes();
-    private static final byte[] SELECT = "select".getBytes();
-    private static final byte[] REPLACE = "replace".getBytes();
-    private static final byte[] RESTORE = "restore".getBytes();
-    private static final byte[] EXPIREAT = "expireat".getBytes();
-    
     public RespRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) {
         super(replicator, configure, out, db, regexs, types, Escape.RAW);
         this.batch = configure.getBatchSize();

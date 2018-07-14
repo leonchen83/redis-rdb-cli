@@ -24,11 +24,6 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     
     private final boolean replace;
     
-    private static final byte[] ZERO = "0".getBytes();
-    private static final byte[] SELECT = "select".getBytes();
-    private static final byte[] REPLACE = "replace".getBytes();
-    private static final byte[] RESTORE = "restore".getBytes();
-    
     public DumpRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) {
         super(replicator, configure, out, db, regexs, types, Escape.RAW);
         this.replace = replace;

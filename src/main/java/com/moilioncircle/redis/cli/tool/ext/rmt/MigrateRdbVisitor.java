@@ -13,6 +13,7 @@ import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.UncheckedIOException;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
+import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
@@ -26,8 +27,6 @@ import java.util.List;
  * @author Baoyi Chen
  */
 public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListener {
-    
-    private static final byte[] ZERO = "0".getBytes();
     
     private Endpoint endpoint;
     private final RedisURI uri;
@@ -47,14 +46,16 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
     public void onEvent(Replicator replicator, Event event) {
         if (event instanceof PreRdbSyncEvent) {
             Endpoint.closeQuietly(this.endpoint);
-            this.endpoint = new Endpoint(this.uri.getHost(), this.uri.getPort(), 0, configuration);
+            this.endpoint = new Endpoint(uri.getHost(), uri.getPort(), 0, configure.getMigratePipeSize(), configuration);
+        } else if (event instanceof PostRdbSyncEvent) {
+            this.endpoint.flush();
         }
     }
     
     @Override
     public DB applySelectDB(RedisInputStream in, int version) throws IOException {
         DB db = super.applySelectDB(in, version);
-        endpoint.select((int) db.getDbNumber());
+        endpoint.batch(SELECT, String.valueOf(db.getDbNumber()).getBytes());
         return db;
     }
     
@@ -76,7 +77,11 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
                 super.doApplyString(in, version, key, contains, type, context);
                 replicator.removeRawByteListener(listener);
             }
-            endpoint.restore(key, ex, o.toByteArray(), replace);
+            if (replace) {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray(), REPLACE);
+            } else {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray());
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e.getMessage(), e);
         }
@@ -101,7 +106,11 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
                 super.doApplyList(in, version, key, contains, type, context);
                 replicator.removeRawByteListener(listener);
             }
-            endpoint.restore(key, ex, o.toByteArray(), replace);
+            if (replace) {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray(), REPLACE);
+            } else {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray());
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e.getMessage(), e);
         }
@@ -126,7 +135,11 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
                 super.doApplySet(in, version, key, contains, type, context);
                 replicator.removeRawByteListener(listener);
             }
-            endpoint.restore(key, ex, o.toByteArray(), replace);
+            if (replace) {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray(), REPLACE);
+            } else {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray());
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e.getMessage(), e);
         }
@@ -151,7 +164,11 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
                 super.doApplyZSet(in, version, key, contains, type, context);
                 replicator.removeRawByteListener(listener);
             }
-            endpoint.restore(key, ex, o.toByteArray(), replace);
+            if (replace) {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray(), REPLACE);
+            } else {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray());
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e.getMessage(), e);
         }
@@ -176,7 +193,11 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
                 super.doApplyZSet2(in, version, key, contains, type, context);
                 replicator.removeRawByteListener(listener);
             }
-            endpoint.restore(key, ex, o.toByteArray(), replace);
+            if (replace) {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray(), REPLACE);
+            } else {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray());
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e.getMessage(), e);
         }
@@ -201,7 +222,11 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
                 super.doApplyHash(in, version, key, contains, type, context);
                 replicator.removeRawByteListener(listener);
             }
-            endpoint.restore(key, ex, o.toByteArray(), replace);
+            if (replace) {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray(), REPLACE);
+            } else {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray());
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e.getMessage(), e);
         }
@@ -226,7 +251,11 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
                 super.doApplyHashZipMap(in, version, key, contains, type, context);
                 replicator.removeRawByteListener(listener);
             }
-            endpoint.restore(key, ex, o.toByteArray(), replace);
+            if (replace) {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray(), REPLACE);
+            } else {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray());
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e.getMessage(), e);
         }
@@ -251,7 +280,11 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
                 super.doApplyListZipList(in, version, key, contains, type, context);
                 replicator.removeRawByteListener(listener);
             }
-            endpoint.restore(key, ex, o.toByteArray(), replace);
+            if (replace) {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray(), REPLACE);
+            } else {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray());
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e.getMessage(), e);
         }
@@ -276,7 +309,11 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
                 super.doApplySetIntSet(in, version, key, contains, type, context);
                 replicator.removeRawByteListener(listener);
             }
-            endpoint.restore(key, ex, o.toByteArray(), replace);
+            if (replace) {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray(), REPLACE);
+            } else {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray());
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e.getMessage(), e);
         }
@@ -301,7 +338,11 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
                 super.doApplyZSetZipList(in, version, key, contains, type, context);
                 replicator.removeRawByteListener(listener);
             }
-            endpoint.restore(key, ex, o.toByteArray(), replace);
+            if (replace) {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray(), REPLACE);
+            } else {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray());
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e.getMessage(), e);
         }
@@ -326,7 +367,11 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
                 super.doApplyHashZipList(in, version, key, contains, type, context);
                 replicator.removeRawByteListener(listener);
             }
-            endpoint.restore(key, ex, o.toByteArray(), replace);
+            if (replace) {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray(), REPLACE);
+            } else {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray());
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e.getMessage(), e);
         }
@@ -351,7 +396,11 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
                 super.doApplyListQuickList(in, version, key, contains, type, context);
                 replicator.removeRawByteListener(listener);
             }
-            endpoint.restore(key, ex, o.toByteArray(), replace);
+            if (replace) {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray(), REPLACE);
+            } else {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray());
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e.getMessage(), e);
         }
@@ -376,7 +425,11 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
                 super.doApplyModule(in, version, key, contains, type, context);
                 replicator.removeRawByteListener(listener);
             }
-            endpoint.restore(key, ex, o.toByteArray(), replace);
+            if (replace) {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray(), REPLACE);
+            } else {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray());
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e.getMessage(), e);
         }
@@ -401,7 +454,11 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
                 super.doApplyModule2(in, version, key, contains, type, context);
                 replicator.removeRawByteListener(listener);
             }
-            endpoint.restore(key, ex, o.toByteArray(), replace);
+            if (replace) {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray(), REPLACE);
+            } else {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray());
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e.getMessage(), e);
         }
@@ -426,7 +483,11 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
                 super.doApplyStreamListPacks(in, version, key, contains, type, context);
                 replicator.removeRawByteListener(listener);
             }
-            endpoint.restore(key, ex, o.toByteArray(), replace);
+            if (replace) {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray(), REPLACE);
+            } else {
+                endpoint.batch(RESTORE, key, ex, o.toByteArray());
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e.getMessage(), e);
         }
