@@ -7,7 +7,6 @@ import com.moilioncircle.redis.cli.tool.util.CloseableThread;
 import com.moilioncircle.redis.cli.tool.util.OutputStreams;
 import com.moilioncircle.redis.cli.tool.util.Sockets;
 import com.moilioncircle.redis.replicator.Configuration;
-import com.moilioncircle.redis.replicator.UncheckedIOException;
 import com.moilioncircle.redis.replicator.cmd.RedisCodec;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.util.ByteBuilder;
@@ -124,7 +123,7 @@ public class Endpoint implements Closeable, Runnable {
             consumer.accept(out);
             out.flush();
             return parse();
-        } catch (IOException | UncheckedIOException e) {
+        } catch (Throwable e) {
             close();
             throw new AssertionError(e.getMessage(), e);
         }
@@ -137,7 +136,7 @@ public class Endpoint implements Closeable, Runnable {
             out.write(' ');
             out.write(String.valueOf(db).getBytes());
             out.write('\n');
-        } catch (IOException e) {
+        } catch (Throwable e) {
             close();
             throw new AssertionError(e.getMessage(), e);
         }
@@ -148,7 +147,7 @@ public class Endpoint implements Closeable, Runnable {
         try {
             OutputStreams.write((byte) ' ', out);
             consumer.accept(out);
-        } catch (UncheckedIOException e) {
+        } catch (Throwable e) {
             close();
             throw new AssertionError(e.getMessage(), e);
         }
