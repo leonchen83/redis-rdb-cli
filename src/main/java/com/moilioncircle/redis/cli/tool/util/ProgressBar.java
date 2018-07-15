@@ -4,6 +4,7 @@ import java.io.Closeable;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.moilioncircle.redis.cli.tool.util.Strings.pretty;
+import static com.moilioncircle.redis.cli.tool.util.Strings.lappend;;
 
 /**
  * @author Baoyi Chen
@@ -76,13 +77,7 @@ public class ProgressBar implements Closeable {
             }
         } else {
             builder.append('/').append(pretty(total)).append('|');
-            if (next < 10) {
-                builder.append(' ').append(' ').append(next).append('%');
-            } else if (next < 100) {
-                builder.append(' ').append(next).append('%');
-            } else {
-                builder.append(next).append('%');
-            }
+            builder.append(lappend(next, 3, ' ')).append('%');
             if (file != null) {
                 builder.append('|');
                 builder.append(file);

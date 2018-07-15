@@ -36,6 +36,17 @@
             "mainClass": "com.moilioncircle.redis.cli.tool.Rmt",
             "projectName": "redis-cli-tool",
             "args": ""
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Strings<redis-cli-tool>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopOnEntry": false,
+            "mainClass": "com.moilioncircle.redis.cli.tool.util.Strings",
+            "projectName": "redis-cli-tool",
+            "args": ""
         }
     ]
 }
