@@ -334,7 +334,6 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
     }
 
     @Override
-    @SuppressWarnings("resource")
     public Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
         delimiter(out);

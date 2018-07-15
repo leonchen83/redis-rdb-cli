@@ -517,7 +517,6 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
     }
     
     @Override
-    @SuppressWarnings("resource")
     public Event applyStreamListPacks(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         try {
             BaseRdbParser parser = new BaseRdbParser(in);
