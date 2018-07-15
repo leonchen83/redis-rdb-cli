@@ -33,3 +33,5 @@ hs_err_pid*
 
 /target
 
+# Vscode
+/.vscode
