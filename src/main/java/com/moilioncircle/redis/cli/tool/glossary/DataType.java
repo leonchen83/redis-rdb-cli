@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018-2019 Baoyi Chen
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.moilioncircle.redis.cli.tool.glossary;
 
 import java.util.ArrayList;
@@ -9,7 +25,7 @@ import static java.util.Collections.singletonList;
  * @author Baoyi Chen
  */
 public enum DataType {
-
+    
     ALL("all"),
     SET("set"),
     LIST("list"),
@@ -18,30 +34,30 @@ public enum DataType {
     MODULE("module"),
     STREAM("stream"),
     SORTEDSET("sortedset");
-
+    
     private String value;
-
+    
     DataType(String value) {
         this.value = value;
     }
-
+    
     public String getValue() {
         return value;
     }
-
+    
     public static List<DataType> parse(List<String> list) {
         if (list.isEmpty()) return singletonList(ALL);
         List<DataType> r = new ArrayList<>(list.size());
         for (String name : list) r.add(DataType.parse(name));
         return r;
     }
-
+    
     public static boolean contains(List<DataType> list, int rdb) {
         if (list.isEmpty()) return true;
         for (DataType type : list) if (type.contains(rdb)) return true;
         return false;
     }
-
+    
     public static DataType parse(String type) {
         switch (type) {
             case "all":
@@ -62,10 +78,10 @@ public enum DataType {
                 return SORTEDSET;
             default:
                 throw new AssertionError("Unsupported data type '" + type + "'");
-
+            
         }
     }
-
+    
     public static DataType parse(int type) {
         switch (type) {
             case 0:
@@ -94,7 +110,7 @@ public enum DataType {
                 throw new AssertionError(type);
         }
     }
-
+    
     public boolean contains(int type) {
         switch (this) {
             case ALL:
@@ -116,7 +132,7 @@ public enum DataType {
         }
         return false;
     }
-
+    
     public static String type(int type) {
         switch (type) {
             case 0:

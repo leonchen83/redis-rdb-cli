@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018-2019 Baoyi Chen
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.moilioncircle.redis.cli.tool.cmd;
 
 import com.moilioncircle.redis.replicator.FileType;
@@ -17,16 +33,16 @@ import static com.moilioncircle.redis.cli.tool.cmd.Version.VERSION;
  * @author Baoyi Chen
  */
 public abstract class AbstractCommand implements Command {
-
+    
     protected Options options = new Options();
-
+    
     protected abstract void doExecute(CommandLine line) throws Exception;
-
+    
     @Override
     public void addOption(Option option) {
         options.addOption(option);
     }
-
+    
     @Override
     public void execute(String[] args) throws Exception {
         CommandLineParser parser = new DefaultParser();
@@ -41,7 +57,7 @@ public abstract class AbstractCommand implements Command {
             }
         }
     }
-
+    
     protected String normalize(String source, FileType type, String message) throws URISyntaxException {
         RedisURI uri;
         try {
@@ -55,16 +71,16 @@ public abstract class AbstractCommand implements Command {
         }
         throw new AssertionError(message);
     }
-
+    
     protected void write(String message) throws Exception {
         System.out.print(message);
         System.out.flush();
     }
-
+    
     protected void writeLine(String message) throws Exception {
         System.out.println(message);
     }
-
+    
     protected String version() {
         StringBuilder builder = new StringBuilder();
         builder.append("redis cli tool: ").append(VERSION).append("\n");

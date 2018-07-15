@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Leon Chen
+ * Copyright 2018-2019 Baoyi Chen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,7 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * @author Leon Chen
- * @since 1.0.0
+ * @author Baoyi Chen
  */
 @SuppressWarnings("unchecked")
 public class Tuple5<T1, T2, T3, T4, T5> implements Iterable<Object> {

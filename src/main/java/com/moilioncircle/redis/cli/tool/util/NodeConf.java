@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018-2019 Baoyi Chen
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.moilioncircle.redis.cli.tool.util;
 
 
@@ -51,7 +67,7 @@ public class NodeConf {
                     int aIdx = hostAndPort.indexOf("@");
                     hostAndPort.substring(0, cIdx); // ip
                     parseInt(hostAndPort.substring(aIdx + 1)); // port
-    
+                    
                     boolean master = false;
                     for (String role : args.get(2).split(",")) {
                         switch (role) {
@@ -83,22 +99,22 @@ public class NodeConf {
                                 // pass
                         }
                     }
-    
+                    
                     if (!map.containsKey(name) && master) {
                         CRCOutputStream out = OutputStreams.newCRCOutputStream(Paths.get(path, name + ".rdb").toFile(), configure.getBufferSize());
                         map.put(name, out);
                         set.add(out);
                     }
-    
+                    
                     if (!args.get(3).equals("-")) {
                         args.get(3); // slave
                         // pass
                     }
-    
+                    
                     // args.get(4); pingTime
                     // args.get(5); pongTime
                     // args.get(6); configEpoch
-    
+                    
                     for (int i = 8; i < args.size(); i++) {
                         int st, ed;
                         String arg = args.get(i);

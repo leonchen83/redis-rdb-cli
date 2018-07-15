@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018-2019 Baoyi Chen
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.moilioncircle.redis.cli.tool.ext.rct;
 
 import com.moilioncircle.redis.cli.tool.conf.Configure;
@@ -25,11 +41,11 @@ import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
  * @author Baoyi Chen
  */
 public class KeyValRdbVisitor extends AbstractRdbVisitor {
-
+    
     public KeyValRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escape escape) {
         super(replicator, configure, out, db, regexs, types, escape);
     }
-
+    
     @Override
     public Event doApplyString(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
@@ -40,7 +56,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         out.write('\n');
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     @Override
     public Event doApplyList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
@@ -56,7 +72,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         }
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     @Override
     public Event doApplySet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
@@ -72,7 +88,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         }
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     @Override
     public Event doApplyZSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
@@ -91,7 +107,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         }
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     @Override
     public Event doApplyZSet2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
@@ -110,7 +126,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         }
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     @Override
     public Event doApplyHash(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
@@ -129,7 +145,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         }
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     @Override
     public Event doApplyHashZipMap(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
@@ -164,7 +180,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
             quote(value, out);
         }
     }
-
+    
     @Override
     public Event doApplyListZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
@@ -186,7 +202,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         }
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     @Override
     public Event doApplySetIntSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
@@ -216,7 +232,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         }
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     @Override
     public Event doApplyZSetZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
@@ -243,7 +259,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         }
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     @Override
     public Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
@@ -270,7 +286,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         }
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     @Override
     public Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
@@ -296,7 +312,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         }
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     @Override
     public Event doApplyModule(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
@@ -312,7 +328,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         out.write(configure.getQuote());
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     @Override
     public Event doApplyModule2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
@@ -328,11 +344,11 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         out.write('\n');
         return context.valueOf(new DummyKeyValuePair());
     }
-
+    
     protected ModuleParser<? extends Module> lookupModuleParser(String moduleName, int moduleVersion) {
         return replicator.getModuleParser(moduleName, moduleVersion);
     }
-
+    
     @Override
     public Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);

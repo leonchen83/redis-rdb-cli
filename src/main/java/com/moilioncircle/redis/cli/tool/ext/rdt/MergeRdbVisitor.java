@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018-2019 Baoyi Chen
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.moilioncircle.redis.cli.tool.ext.rdt;
 
 import com.moilioncircle.redis.cli.tool.conf.Configure;
@@ -19,11 +35,11 @@ import java.util.function.Supplier;
  * @author Baoyi Chen
  */
 public class MergeRdbVisitor extends AbstractRdbVisitor {
-
+    
     public MergeRdbVisitor(Replicator replicator, Configure configure, List<Long> db, List<String> regexs, List<DataType> types, Supplier<OutputStream> supplier) {
         super(replicator, configure, db, regexs, types, supplier);
     }
-
+    
     @Override
     public int applyVersion(RedisInputStream in) throws IOException {
         listener.setGuard(Guard.PASS);
@@ -33,7 +49,7 @@ public class MergeRdbVisitor extends AbstractRdbVisitor {
             listener.setGuard(Guard.SAVE);
         }
     }
-
+    
     @Override
     public Event applyAux(RedisInputStream in, int version) throws IOException {
         listener.setGuard(Guard.PASS);
@@ -43,7 +59,7 @@ public class MergeRdbVisitor extends AbstractRdbVisitor {
             listener.setGuard(Guard.SAVE);
         }
     }
-
+    
     @Override
     public Event applyModuleAux(RedisInputStream in, int version) throws IOException {
         listener.setGuard(Guard.PASS);
@@ -53,7 +69,7 @@ public class MergeRdbVisitor extends AbstractRdbVisitor {
             listener.setGuard(Guard.SAVE);
         }
     }
-
+    
     @Override
     public DB applySelectDB(RedisInputStream in, int version) throws IOException {
         listener.setGuard(Guard.DRAIN);
@@ -63,7 +79,7 @@ public class MergeRdbVisitor extends AbstractRdbVisitor {
             listener.setGuard(Guard.SAVE);
         }
     }
-
+    
     @Override
     public DB applyResizeDB(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         listener.setGuard(Guard.DRAIN);

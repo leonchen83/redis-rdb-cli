@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018-2019 Baoyi Chen
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.moilioncircle.redis.cli.tool.cmd;
 
 import com.moilioncircle.redis.cli.tool.conf.Configure;
@@ -20,7 +36,7 @@ import static com.moilioncircle.redis.cli.tool.glossary.DataType.parse;
  * @author Baoyi Chen
  */
 public class RmtCommand extends AbstractCommand {
-
+    
     private static final Option HELP = Option.builder("h").longOpt("help").required(false).hasArg(false).desc("rmt usage.").build();
     private static final Option VERSION = Option.builder("v").longOpt("version").required(false).hasArg(false).desc("rmt version.").build();
     private static final Option SOURCE = Option.builder("s").longOpt("source").required(false).hasArg().argName("source").type(String.class).desc("<source> eg:\n /path/to/dump.rdb redis://host:port?authPassword=foobar redis:///path/to/dump.rdb").build();
@@ -32,7 +48,7 @@ public class RmtCommand extends AbstractCommand {
     
     private static final String HEADER = "rmt -s <source> -m <uri> [-d <num num...>] [-k <regex regex...>] [-t <type type...>] [-r]";
     private static final String EXAMPLE = "\nexamples:\n rmt -s redis://120.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0\n rmt -s ./dump.rdb -m redis://127.0.0.1:6380 -t string -r\n";
-
+    
     private RmtCommand() {
         addOption(HELP);
         addOption(VERSION);
@@ -43,7 +59,7 @@ public class RmtCommand extends AbstractCommand {
         addOption(KEY);
         addOption(TYPE);
     }
-
+    
     @Override
     protected void doExecute(CommandLine line) throws Exception {
         if (line.hasOption("help")) {
@@ -53,30 +69,30 @@ public class RmtCommand extends AbstractCommand {
             writeLine(version());
         } else {
             StringBuilder sb = new StringBuilder();
-
+            
             if (!line.hasOption("source")) {
                 sb.append("s ");
             }
-
+            
             if (!line.hasOption("migrate")) {
                 sb.append("m ");
             }
-
+            
             if (sb.length() > 0) {
                 writeLine("Missing required options: " + sb.toString() + ". Try `rmt -h` for more information.");
                 return;
             }
-
+            
             String migrate = line.getOption("migrate");
             String source = line.getOption("source");
-
+            
             List<Long> db = line.getOptions("db");
             List<String> type = line.getOptions("type");
             boolean replace = line.hasOption("replace");
             List<String> regexs = line.getOptions("key");
-
+            
             source = normalize(source, FileType.RDB, "Invalid options: s. Try `rmt -h` for more information.");
-
+            
             RedisURI uri = new RedisURI(migrate);
             if (uri.getFileType() != null) {
                 writeLine("Invalid options: m. Try `rmt -h` for more information.");
@@ -97,12 +113,12 @@ public class RmtCommand extends AbstractCommand {
             }
         }
     }
-
+    
     @Override
     public String name() {
         return "rmt";
     }
-
+    
     public static void run(String[] args) throws Exception {
         RmtCommand command = new RmtCommand();
         command.execute(args);

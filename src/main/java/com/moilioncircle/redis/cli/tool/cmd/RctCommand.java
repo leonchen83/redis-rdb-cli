@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018-2019 Baoyi Chen
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.moilioncircle.redis.cli.tool.cmd;
 
 import com.moilioncircle.redis.cli.tool.conf.Configure;
@@ -69,24 +85,24 @@ public class RctCommand extends AbstractCommand {
             if (!line.hasOption("format")) {
                 sb.append("f ");
             }
-    
+            
             if (!line.hasOption("source")) {
                 sb.append("s ");
             }
-    
+            
             if (!line.hasOption("out")) {
                 sb.append("o ");
             }
-    
+            
             if (sb.length() > 0) {
                 writeLine("Missing required options: " + sb.toString() + ", Try `rct -h` for more information.");
                 return;
             }
-    
+            
             String source = line.getOption("source");
             File output = line.getOption("out");
             String format = line.getOption("format");
-    
+            
             List<Long> db = line.getOptions("db");
             Long bytes = line.getOption("bytes");
             Long largest = line.getOption("largest");
@@ -94,9 +110,9 @@ public class RctCommand extends AbstractCommand {
             List<String> type = line.getOptions("type");
             boolean replace = line.hasOption("replace");
             List<String> regexs = line.getOptions("key");
-    
+            
             source = normalize(source, FileType.RDB, "Invalid options: s, Try `rct -h` for more information.");
-    
+            
             try (ProgressBar bar = new ProgressBar(-1)) {
                 Configure configure = Configure.bind();
                 Replicator r = new CliRedisReplicator(source, configure);

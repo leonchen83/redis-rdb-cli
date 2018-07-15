@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018-2019 Baoyi Chen
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.moilioncircle.redis.cli.tool.ext.rdt;
 
 import com.moilioncircle.redis.cli.tool.conf.Configure;
@@ -23,7 +39,7 @@ import java.util.function.Supplier;
  * @author Baoyi Chen
  */
 public class SplitRdbVisitor extends AbstractRdbVisitor {
-
+    
     public SplitRdbVisitor(Replicator replicator, Configure configure, List<Long> db, List<String> regexs, List<DataType> types, Supplier<OutputStream> supplier) {
         super(replicator, configure, db, regexs, types, supplier);
         this.replicator.addEventListener((rep, event) -> {
@@ -37,12 +53,12 @@ public class SplitRdbVisitor extends AbstractRdbVisitor {
             }
         });
     }
-
+    
     private void shard(byte[] key) {
         FilesOutputStream out = listener.getOutputStream();
         out.shard(key);
     }
-
+    
     @Override
     public int applyVersion(RedisInputStream in) throws IOException {
         listener.setGuard(Guard.DRAIN);
@@ -52,7 +68,7 @@ public class SplitRdbVisitor extends AbstractRdbVisitor {
             listener.setGuard(Guard.SAVE);
         }
     }
-
+    
     @Override
     public Event applyAux(RedisInputStream in, int version) throws IOException {
         listener.setGuard(Guard.DRAIN);
@@ -62,7 +78,7 @@ public class SplitRdbVisitor extends AbstractRdbVisitor {
             listener.setGuard(Guard.SAVE);
         }
     }
-
+    
     @Override
     public Event applyModuleAux(RedisInputStream in, int version) throws IOException {
         listener.setGuard(Guard.DRAIN);
@@ -72,7 +88,7 @@ public class SplitRdbVisitor extends AbstractRdbVisitor {
             listener.setGuard(Guard.SAVE);
         }
     }
-
+    
     @Override
     public DB applySelectDB(RedisInputStream in, int version) throws IOException {
         listener.setGuard(Guard.DRAIN);
@@ -82,7 +98,7 @@ public class SplitRdbVisitor extends AbstractRdbVisitor {
             listener.setGuard(Guard.SAVE);
         }
     }
-
+    
     @Override
     public DB applyResizeDB(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         listener.setGuard(Guard.DRAIN);
@@ -92,95 +108,95 @@ public class SplitRdbVisitor extends AbstractRdbVisitor {
             listener.setGuard(Guard.SAVE);
         }
     }
-
+    
     @Override
     protected Event doApplyString(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         shard(key);
         return super.doApplyString(in, version, key, contains, type, context);
     }
-
+    
     @Override
     protected Event doApplyList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         shard(key);
         return super.doApplyList(in, version, key, contains, type, context);
     }
-
+    
     @Override
     protected Event doApplySet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         shard(key);
         return super.doApplySet(in, version, key, contains, type, context);
     }
-
+    
     @Override
     protected Event doApplyZSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         shard(key);
         return super.doApplyZSet(in, version, key, contains, type, context);
     }
-
+    
     @Override
     protected Event doApplyZSet2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         shard(key);
         return super.doApplyZSet2(in, version, key, contains, type, context);
     }
-
+    
     @Override
     protected Event doApplyHash(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         shard(key);
         return super.doApplyHash(in, version, key, contains, type, context);
     }
-
+    
     @Override
     protected Event doApplyHashZipMap(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         shard(key);
         return super.doApplyHashZipMap(in, version, key, contains, type, context);
     }
-
+    
     @Override
     protected Event doApplyListZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         shard(key);
         return super.doApplyListZipList(in, version, key, contains, type, context);
     }
-
+    
     @Override
     protected Event doApplySetIntSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         shard(key);
         return super.doApplySetIntSet(in, version, key, contains, type, context);
     }
-
+    
     @Override
     protected Event doApplyZSetZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         shard(key);
         return super.doApplyZSetZipList(in, version, key, contains, type, context);
     }
-
+    
     @Override
     protected Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         shard(key);
         return super.doApplyHashZipList(in, version, key, contains, type, context);
     }
-
+    
     @Override
     protected Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         shard(key);
         return super.doApplyListQuickList(in, version, key, contains, type, context);
     }
-
+    
     @Override
     protected Event doApplyModule(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         shard(key);
         return super.doApplyModule(in, version, key, contains, type, context);
     }
-
+    
     @Override
     protected Event doApplyModule2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         shard(key);
         return super.doApplyModule2(in, version, key, contains, type, context);
     }
-
+    
     @Override
     protected Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         shard(key);
         return super.doApplyStreamListPacks(in, version, key, contains, type, context);
     }
-
+    
 }
