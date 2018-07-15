@@ -1,0 +1,41 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Rct<redis-cli-tool>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopOnEntry": false,
+            "mainClass": "com.moilioncircle.redis.cli.tool.Rct",
+            "projectName": "redis-cli-tool",
+            "args": "-h"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Rdt<redis-cli-tool>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopOnEntry": false,
+            "mainClass": "com.moilioncircle.redis.cli.tool.Rdt",
+            "projectName": "redis-cli-tool",
+            "args": ""
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Rmt<redis-cli-tool>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopOnEntry": false,
+            "mainClass": "com.moilioncircle.redis.cli.tool.Rmt",
+            "projectName": "redis-cli-tool",
+            "args": ""
+        }
+    ]
+}

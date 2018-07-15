@@ -744,10 +744,6 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             return new long[]{t * sig, 1L};
         }
 
-        public static void main(String[] args) {
-            System.out.println(Math.pow(10, 0));
-        }
-
         public long malloc(long size) {
             int idx = Arrays.binarySearch(JEMALLOC_SIZE, size);
             if (idx < 0) idx = -idx - 1;
