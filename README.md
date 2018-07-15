@@ -146,3 +146,12 @@ examples:
  rdt -s redis://127.0.0.1:6379 -c ./nodes.conf -o /path/to/folder -d 0
 
 ```
+
+# Redis mass insertion
+
+```java  
+
+rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof
+cat /path/to/dump.aof | /redis/src/redis-cli -p 6379 --pipe
+
+```

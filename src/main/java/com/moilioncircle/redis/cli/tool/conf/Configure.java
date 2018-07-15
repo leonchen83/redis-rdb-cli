@@ -47,11 +47,6 @@ public class Configure {
     private int batchSize = 128;
     
     /**
-     * rct --format dump replace
-     */
-    private boolean dumpReplace = true;
-    
-    /**
      * rct quote
      */
     private byte quote = '"';
@@ -122,14 +117,6 @@ public class Configure {
     
     public void setBatchSize(int batchSize) {
         this.batchSize = batchSize;
-    }
-    
-    public boolean isDumpReplace() {
-        return dumpReplace;
-    }
-    
-    public void setDumpReplace(boolean dumpReplace) {
-        this.dumpReplace = dumpReplace;
     }
     
     public byte getQuote() {
@@ -263,7 +250,6 @@ public class Configure {
         conf.batchSize = getInt(conf, "batch_size", 128, true);
         conf.migrateBatchSize = getInt(conf, "migrate_batch_size", 2048, true);
         conf.dumpRdbVersion = getInt(conf, "dump_rdb_version", -1, true);
-        conf.dumpReplace = getBool(conf, "dump_replace", true, true);
         conf.quote = (byte) getString(conf, "quote", "\"", true).charAt(0);
         conf.delimiter = (byte) getString(conf, "delimiter", ",", true).charAt(0);
         conf.retryTime = getInt(conf, "retry_time", 5, true);
@@ -324,7 +310,6 @@ public class Configure {
     public String toString() {
         return "Configure{" +
                 "batchSize=" + batchSize +
-                ", dumpReplace=" + dumpReplace +
                 ", quote=" + quote +
                 ", delimiter=" + delimiter +
                 ", timeout=" + timeout +
