@@ -27,17 +27,17 @@ import static com.moilioncircle.redis.cli.tool.util.Strings.pretty;
  */
 public class ProgressBar implements Closeable {
 
-    private final long init;
+    private final long ctime;
     private final long total;
     private volatile boolean bit;
     private volatile String file;
     private volatile double percentage;
     private AtomicLong num = new AtomicLong();
-    private volatile long access = System.currentTimeMillis();
+    private volatile long atime = System.currentTimeMillis();
 
     public ProgressBar(long total) {
         this.total = total;
-        this.init = System.currentTimeMillis();
+        this.ctime = System.currentTimeMillis();
     }
 
     public void react(long num) {
@@ -70,13 +70,13 @@ public class ProgressBar implements Closeable {
 
     private void show(int prev, int next, int len, long num, String file) {
         long now = System.currentTimeMillis();
-        long elapsed = now - access;
+        long elapsed = now - atime;
 
         if (elapsed < 1000 && prev == next &&
                 (file == null || file.equals(this.file))) return;
-        int speed = (int) ((double) num / (now - init) * 1000);
+        int speed = (int) ((double) num / (now - ctime) * 1000);
         this.file = file;
-        this.access = now;
+        this.atime = now;
         StringBuilder builder = new StringBuilder();
         if (bit) {
             builder.append('/');
