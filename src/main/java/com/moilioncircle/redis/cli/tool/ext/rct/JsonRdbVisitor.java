@@ -423,7 +423,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         BaseRdbParser parser = new BaseRdbParser(in);
         boolean flag = true;
         long len = parser.rdbLoadLen().len;
-        for (int i = 0; i < len; i++) {
+        for (long i = 0; i < len; i++) {
             RedisInputStream stream = new RedisInputStream(parser.rdbGenericLoadStringObject(RDB_LOAD_NONE));
             
             BaseRdbParser.LenHelper.zlbytes(stream); // zlbytes

@@ -293,7 +293,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         delimiter(out);
         BaseRdbParser parser = new BaseRdbParser(in);
         long len = parser.rdbLoadLen().len;
-        for (int i = 0; i < len; i++) {
+        for (long i = 0; i < len; i++) {
             RedisInputStream stream = new RedisInputStream(parser.rdbGenericLoadStringObject(RDB_LOAD_NONE));
             BaseRdbParser.LenHelper.zlbytes(stream); // zlbytes
             BaseRdbParser.LenHelper.zltail(stream); // zltail

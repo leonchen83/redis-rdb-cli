@@ -39,7 +39,7 @@ import java.util.function.Supplier;
  * @author Baoyi Chen
  */
 public class BackupRdbVisitor extends AbstractRdbVisitor {
-    
+
     public BackupRdbVisitor(Replicator replicator, Configure configure, List<Long> db, List<String> regexs, List<DataType> types, Supplier<OutputStream> supplier) {
         super(replicator, configure, db, regexs, types, supplier);
         this.replicator.addEventListener((rep, event) -> {
@@ -48,13 +48,13 @@ public class BackupRdbVisitor extends AbstractRdbVisitor {
             }
             if (event instanceof PostRdbSyncEvent) {
                 CRCOutputStream out = listener.getOutputStream();
-                OutputStreams.writeQuietly(0xFF, out);
-                OutputStreams.writeQuietly(out.getCRC64(), out);
-                OutputStreams.closeQuietly(out);
+                OutputStreams.write(0xFF, out);
+                OutputStreams.write(out.getCRC64(), out);
+                OutputStreams.close(out);
             }
         });
     }
-    
+
     @Override
     public int applyVersion(RedisInputStream in) throws IOException {
         listener.setGuard(Guard.DRAIN);
@@ -64,7 +64,7 @@ public class BackupRdbVisitor extends AbstractRdbVisitor {
             listener.setGuard(Guard.SAVE);
         }
     }
-    
+
     @Override
     public Event applyAux(RedisInputStream in, int version) throws IOException {
         listener.setGuard(Guard.DRAIN);
@@ -74,7 +74,7 @@ public class BackupRdbVisitor extends AbstractRdbVisitor {
             listener.setGuard(Guard.SAVE);
         }
     }
-    
+
     @Override
     public Event applyModuleAux(RedisInputStream in, int version) throws IOException {
         listener.setGuard(Guard.DRAIN);
@@ -84,7 +84,7 @@ public class BackupRdbVisitor extends AbstractRdbVisitor {
             listener.setGuard(Guard.SAVE);
         }
     }
-    
+
     @Override
     public DB applySelectDB(RedisInputStream in, int version) throws IOException {
         listener.setGuard(Guard.DRAIN);
@@ -94,7 +94,7 @@ public class BackupRdbVisitor extends AbstractRdbVisitor {
             listener.setGuard(Guard.SAVE);
         }
     }
-    
+
     @Override
     public DB applyResizeDB(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         listener.setGuard(Guard.DRAIN);

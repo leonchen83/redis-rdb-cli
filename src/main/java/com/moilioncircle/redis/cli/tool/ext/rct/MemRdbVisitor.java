@@ -461,7 +461,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         long val = 0;
         long max = 0;
         long length = 0;
-        for (int i = 0; i < len; i++) {
+        for (long i = 0; i < len; i++) {
             ByteArray ary = parser.rdbGenericLoadStringObject(RDB_LOAD_NONE);
             RedisInputStream stream = new RedisInputStream(ary);
             val += ary.length();

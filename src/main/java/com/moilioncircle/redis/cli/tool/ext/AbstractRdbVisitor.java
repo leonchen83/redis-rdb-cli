@@ -469,7 +469,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
                 if (listener != null) listener.setGuard(PASS);
                 SkipRdbParser skip = new SkipRdbParser(in);
                 long len = skip.rdbLoadLen().len;
-                for (int i = 0; i < len; i++) {
+                for (long i = 0; i < len; i++) {
                     skip.rdbGenericLoadStringObject();
                 }
                 return context.valueOf(new DummyKeyValuePair());
