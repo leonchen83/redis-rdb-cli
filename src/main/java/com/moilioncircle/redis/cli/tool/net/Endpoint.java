@@ -44,6 +44,7 @@ public class Endpoint implements Closeable {
     
     private static final Logger logger = LoggerFactory.getLogger(Endpoint.class);
     
+    private static final int BUFFER = 64 * 1024;
     private static final byte[] AUTH = "auth".getBytes();
     private static final byte[] PING = "ping".getBytes();
     private static final byte[] SELECT = "select".getBytes();
@@ -59,20 +60,20 @@ public class Endpoint implements Closeable {
         try {
             CliSocketFactory factory = new CliSocketFactory(conf);
             this.socket = factory.createSocket(host, port, conf.getConnectionTimeout());
-            this.in = new RedisInputStream(this.socket.getInputStream(), 64 * 1024);
-            this.out = new BufferedOutputStream(this.socket.getOutputStream(), 64 * 1024);
+            this.in = new RedisInputStream(this.socket.getInputStream(), BUFFER);
+            this.out = new BufferedOutputStream(this.socket.getOutputStream(), BUFFER);
+            if (conf.getAuthPassword() != null) {
+                String r = send(AUTH, conf.getAuthPassword().getBytes());
+                if (r != null) throw new RuntimeException(r);
+            } else {
+                String r = send(PING);
+                if (r != null) throw new RuntimeException(r);
+            }
+            String r = send(SELECT, String.valueOf(db).getBytes());
+            if (r != null) throw new RuntimeException(r);
         } catch (IOException e) {
-            throw new AssertionError(e.getMessage(), e);
+            throw new RuntimeException(e);
         }
-        if (conf.getAuthPassword() != null) {
-            String r = send(AUTH, conf.getAuthPassword().getBytes());
-            if (r != null) throw new AssertionError(r);
-        } else {
-            String r = send(PING);
-            if (r != null) throw new AssertionError(r);
-        }
-        String r = send(SELECT, String.valueOf(db).getBytes());
-        if (r != null) throw new AssertionError(r);
     }
     
     public String send(byte[] command, byte[]... ary) {
@@ -80,8 +81,8 @@ public class Endpoint implements Closeable {
             emit(out, command, ary);
             out.flush();
             return parse();
-        } catch (Throwable e) {
-            throw new AssertionError(e.getMessage(), e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
     
@@ -90,24 +91,28 @@ public class Endpoint implements Closeable {
             emit(out, command, args);
             count++;
             if (count == pipe) flush();
-        } catch (Throwable e) {
-            throw new AssertionError(e.getMessage(), e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
     
     public void flush() {
-        if (count > 0) {
-            OutputStreams.flush(out);
-            for (int i = 0; i < count; i++) {
-                String r = parseQuietly();
-                if (r != null) logger.error(r);
+        try {
+            if (count > 0) {
+                OutputStreams.flush(out);
+                for (int i = 0; i < count; i++) {
+                    String r = parse();
+                    if (r != null) logger.error(r);
+                }
+                count = 0;
             }
-            count = 0;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
     
     @Override
-    public void close() {
+    public void close() throws IOException {
         Sockets.closeQuietly(in);
         Sockets.closeQuietly(out);
         Sockets.closeQuietly(socket);
@@ -117,8 +122,8 @@ public class Endpoint implements Closeable {
         if (endpoint == null) return;
         try {
             endpoint.close();
-        } catch (Throwable txt) {
-            throw new RuntimeException(txt);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
     
@@ -126,7 +131,7 @@ public class Endpoint implements Closeable {
         if (endpoint == null) return;
         try {
             endpoint.close();
-        } catch (Throwable txt) {
+        } catch (Throwable e) {
         }
     }
     
@@ -150,14 +155,6 @@ public class Endpoint implements Closeable {
             out.write(arg);
             out.write('\r');
             out.write('\n');
-        }
-    }
-    
-    private String parseQuietly() {
-        try {
-            return parse();
-        } catch (Throwable e) {
-            throw new AssertionError(e.getMessage(), e);
         }
     }
     
@@ -235,7 +232,7 @@ public class Endpoint implements Closeable {
                         }
                     }
                 default:
-                    throw new AssertionError("expect [$,:,*,+,-] but: " + (char) c);
+                    throw new RuntimeException("expect [$,:,*,+,-] but: " + (char) c);
                 
             }
         }

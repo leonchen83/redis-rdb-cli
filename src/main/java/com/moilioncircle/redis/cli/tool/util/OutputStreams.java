@@ -35,10 +35,10 @@ public class OutputStreams {
         if (out == null) return;
         try {
             out.close();
-        } catch (IOException t) {
-            throw new RuntimeException(t.getMessage(), t);
-        } catch (Throwable txt) {
-            throw new RuntimeException(txt.getMessage(), txt);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
         }
     }
     
@@ -54,10 +54,10 @@ public class OutputStreams {
         if (out == null) return;
         try {
             out.write(b);
-        } catch (IOException t) {
-            throw new RuntimeException(t.getMessage(), t);
-        } catch (Throwable txt) {
-            throw new RuntimeException(txt.getMessage(), txt);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
         }
     }
     
@@ -73,10 +73,10 @@ public class OutputStreams {
         if (out == null) return;
         try {
             out.write(b);
-        } catch (IOException t) {
-            throw new RuntimeException(t.getMessage(), t);
-        } catch (Throwable txt) {
-            throw new RuntimeException(txt.getMessage(), txt);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
         }
     }
     
@@ -92,10 +92,10 @@ public class OutputStreams {
         if (out == null) return;
         try {
             out.write(b, off, len);
-        } catch (IOException t) {
-            throw new RuntimeException(t.getMessage(), t);
-        } catch (Throwable txt) {
-            throw new RuntimeException(txt.getMessage(), txt);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
         }
     }
     
@@ -119,10 +119,10 @@ public class OutputStreams {
         if (out == null) return;
         try {
             out.flush();
-        } catch (IOException t) {
-            throw new RuntimeException(t.getMessage(), t);
-        } catch (Throwable txt) {
-            throw new RuntimeException(txt.getMessage(), txt);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
         }
     }
     
@@ -130,10 +130,10 @@ public class OutputStreams {
         if (callable == null) return null;
         try {
             return callable.call();
-        } catch (IOException t) {
-            throw new RuntimeException(t.getMessage(), t);
-        } catch (Throwable txt) {
-            throw new RuntimeException(txt.getMessage(), txt);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
         }
     }
     
