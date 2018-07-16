@@ -22,37 +22,36 @@ import java.util.concurrent.atomic.AtomicLong;
 import static com.moilioncircle.redis.cli.tool.util.Strings.lappend;
 import static com.moilioncircle.redis.cli.tool.util.Strings.pretty;
 
-;
-
 /**
  * @author Baoyi Chen
  */
 public class ProgressBar implements Closeable {
-    
+
+    private final long init;
     private final long total;
-    private volatile long last;
     private volatile boolean bit;
     private volatile String file;
     private volatile double percentage;
     private AtomicLong num = new AtomicLong();
     private volatile long access = System.currentTimeMillis();
-    
+
     public ProgressBar(long total) {
         this.total = total;
+        this.init = System.currentTimeMillis();
     }
-    
+
     public void react(long num) {
         react(num, true, null);
     }
-    
+
     public void react(long num, String file) {
         react(num, true, file);
     }
-    
+
     public void react(long num, boolean increment, String file) {
         react(num, total <= 0 ? 0 : Processes.width(), increment, file);
     }
-    
+
     public void react(long num, int len, boolean increment, String file) {
         if (increment)
             this.num.addAndGet(num);
@@ -68,15 +67,14 @@ public class ProgressBar implements Closeable {
         int next = (int) this.percentage;
         show(prev, next, len, this.num.get(), file);
     }
-    
+
     private void show(int prev, int next, int len, long num, String file) {
         long now = System.currentTimeMillis();
         long elapsed = now - access;
-        
+
         if (elapsed < 1000 && prev == next &&
                 (file == null || file.equals(this.file))) return;
-        int speed = (int) ((double) (num - last) / elapsed * 1000);
-        this.last = num;
+        int speed = (int) ((double) num / (now - init) * 1000);
         this.file = file;
         this.access = now;
         StringBuilder builder = new StringBuilder();
@@ -120,7 +118,7 @@ public class ProgressBar implements Closeable {
         System.out.print('\r');
         System.out.print(builder.toString());
     }
-    
+
     @Override
     public void close() {
         System.out.println();

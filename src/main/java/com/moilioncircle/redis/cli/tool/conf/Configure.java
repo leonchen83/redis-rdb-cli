@@ -75,7 +75,7 @@ public class Configure {
     /**
      * rmt --migrate
      */
-    private int migrateBatchSize = 2048;
+    private int migrateBatchSize = 4096;
     
     /**
      * timeout
@@ -264,7 +264,7 @@ public class Configure {
     public static Configure bind(Properties properties) {
         Configure conf = new Configure(properties);
         conf.batchSize = getInt(conf, "batch_size", 128, true);
-        conf.migrateBatchSize = getInt(conf, "migrate_batch_size", 2048, true);
+        conf.migrateBatchSize = getInt(conf, "migrate_batch_size", 4096, true);
         conf.dumpRdbVersion = getInt(conf, "dump_rdb_version", -1, true);
         conf.quote = (byte) getString(conf, "quote", "\"", true).charAt(0);
         conf.delimiter = (byte) getString(conf, "delimiter", ",", true).charAt(0);
