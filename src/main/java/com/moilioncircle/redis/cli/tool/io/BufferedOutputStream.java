@@ -25,8 +25,8 @@ import java.io.OutputStream;
 public class BufferedOutputStream extends OutputStream {
     
     protected int count;
-    protected byte buf[];
-    protected OutputStream out;
+    protected final byte buf[];
+    protected final OutputStream out;
     
     public BufferedOutputStream(OutputStream out, int size) {
         this.out = out;

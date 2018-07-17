@@ -33,7 +33,7 @@ public class GuardOutputStream extends OutputStream {
     
     private OutputStream out;
     private Guard guard = SAVE;
-    private ByteBuilder builder;
+    private final ByteBuilder builder;
     
     
     public GuardOutputStream(int cap, OutputStream out) {

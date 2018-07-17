@@ -43,8 +43,8 @@ public class ShardableFileOutputStream extends OutputStream {
     
     private byte[] key;
     
-    private Set<CRCOutputStream> set = new HashSet<>();
-    private Map<Short, CRCOutputStream> map = new HashMap<>();
+    private final Set<CRCOutputStream> set = new HashSet<>();
+    private final Map<Short, CRCOutputStream> map = new HashMap<>();
 
     public ShardableFileOutputStream(String path, File conf, Configure configure) {
         NodeConfParser.parse(path, conf, set, map, configure);
