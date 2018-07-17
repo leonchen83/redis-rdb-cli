@@ -27,32 +27,36 @@ import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static com.moilioncircle.redis.replicator.util.Concurrents.terminateQuietly;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
  * @author Baoyi Chen
  */
 public class AsyncEventListener implements EventListener {
-    
+
     private int count;
     private ExecutorService[] executors;
     private final EventListener listener;
-    
+
     public AsyncEventListener(EventListener listener, Replicator r, Configure c) {
         this.listener = listener;
-        this.executors = new ExecutorService[4];
+        int n = c.getMigrateThreadSize();
+        if ((n & (n - 1)) != 0) {
+            throw new IllegalArgumentException("migrate_thread_size " + n + " must power of 2");
+        }
+        this.executors = new ExecutorService[n];
         for (int i = 0; i < this.executors.length; i++) {
             this.executors[i] = Executors.newSingleThreadExecutor();
         }
         r.addCloseListener(rep -> {
             for (int i = 0; i < this.executors.length; i++) {
-                terminateQuietly(this.executors[i], c.getTimeout(), MILLISECONDS);
+                terminateQuietly(this.executors[i], c.getTimeout(), TimeUnit.MILLISECONDS);
             }
         });
     }
-    
+
     @Override
     public void onEvent(Replicator replicator, Event event) {
         if (event instanceof PreRdbSyncEvent ||

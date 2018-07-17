@@ -24,6 +24,7 @@ import com.moilioncircle.redis.cli.tool.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
+import com.moilioncircle.redis.replicator.event.PreCommandSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.io.CRCOutputStream;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
@@ -51,6 +52,9 @@ public class BackupRdbVisitor extends AbstractRdbVisitor {
                 OutputStreams.write(0xFF, out);
                 OutputStreams.write(out.getCRC64(), out);
                 OutputStreams.close(out);
+            }
+            if (event instanceof PreCommandSyncEvent) {
+                OutputStreams.closeQuietly(listener.getOutputStream());
             }
         });
     }

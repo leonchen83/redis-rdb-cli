@@ -29,9 +29,9 @@ import java.util.Properties;
  * @author Baoyi Chen
  */
 public class Configure {
-    
+
     private Properties properties;
-    
+
     private Configure() {
         this.properties = new Properties();
         try {
@@ -50,199 +50,225 @@ public class Configure {
             throw new UncheckedIOException(e);
         }
     }
-    
+
     private Configure(Properties properties) {
         this();
         if (properties != null)
             this.properties.putAll(properties);
     }
-    
+
     /**
      * rct --format resp batch size
      */
     private int batchSize = 128;
-    
+
     /**
      * rct quote
      */
     private byte quote = '"';
-    
+
     /**
      * rct delimiter
      */
     private byte delimiter = ',';
-    
+
     /**
      * rmt --migrate
      */
     private int migrateBatchSize = 4096;
-    
+
+    /**
+     * rmt --migrate
+     */
+    private int migrateThreadSize = 4;
+
+    /**
+     * rmt --migrate
+     */
+    private int migrateRetryTime = 1;
+
     /**
      * timeout
      */
     private int timeout = 30000;
-    
+
     /**
      * socket receive buffer size
      */
     private int rcvBuf = 0;
-    
+
     /**
      * socket send buffer size
      */
     private int sndBuf = 0;
-    
+
     /**
      * connection retry times. if retries <= 0 then always retry
      */
     private int retryTime = 5;
-    
+
     /**
      * retry time interval
      */
     private int retryInterval = 1000;
-    
+
     /**
      * redis input stream buffer size
      */
     private int bufferSize = 8 * 1024;
-    
+
     /**
      * async buffer size
      */
     private int asyncCacheSize = 512 * 1024;
-    
+
     /**
      *
      */
     private int dumpRdbVersion = -1;
-    
+
     /**
      * trace event log
      */
     private boolean verbose = false;
-    
+
     /**
      * used in psync heartbeat
      */
     private int heartbeat = 1000;
-    
+
     public int getBatchSize() {
         return batchSize;
     }
-    
+
     public void setBatchSize(int batchSize) {
         this.batchSize = batchSize;
     }
-    
+
     public byte getQuote() {
         return quote;
     }
-    
+
     public void setQuote(byte quote) {
         this.quote = quote;
     }
-    
+
     public byte getDelimiter() {
         return delimiter;
     }
-    
+
     public void setDelimiter(byte delimiter) {
         this.delimiter = delimiter;
     }
-    
+
     public int getTimeout() {
         return timeout;
     }
-    
+
     public void setTimeout(int timeout) {
         this.timeout = timeout;
     }
-    
+
     public int getRcvBuf() {
         return rcvBuf;
     }
-    
+
     public void setRcvBuf(int rcvBuf) {
         this.rcvBuf = rcvBuf;
     }
-    
+
     public int getSndBuf() {
         return sndBuf;
     }
-    
+
     public void setSndBuf(int sndBuf) {
         this.sndBuf = sndBuf;
     }
-    
+
     public int getRetryTime() {
         return retryTime;
     }
-    
+
     public void setRetryTime(int retryTime) {
         this.retryTime = retryTime;
     }
-    
+
     public int getMigrateBatchSize() {
         return migrateBatchSize;
     }
-    
+
     public void setMigrateBatchSize(int migrateBatchSize) {
         this.migrateBatchSize = migrateBatchSize;
     }
-    
+
+    public int getMigrateThreadSize() {
+        return migrateThreadSize;
+    }
+
+    public void setMigrateThreadSize(int migrateThreadSize) {
+        this.migrateThreadSize = migrateThreadSize;
+    }
+
+    public int getMigrateRetryTime() {
+        return migrateRetryTime;
+    }
+
+    public void setMigrateRetryTime(int migrateRetryTime) {
+        this.migrateRetryTime = migrateRetryTime;
+    }
+
     public int getRetryInterval() {
         return retryInterval;
     }
-    
+
     public void setRetryInterval(int retryInterval) {
         this.retryInterval = retryInterval;
     }
-    
+
     public int getBufferSize() {
         return bufferSize;
     }
-    
+
     public void setBufferSize(int bufferSize) {
         this.bufferSize = bufferSize;
     }
-    
+
     public int getAsyncCacheSize() {
         return asyncCacheSize;
     }
-    
+
     public void setAsyncCacheSize(int asyncCacheSize) {
         this.asyncCacheSize = asyncCacheSize;
     }
-    
+
     public int getDumpRdbVersion() {
         return dumpRdbVersion;
     }
-    
+
     public void setDumpRdbVersion(int dumpRdbVersion) {
         this.dumpRdbVersion = dumpRdbVersion;
     }
-    
+
     public boolean isVerbose() {
         return verbose;
     }
-    
+
     public void setVerbose(boolean verbose) {
         this.verbose = verbose;
     }
-    
+
     public int getHeartbeat() {
         return heartbeat;
     }
-    
+
     public void setHeartbeat(int heartbeat) {
         this.heartbeat = heartbeat;
     }
-    
+
     public Configuration merge(RedisURI uri) {
         return merge(Configuration.valueOf(uri));
     }
-    
+
     public Configuration merge(Configuration conf) {
         conf.setRetries(this.retryTime);
         conf.setRetryTimeInterval(this.retryInterval);
@@ -256,15 +282,17 @@ public class Configure {
         conf.setHeartBeatPeriod(this.heartbeat);
         return conf;
     }
-    
+
     public static Configure bind() {
         return bind(null);
     }
-    
+
     public static Configure bind(Properties properties) {
         Configure conf = new Configure(properties);
         conf.batchSize = getInt(conf, "batch_size", 128, true);
         conf.migrateBatchSize = getInt(conf, "migrate_batch_size", 4096, true);
+        conf.migrateThreadSize = getInt(conf, "migrate_thread_size", 4, true);
+        conf.migrateRetryTime = getInt(conf, "migrate_retry_time", 1, true);
         conf.dumpRdbVersion = getInt(conf, "dump_rdb_version", -1, true);
         conf.quote = (byte) getString(conf, "quote", "\"", true).charAt(0);
         conf.delimiter = (byte) getString(conf, "delimiter", ",", true).charAt(0);
@@ -279,19 +307,19 @@ public class Configure {
         conf.heartbeat = getInt(conf, "heartbeat", 1000, true);
         return conf;
     }
-    
+
     public static String getString(Configure conf, String key) {
         return getString(conf, key, null, false);
     }
-    
+
     public static Integer getInt(Configure conf, String key) {
         return getInt(conf, key, null, false);
     }
-    
+
     public static Boolean getBool(Configure conf, String key) {
         return getBool(conf, key, null, false);
     }
-    
+
     public static String getString(Configure conf, String key, String value, boolean optional) {
         String v = System.getProperty(key);
         if (v == null && (v = conf.properties.getProperty(key)) == null)
@@ -301,7 +329,7 @@ public class Configure {
         }
         return v;
     }
-    
+
     public static Integer getInt(Configure conf, String key, Integer value, boolean optional) {
         String v = getString(conf, key, value == null ? null : value.toString(), optional);
         try {
@@ -310,7 +338,7 @@ public class Configure {
             throw new IllegalArgumentException("not found the config[key=" + key + "]");
         }
     }
-    
+
     public static Boolean getBool(Configure conf, String key, Boolean value, boolean optional) {
         String v = getString(conf, key, value == null ? null : value.toString(), optional);
         if (v == null)
@@ -321,7 +349,7 @@ public class Configure {
             return Boolean.FALSE;
         throw new IllegalArgumentException("not found the config[key=" + key + "]");
     }
-    
+
     @Override
     public String toString() {
         return "Configure{" +
@@ -333,6 +361,8 @@ public class Configure {
                 ", sndBuf=" + sndBuf +
                 ", retryTime=" + retryTime +
                 ", migrateBatchSize=" + migrateBatchSize +
+                ", migrateThreadSize=" + migrateThreadSize +
+                ", migrateRetryTime=" + migrateRetryTime +
                 ", retryInterval=" + retryInterval +
                 ", bufferSize=" + bufferSize +
                 ", asyncCacheSize=" + asyncCacheSize +
