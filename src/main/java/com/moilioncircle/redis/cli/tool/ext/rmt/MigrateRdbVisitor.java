@@ -18,6 +18,7 @@ package com.moilioncircle.redis.cli.tool.ext.rmt;
 
 import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.ext.AbstractRdbVisitor;
+import com.moilioncircle.redis.cli.tool.ext.AsyncEventListener;
 import com.moilioncircle.redis.cli.tool.ext.DumpRawByteListener;
 import com.moilioncircle.redis.cli.tool.glossary.DataType;
 import com.moilioncircle.redis.cli.tool.glossary.Escape;
@@ -28,6 +29,7 @@ import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
 import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
+import com.moilioncircle.redis.replicator.event.PreCommandSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
@@ -37,7 +39,6 @@ import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.moilioncircle.redis.cli.tool.net.Endpoint.closeQuietly;
 import static com.moilioncircle.redis.replicator.Configuration.valueOf;
@@ -47,36 +48,33 @@ import static com.moilioncircle.redis.replicator.Configuration.valueOf;
  */
 public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListener {
     
-    private Endpoint endpoint;
     private final RedisURI uri;
     private final boolean replace;
     private final Configuration conf;
-    private final AtomicInteger dbnum = new AtomicInteger(0);
+    private ThreadLocal<Endpoint> endpoint = new ThreadLocal<>();
     
     public MigrateRdbVisitor(Replicator replicator, Configure configure, String uri, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) throws Exception {
         super(replicator, configure, db, regexs, types);
         this.replace = replace;
         this.uri = new RedisURI(uri);
-        this.replicator.addEventListener(this);
         this.conf = configure.merge(valueOf(this.uri));
-        this.replicator.addCloseListener(e -> closeQuietly(this.endpoint));
+        this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure));
     }
     
     @Override
     public void onEvent(Replicator replicator, Event event) {
         if (event instanceof PreRdbSyncEvent) {
-            closeQuietly(this.endpoint);
-            this.endpoint = new Endpoint(uri.getHost(), uri.getPort(), 0, configure.getMigrateBatchSize(), conf);
-            dbnum.set(0);
-        } else if (event instanceof PostRdbSyncEvent) {
-            this.endpoint.flush();
+            closeQuietly(this.endpoint.get());
+            this.endpoint.set(new Endpoint(uri.getHost(), uri.getPort(), 0, configure.getMigrateBatchSize(), conf));
+        } else if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
+            this.endpoint.get().flush();
+            closeQuietly(this.endpoint.get());
         } else if (event instanceof DumpKeyValuePair) {
             DumpKeyValuePair dkv = (DumpKeyValuePair) event;
             DB db = dkv.getDb();
             int index;
-            if (db != null && (index = (int) db.getDbNumber()) != dbnum.get()) {
-                endpoint.batch(SELECT, String.valueOf(index).getBytes());
-                dbnum.set(index);
+            if (db != null && (index = (int) db.getDbNumber()) != endpoint.get().getDB()) {
+                endpoint.get().select(index);
             }
     
             byte[] expire = ZERO;
@@ -86,9 +84,9 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
                 expire = String.valueOf(ms).getBytes();
             }
             if (!replace) {
-                endpoint.batch(RESTORE, dkv.getKey(), expire, dkv.getValue());
+                endpoint.get().batch(RESTORE, dkv.getKey(), expire, dkv.getValue());
             } else {
-                endpoint.batch(RESTORE, dkv.getKey(), expire, dkv.getValue(), REPLACE);
+                endpoint.get().batch(RESTORE, dkv.getKey(), expire, dkv.getValue(), REPLACE);
             }
         }
     }

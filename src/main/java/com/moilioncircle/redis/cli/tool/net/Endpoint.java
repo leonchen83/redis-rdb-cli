@@ -49,6 +49,7 @@ public class Endpoint implements Closeable {
     private static final byte[] PING = "ping".getBytes();
     private static final byte[] SELECT = "select".getBytes();
     
+    private int db;
     private int count = 0;
     private final int pipe;
     private final Socket socket;
@@ -71,9 +72,14 @@ public class Endpoint implements Closeable {
             }
             String r = send(SELECT, String.valueOf(db).getBytes());
             if (r != null) throw new RuntimeException(r);
+            this.db = db;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    public int getDB() {
+        return db;
     }
     
     public String send(byte[] command, byte[]... ary) {
@@ -84,6 +90,11 @@ public class Endpoint implements Closeable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    public void select(int db) {
+        batch(SELECT, String.valueOf(db).getBytes());
+        this.db = db;
     }
     
     public void batch(byte[] command, byte[]... args) {

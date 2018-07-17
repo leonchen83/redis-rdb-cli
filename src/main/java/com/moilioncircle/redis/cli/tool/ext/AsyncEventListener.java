@@ -20,6 +20,10 @@ import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
+import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
+import com.moilioncircle.redis.replicator.event.PreCommandSyncEvent;
+import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
+import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,16 +36,34 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  */
 public class AsyncEventListener implements EventListener {
     
+    private int count;
+    private ExecutorService[] executors;
     private final EventListener listener;
-    private ExecutorService executor = Executors.newSingleThreadExecutor();
     
     public AsyncEventListener(EventListener listener, Replicator r, Configure c) {
         this.listener = listener;
-        r.addCloseListener(rep -> terminateQuietly(executor, c.getTimeout(), MILLISECONDS));
+        this.executors = new ExecutorService[4];
+        for (int i = 0; i < this.executors.length; i++) {
+            this.executors[i] = Executors.newSingleThreadExecutor();
+        }
+        r.addCloseListener(rep -> {
+            for (int i = 0; i < this.executors.length; i++) {
+                terminateQuietly(this.executors[i], c.getTimeout(), MILLISECONDS);
+            }
+        });
     }
     
     @Override
     public void onEvent(Replicator replicator, Event event) {
-        this.executor.submit(() -> this.listener.onEvent(replicator, event));
+        if (event instanceof PreRdbSyncEvent ||
+                event instanceof PostRdbSyncEvent ||
+                event instanceof PreCommandSyncEvent) {
+            for (int i = 0; i < this.executors.length; i++) {
+                this.executors[i].submit(() -> this.listener.onEvent(replicator, event));
+            }
+        } else if (event instanceof DumpKeyValuePair) {
+            int i = count++ & (executors.length - 1);
+            this.executors[i].submit(() -> this.listener.onEvent(replicator, event));
+        }
     }
 }
