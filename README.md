@@ -22,6 +22,10 @@ maven-3.3.1+
     ./rct -h 
 ```
 
+## Windows Environment Variables
+  
+Add `/path/to/redis-cli-tool/bin` to `Path` environment variable  
+  
 ## Usage
 
 ```java  
