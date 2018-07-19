@@ -89,11 +89,15 @@ public enum Escape {
                 break;
         }
     }
+    
+    public void encode(long value, OutputStream out, Configure configure) throws IOException {
+        encode(String.valueOf(value).getBytes(), out, configure);
+    }
 
     public void encode(double value, OutputStream out, Configure configure) throws IOException {
         encode(String.valueOf(value).getBytes(), out, configure);
     }
-
+    
     public void encode(byte[] bytes, OutputStream out, Configure configure) throws IOException {
         if (bytes == null) return;
         encode(bytes, 0, bytes.length, out, configure);
