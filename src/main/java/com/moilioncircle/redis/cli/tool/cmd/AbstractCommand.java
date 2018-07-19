@@ -27,7 +27,8 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import static com.moilioncircle.redis.cli.tool.cmd.Version.VERSION;
+import static com.moilioncircle.redis.cli.tool.cmd.Version.INSTANCE;
+import static com.moilioncircle.redis.cli.tool.util.Strings.isEmpty;
 
 /**
  * @author Baoyi Chen
@@ -83,7 +84,15 @@ public abstract class AbstractCommand implements Command {
     
     protected String version() {
         StringBuilder builder = new StringBuilder();
-        builder.append("redis cli tool: ").append(VERSION).append("\n");
+        builder.append("redis cli tool: ").append(INSTANCE.version());
+        if (!isEmpty(INSTANCE.commit())) {
+            builder.append(" (").append(INSTANCE.commit()).append(": ");
+            builder.append(INSTANCE.date()).append(")");
+        }
+        builder.append("\n");
+        if (!isEmpty(INSTANCE.home())) {
+            builder.append("rct home: ").append(INSTANCE.home()).append("\n");
+        }
         builder.append("java version: ").append(System.getProperty("java.version")).append(", ");
         builder.append("vendor: ").append(System.getProperty("java.vendor")).append("\n");
         builder.append("java home: ").append(System.getProperty("java.home")).append("\n");

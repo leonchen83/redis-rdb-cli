@@ -16,9 +16,42 @@
 
 package com.moilioncircle.redis.cli.tool.cmd;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * @author Baoyi Chen
  */
 public class Version {
+    
+    static {
+        ClassLoader loader = Version.class.getClassLoader();
+        try (InputStream in = loader.getResourceAsStream("git.properties")) {
+            System.getProperties().load(in);
+        } catch (IOException e) {
+        }
+    }
+    
     public static final String VERSION = "0.1.3";
+    
+    public static final Version INSTANCE = new Version();
+    
+    private Version() {
+    }
+    
+    public String version() {
+        return VERSION;
+    }
+    
+    public String home() {
+        return System.getProperty("rct.home");
+    }
+    
+    public String date() {
+        return System.getProperty("git.build.time");
+    }
+    
+    public String commit() {
+        return System.getProperty("git.commit.id");
+    }
 }

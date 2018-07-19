@@ -20,6 +20,11 @@ package com.moilioncircle.redis.cli.tool.util;
  * @author Baoyi Chen
  */
 public class Strings {
+    
+    public static boolean isEmpty(String str) {
+        return str == null || str.length() == 0;
+    }
+    
     public static String pretty(long bytes) {
         return pretty(bytes, true);
     }
