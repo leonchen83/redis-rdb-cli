@@ -725,7 +725,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
                 level += 1;
                 r = ThreadLocalRandom.current().nextInt(0xFFFF);
             }
-            return Math.max(level, 32);
+            return Math.min(level, 32);
         }
         
         public long element(byte[] element) {
