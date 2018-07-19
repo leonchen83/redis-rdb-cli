@@ -71,8 +71,12 @@
             <groupId>com.moilioncircle</groupId>
             <artifactId>redis-replicator</artifactId>
             <version>3.0.0-RC1</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/redis-replicator-3.0.0-RC1.jar</systemPath>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>commons-cli</groupId>

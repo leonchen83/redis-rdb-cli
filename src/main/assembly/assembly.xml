@@ -46,11 +46,6 @@
                 <include>log4j2.xml</include>
             </includes>
         </fileSet>
-        <fileSet>
-            <directory>lib</directory>
-            <outputDirectory>lib</outputDirectory>
-            <fileMode>0755</fileMode>
-        </fileSet>
     </fileSets>
 
     <files>
