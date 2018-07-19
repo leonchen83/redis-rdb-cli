@@ -24,7 +24,7 @@ maven-3.3.1+
 
 ## Windows Environment Variables
   
-Add `/path/to/redis-cli-tool/bin` to `Path` environment variable or set `RCT_HOME` points to `/path/to/redis-cli-tool`  
+Add `/path/to/redis-cli-tool/bin` to `Path` environment variable  
   
 ## Usage
 
