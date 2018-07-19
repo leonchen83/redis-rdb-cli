@@ -349,7 +349,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         firstkey = false;
         emitString(key);
         out.write(':');
-        out.write('[');
+        out.write('{');
         BaseRdbParser parser = new BaseRdbParser(in);
         RedisInputStream stream = new RedisInputStream(parser.rdbLoadPlainStringObject());
         boolean flag = true;
@@ -371,7 +371,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         if (zlend != 255) {
             throw new AssertionError("zlend expect 255 but " + zlend);
         }
-        out.write(']');
+        out.write('}');
         return context.valueOf(new DummyKeyValuePair());
     }
     
