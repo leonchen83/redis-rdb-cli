@@ -10,6 +10,16 @@
 jdk 1.8+
 ```
 
+## Install
+
+```java  
+wget https://github.com/leonchen83/redis-cli-tool/releases/download/v0.1.3/redis-cli-tool.zip
+unzip redis-cli-tool.zip
+sudo chmod -R 755 ./redis-cli-tool
+cd ./redis-cli-tool/bin
+./rct -h
+```
+
 ## Compile requirement
 
 ```java  
