@@ -4,6 +4,12 @@
 
 [binary releases](https://github.com/leonchen83/redis-cli-tool/releases)
 
+## Runtime requirement
+
+```java  
+jdk 1.8+
+```
+
 ## Compile requirement
 
 ```java  
@@ -151,11 +157,85 @@ examples:
 
 ```
 
-# Redis mass insertion
+## Filter
+
+`rct`, `rdt` and `rmt` all these commands support data filter by `type`,`db`,`key` RegEx.  
+For example:
 
 ```java  
 
-rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof
+rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -d 0
+rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -t string hash
+rmt -s /path/to/dump.rdb -m redis://192.168.1.105:6379 -r -d 0 1 -t list
+```
+
+## Redis mass insertion
+
+```java  
+
+rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -r
 cat /path/to/dump.aof | /redis/src/redis-cli -p 6379 --pipe
 
+```
+
+## Convert rdb to dump format
+
+```java  
+rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof
+```
+
+## Convert rdb to json format
+
+```java  
+rct -f json -s /path/to/dump.rdb -o /path/to/dump.json
+```
+
+## Find top 50 largest keys
+
+```java  
+rct -f mem -s /path/to/dump.rdb -o /path/to/dump.mem -l 50
+```
+
+## Diff rdb
+
+```java  
+rct -f diff -s /path/to/dump1.rdb -o /path/to/dump1.diff
+rct -f diff -s /path/to/dump2.rdb -o /path/to/dump2.diff
+diff /path/to/dump1.diff /path/to/dump2.diff
+```
+
+## Convert rdb to RESP
+
+```java  
+rct -f resp -s /path/to/dump.rdb -o /path/to/appendonly.aof
+```
+
+## Migrate rdb to remote redis
+
+```java  
+rmt -s /path/to/dump.rdb -m redis://192.168.1.105:6379 -r
+```
+
+## Backup remote redis's rdb
+
+```java  
+rdt -b redis://192.168.1.105:6379 -o /path/to/dump.rdb
+```
+
+## Filter rdb
+
+```java  
+rdt -b /path/to/dump.rdb -o /path/to/filtered-dump.rdb -d 0 -t string
+```
+
+## Split rdb via cluster's nodes.conf
+
+```java  
+rdt -s ./dump.rdb -c ./nodes.conf -o /path/to/folder -d 0
+```
+
+## Merge multi rdb to one
+
+```java  
+rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
 ```
