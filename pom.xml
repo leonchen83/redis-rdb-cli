@@ -22,7 +22,7 @@
 
     <groupId>com.moilioncircle</groupId>
     <artifactId>redis-cli-tool</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>0.1.4</version>
 
     <name>redis-cli-tool</name>
     <description>redis cli tool</description>
@@ -52,7 +52,7 @@
         <connection>scm:git:git@github.com:leonchen83/redis-cli-tool.git</connection>
         <url>scm:git:git@github.com:leonchen83/redis-cli-tool.git</url>
         <developerConnection>scm:git:git@github.com:leonchen83/redis-cli-tool.git</developerConnection>
-        <tag>1.0.0-SNAPSHOT</tag>
+        <tag>0.1.x</tag>
     </scm>
 
     <issueManagement>
@@ -84,9 +84,9 @@
             <version>1.4</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-exec</artifactId>
-            <version>1.3</version>
+            <groupId>org.jline</groupId>
+            <artifactId>jline</artifactId>
+            <version>3.9.0</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
