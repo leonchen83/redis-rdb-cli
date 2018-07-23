@@ -39,6 +39,7 @@ import com.moilioncircle.redis.replicator.util.Strings;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
@@ -92,7 +93,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             quote(pretty(kv.getMax()).getBytes(), out);
             delimiter(out);
             if (kv.getExpiredType() != NONE) {
-                quote(FORMATTER.format(ofEpochMilli(kv.getExpiredValue())).getBytes(), out);
+                quote(FORMATTER.format(ofEpochMilli(kv.getExpiredValue()).atZone(ZoneId.systemDefault())).getBytes(), out);
             } else {
                 quote("".getBytes(), out);
             }
@@ -101,7 +102,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             throw new UncheckedIOException(e);
         }
     }
-    
+
     @Override
     public void onEvent(Replicator replicator, Event event) {
         if (event instanceof DummyKeyValuePair) {

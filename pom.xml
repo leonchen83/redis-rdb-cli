@@ -22,7 +22,7 @@
 
     <groupId>com.moilioncircle</groupId>
     <artifactId>redis-cli-tool</artifactId>
-    <version>0.1.4</version>
+    <version>0.1.5</version>
 
     <name>redis-cli-tool</name>
     <description>redis cli tool</description>
@@ -70,7 +70,7 @@
         <dependency>
             <groupId>com.moilioncircle</groupId>
             <artifactId>redis-replicator</artifactId>
-            <version>3.0.0-RC1</version>
+            <version>3.0.0-RC2</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>

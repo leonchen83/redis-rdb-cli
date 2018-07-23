@@ -30,7 +30,7 @@ import static com.moilioncircle.redis.cli.tool.util.Strings.pretty;
  * @author Baoyi Chen
  */
 public class ProgressBar implements Closeable {
-    
+
     private final long ctime;
     private final long total;
     private volatile int max = 0;
@@ -40,21 +40,21 @@ public class ProgressBar implements Closeable {
     private volatile double percentage;
     private AtomicLong num = new AtomicLong();
     private volatile long atime = System.currentTimeMillis();
-    
+
     public ProgressBar(long total) throws IOException {
         this.total = total;
         this.ctime = System.currentTimeMillis();
         this.terminal = TerminalBuilder.terminal();
     }
-    
+
     public void react(long num) {
         react(num, true, null);
     }
-    
+
     public void react(long num, String file) {
         react(num, true, file);
     }
-    
+
     public void react(long num, boolean increment, String file) {
         if (increment)
             this.num.addAndGet(num);
@@ -70,20 +70,20 @@ public class ProgressBar implements Closeable {
         int next = (int) this.percentage;
         show(prev, next, this.num.get(), file);
     }
-    
+
     private void show(int prev, int next, long num, String file) {
         long now = System.currentTimeMillis();
         long elapsed = now - atime;
-        
+
         if (elapsed < 1000 && prev == next &&
                 (file == null || file.equals(this.file))) return;
         int speed = (int) ((double) num / (now - ctime) * 1000);
         String strSpeed = lappend(pretty(speed), 7, ' ');
         this.file = file;
         this.atime = now;
-        this.max = Math.max(file.length(), max);
+        this.max = Math.max(file == null ? 0 : file.length(), max);
         int len = Math.max(terminal.getWidth(), 120);
-        
+
         StringBuilder builder = new StringBuilder();
         if (bit) {
             builder.append('/');
@@ -126,7 +126,7 @@ public class ProgressBar implements Closeable {
         System.out.print('\r');
         System.out.print(builder.toString());
     }
-    
+
     @Override
     public void close() {
         System.out.println();

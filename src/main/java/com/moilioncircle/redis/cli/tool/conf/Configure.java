@@ -105,7 +105,7 @@ public class Configure {
     /**
      * connection retry times. if retries <= 0 then always retry
      */
-    private int retryTime = 5;
+    private int retries = 5;
 
     /**
      * retry time interval
@@ -185,12 +185,12 @@ public class Configure {
         this.sndBuf = sndBuf;
     }
 
-    public int getRetryTime() {
-        return retryTime;
+    public int getRetries() {
+        return retries;
     }
 
-    public void setRetryTime(int retryTime) {
-        this.retryTime = retryTime;
+    public void setRetries(int retries) {
+        this.retries = retries;
     }
 
     public int getMigrateBatchSize() {
@@ -270,7 +270,7 @@ public class Configure {
     }
 
     public Configuration merge(Configuration conf) {
-        conf.setRetries(this.retryTime);
+        conf.setRetries(this.retries);
         conf.setRetryTimeInterval(this.retryInterval);
         conf.setConnectionTimeout(this.timeout);
         conf.setReadTimeout(this.timeout);
@@ -279,7 +279,7 @@ public class Configure {
         conf.setBufferSize(this.bufferSize);
         conf.setAsyncCachedBytes(this.asyncCacheSize);
         conf.setVerbose(this.verbose);
-        conf.setHeartBeatPeriod(this.heartbeat);
+        conf.setHeartbeatPeriod(this.heartbeat);
         return conf;
     }
 
@@ -296,7 +296,7 @@ public class Configure {
         conf.dumpRdbVersion = getInt(conf, "dump_rdb_version", -1, true);
         conf.quote = (byte) getString(conf, "quote", "\"", true).charAt(0);
         conf.delimiter = (byte) getString(conf, "delimiter", ",", true).charAt(0);
-        conf.retryTime = getInt(conf, "retry_time", 5, true);
+        conf.retries = getInt(conf, "retries", 5, true);
         conf.retryInterval = getInt(conf, "retry_interval", 1000, true);
         conf.timeout = getInt(conf, "timeout", 30000, true);
         conf.sndBuf = getInt(conf, "snd_buf", 0, true);
@@ -359,7 +359,7 @@ public class Configure {
                 ", timeout=" + timeout +
                 ", rcvBuf=" + rcvBuf +
                 ", sndBuf=" + sndBuf +
-                ", retryTime=" + retryTime +
+                ", retries=" + retries +
                 ", migrateBatchSize=" + migrateBatchSize +
                 ", migrateThreadSize=" + migrateThreadSize +
                 ", migrateRetryTime=" + migrateRetryTime +
