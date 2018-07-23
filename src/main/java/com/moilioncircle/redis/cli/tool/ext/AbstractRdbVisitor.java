@@ -155,8 +155,16 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
     }
     
     protected void quote(byte[] bytes, OutputStream out) throws IOException {
+        quote(bytes, out, true);
+    }
+    
+    protected void quote(byte[] bytes, OutputStream out, boolean escape) throws IOException {
         out.write(configure.getQuote());
-        escape.encode(bytes, out, configure);
+        if (escape) {
+            this.escape.encode(bytes, out, configure);
+        } else {
+            out.write(bytes);
+        }
         out.write(configure.getQuote());
     }
     

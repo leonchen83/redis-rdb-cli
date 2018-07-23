@@ -93,9 +93,9 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             quote(pretty(kv.getMax()).getBytes(), out);
             delimiter(out);
             if (kv.getExpiredType() != NONE) {
-                quote(FORMATTER.format(ofEpochMilli(kv.getExpiredValue()).atZone(ZoneId.systemDefault())).getBytes(), out);
+                quote(FORMATTER.format(ofEpochMilli(kv.getExpiredValue()).atZone(ZoneId.systemDefault())).getBytes(), out, false);
             } else {
-                quote("".getBytes(), out);
+                quote("".getBytes(), out, false);
             }
             out.write('\n');
         } catch (IOException e) {
