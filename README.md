@@ -172,7 +172,7 @@ examples:
 
 ### Filter
 
-`rct`, `rdt` and `rmt` all these commands support data filter by `type`,`db`,`key` RegEx.  
+`rct`, `rdt` and `rmt` all these commands support data filter by `type`,`db`,`key` RegEx(Java style).  
 For example:
 
 ```java  
