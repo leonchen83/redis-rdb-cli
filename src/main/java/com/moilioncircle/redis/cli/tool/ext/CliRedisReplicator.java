@@ -60,8 +60,7 @@ public class CliRedisReplicator implements Replicator {
     private void initialize(RedisURI uri, Configure configure) throws IOException {
         Objects.requireNonNull(uri);
         Objects.requireNonNull(configure);
-        Configuration configuration = Configuration.valueOf(uri);
-        configuration = configure.merge(configuration);
+        Configuration configuration = configure.merge(uri);
         if (uri.getFileType() != null) {
             PeekableInputStream in = new PeekableInputStream(uri.toURL().openStream());
             switch (uri.getFileType()) {

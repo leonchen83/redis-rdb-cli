@@ -56,12 +56,12 @@ public final class CloseableThread extends Thread {
         }
     }
     
-    public static final CloseableThread open(final String name, final Runnable runnable) {
-        return open(name, runnable, true);
-    }
-    
     public static final void close(final CloseableThread thread) {
         if (thread != null) thread.close();
+    }
+
+    public static final CloseableThread open(final String name, final Runnable runnable) {
+        return open(name, runnable, true);
     }
     
     public static final CloseableThread open(final String name, final Runnable runnable, boolean start) {

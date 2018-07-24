@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.moilioncircle.redis.cli.tool.util.Strings.lappend;
+import static com.moilioncircle.redis.cli.tool.util.Strings.length;
 import static com.moilioncircle.redis.cli.tool.util.Strings.pretty;
 
 /**
@@ -81,7 +82,7 @@ public class ProgressBar implements Closeable {
         String strSpeed = lappend(pretty(speed), 7, ' ');
         this.file = file;
         this.atime = now;
-        this.max = Math.max(file == null ? 0 : file.length(), max);
+        this.max = Math.max(length(file), max);
         int len = Math.max(terminal.getWidth(), 120);
 
         StringBuilder builder = new StringBuilder();

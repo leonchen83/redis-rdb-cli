@@ -41,7 +41,6 @@ import java.io.IOException;
 import java.util.List;
 
 import static com.moilioncircle.redis.cli.tool.net.Endpoint.closeQuietly;
-import static com.moilioncircle.redis.replicator.Configuration.valueOf;
 
 /**
  * @author Baoyi Chen
@@ -57,7 +56,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         super(replicator, configure, db, regexs, types);
         this.replace = replace;
         this.uri = new RedisURI(uri);
-        this.conf = configure.merge(valueOf(this.uri));
+        this.conf = configure.merge(this.uri);
         this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure));
     }
     
