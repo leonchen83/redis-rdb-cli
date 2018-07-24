@@ -13,10 +13,12 @@ jdk 1.8+
 ## 安装
 
 ```java  
+mkdir redis-cli-tool
+cd ./redis-cli-tool
 wget https://github.com/leonchen83/redis-cli-tool/releases/download/${version}/redis-cli-tool.zip
 unzip redis-cli-tool.zip
-sudo chmod -R 755 ./redis-cli-tool
-cd ./redis-cli-tool/bin
+sudo chmod -R 755 ./
+cd ./bin
 ./rct -h
 ```
 
@@ -32,6 +34,7 @@ maven-3.3.1+
 ## 编译 & 运行
 
 ```java  
+    git clone https://github.com/leonchen83/redis-cli-tool.git
     cd redis-cli-tool
     mvn clean install -Dmaven.test.skip=true
     cd target/redis-cli-tool/bin
@@ -42,7 +45,7 @@ maven-3.3.1+
   
 把 `/path/to/redis-cli-tool/bin` 添加到 `Path` 中
   
-## 使用
+### 使用
 
 ```java  
 
@@ -167,7 +170,7 @@ examples:
 
 ```
 
-## 过滤
+### 过滤
 
 `rct`, `rdt` 和 `rmt` 这3个命令支持`type`,`db`,`key`正则表达式数据过滤  
 举例如下:  
@@ -179,7 +182,7 @@ rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -t string hash
 rmt -s /path/to/dump.rdb -m redis://192.168.1.105:6379 -r -d 0 1 -t list
 ```
 
-## Redis大量数据插入
+### Redis大量数据插入
 
 ```java  
 
@@ -188,25 +191,25 @@ cat /path/to/dump.aof | /redis/src/redis-cli -p 6379 --pipe
 
 ```
 
-## 把rdb转换成dump格式
+### 把rdb转换成dump格式
 
 ```java  
 rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof
 ```
 
-## 把rdb转换成json格式
+### 把rdb转换成json格式
 
 ```java  
 rct -f json -s /path/to/dump.rdb -o /path/to/dump.json
 ```
 
-## 找到占用内存最大的50个key
+### 找到占用内存最大的50个key
 
 ```java  
 rct -f mem -s /path/to/dump.rdb -o /path/to/dump.mem -l 50
 ```
 
-## Diff rdb
+### Diff rdb
 
 ```java  
 rct -f diff -s /path/to/dump1.rdb -o /path/to/dump1.diff
@@ -214,38 +217,42 @@ rct -f diff -s /path/to/dump2.rdb -o /path/to/dump2.diff
 diff /path/to/dump1.diff /path/to/dump2.diff
 ```
 
-## 把rdb转换成RESP格式
+### 把rdb转换成RESP格式
 
 ```java  
 rct -f resp -s /path/to/dump.rdb -o /path/to/appendonly.aof
 ```
 
-## 同步rdb到远端redis
+### 同步rdb到远端redis
 
 ```java  
 rmt -s /path/to/dump.rdb -m redis://192.168.1.105:6379 -r
 ```
 
-## 备份远端redis的rdb
+### 备份远端redis的rdb
 
 ```java  
 rdt -b redis://192.168.1.105:6379 -o /path/to/dump.rdb
 ```
 
-## 过滤rdb
+### 过滤rdb
 
 ```java  
 rdt -b /path/to/dump.rdb -o /path/to/filtered-dump.rdb -d 0 -t string
 ```
 
-## 通过集群的nodes.conf把1个rdb分割成多个rdb
+### 通过集群的nodes.conf把1个rdb分割成多个rdb
 
 ```java  
 rdt -s ./dump.rdb -c ./nodes.conf -o /path/to/folder -d 0
 ```
 
-## 合并多个rdb成1个
+### 合并多个rdb成1个
 
 ```java  
 rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
 ```
+
+### 其他参数
+
+更多的可配置参数可以在 `/path/to/redis-cli-tool/conf/redis-cli.conf` 这里配置

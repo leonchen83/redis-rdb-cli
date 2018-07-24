@@ -13,10 +13,12 @@ jdk 1.8+
 ## Install
 
 ```java  
+mkdir redis-cli-tool
+cd ./redis-cli-tool
 wget https://github.com/leonchen83/redis-cli-tool/releases/download/${version}/redis-cli-tool.zip
 unzip redis-cli-tool.zip
-sudo chmod -R 755 ./redis-cli-tool
-cd ./redis-cli-tool/bin
+sudo chmod -R 755 ./
+cd ./bin
 ./rct -h
 ```
 
@@ -32,6 +34,7 @@ maven-3.3.1+
 ## Compile & run
 
 ```java  
+    git clone https://github.com/leonchen83/redis-cli-tool.git
     cd redis-cli-tool
     mvn clean install -Dmaven.test.skip=true
     cd target/redis-cli-tool/bin
@@ -167,7 +170,7 @@ examples:
 
 ```
 
-## Filter
+### Filter
 
 `rct`, `rdt` and `rmt` all these commands support data filter by `type`,`db`,`key` RegEx.  
 For example:
@@ -179,7 +182,7 @@ rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -t string hash
 rmt -s /path/to/dump.rdb -m redis://192.168.1.105:6379 -r -d 0 1 -t list
 ```
 
-## Redis mass insertion
+### Redis mass insertion
 
 ```java  
 
@@ -188,25 +191,25 @@ cat /path/to/dump.aof | /redis/src/redis-cli -p 6379 --pipe
 
 ```
 
-## Convert rdb to dump format
+### Convert rdb to dump format
 
 ```java  
 rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof
 ```
 
-## Convert rdb to json format
+### Convert rdb to json format
 
 ```java  
 rct -f json -s /path/to/dump.rdb -o /path/to/dump.json
 ```
 
-## Find top 50 largest keys
+### Find top 50 largest keys
 
 ```java  
 rct -f mem -s /path/to/dump.rdb -o /path/to/dump.mem -l 50
 ```
 
-## Diff rdb
+### Diff rdb
 
 ```java  
 rct -f diff -s /path/to/dump1.rdb -o /path/to/dump1.diff
@@ -214,38 +217,42 @@ rct -f diff -s /path/to/dump2.rdb -o /path/to/dump2.diff
 diff /path/to/dump1.diff /path/to/dump2.diff
 ```
 
-## Convert rdb to RESP
+### Convert rdb to RESP
 
 ```java  
 rct -f resp -s /path/to/dump.rdb -o /path/to/appendonly.aof
 ```
 
-## Migrate rdb to remote redis
+### Migrate rdb to remote redis
 
 ```java  
 rmt -s /path/to/dump.rdb -m redis://192.168.1.105:6379 -r
 ```
 
-## Backup remote redis's rdb
+### Backup remote redis's rdb
 
 ```java  
 rdt -b redis://192.168.1.105:6379 -o /path/to/dump.rdb
 ```
 
-## Filter rdb
+### Filter rdb
 
 ```java  
 rdt -b /path/to/dump.rdb -o /path/to/filtered-dump.rdb -d 0 -t string
 ```
 
-## Split rdb via cluster's nodes.conf
+### Split rdb via cluster's nodes.conf
 
 ```java  
 rdt -s ./dump.rdb -c ./nodes.conf -o /path/to/folder -d 0
 ```
 
-## Merge multi rdb to one
+### Merge multi rdb to one
 
 ```java  
 rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
 ```
+
+### Other parameter
+
+More configurable parameter can be modified in `/path/to/redis-cli-tool/conf/redis-cli.conf`

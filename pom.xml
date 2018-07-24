@@ -22,7 +22,7 @@
 
     <groupId>com.moilioncircle</groupId>
     <artifactId>redis-cli-tool</artifactId>
-    <version>0.1.5</version>
+    <version>1.0.0</version>
 
     <name>redis-cli-tool</name>
     <description>redis cli tool</description>
