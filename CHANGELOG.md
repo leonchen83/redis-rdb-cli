@@ -1,6 +1,6 @@
 ### 0.1.6
 
-`rct` command add `cluster mode`.   
+`rct` command add parameter `--config`.   
 
 ### 0.1.5
 

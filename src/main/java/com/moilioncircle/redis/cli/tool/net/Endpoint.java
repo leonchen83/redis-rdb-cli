@@ -28,9 +28,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Map;
 
 import static com.moilioncircle.redis.replicator.Constants.COLON;
 import static com.moilioncircle.redis.replicator.Constants.DOLLAR;
@@ -157,6 +159,11 @@ public class Endpoint implements Closeable {
     public static Endpoint valueOf(Endpoint endpoint) {
         closeQuietly(endpoint);
         return new Endpoint(endpoint.host, endpoint.port, endpoint.db, endpoint.pipe, endpoint.conf);
+    }
+
+    public static Map<Short, Endpoint> valueOf(File config, int pipe) {
+        // TODO
+        return null;
     }
 
     private void emit(OutputStream out, byte[] command, byte[]... ary) throws IOException {

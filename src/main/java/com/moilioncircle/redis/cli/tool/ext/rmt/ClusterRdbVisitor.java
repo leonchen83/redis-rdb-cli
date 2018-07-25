@@ -18,13 +18,10 @@ package com.moilioncircle.redis.cli.tool.ext.rmt;
 
 import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.ext.AbstractRdbVisitor;
-import com.moilioncircle.redis.cli.tool.ext.AsyncEventListener;
 import com.moilioncircle.redis.cli.tool.ext.DumpRawByteListener;
 import com.moilioncircle.redis.cli.tool.glossary.DataType;
 import com.moilioncircle.redis.cli.tool.glossary.Escape;
 import com.moilioncircle.redis.cli.tool.net.Endpoint;
-import com.moilioncircle.redis.replicator.Configuration;
-import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
@@ -33,72 +30,91 @@ import com.moilioncircle.redis.replicator.event.PreCommandSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
-import com.moilioncircle.redis.replicator.rdb.datatype.DB;
 import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static com.moilioncircle.redis.cli.tool.net.Endpoint.closeQuietly;
+import static com.moilioncircle.redis.cli.tool.util.CRC16.crc16;
+import static java.util.Collections.singletonList;
 
 /**
  * @author Baoyi Chen
  */
-public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListener {
+public class ClusterRdbVisitor extends AbstractRdbVisitor implements EventListener {
 
-    private final RedisURI uri;
+    private final File conf;
     private final boolean replace;
-    private final Configuration conf;
-    private ThreadLocal<Endpoint> endpoint = new ThreadLocal<>();
+    private Map<Short, Endpoint> endpoints = new HashMap<>();
 
-    public MigrateRdbVisitor(Replicator replicator, Configure configure, String uri, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) throws Exception {
-        super(replicator, configure, db, regexs, types);
+    public ClusterRdbVisitor(Replicator replicator, Configure configure, File conf, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) throws Exception {
+        super(replicator, configure, singletonList(0L), regexs, types);
+        this.conf = conf;
         this.replace = replace;
-        this.uri = new RedisURI(uri);
-        this.conf = configure.merge(this.uri);
-        this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure));
+        this.replicator.addEventListener(this);
     }
 
     @Override
     public void onEvent(Replicator replicator, Event event) {
         if (event instanceof PreRdbSyncEvent) {
-            closeQuietly(this.endpoint.get());
+            Set<Endpoint> set = new HashSet<>(this.endpoints.values());
+            set.forEach(e -> closeQuietly(e));
             int pipe = configure.getMigrateBatchSize();
-            this.endpoint.set(new Endpoint(uri.getHost(), uri.getPort(), 0, pipe, conf));
+            this.endpoints = Endpoint.valueOf(conf, pipe);
         } else if (event instanceof DumpKeyValuePair) {
             retry(event, configure.getMigrateRetryTime());
         } else if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
-            this.endpoint.get().flush();
-            closeQuietly(this.endpoint.get());
+            Set<Endpoint> set = new HashSet<>(this.endpoints.values());
+            set.forEach(e -> {
+                e.flush();
+                closeQuietly(e);
+            });
         }
     }
 
-    public void retry(Event event, int times) {
-        try {
-            DumpKeyValuePair dkv = (DumpKeyValuePair) event;
-            DB db = dkv.getDb();
-
-            int index;
-            if (db != null && (index = (int) db.getDbNumber()) != endpoint.get().getDB()) {
-                endpoint.get().select(true, index);
+    protected short slot(byte[] key) {
+        if (key == null) return 0;
+        int st = -1, ed = -1;
+        for (int i = 0, len = key.length; i < len; i++) {
+            if (key[i] == '{' && st == -1) st = i;
+            if (key[i] == '}' && st >= 0) {
+                ed = i;
+                break;
             }
+        }
+        if (st >= 0 && ed >= 0 && ed > st + 1)
+            return (short) (crc16(key, st + 1, ed) & 16383);
+        return (short) (crc16(key) & 16383);
+    }
 
+    public void retry(Event event, int times) {
+        DumpKeyValuePair dkv = (DumpKeyValuePair) event;
+        short slot = slot(dkv.getKey());
+        Endpoint endpoint = this.endpoints.get(slot);
+        try {
             byte[] expire = ZERO;
             if (dkv.getExpiredMs() != null) {
                 long ms = dkv.getExpiredMs() - System.currentTimeMillis();
                 if (ms <= 0) return;
                 expire = String.valueOf(ms).getBytes();
             }
+
             if (!replace) {
-                endpoint.get().batch(true, RESTORE, dkv.getKey(), expire, dkv.getValue());
+                endpoint.batch(true, RESTORE_ASKING, dkv.getKey(), expire, dkv.getValue());
             } else {
-                endpoint.get().batch(true, RESTORE, dkv.getKey(), expire, dkv.getValue(), REPLACE);
+                endpoint.batch(true, RESTORE_ASKING, dkv.getKey(), expire, dkv.getValue(), REPLACE);
             }
         } catch (Throwable e) {
             times--;
             if (times >= 0) {
-                endpoint.set(Endpoint.valueOf(endpoint.get()));
+                this.endpoints.put(slot, Endpoint.valueOf(endpoint));
                 retry(event, times);
             }
         }

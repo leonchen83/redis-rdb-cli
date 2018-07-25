@@ -94,14 +94,13 @@ examples:
 
 ```java  
 
-usage: rmt -s <source> -m <uri> [-d <num num...>] [-k <regex regex...>]
-           [-t <type type...>] [-r] [-c]
+usage: rmt -s <source> [-m <uri> | -c <file>] [-d <num num...>] [-k <regex
+           regex...>] [-t <type type...>] [-r]
 
 options:
- -c,--cluster                whether the target <uri> is cluster uri. if
-                             not specified, default value is false. if
-                             specified, that will only migrate db0 from
-                             <source>.
+ -c,--config <file>          migrate data to cluster via redis cluster's
+                             <nodes.conf> file, if specified, no need to
+                             specify --migrate.
  -d,--db <num num...>        database number. multiple databases can be
                              provided. if not specified, all databases
                              will be included.
@@ -124,8 +123,9 @@ options:
  -v,--version                rmt version.
 
 examples:
+ rmt -s ./dump.rdb -c ./nodes.conf -t string -r
+ rmt -s ./dump.rdb -m redis://127.0.0.1:6380 -t list -d 0
  rmt -s redis://120.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0
- rmt -s ./dump.rdb -m redis://127.0.0.1:6380 -t string -r -c
 
 ```
 
