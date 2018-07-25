@@ -18,10 +18,7 @@ package com.moilioncircle.redis.cli.tool.net;
 
 import com.moilioncircle.redis.replicator.Configuration;
 
-import java.io.BufferedReader;
 import java.io.Closeable;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,11 +38,16 @@ public class Endpoints implements Closeable {
     private final Set<Endpoint> set = new HashSet<>();
     private final Map<Short, Endpoint> endpoints = new HashMap<>();
     
-    public Endpoints(File conf, int pipe, Configuration configuration) {
+    public Endpoints(List<String> conf, int pipe, Configuration configuration) {
         NodeConfParser parser = new NodeConfParser(pipe, configuration);
         parser.parse(conf, set, endpoints);
         if (endpoints.size() != 16384)
             throw new UnsupportedOperationException("slots size : " + endpoints.size() + ", expected 16384.");
+    }
+    
+    public String send(byte[] command, byte[]... args) {
+        short slot = slot(args[0]);
+        return endpoints.get(slot).send(command, args);
     }
     
     public void batch(boolean force, byte[] command, byte[]... args) {
@@ -119,105 +121,100 @@ public class Endpoints implements Closeable {
             this.pipe = pipe;
             this.configuration = configuration;
         }
-        
-        public void parse(File conf, Set<Endpoint> set, Map<Short, Endpoint> result) {
+    
+        public void parse(List<String> conf, Set<Endpoint> set, Map<Short, Endpoint> result) {
             Map<String, Endpoint> map = new HashMap<>();
-            try (BufferedReader r = new BufferedReader(new FileReader(conf))) {
-                String line;
-                while ((line = r.readLine()) != null) {
-                    List<String> args = parseLine(line);
-                    if (args.isEmpty()) continue;
-                    if (args.get(0).equals("vars")) {
-                        for (int i = 1; i < args.size(); i += 2) {
-                            switch (args.get(i)) {
-                                case "currentEpoch":
-                                    // pass
-                                    break;
-                                case "lastVoteEpoch":
-                                    // pass
-                                    break;
-                                default:
-                                    break;
-                            }
+            for (String line : conf) {
+                List<String> args = parseLine(line);
+                if (args.isEmpty()) continue;
+                if (args.get(0).equals("vars")) {
+                    for (int i = 1; i < args.size(); i += 2) {
+                        switch (args.get(i)) {
+                            case "currentEpoch":
+                                // pass
+                                break;
+                            case "lastVoteEpoch":
+                                // pass
+                                break;
+                            default:
+                                break;
                         }
-                    } else if (args.size() < 8) {
+                    }
+                } else if (args.size() < 8) {
+                    // pass
+                } else {
+                    String name = args.get(0);
+                    String hostAndPort = args.get(1);
+                    int cIdx = hostAndPort.indexOf(":");
+                    int aIdx = hostAndPort.indexOf("@");
+                    String host = hostAndPort.substring(0, cIdx); // ip
+                    int port = parseInt(hostAndPort.substring(cIdx + 1, aIdx == -1 ? hostAndPort.length() : aIdx));
+                
+                    boolean master = false;
+                    for (String role : args.get(2).split(",")) {
+                        switch (role) {
+                            case "noflags":
+                                break;
+                            case "fail":
+                                // pass
+                                break;
+                            case "fail?":
+                                // pass
+                                break;
+                            case "slave":
+                                // pass
+                                break;
+                            case "noaddr":
+                                // pass
+                                break;
+                            case "master":
+                                master = true;
+                                break;
+                            case "handshake":
+                                // pass
+                                break;
+                            case "myself":
+                                // pass
+                                // pass
+                                break;
+                            default:
+                                // pass
+                        }
+                    }
+                
+                    if (!map.containsKey(name) && master) {
+                        Endpoint endpoint = new Endpoint(host, port, 0, pipe, configuration);
+                        map.put(name, endpoint);
+                        set.add(endpoint);
+                    }
+                
+                    if (!args.get(3).equals("-")) {
+                        args.get(3); // slave
                         // pass
-                    } else {
-                        String name = args.get(0);
-                        String hostAndPort = args.get(1);
-                        int cIdx = hostAndPort.indexOf(":");
-                        int aIdx = hostAndPort.indexOf("@");
-                        String host = hostAndPort.substring(0, cIdx); // ip
-                        int port = parseInt(hostAndPort.substring(aIdx + 1)); // port
-                        
-                        boolean master = false;
-                        for (String role : args.get(2).split(",")) {
-                            switch (role) {
-                                case "noflags":
-                                    break;
-                                case "fail":
-                                    // pass
-                                    break;
-                                case "fail?":
-                                    // pass
-                                    break;
-                                case "slave":
-                                    // pass
-                                    break;
-                                case "noaddr":
-                                    // pass
-                                    break;
-                                case "master":
-                                    master = true;
-                                    break;
-                                case "handshake":
-                                    // pass
-                                    break;
-                                case "myself":
-                                    // pass
-                                    // pass
-                                    break;
-                                default:
-                                    // pass
-                            }
-                        }
-                        
-                        if (!map.containsKey(name) && master) {
-                            Endpoint endpoint = new Endpoint(host, port, 0, pipe, configuration);
-                            map.put(name, endpoint);
-                            set.add(endpoint);
-                        }
-                        
-                        if (!args.get(3).equals("-")) {
-                            args.get(3); // slave
-                            // pass
-                        }
-                        
-                        // args.get(4); pingTime
-                        // args.get(5); pongTime
-                        // args.get(6); configEpoch
-                        
-                        for (int i = 8; i < args.size(); i++) {
-                            int st, ed;
-                            String arg = args.get(i);
-                            if (arg.startsWith("[")) {
-                                int idx = arg.indexOf("-");
-                                arg.substring(1, idx); // slot
-                                arg.substring(idx + 3, idx + 3 + 40); // migrate
-                                throw new UnsupportedOperationException(conf.getName() + " must not contains migrating slot.");
-                            } else if (arg.contains("-")) {
-                                int idx = arg.indexOf("-");
-                                st = parseInt(arg.substring(0, idx));
-                                ed = parseInt(arg.substring(idx + 1));
-                            } else st = ed = parseInt(arg);
-                            for (; st <= ed; st++) {
-                                result.put((short) st, map.get(name));
-                            }
+                    }
+                
+                    // args.get(4); pingTime
+                    // args.get(5); pongTime
+                    // args.get(6); configEpoch
+                
+                    for (int i = 8; i < args.size(); i++) {
+                        int st, ed;
+                        String arg = args.get(i);
+                        if (arg.startsWith("[")) {
+                            int idx = arg.indexOf("-");
+                            arg.substring(1, idx); // slot
+                            arg.substring(idx + 3, idx + 3 + 40); // migrate
+                            throw new UnsupportedOperationException("must not contains migrating slot.");
+                        } else if (arg.contains("-")) {
+                            int idx = arg.indexOf("-");
+                            st = parseInt(arg.substring(0, idx));
+                            ed = parseInt(arg.substring(idx + 1));
+                        } else st = ed = parseInt(arg);
+                        for (; st <= ed; st++) {
+                            result.put((short) st, map.get(name));
                         }
                     }
                 }
-            } catch (IOException e) {
-                throw new UnsupportedOperationException(e.getMessage(), e);
             }
         }
         

@@ -37,6 +37,7 @@ import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 
 import static com.moilioncircle.redis.cli.tool.net.Endpoints.closeQuietly;
@@ -48,14 +49,14 @@ import static java.util.Collections.singletonList;
  */
 public class ClusterRdbVisitor extends AbstractRdbVisitor implements EventListener {
     
-    private final File conf;
+    private final List<String> conf;
     private final boolean replace;
     private final Configuration configuration;
     private ThreadLocal<Endpoints> endpoints = new ThreadLocal<>();
     
-    public ClusterRdbVisitor(Replicator replicator, Configure configure, File conf, List<String> regexs, List<DataType> types, boolean replace) {
+    public ClusterRdbVisitor(Replicator replicator, Configure configure, File conf, List<String> regexs, List<DataType> types, boolean replace) throws IOException {
         super(replicator, configure, singletonList(0L), regexs, types);
-        this.conf = conf;
+        this.conf = Files.readAllLines(conf.toPath());
         this.replace = replace;
         this.configuration = configure.merge(defaultSetting());
         this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure));
