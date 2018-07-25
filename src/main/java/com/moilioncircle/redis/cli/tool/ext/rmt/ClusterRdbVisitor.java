@@ -54,7 +54,7 @@ public class ClusterRdbVisitor extends AbstractRdbVisitor implements EventListen
     private final boolean replace;
     private Map<Short, Endpoint> endpoints = new HashMap<>();
 
-    public ClusterRdbVisitor(Replicator replicator, Configure configure, File conf, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) throws Exception {
+    public ClusterRdbVisitor(Replicator replicator, Configure configure, File conf, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) {
         super(replicator, configure, singletonList(0L), regexs, types);
         this.conf = conf;
         this.replace = replace;
