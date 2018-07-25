@@ -42,19 +42,21 @@ public class RmtCommand extends AbstractCommand {
     private static final Option VERSION = Option.builder("v").longOpt("version").required(false).hasArg(false).desc("rmt version.").build();
     private static final Option SOURCE = Option.builder("s").longOpt("source").required(false).hasArg().argName("source").type(String.class).desc("<source> eg:\n /path/to/dump.rdb redis://host:port?authPassword=foobar redis:///path/to/dump.rdb").build();
     private static final Option REPLACE = Option.builder("r").longOpt("replace").required(false).desc("replace exist key value. if not specified, default value is false.").build();
+    private static final Option CLUSTER = Option.builder("c").longOpt("cluster").required(false).desc("whether the target <uri> is cluster uri. if not specified, default value is false. if specified, that will only migrate db0 from <source>.").build();
     private static final Option MIGRATE = Option.builder("m").longOpt("migrate").required(false).hasArg().argName("uri").type(String.class).desc("migrate to uri. eg: redis://host:port?authPassword=foobar.").build();
     private static final Option DB = Option.builder("d").longOpt("db").required(false).hasArg().argName("num num...").valueSeparator(' ').type(Number.class).desc("database number. multiple databases can be provided. if not specified, all databases will be included.").build();
     private static final Option KEY = Option.builder("k").longOpt("key").required(false).hasArg().argName("regex regex...").valueSeparator(' ').type(String.class).desc("keys to export. this can be a regex. if not specified, all keys will be returned.").build();
     private static final Option TYPE = Option.builder("t").longOpt("type").required(false).hasArgs().argName("type type...").valueSeparator(' ').type(String.class).desc("data type to export. possible values are string, hash, set, sortedset, list, module, stream. multiple types can be provided. if not specified, all data types will be returned.").build();
 
-    private static final String HEADER = "rmt -s <source> -m <uri> [-d <num num...>] [-k <regex regex...>] [-t <type type...>] [-r]";
-    private static final String EXAMPLE = "\nexamples:\n rmt -s redis://120.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0\n rmt -s ./dump.rdb -m redis://127.0.0.1:6380 -t string -r\n";
+    private static final String HEADER = "rmt -s <source> -m <uri> [-d <num num...>] [-k <regex regex...>] [-t <type type...>] [-r] [-c]";
+    private static final String EXAMPLE = "\nexamples:\n rmt -s redis://120.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0\n rmt -s ./dump.rdb -m redis://127.0.0.1:6380 -t string -r -c\n";
 
     private RmtCommand() {
         addOption(HELP);
         addOption(VERSION);
         addOption(SOURCE);
         addOption(REPLACE);
+        addOption(CLUSTER);
         addOption(MIGRATE);
         addOption(DB);
         addOption(KEY);
@@ -90,6 +92,7 @@ public class RmtCommand extends AbstractCommand {
             List<Long> db = line.getOptions("db");
             List<String> type = line.getOptions("type");
             boolean replace = line.hasOption("replace");
+            boolean cluster = line.hasOption("cluster");
             List<String> regexs = line.getOptions("key");
 
             source = normalize(source, FileType.RDB, "Invalid options: s. Try `rmt -h` for more information.");
@@ -102,7 +105,7 @@ public class RmtCommand extends AbstractCommand {
             try (ProgressBar bar = new ProgressBar(-1)) {
                 Configure configure = Configure.bind();
                 Replicator r = new CliRedisReplicator(source, configure);
-                r.setRdbVisitor(new MigrateRdbVisitor(r, configure, migrate, db, regexs, parse(type), replace));
+                r.setRdbVisitor(new MigrateRdbVisitor(r, configure, migrate, db, regexs, parse(type), replace, cluster));
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> CliRedisReplicator.closeQuietly(r)));
                 r.addExceptionListener((rep, tx, e) -> { throw new RuntimeException(tx.getMessage(), tx); });
                 r.addEventListener((rep, event) -> {

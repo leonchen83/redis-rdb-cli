@@ -81,7 +81,8 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
     protected static final byte[] REPLACE = "replace".getBytes();
     protected static final byte[] RESTORE = "restore".getBytes();
     protected static final byte[] EXPIREAT = "expireat".getBytes();
-    
+    protected static final byte[] RESTORE_ASKING = "restore-asking".getBytes();
+
     // common
     protected Set<Long> db;
     protected Set<String> keys;
