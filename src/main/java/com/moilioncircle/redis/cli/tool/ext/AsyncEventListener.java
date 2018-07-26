@@ -42,32 +42,38 @@ public class AsyncEventListener implements EventListener {
 
     public AsyncEventListener(EventListener listener, Replicator r, Configure c) {
         this.listener = listener;
-        int n = c.getMigrateThreadSize();
-        if ((n & (n - 1)) != 0) {
-            throw new IllegalArgumentException("migrate_thread_size " + n + " must power of 2");
-        }
-        this.executors = new ExecutorService[n];
-        for (int i = 0; i < this.executors.length; i++) {
-            this.executors[i] = Executors.newSingleThreadExecutor();
-        }
-        r.addCloseListener(rep -> {
-            for (int i = 0; i < this.executors.length; i++) {
-                terminateQuietly(this.executors[i], c.getTimeout(), TimeUnit.MILLISECONDS);
+        int n = c.getMigrateThreads();
+        if (n > 0) {
+            if ((n & (n - 1)) != 0) {
+                throw new IllegalArgumentException("migrate_thread_size " + n + " must power of 2");
             }
-        });
+            this.executors = new ExecutorService[n];
+            for (int i = 0; i < this.executors.length; i++) {
+                this.executors[i] = Executors.newSingleThreadExecutor();
+            }
+            r.addCloseListener(rep -> {
+                for (int i = 0; i < this.executors.length; i++) {
+                    terminateQuietly(this.executors[i], c.getTimeout(), TimeUnit.MILLISECONDS);
+                }
+            });
+        }
     }
 
     @Override
     public void onEvent(Replicator replicator, Event event) {
-        if (event instanceof PreRdbSyncEvent ||
-                event instanceof PostRdbSyncEvent ||
-                event instanceof PreCommandSyncEvent) {
-            for (int i = 0; i < this.executors.length; i++) {
+        if (executors == null) {
+            this.listener.onEvent(replicator, event);
+        } else {
+            if (event instanceof PreRdbSyncEvent ||
+                    event instanceof PostRdbSyncEvent ||
+                    event instanceof PreCommandSyncEvent) {
+                for (int i = 0; i < this.executors.length; i++) {
+                    this.executors[i].submit(() -> this.listener.onEvent(replicator, event));
+                }
+            } else if (event instanceof DumpKeyValuePair) {
+                int i = count++ & (executors.length - 1);
                 this.executors[i].submit(() -> this.listener.onEvent(replicator, event));
             }
-        } else if (event instanceof DumpKeyValuePair) {
-            int i = count++ & (executors.length - 1);
-            this.executors[i].submit(() -> this.listener.onEvent(replicator, event));
         }
     }
 }

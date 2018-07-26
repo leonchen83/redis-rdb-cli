@@ -80,12 +80,17 @@ public class Configure {
     /**
      * rmt --migrate
      */
-    private int migrateThreadSize = 4;
+    private int migrateThreads = 4;
 
     /**
      * rmt --migrate
      */
-    private int migrateRetryTime = 1;
+    private int migrateRetries = 1;
+
+    /**
+     * rmt --migrate
+     */
+    private boolean migrateFlush = true;
 
     /**
      * timeout
@@ -201,20 +206,28 @@ public class Configure {
         this.migrateBatchSize = migrateBatchSize;
     }
 
-    public int getMigrateThreadSize() {
-        return migrateThreadSize;
+    public int getMigrateThreads() {
+        return migrateThreads;
     }
 
-    public void setMigrateThreadSize(int migrateThreadSize) {
-        this.migrateThreadSize = migrateThreadSize;
+    public void setMigrateThreads(int migrateThreads) {
+        this.migrateThreads = migrateThreads;
     }
 
-    public int getMigrateRetryTime() {
-        return migrateRetryTime;
+    public int getMigrateRetries() {
+        return migrateRetries;
     }
 
-    public void setMigrateRetryTime(int migrateRetryTime) {
-        this.migrateRetryTime = migrateRetryTime;
+    public void setMigrateRetries(int migrateRetries) {
+        this.migrateRetries = migrateRetries;
+    }
+
+    public boolean isMigrateFlush() {
+        return migrateFlush;
+    }
+
+    public void setMigrateFlush(boolean migrateFlush) {
+        this.migrateFlush = migrateFlush;
     }
 
     public int getRetryInterval() {
@@ -291,8 +304,9 @@ public class Configure {
         Configure conf = new Configure(properties);
         conf.batchSize = getInt(conf, "batch_size", 128, true);
         conf.migrateBatchSize = getInt(conf, "migrate_batch_size", 4096, true);
-        conf.migrateThreadSize = getInt(conf, "migrate_thread_size", 4, true);
-        conf.migrateRetryTime = getInt(conf, "migrate_retry_time", 1, true);
+        conf.migrateThreads = getInt(conf, "migrate_threads", 4, true);
+        conf.migrateRetries = getInt(conf, "migrate_retries", 1, true);
+        conf.migrateFlush = getBool(conf, "migrate_flush", true, true);
         conf.dumpRdbVersion = getInt(conf, "dump_rdb_version", -1, true);
         conf.quote = (byte) getString(conf, "quote", "\"", true).charAt(0);
         conf.delimiter = (byte) getString(conf, "delimiter", ",", true).charAt(0);
@@ -361,8 +375,9 @@ public class Configure {
                 ", sndBuf=" + sndBuf +
                 ", retries=" + retries +
                 ", migrateBatchSize=" + migrateBatchSize +
-                ", migrateThreadSize=" + migrateThreadSize +
-                ", migrateRetryTime=" + migrateRetryTime +
+                ", migrateThreads=" + migrateThreads +
+                ", migrateRetries=" + migrateRetries +
+                ", migrateFlush=" + migrateFlush +
                 ", retryInterval=" + retryInterval +
                 ", bufferSize=" + bufferSize +
                 ", asyncCacheSize=" + asyncCacheSize +

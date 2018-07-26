@@ -48,6 +48,7 @@ import static com.moilioncircle.redis.cli.tool.net.Endpoint.closeQuietly;
 public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListener {
 
     private final RedisURI uri;
+    private final boolean flush;
     private final boolean replace;
     private final Configuration conf;
     private ThreadLocal<Endpoint> endpoint = new ThreadLocal<>();
@@ -57,6 +58,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
         this.replace = replace;
         this.uri = new RedisURI(uri);
         this.conf = configure.merge(this.uri);
+        this.flush = configure.isMigrateFlush();
         this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure));
     }
 
@@ -67,7 +69,7 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
             int pipe = configure.getMigrateBatchSize();
             this.endpoint.set(new Endpoint(uri.getHost(), uri.getPort(), 0, pipe, conf));
         } else if (event instanceof DumpKeyValuePair) {
-            retry(event, configure.getMigrateRetryTime());
+            retry(event, configure.getMigrateRetries());
         } else if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
             this.endpoint.get().flush();
             closeQuietly(this.endpoint.get());
@@ -91,9 +93,9 @@ public class MigrateRdbVisitor extends AbstractRdbVisitor implements EventListen
                 expire = String.valueOf(ms).getBytes();
             }
             if (!replace) {
-                endpoint.get().batch(true, RESTORE, dkv.getKey(), expire, dkv.getValue());
+                endpoint.get().batch(flush, RESTORE, dkv.getKey(), expire, dkv.getValue());
             } else {
-                endpoint.get().batch(true, RESTORE, dkv.getKey(), expire, dkv.getValue(), REPLACE);
+                endpoint.get().batch(flush, RESTORE, dkv.getKey(), expire, dkv.getValue(), REPLACE);
             }
         } catch (Throwable e) {
             times--;

@@ -48,20 +48,22 @@ import static java.util.Collections.singletonList;
  * @author Baoyi Chen
  */
 public class ClusterRdbVisitor extends AbstractRdbVisitor implements EventListener {
-    
-    private final List<String> conf;
+
+    private final boolean flush;
     private final boolean replace;
+    private final List<String> conf;
     private final Configuration configuration;
     private ThreadLocal<Endpoints> endpoints = new ThreadLocal<>();
-    
+
     public ClusterRdbVisitor(Replicator replicator, Configure configure, File conf, List<String> regexs, List<DataType> types, boolean replace) throws IOException {
         super(replicator, configure, singletonList(0L), regexs, types);
-        this.conf = Files.readAllLines(conf.toPath());
         this.replace = replace;
+        this.flush = configure.isMigrateFlush();
+        this.conf = Files.readAllLines(conf.toPath());
         this.configuration = configure.merge(defaultSetting());
         this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure));
     }
-    
+
     @Override
     public void onEvent(Replicator replicator, Event event) {
         if (event instanceof PreRdbSyncEvent) {
@@ -69,13 +71,13 @@ public class ClusterRdbVisitor extends AbstractRdbVisitor implements EventListen
             int pipe = configure.getMigrateBatchSize();
             this.endpoints.set(new Endpoints(conf, pipe, configuration));
         } else if (event instanceof DumpKeyValuePair) {
-            retry(event, configure.getMigrateRetryTime());
+            retry(event, configure.getMigrateRetries());
         } else if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
             this.endpoints.get().flush();
             closeQuietly(this.endpoints.get());
         }
     }
-    
+
     public void retry(Event event, int times) {
         DumpKeyValuePair dkv = (DumpKeyValuePair) event;
         try {
@@ -85,11 +87,11 @@ public class ClusterRdbVisitor extends AbstractRdbVisitor implements EventListen
                 if (ms <= 0) return;
                 expire = String.valueOf(ms).getBytes();
             }
-    
+
             if (!replace) {
-                endpoints.get().batch(true, RESTORE_ASKING, dkv.getKey(), expire, dkv.getValue());
+                endpoints.get().batch(flush, RESTORE_ASKING, dkv.getKey(), expire, dkv.getValue());
             } else {
-                endpoints.get().batch(true, RESTORE_ASKING, dkv.getKey(), expire, dkv.getValue(), REPLACE);
+                endpoints.get().batch(flush, RESTORE_ASKING, dkv.getKey(), expire, dkv.getValue(), REPLACE);
             }
         } catch (Throwable e) {
             times--;
@@ -99,7 +101,7 @@ public class ClusterRdbVisitor extends AbstractRdbVisitor implements EventListen
             }
         }
     }
-    
+
     @Override
     protected Event doApplyString(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
@@ -116,7 +118,7 @@ public class ClusterRdbVisitor extends AbstractRdbVisitor implements EventListen
             return context.valueOf(dump);
         }
     }
-    
+
     @Override
     protected Event doApplyList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
@@ -133,7 +135,7 @@ public class ClusterRdbVisitor extends AbstractRdbVisitor implements EventListen
             return context.valueOf(dump);
         }
     }
-    
+
     @Override
     protected Event doApplySet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
@@ -150,7 +152,7 @@ public class ClusterRdbVisitor extends AbstractRdbVisitor implements EventListen
             return context.valueOf(dump);
         }
     }
-    
+
     @Override
     protected Event doApplyZSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
@@ -167,7 +169,7 @@ public class ClusterRdbVisitor extends AbstractRdbVisitor implements EventListen
             return context.valueOf(dump);
         }
     }
-    
+
     @Override
     protected Event doApplyZSet2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
@@ -184,7 +186,7 @@ public class ClusterRdbVisitor extends AbstractRdbVisitor implements EventListen
             return context.valueOf(dump);
         }
     }
-    
+
     @Override
     protected Event doApplyHash(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
@@ -201,7 +203,7 @@ public class ClusterRdbVisitor extends AbstractRdbVisitor implements EventListen
             return context.valueOf(dump);
         }
     }
-    
+
     @Override
     protected Event doApplyHashZipMap(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
@@ -218,7 +220,7 @@ public class ClusterRdbVisitor extends AbstractRdbVisitor implements EventListen
             return context.valueOf(dump);
         }
     }
-    
+
     @Override
     protected Event doApplyListZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
@@ -235,7 +237,7 @@ public class ClusterRdbVisitor extends AbstractRdbVisitor implements EventListen
             return context.valueOf(dump);
         }
     }
-    
+
     @Override
     protected Event doApplySetIntSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
@@ -252,7 +254,7 @@ public class ClusterRdbVisitor extends AbstractRdbVisitor implements EventListen
             return context.valueOf(dump);
         }
     }
-    
+
     @Override
     protected Event doApplyZSetZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
@@ -269,7 +271,7 @@ public class ClusterRdbVisitor extends AbstractRdbVisitor implements EventListen
             return context.valueOf(dump);
         }
     }
-    
+
     @Override
     protected Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
@@ -286,7 +288,7 @@ public class ClusterRdbVisitor extends AbstractRdbVisitor implements EventListen
             return context.valueOf(dump);
         }
     }
-    
+
     @Override
     protected Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
@@ -303,7 +305,7 @@ public class ClusterRdbVisitor extends AbstractRdbVisitor implements EventListen
             return context.valueOf(dump);
         }
     }
-    
+
     @Override
     protected Event doApplyModule(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
@@ -320,7 +322,7 @@ public class ClusterRdbVisitor extends AbstractRdbVisitor implements EventListen
             return context.valueOf(dump);
         }
     }
-    
+
     @Override
     protected Event doApplyModule2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
@@ -337,7 +339,7 @@ public class ClusterRdbVisitor extends AbstractRdbVisitor implements EventListen
             return context.valueOf(dump);
         }
     }
-    
+
     @Override
     protected Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
