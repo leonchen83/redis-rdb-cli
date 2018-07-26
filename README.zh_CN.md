@@ -176,7 +176,7 @@ examples:
 
 ### 过滤
 
-`rct`, `rdt` 和 `rmt` 这3个命令支持`type`,`db`,`key`正则表达式(Java风格)数据过滤  
+`rct`, `rdt` 和 `rmt` 这3个命令支持`type`,`db` 和 `key`正则表达式(Java风格)数据过滤  
 举例如下:  
 
 ```java  
