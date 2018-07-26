@@ -33,6 +33,7 @@ import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URI;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,7 +81,8 @@ public enum Action {
                 return list;
             case SPLIT:
                 Replicator r = new CliRedisReplicator(split, configure);
-                r.setRdbVisitor(new SplitRdbVisitor(r, configure, db, regexs, types, () -> new ShardableFileOutputStream(output, conf, configure)));
+                List<String> lines = Files.readAllLines(conf.toPath());
+                r.setRdbVisitor(new SplitRdbVisitor(r, configure, db, regexs, types, () -> new ShardableFileOutputStream(output, lines, configure)));
                 list.add(Tuples.of(r, null));
                 return list;
             case BACKUP:

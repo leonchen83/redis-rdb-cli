@@ -40,7 +40,7 @@ import static com.moilioncircle.redis.cli.tool.glossary.DataType.parse;
  * @author Baoyi Chen
  */
 public class RmtCommand extends AbstractCommand {
-    
+
     private static final Option HELP = Option.builder("h").longOpt("help").required(false).hasArg(false).desc("rmt usage.").build();
     private static final Option VERSION = Option.builder("v").longOpt("version").required(false).hasArg(false).desc("rmt version.").build();
     private static final Option SOURCE = Option.builder("s").longOpt("source").required(false).hasArg().argName("source").type(String.class).desc("<source> eg:\n /path/to/dump.rdb redis://host:port?authPassword=foobar redis:///path/to/dump.rdb").build();
@@ -50,10 +50,10 @@ public class RmtCommand extends AbstractCommand {
     private static final Option DB = Option.builder("d").longOpt("db").required(false).hasArg().argName("num num...").valueSeparator(' ').type(Number.class).desc("database number. multiple databases can be provided. if not specified, all databases will be included.").build();
     private static final Option KEY = Option.builder("k").longOpt("key").required(false).hasArg().argName("regex regex...").valueSeparator(' ').type(String.class).desc("keys to export. this can be a regex. if not specified, all keys will be returned.").build();
     private static final Option TYPE = Option.builder("t").longOpt("type").required(false).hasArgs().argName("type type...").valueSeparator(' ').type(String.class).desc("data type to export. possible values are string, hash, set, sortedset, list, module, stream. multiple types can be provided. if not specified, all data types will be returned.").build();
-    
+
     private static final String HEADER = "rmt -s <source> [-m <uri> | -c <file>] [-d <num num...>] [-k <regex regex...>] [-t <type type...>] [-r]";
     private static final String EXAMPLE = "\nexamples:\n rmt -s ./dump.rdb -c ./nodes.conf -t string -r\n rmt -s ./dump.rdb -m redis://127.0.0.1:6380 -t list -d 0\n rmt -s redis://120.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0\n";
-    
+
     private RmtCommand() {
         addOption(HELP);
         addOption(VERSION);
@@ -65,7 +65,7 @@ public class RmtCommand extends AbstractCommand {
         addOption(KEY);
         addOption(TYPE);
     }
-    
+
     @Override
     protected void doExecute(CommandLine line) throws Exception {
         if (line.hasOption("help")) {
@@ -75,35 +75,35 @@ public class RmtCommand extends AbstractCommand {
             writeLine(version());
         } else {
             StringBuilder sb = new StringBuilder();
-    
+
             if (!line.hasOption("source")) {
                 sb.append("s ");
             }
-    
+
             if (line.hasOption("migrate") && line.hasOption("config")) {
                 sb.append("m or c ");
             } else if (!line.hasOption("migrate") && !line.hasOption("config")) {
                 sb.append("m or c ");
             }
-    
+
             if (sb.length() > 0) {
                 writeLine("Missing required options: " + sb.toString() + ". Try `rmt -h` for more information.");
                 return;
             }
-    
+
             File conf = line.getOption("config");
             String source = line.getOption("source");
             String migrate = line.getOption("migrate");
-    
+
             List<Long> db = line.getOptions("db");
             List<String> type = line.getOptions("type");
             boolean replace = line.hasOption("replace");
             List<String> regexs = line.getOptions("key");
-    
+
             source = normalize(source, FileType.RDB, "Invalid options: s. Try `rmt -h` for more information.");
-    
+
             Configure configure = Configure.bind();
-    
+
             if (migrate != null) {
                 RedisURI uri = new RedisURI(migrate);
                 if (uri.getFileType() != null) {
@@ -132,7 +132,8 @@ public class RmtCommand extends AbstractCommand {
                 }
                 try (ProgressBar bar = new ProgressBar(-1)) {
                     Replicator r = new CliRedisReplicator(source, configure);
-                    r.setRdbVisitor(new ClusterRdbVisitor(r, configure, conf, regexs, parse(type), replace));
+                    List<String> lines = Files.readAllLines(conf.toPath());
+                    r.setRdbVisitor(new ClusterRdbVisitor(r, configure, lines, regexs, parse(type), replace));
                     Runtime.getRuntime().addShutdownHook(new Thread(() -> CliRedisReplicator.closeQuietly(r)));
                     r.addExceptionListener((rep, tx, e) -> {
                         throw new RuntimeException(tx.getMessage(), tx);
@@ -148,12 +149,12 @@ public class RmtCommand extends AbstractCommand {
             }
         }
     }
-    
+
     @Override
     public String name() {
         return "rmt";
     }
-    
+
     public static void run(String[] args) throws Exception {
         RmtCommand command = new RmtCommand();
         command.execute(args);

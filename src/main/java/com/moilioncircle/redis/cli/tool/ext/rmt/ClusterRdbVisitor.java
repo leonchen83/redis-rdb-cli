@@ -29,9 +29,7 @@ import com.moilioncircle.redis.replicator.event.PreCommandSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.List;
 
 import static com.moilioncircle.redis.cli.tool.net.Endpoints.closeQuietly;
@@ -43,13 +41,13 @@ import static java.util.Collections.singletonList;
  */
 public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements EventListener {
 
-    private final List<String> conf;
+    private final List<String> lines;
     private final Configuration configuration;
     private ThreadLocal<Endpoints> endpoints = new ThreadLocal<>();
 
-    public ClusterRdbVisitor(Replicator replicator, Configure configure, File conf, List<String> regexs, List<DataType> types, boolean replace) throws IOException {
+    public ClusterRdbVisitor(Replicator replicator, Configure configure, List<String> lines, List<String> regexs, List<DataType> types, boolean replace) throws IOException {
         super(replicator, configure, singletonList(0L), regexs, types, replace);
-        this.conf = Files.readAllLines(conf.toPath());
+        this.lines = lines;
         this.configuration = configure.merge(defaultSetting());
         this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure));
     }
@@ -59,7 +57,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
         if (event instanceof PreRdbSyncEvent) {
             closeQuietly(this.endpoints.get());
             int pipe = configure.getMigrateBatchSize();
-            this.endpoints.set(new Endpoints(conf, pipe, configuration));
+            this.endpoints.set(new Endpoints(lines, pipe, configuration));
         } else if (event instanceof DumpKeyValuePair) {
             retry(event, configure.getMigrateRetries());
         } else if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
