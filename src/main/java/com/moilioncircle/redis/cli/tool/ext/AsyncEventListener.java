@@ -20,6 +20,7 @@ import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
+import com.moilioncircle.redis.replicator.event.PostCommandSyncEvent;
 import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreCommandSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
@@ -66,7 +67,8 @@ public class AsyncEventListener implements EventListener {
         } else {
             if (event instanceof PreRdbSyncEvent ||
                     event instanceof PostRdbSyncEvent ||
-                    event instanceof PreCommandSyncEvent) {
+                    event instanceof PreCommandSyncEvent ||
+                    event instanceof PostCommandSyncEvent) {
                 for (int i = 0; i < this.executors.length; i++) {
                     this.executors[i].submit(() -> this.listener.onEvent(replicator, event));
                 }

@@ -260,3 +260,100 @@ rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
 ### Other parameter
 
 More configurable parameter can be modified in `/path/to/redis-cli-tool/conf/redis-cli.conf`
+
+## Hack rmt
+
+### Rmt threading model
+
+The `rmt` command use the following 4 parameters([redis-cli.conf](https://github.com/leonchen83/redis-cli-tool/blob/master/src/main/resources/redis-cli.conf)) to migrate data to remote.  
+  
+```java  
+migrate_batch_size=4096
+migrate_threads=4
+migrate_flush=yes
+migrate_retries=1
+```
+
+The most important parameter is `migrate_threads=4`. this means we use the following threading model to migrate data.  
+
+```java  
+
+single redis ----> single redis
+
++--------------+         +----------+     thread 1      +--------------+
+|              |    +----| Endpoint |-------------------|              |
+|              |    |    +----------+                   |              |
+|              |    |                                   |              |
+|              |    |    +----------+     thread 2      |              |
+|              |    |----| Endpoint |-------------------|              |
+|              |    |    +----------+                   |              |
+| Source Redis |----|                                   | Target Redis |
+|              |    |    +----------+     thread 3      |              |
+|              |    |----| Endpoint |-------------------|              |
+|              |    |    +----------+                   |              |
+|              |    |                                   |              |
+|              |    |    +----------+     thread 4      |              |
+|              |    +----| Endpoint |-------------------|              |
++--------------+         +----------+                   +--------------+
+
+``` 
+
+```java  
+
+single redis ----> redis cluster
+
++--------------+         +----------+     thread 1      +--------------+
+|              |    +----| Endpoints|-------------------|              |
+|              |    |    +----------+                   |              |
+|              |    |                                   |              |
+|              |    |    +----------+     thread 2      |              |
+|              |    |----| Endpoints|-------------------|              |
+|              |    |    +----------+                   |              |
+| Source Redis |----|                                   | Redis cluster|
+|              |    |    +----------+     thread 3      |              |
+|              |    |----| Endpoints|-------------------|              |
+|              |    |    +----------+                   |              |
+|              |    |                                   |              |
+|              |    |    +----------+     thread 4      |              |
+|              |    +----| Endpoints|-------------------|              |
++--------------+         +----------+                   +--------------+
+
+``` 
+
+The difference between cluster migration and single migration is `Endpoint` and `Endpoints`. In cluster migration the `Endpoints` contains multi `Endpoint` to point to every `master` redis in cluster. For example:  
+  
+3 master 3 replica redis cluster. if `migrate_threads=4` then we have `3 * 4 = 12` connections that connected with redis cluster. 
+
+### Migration performance
+
+The following 3 parameters affect migration performance  
+  
+```java  
+migrate_batch_size=4096
+migrate_retries=1
+migrate_flush=yes
+```
+
+By default we use redis `pipeline` to migrate data to remote. the `migrate_batch_size` is the `pipeline` batch size. if  `migrate_batch_size=1` then the `pipeline` devolved into a common command to process.
+The `migrate_retries=1` means if socket error occurred. we recreate a new socket and retry once to send that failed command to target redis. 
+The `migrate_flush=yes`, this means we write to socket every 1 command. then we invoke `SocketOutputStream.flush()` immediately. if `migrate_flush=no` we invoke `SocketOutputStream.flush()` every write 64KB. notice that this parameter also affect `migrate_retries`. the `migrate_retries` only take effect when `migrate_flush=yes` 
+
+### Migration principle
+
+```java  
+
++---------------+             +-------------------+    restore      +---------------+ 
+|               |             | redis dump format |---------------->|               |
+|               |             |-------------------|    restore      |               |
+|               |   convert   | redis dump format |---------------->|               |
+|    Dump rdb   |------------>|-------------------|    restore      |  Targe Redis  |
+|               |             | redis dump format |---------------->|               |
+|               |             |-------------------|    restore      |               |
+|               |             | redis dump format |---------------->|               |
++---------------+             +-------------------+                 +---------------+
+```
+
+### limitation of cluster migration
+
+We use cluster's `nodes.conf` to migrate data to cluster. because of we don't handle the `MOVED` `ASK` redirection. so the only limitation is that the cluster **MUST** in stable state during the migration. this means the cluster **MUST** no `migraing`, `importing` slot. no switch slave to master. 
+

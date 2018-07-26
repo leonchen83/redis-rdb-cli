@@ -83,7 +83,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             }
         } catch (Throwable e) {
             times--;
-            if (times >= 0) {
+            if (times >= 0 && flush) {
                 this.endpoints.get().update(dkv.getKey());
                 retry(event, times);
             }

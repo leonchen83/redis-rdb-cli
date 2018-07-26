@@ -260,3 +260,100 @@ rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
 ### 其他参数
 
 更多的可配置参数可以在 `/path/to/redis-cli-tool/conf/redis-cli.conf` 这里配置
+
+## Hack rmt
+
+### Rmt 线程模型
+
+`rmt`使用下面四个参数([redis-cli.conf](https://github.com/leonchen83/redis-cli-tool/blob/master/src/main/resources/redis-cli.conf))来同步数据到远端.  
+  
+```java  
+migrate_batch_size=4096
+migrate_threads=4
+migrate_flush=yes
+migrate_retries=1
+```
+
+最重要的参数是 `migrate_threads=4`. 这意味着我们用如下的线程模型同步数据  
+
+```java  
+
+单 redis ----> 单 redis
+
++--------------+         +----------+     thread 1      +--------------+
+|              |    +----| Endpoint |-------------------|              |
+|              |    |    +----------+                   |              |
+|              |    |                                   |              |
+|              |    |    +----------+     thread 2      |              |
+|              |    |----| Endpoint |-------------------|              |
+|              |    |    +----------+                   |              |
+| Source Redis |----|                                   | Target Redis |
+|              |    |    +----------+     thread 3      |              |
+|              |    |----| Endpoint |-------------------|              |
+|              |    |    +----------+                   |              |
+|              |    |                                   |              |
+|              |    |    +----------+     thread 4      |              |
+|              |    +----| Endpoint |-------------------|              |
++--------------+         +----------+                   +--------------+
+
+``` 
+
+```java  
+
+单 redis ----> redis 集群
+
++--------------+         +----------+     thread 1      +--------------+
+|              |    +----| Endpoints|-------------------|              |
+|              |    |    +----------+                   |              |
+|              |    |                                   |              |
+|              |    |    +----------+     thread 2      |              |
+|              |    |----| Endpoints|-------------------|              |
+|              |    |    +----------+                   |              |
+| Source Redis |----|                                   | Redis cluster|
+|              |    |    +----------+     thread 3      |              |
+|              |    |----| Endpoints|-------------------|              |
+|              |    |    +----------+                   |              |
+|              |    |                                   |              |
+|              |    |    +----------+     thread 4      |              |
+|              |    +----| Endpoints|-------------------|              |
++--------------+         +----------+                   +--------------+
+
+``` 
+
+上面两张图的不同点在 `Endpoint` 和 `Endpoints`. 在集群同步中 `Endpoints` 包含多个 `Endpoint`, 每个`Endpoint` 和集群中的 `master` 链接, 举例如下:  
+  
+集群中有 3 master 3 replica. 如果 `migrate_threads=4` 那么我们有 `3 * 4 = 12` 个连接与redis集群相连. 
+
+### 同步性能
+
+下面3个参数影响同步性能  
+  
+```java  
+migrate_batch_size=4096
+migrate_retries=1
+migrate_flush=yes
+```
+
+默认我们使用redis的 `pipeline` 来同步数据. `migrate_batch_size` 就是 `pipeline` 批处理大小. 如果 `migrate_batch_size=1` 那么 `pipeline` 的大小就退化成处理单条命令并同步等待命令结果返回. 
+`migrate_retries=1` 意思是如果 socket 连接错误发生. 我们重建一个新的 socket 并重试1次把上次发送失败的命令重新发送一遍. 
+`migrate_flush=yes` 意思是我们每写入socket一条命令之后, 立即调用一次 `SocketOutputStream.flush()`. 如果 `migrate_flush=no` 我们每写入 64KB 到 socket 才调用一次 `SocketOutputStream.flush()`. 请注意这个参数影响 `migrate_retries`. `migrate_retries` 只有在 `migrate_flush=yes` 的时候生效. 
+
+### 同步原理
+
+```java  
+
++---------------+             +-------------------+    restore      +---------------+ 
+|               |             | redis dump format |---------------->|               |
+|               |             |-------------------|    restore      |               |
+|               |   convert   | redis dump format |---------------->|               |
+|    Dump rdb   |------------>|-------------------|    restore      |  Targe Redis  |
+|               |             | redis dump format |---------------->|               |
+|               |             |-------------------|    restore      |               |
+|               |             | redis dump format |---------------->|               |
++---------------+             +-------------------+                 +---------------+
+```
+
+### 同步到集群的限制
+
+我们通过集群的 `nodes.conf` 文件来同步数据到集群. 因为我们没有处理 `MOVED` `ASK` 重定向. 因此唯一的限制是集群在同步期间 **必须** 是稳定的状态. 这意味着集群 **必须** 不存在 `migraing`, `importing` 这样的slot. 而且没有主从切换. 
+

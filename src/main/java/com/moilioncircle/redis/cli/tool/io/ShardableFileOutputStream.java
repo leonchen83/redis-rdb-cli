@@ -50,8 +50,6 @@ public class ShardableFileOutputStream extends OutputStream {
             return newCRCOutputStream(get(path, t.getV3() + ".rdb").toFile(), configure.getBufferSize());
         };
         new NodeConfParser(mapper).parse(lines, set, map);
-        if (map.size() != 16384)
-            throw new UnsupportedOperationException("slots size : " + map.size() + ", expected 16384.");
     }
 
     public void shard(byte[] key) {

@@ -44,8 +44,6 @@ public class Endpoints implements Closeable {
             return new Endpoint(t.getV1(), t.getV2(), 0, pipe, configuration);
         };
         new NodeConfParser(mapper).parse(lines, set, endpoints);
-        if (endpoints.size() != 16384)
-            throw new UnsupportedOperationException("slots size : " + endpoints.size() + ", expected 16384.");
     }
 
     public String send(byte[] command, byte[]... args) {
