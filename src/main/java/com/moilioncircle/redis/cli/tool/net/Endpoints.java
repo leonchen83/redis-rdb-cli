@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-import static com.moilioncircle.redis.cli.tool.util.CRC16.crc16;
+import static com.moilioncircle.redis.cli.tool.conf.NodeConfParser.slot;
 
 /**
  * @author Baoyi Chen
@@ -98,20 +98,5 @@ public class Endpoints implements Closeable {
         set.remove(v1);
         set.add(v2);
         endpoints.put(slot, v2);
-    }
-
-    protected short slot(byte[] key) {
-        if (key == null) return 0;
-        int st = -1, ed = -1;
-        for (int i = 0, len = key.length; i < len; i++) {
-            if (key[i] == '{' && st == -1) st = i;
-            if (key[i] == '}' && st >= 0) {
-                ed = i;
-                break;
-            }
-        }
-        if (st >= 0 && ed >= 0 && ed > st + 1)
-            return (short) (crc16(key, st + 1, ed) & 16383);
-        return (short) (crc16(key) & 16383);
     }
 }
