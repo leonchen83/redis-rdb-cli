@@ -24,8 +24,12 @@ import org.apache.commons.cli.Option;
 public interface Command {
     
     String name();
-    
+
     void addOption(Option option);
     
     void execute(String[] args) throws Exception;
+
+    void write(String message) throws Exception;
+
+    void writeLine(String message) throws Exception;
 }

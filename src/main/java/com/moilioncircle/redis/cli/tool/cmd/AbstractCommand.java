@@ -58,6 +58,17 @@ public abstract class AbstractCommand implements Command {
             }
         }
     }
+
+    @Override
+    public void write(String message) throws Exception {
+        System.out.print(message);
+        System.out.flush();
+    }
+
+    @Override
+    public void writeLine(String message) throws Exception {
+        System.out.println(message);
+    }
     
     protected String normalize(String source, FileType type, String message) throws URISyntaxException {
         RedisURI uri;
@@ -72,16 +83,7 @@ public abstract class AbstractCommand implements Command {
         }
         throw new AssertionError(message);
     }
-    
-    protected void write(String message) throws Exception {
-        System.out.print(message);
-        System.out.flush();
-    }
-    
-    protected void writeLine(String message) throws Exception {
-        System.out.println(message);
-    }
-    
+
     protected String version() {
         StringBuilder builder = new StringBuilder();
         builder.append("redis cli tool: ").append(INSTANCE.version());

@@ -19,7 +19,7 @@ package com.moilioncircle.redis.cli.tool.cmd;
 import com.moilioncircle.redis.cli.tool.conf.Configure;
 import com.moilioncircle.redis.cli.tool.ext.CliRedisReplicator;
 import com.moilioncircle.redis.cli.tool.ext.rmt.ClusterRdbVisitor;
-import com.moilioncircle.redis.cli.tool.ext.rmt.MigrateRdbVisitor;
+import com.moilioncircle.redis.cli.tool.ext.rmt.SingleRdbVisitor;
 import com.moilioncircle.redis.cli.tool.util.ProgressBar;
 import com.moilioncircle.redis.replicator.FileType;
 import com.moilioncircle.redis.replicator.RedisURI;
@@ -112,7 +112,7 @@ public class RmtCommand extends AbstractCommand {
                 }
                 try (ProgressBar bar = new ProgressBar(-1)) {
                     Replicator r = new CliRedisReplicator(source, configure);
-                    r.setRdbVisitor(new MigrateRdbVisitor(r, configure, migrate, db, regexs, parse(type), replace));
+                    r.setRdbVisitor(new SingleRdbVisitor(r, configure, migrate, db, regexs, parse(type), replace));
                     Runtime.getRuntime().addShutdownHook(new Thread(() -> CliRedisReplicator.closeQuietly(r)));
                     r.addExceptionListener((rep, tx, e) -> {
                         throw new RuntimeException(tx.getMessage(), tx);
