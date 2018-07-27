@@ -233,6 +233,13 @@ rct -f resp -s /path/to/dump.rdb -o /path/to/appendonly.aof
 rmt -s /path/to/dump.rdb -m redis://192.168.1.105:6379 -r
 ```
 
+### Migrate rdb to remote redis cluster
+
+```java  
+rmt -s /path/to/dump.rdb -c ./nodes-30001.conf -r
+```
+
+
 ### Backup remote redis's rdb
 
 ```java  
@@ -320,9 +327,9 @@ single redis ----> redis cluster
 
 ``` 
 
-The difference between cluster migration and single migration is `Endpoint` and `Endpoints`. In cluster migration the `Endpoints` contains multi `Endpoint` to point to every `master` redis in cluster. For example:  
+The difference between cluster migration and single migration is `Endpoint` and `Endpoints`. In cluster migration the `Endpoints` contains multi `Endpoint` to point to every `master` instance in cluster. For example:  
   
-3 master 3 replica redis cluster. if `migrate_threads=4` then we have `3 * 4 = 12` connections that connected with redis cluster. 
+3 masters 3 replicas redis cluster. if `migrate_threads=4` then we have `3 * 4 = 12` connections that connected with `master` instance. 
 
 ### Migration performance
 
@@ -334,9 +341,9 @@ migrate_retries=1
 migrate_flush=yes
 ```
 
-By default we use redis `pipeline` to migrate data to remote. the `migrate_batch_size` is the `pipeline` batch size. if  `migrate_batch_size=1` then the `pipeline` devolved into a common command to process.
-The `migrate_retries=1` means if socket error occurred. we recreate a new socket and retry once to send that failed command to target redis. 
-The `migrate_flush=yes`, this means we write to socket every 1 command. then we invoke `SocketOutputStream.flush()` immediately. if `migrate_flush=no` we invoke `SocketOutputStream.flush()` every write 64KB. notice that this parameter also affect `migrate_retries`. the `migrate_retries` only take effect when `migrate_flush=yes` 
+By default we use redis `pipeline` to migrate data to remote. the `migrate_batch_size` is the `pipeline` batch size. if `migrate_batch_size=1` then the `pipeline` devolved into 1 single command to sent and wait the response from remote.
+The `migrate_retries=1` means if socket error occurred. we recreate a new socket and retry to send that failed command to target redis with `migrate_retries` times. 
+The `migrate_flush=yes` means we write every 1 command to socket. then we invoke `SocketOutputStream.flush()` immediately. if `migrate_flush=no` we invoke `SocketOutputStream.flush()` when write to socket every 64KB. notice that this parameter also affect `migrate_retries`. the `migrate_retries` only take effect when `migrate_flush=yes` 
 
 ### Migration principle
 
@@ -355,5 +362,5 @@ The `migrate_flush=yes`, this means we write to socket every 1 command. then we 
 
 ### limitation of cluster migration
 
-We use cluster's `nodes.conf` to migrate data to cluster. because of we don't handle the `MOVED` `ASK` redirection. so the only limitation is that the cluster **MUST** in stable state during the migration. this means the cluster **MUST** no `migraing`, `importing` slot. no switch slave to master. 
+We use cluster's `nodes.conf` to migrate data to cluster. because of we did't handle the `MOVED` `ASK` redirection. so the only limitation is that the cluster **MUST** in stable state during the migration. this means the cluster **MUST** have no `migraing`, `importing` slot and no switch slave to master. 
 
