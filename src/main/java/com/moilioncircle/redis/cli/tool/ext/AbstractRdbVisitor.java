@@ -171,7 +171,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
 
     protected void emit(OutputStream out, byte[] command, byte[]... ary) {
         OutputStreams.write(STAR, out);
-        OutputStreams.write(String.valueOf(5).getBytes(), out);
+        OutputStreams.write(String.valueOf(ary.length + 1).getBytes(), out);
         OutputStreams.write('\r', out);
         OutputStreams.write('\n', out);
         OutputStreams.write(DOLLAR, out);
