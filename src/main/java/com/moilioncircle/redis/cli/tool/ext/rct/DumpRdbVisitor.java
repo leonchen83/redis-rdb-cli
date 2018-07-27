@@ -49,7 +49,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     public DB applySelectDB(RedisInputStream in, int version) throws IOException {
         DB db = super.applySelectDB(in, version);
         long dbnum = db.getDbNumber();
-        emit(out, SELECT, String.valueOf(dbnum).getBytes());
+        emit(this.out, SELECT, String.valueOf(dbnum).getBytes());
         return db;
     }
     
@@ -72,9 +72,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(out, RESTORE, key, ex, out.toByteArray());
+                emit(this.out, RESTORE, key, ex, out.toByteArray());
             }
             return context.valueOf(new DummyKeyValuePair());
         }
@@ -99,9 +99,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(out, RESTORE, key, ex, out.toByteArray());
+                emit(this.out, RESTORE, key, ex, out.toByteArray());
             }
             return context.valueOf(new DummyKeyValuePair());
         }
@@ -126,9 +126,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(out, RESTORE, key, ex, out.toByteArray());
+                emit(this.out, RESTORE, key, ex, out.toByteArray());
             }
             return context.valueOf(new DummyKeyValuePair());
         }
@@ -153,9 +153,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(out, RESTORE, key, ex, out.toByteArray());
+                emit(this.out, RESTORE, key, ex, out.toByteArray());
             }
             return context.valueOf(new DummyKeyValuePair());
         }
@@ -180,9 +180,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(out, RESTORE, key, ex, out.toByteArray());
+                emit(this.out, RESTORE, key, ex, out.toByteArray());
             }
             return context.valueOf(new DummyKeyValuePair());
         }
@@ -207,9 +207,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(out, RESTORE, key, ex, out.toByteArray());
+                emit(this.out, RESTORE, key, ex, out.toByteArray());
             }
             return context.valueOf(new DummyKeyValuePair());
         }
@@ -234,9 +234,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(out, RESTORE, key, ex, out.toByteArray());
+                emit(this.out, RESTORE, key, ex, out.toByteArray());
             }
             return context.valueOf(new DummyKeyValuePair());
         }
@@ -261,9 +261,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(out, RESTORE, key, ex, out.toByteArray());
+                emit(this.out, RESTORE, key, ex, out.toByteArray());
             }
             return context.valueOf(new DummyKeyValuePair());
         }
@@ -288,9 +288,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(out, RESTORE, key, ex, out.toByteArray());
+                emit(this.out, RESTORE, key, ex, out.toByteArray());
             }
             return context.valueOf(new DummyKeyValuePair());
         }
@@ -315,9 +315,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(out, RESTORE, key, ex, out.toByteArray());
+                emit(this.out, RESTORE, key, ex, out.toByteArray());
             }
             return context.valueOf(new DummyKeyValuePair());
         }
@@ -342,9 +342,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(out, RESTORE, key, ex, out.toByteArray());
+                emit(this.out, RESTORE, key, ex, out.toByteArray());
             }
             return context.valueOf(new DummyKeyValuePair());
         }
@@ -369,9 +369,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(out, RESTORE, key, ex, out.toByteArray());
+                emit(this.out, RESTORE, key, ex, out.toByteArray());
             }
             return context.valueOf(new DummyKeyValuePair());
         }
@@ -396,9 +396,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(out, RESTORE, key, ex, out.toByteArray());
+                emit(this.out, RESTORE, key, ex, out.toByteArray());
             }
             return context.valueOf(new DummyKeyValuePair());
         }
@@ -423,9 +423,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(out, RESTORE, key, ex, out.toByteArray());
+                emit(this.out, RESTORE, key, ex, out.toByteArray());
             }
             return context.valueOf(new DummyKeyValuePair());
         }
@@ -450,9 +450,9 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(out, RESTORE, key, ex, out.toByteArray());
+                emit(this.out, RESTORE, key, ex, out.toByteArray());
             }
             return context.valueOf(new DummyKeyValuePair());
         }

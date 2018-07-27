@@ -55,7 +55,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
     @Override
     public DB applySelectDB(RedisInputStream in, int version) throws IOException {
         DB db = super.applySelectDB(in, version);
-        emit(out, SELECT, String.valueOf(db.getDbNumber()).getBytes());
+        emit(this.out, SELECT, String.valueOf(db.getDbNumber()).getBytes());
         return db;
     }
     
@@ -63,7 +63,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
     public Event applyExpireTime(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         DummyKeyValuePair kv = (DummyKeyValuePair) super.applyExpireTime(in, version, context);
         if (!kv.isContains() || kv.getKey() == null) return context.valueOf(kv);
-        emit(out, EXPIREAT, kv.getKey(), String.valueOf(kv.getExpiredSeconds() * 1000).getBytes());
+        emit(this.out, EXPIREAT, kv.getKey(), String.valueOf(kv.getExpiredSeconds() * 1000).getBytes());
         return context.valueOf(kv);
     }
     
@@ -71,7 +71,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
     public Event applyExpireTimeMs(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         DummyKeyValuePair kv = (DummyKeyValuePair) super.applyExpireTimeMs(in, version, context);
         if (!kv.isContains() || kv.getKey() == null) return context.valueOf(kv);
-        emit(out, EXPIREAT, kv.getKey(), String.valueOf(kv.getExpiredMs()).getBytes());
+        emit(this.out, EXPIREAT, kv.getKey(), String.valueOf(kv.getExpiredMs()).getBytes());
         return context.valueOf(kv);
     }
     
@@ -79,7 +79,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
     protected Event doApplyString(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
         byte[] val = parser.rdbLoadEncodedStringObject().first();
-        emit(out, SET, key, val);
+        emit(this.out, SET, key, val);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setValueRdbType(type);
         kv.setKey(key);
@@ -96,12 +96,12 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             byte[] element = parser.rdbLoadEncodedStringObject().first();
             list.add(element);
             if (list.size() == batch) {
-                emit(out, RPUSH, key, list);
+                emit(this.out, RPUSH, key, list);
                 list.clear();
             }
             len--;
         }
-        if (!list.isEmpty()) emit(out, RPUSH, key, list);
+        if (!list.isEmpty()) emit(this.out, RPUSH, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setValueRdbType(type);
         kv.setKey(key);
@@ -118,12 +118,12 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             byte[] element = parser.rdbLoadEncodedStringObject().first();
             list.add(element);
             if (list.size() == batch) {
-                emit(out, SADD, key, list);
+                emit(this.out, SADD, key, list);
                 list.clear();
             }
             len--;
         }
-        if (!list.isEmpty()) emit(out, SADD, key, list);
+        if (!list.isEmpty()) emit(this.out, SADD, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setValueRdbType(type);
         kv.setKey(key);
@@ -142,12 +142,12 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             list.add(String.valueOf(score).getBytes());
             list.add(element);
             if (list.size() == 2 * batch) {
-                emit(out, ZADD, key, list);
+                emit(this.out, ZADD, key, list);
                 list.clear();
             }
             len--;
         }
-        if (!list.isEmpty()) emit(out, ZADD, key, list);
+        if (!list.isEmpty()) emit(this.out, ZADD, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setValueRdbType(type);
         kv.setKey(key);
@@ -166,12 +166,12 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             list.add(String.valueOf(score).getBytes());
             list.add(element);
             if (list.size() == 2 * batch) {
-                emit(out, ZADD, key, list);
+                emit(this.out, ZADD, key, list);
                 list.clear();
             }
             len--;
         }
-        if (!list.isEmpty()) emit(out, ZADD, key, list);
+        if (!list.isEmpty()) emit(this.out, ZADD, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setValueRdbType(type);
         kv.setKey(key);
@@ -190,12 +190,12 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             list.add(field);
             list.add(value);
             if (list.size() == 2 * batch) {
-                emit(out, HMSET, key, list);
+                emit(this.out, HMSET, key, list);
                 list.clear();
             }
             len--;
         }
-        if (!list.isEmpty()) emit(out, HMSET, key, list);
+        if (!list.isEmpty()) emit(this.out, HMSET, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setValueRdbType(type);
         kv.setKey(key);
@@ -213,7 +213,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             int zmEleLen = BaseRdbParser.LenHelper.zmElementLen(stream);
             if (zmEleLen == 255) {
                 if (!list.isEmpty()) {
-                    emit(out, HMSET, key, list);
+                    emit(this.out, HMSET, key, list);
                     list.clear();
                 }
                 DummyKeyValuePair kv = new DummyKeyValuePair();
@@ -227,7 +227,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             if (zmEleLen == 255) {
                 list.add(field);
                 list.add(null);
-                emit(out, HMSET, key, list);
+                emit(this.out, HMSET, key, list);
                 list.clear();
                 DummyKeyValuePair kv = new DummyKeyValuePair();
                 kv.setValueRdbType(type);
@@ -241,7 +241,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             list.add(field);
             list.add(value);
             if (list.size() == 2 * batch) {
-                emit(out, HMSET, key, list);
+                emit(this.out, HMSET, key, list);
                 list = new ArrayList<>();
             }
         }
@@ -260,7 +260,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             byte[] e = BaseRdbParser.StringHelper.zipListEntry(stream);
             list.add(e);
             if (list.size() == batch) {
-                emit(out, RPUSH, key, list);
+                emit(this.out, RPUSH, key, list);
                 list.clear();
             }
         }
@@ -268,7 +268,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         if (zlend != 255) {
             throw new AssertionError("zlend expect 255 but " + zlend);
         }
-        if (!list.isEmpty()) emit(out, RPUSH, key, list);
+        if (!list.isEmpty()) emit(this.out, RPUSH, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setValueRdbType(type);
         kv.setKey(key);
@@ -301,11 +301,11 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             }
             list.add(element.getBytes());
             if (list.size() == batch) {
-                emit(out, SADD, key, list);
+                emit(this.out, SADD, key, list);
                 list.clear();
             }
         }
-        if (!list.isEmpty()) emit(out, SADD, key, list);
+        if (!list.isEmpty()) emit(this.out, SADD, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setValueRdbType(type);
         kv.setKey(key);
@@ -329,7 +329,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             list.add(String.valueOf(score).getBytes());
             list.add(element);
             if (list.size() == 2 * batch) {
-                emit(out, ZADD, key, list);
+                emit(this.out, ZADD, key, list);
                 list.clear();
             }
         }
@@ -337,7 +337,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         if (zlend != 255) {
             throw new AssertionError("zlend expect 255 but " + zlend);
         }
-        if (!list.isEmpty()) emit(out, ZADD, key, list);
+        if (!list.isEmpty()) emit(this.out, ZADD, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setValueRdbType(type);
         kv.setKey(key);
@@ -361,7 +361,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             list.add(field);
             list.add(value);
             if (list.size() == 2 * batch) {
-                emit(out, HMSET, key, list);
+                emit(this.out, HMSET, key, list);
                 list.clear();
             }
         }
@@ -369,7 +369,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         if (zlend != 255) {
             throw new AssertionError("zlend expect 255 but " + zlend);
         }
-        if (!list.isEmpty()) emit(out, HMSET, key, list);
+        if (!list.isEmpty()) emit(this.out, HMSET, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setValueRdbType(type);
         kv.setKey(key);
@@ -392,7 +392,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
                 byte[] e = BaseRdbParser.StringHelper.zipListEntry(stream);
                 list.add(e);
                 if (list.size() == batch) {
-                    emit(out, RPUSH, key, list);
+                    emit(this.out, RPUSH, key, list);
                     list.clear();
                 }
             }
@@ -401,7 +401,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
                 throw new AssertionError("zlend expect 255 but " + zlend);
             }
         }
-        if (!list.isEmpty()) emit(out, RPUSH, key, list);
+        if (!list.isEmpty()) emit(this.out, RPUSH, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setValueRdbType(type);
         kv.setKey(key);
@@ -428,9 +428,9 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(out, RESTORE, key, ex, out.toByteArray());
+                emit(this.out, RESTORE, key, ex, out.toByteArray());
             }
             return context.valueOf(new DummyKeyValuePair());
         }
@@ -455,9 +455,9 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(out, RESTORE, key, ex, out.toByteArray());
+                emit(this.out, RESTORE, key, ex, out.toByteArray());
             }
             return context.valueOf(new DummyKeyValuePair());
         }
@@ -482,9 +482,9 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
                 replicator.removeRawByteListener(listener);
             }
             if (replace) {
-                emit(out, RESTORE, key, ex, out.toByteArray(), REPLACE);
+                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {
-                emit(out, RESTORE, key, ex, out.toByteArray());
+                emit(this.out, RESTORE, key, ex, out.toByteArray());
             }
             return context.valueOf(new DummyKeyValuePair());
         }

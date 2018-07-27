@@ -69,7 +69,7 @@ public class OutputStreams {
         }
     }
     
-    public static void write(byte b[], OutputStream out) {
+    public static void write(byte[] b, OutputStream out) {
         if (out == null) return;
         try {
             out.write(b);
@@ -88,7 +88,7 @@ public class OutputStreams {
         }
     }
     
-    public static void write(byte b[], int off, int len, OutputStream out) {
+    public static void write(byte[] b, int off, int len, OutputStream out) {
         if (out == null) return;
         try {
             out.write(b, off, len);
@@ -99,7 +99,7 @@ public class OutputStreams {
         }
     }
     
-    public static void writeQuietly(byte b[], int off, int len, OutputStream out) {
+    public static void writeQuietly(byte[] b, int off, int len, OutputStream out) {
         if (out == null) return;
         try {
             out.write(b, off, len);
