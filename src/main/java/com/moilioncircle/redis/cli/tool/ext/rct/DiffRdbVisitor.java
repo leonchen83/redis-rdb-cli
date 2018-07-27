@@ -22,6 +22,7 @@ import com.moilioncircle.redis.cli.tool.ext.DumpRawByteListener;
 import com.moilioncircle.redis.cli.tool.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.cli.tool.glossary.DataType;
 import com.moilioncircle.redis.cli.tool.glossary.Escape;
+import com.moilioncircle.redis.cli.tool.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
@@ -58,7 +59,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
             super.doApplyString(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
-        out.write('\n');
+        OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
@@ -78,7 +79,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
             super.doApplyList(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
-        out.write('\n');
+        OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
@@ -98,7 +99,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
             super.doApplySet(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
-        out.write('\n');
+        OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
@@ -118,7 +119,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
             super.doApplyZSet(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
-        out.write('\n');
+        OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
@@ -138,7 +139,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
             super.doApplyZSet2(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
-        out.write('\n');
+        OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
@@ -158,7 +159,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
             super.doApplyHash(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
-        out.write('\n');
+        OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
@@ -178,7 +179,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
             super.doApplyHashZipMap(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
-        out.write('\n');
+        OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
@@ -198,7 +199,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
             super.doApplyListZipList(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
-        out.write('\n');
+        OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
@@ -218,7 +219,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
             super.doApplySetIntSet(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
-        out.write('\n');
+        OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
@@ -238,7 +239,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
             super.doApplyZSetZipList(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
-        out.write('\n');
+        OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
@@ -258,7 +259,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
             super.doApplyHashZipList(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
-        out.write('\n');
+        OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
@@ -278,7 +279,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
             super.doApplyListQuickList(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
-        out.write('\n');
+        OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
@@ -298,7 +299,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
             super.doApplyModule(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
-        out.write('\n');
+        OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
@@ -318,7 +319,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
             super.doApplyModule2(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
-        out.write('\n');
+        OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
@@ -338,7 +339,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
             super.doApplyStreamListPacks(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
-        out.write('\n');
+        OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
 }

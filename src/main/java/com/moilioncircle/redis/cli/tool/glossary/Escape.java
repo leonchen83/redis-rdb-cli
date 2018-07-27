@@ -17,8 +17,8 @@
 package com.moilioncircle.redis.cli.tool.glossary;
 
 import com.moilioncircle.redis.cli.tool.conf.Configure;
+import com.moilioncircle.redis.cli.tool.util.OutputStreams;
 
-import java.io.IOException;
 import java.io.OutputStream;
 
 /**
@@ -52,62 +52,62 @@ public enum Escape {
         }
     }
 
-    public void encode(int b, OutputStream out, Configure configure) throws IOException {
+    public void encode(int b, OutputStream out, Configure configure) {
         b = b & 0xFF;
         switch (this) {
             case RAW:
-                out.write(b);
+                OutputStreams.write(b, out);
                 break;
             case REDIS:
                 if (b == '\n') {
-                    out.write('\\');
-                    out.write('n');
+                    OutputStreams.write('\\', out);
+                    OutputStreams.write('n', out);
                 } else if (b == '\r') {
-                    out.write('\\');
-                    out.write('r');
+                    OutputStreams.write('\\', out);
+                    OutputStreams.write('r', out);
                 } else if (b == '\t') {
-                    out.write('\\');
-                    out.write('t');
+                    OutputStreams.write('\\', out);
+                    OutputStreams.write('t', out);
                 } else if (b == '\b') {
-                    out.write('\\');
-                    out.write('b');
+                    OutputStreams.write('\\', out);
+                    OutputStreams.write('b', out);
                 } else if (b == 7) {
-                    out.write('\\');
-                    out.write('a');
+                    OutputStreams.write('\\', out);
+                    OutputStreams.write('a', out);
                 } else if (b == 34 || b == 39 || b == 92 || b <= 32 || b >= 127 ||
                         b == configure.getDelimiter() || b == configure.getQuote()) {
                     // encode " ' \ unprintable and space
-                    out.write('\\');
-                    out.write('x');
+                    OutputStreams.write('\\', out);
+                    OutputStreams.write('x', out);
                     int ma = b >>> 4;
                     int mi = b & 0xF;
-                    out.write(NUMERALS[ma]);
-                    out.write(NUMERALS[mi]);
+                    OutputStreams.write(NUMERALS[ma], out);
+                    OutputStreams.write(NUMERALS[mi], out);
                 } else {
-                    out.write(b);
+                    OutputStreams.write(b, out);
                 }
                 break;
         }
     }
-    
-    public void encode(long value, OutputStream out, Configure configure) throws IOException {
+
+    public void encode(long value, OutputStream out, Configure configure) {
         encode(String.valueOf(value).getBytes(), out, configure);
     }
 
-    public void encode(double value, OutputStream out, Configure configure) throws IOException {
+    public void encode(double value, OutputStream out, Configure configure) {
         encode(String.valueOf(value).getBytes(), out, configure);
     }
-    
-    public void encode(byte[] bytes, OutputStream out, Configure configure) throws IOException {
+
+    public void encode(byte[] bytes, OutputStream out, Configure configure) {
         if (bytes == null) return;
         encode(bytes, 0, bytes.length, out, configure);
     }
 
-    public void encode(byte[] bytes, int off, int len, OutputStream out, Configure configure) throws IOException {
+    public void encode(byte[] bytes, int off, int len, OutputStream out, Configure configure) {
         if (bytes == null) return;
         switch (this) {
             case RAW:
-                out.write(bytes, off, len);
+                OutputStreams.write(bytes, off, len, out);
                 break;
             case REDIS:
                 for (int i = off; i < off + len; i++) {

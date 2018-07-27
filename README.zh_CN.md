@@ -62,7 +62,7 @@ options:
  -e,--escape <escape>        escape strings to encoding: raw (default),
                              redis.
  -f,--format <format>        format to export. valid formats are json,
-                             dump, diff, key, keyval, mem and resp
+                             dump, diff, key, keyval, count, mem and resp
  -h,--help                   rct usage.
  -k,--key <regex regex...>   keys to export. this can be a regex. if not
                              specified, all keys will be returned.
@@ -205,6 +205,12 @@ rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof
 
 ```java  
 rct -f json -s /path/to/dump.rdb -o /path/to/dump.json
+```
+
+### rdb的key数量统计
+
+```java  
+rct -f count -s /path/to/dump.rdb -o /path/to/dump.csv
 ```
 
 ### 找到占用内存最大的50个key

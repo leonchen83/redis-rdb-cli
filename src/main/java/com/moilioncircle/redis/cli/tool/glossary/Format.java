@@ -17,6 +17,7 @@
 package com.moilioncircle.redis.cli.tool.glossary;
 
 import com.moilioncircle.redis.cli.tool.conf.Configure;
+import com.moilioncircle.redis.cli.tool.ext.rct.CountRdbVisitor;
 import com.moilioncircle.redis.cli.tool.ext.rct.DiffRdbVisitor;
 import com.moilioncircle.redis.cli.tool.ext.rct.DumpRdbVisitor;
 import com.moilioncircle.redis.cli.tool.ext.rct.JsonRdbVisitor;
@@ -39,18 +40,19 @@ public enum Format {
     DIFF("diff"),
     JSON("json"),
     RESP("resp"),
+    COUNT("count"),
     KEYVAL("keyval");
-    
+
     private String value;
-    
+
     Format(String value) {
         this.value = value;
     }
-    
+
     public String getValue() {
         return this.value;
     }
-    
+
     public static Format parse(String format) {
         switch (format) {
             case "key":
@@ -65,17 +67,22 @@ public enum Format {
                 return JSON;
             case "resp":
                 return RESP;
+            case "count":
+                return COUNT;
             case "keyval":
                 return KEYVAL;
             default:
                 throw new AssertionError("Unsupported format '" + format + "'");
         }
     }
-    
+
     public void dress(Replicator r, Configure conf, File output, List<Long> db, List<String> regexs, Long largest, Long bytes, List<DataType> types, Escape escape, boolean replace) {
         switch (this) {
             case DIFF:
                 r.setRdbVisitor(new DiffRdbVisitor(r, conf, output, db, regexs, types));
+                break;
+            case COUNT:
+                r.setRdbVisitor(new CountRdbVisitor(r, conf, output, db, regexs, types));
                 break;
             case KEY:
                 r.setRdbVisitor(new KeyRdbVisitor(r, conf, output, db, regexs, types, escape));

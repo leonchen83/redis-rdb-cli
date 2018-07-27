@@ -22,6 +22,7 @@ import com.moilioncircle.redis.cli.tool.ext.DumpRawByteListener;
 import com.moilioncircle.redis.cli.tool.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.cli.tool.glossary.DataType;
 import com.moilioncircle.redis.cli.tool.glossary.Escape;
+import com.moilioncircle.redis.cli.tool.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
@@ -53,7 +54,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         BaseRdbParser parser = new BaseRdbParser(in);
         byte[] val = parser.rdbLoadEncodedStringObject().first();
         quote(val, out);
-        out.write('\n');
+        OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
@@ -67,7 +68,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
             byte[] element = parser.rdbLoadEncodedStringObject().first();
             quote(element, out);
             if (len - 1 > 0) delimiter(out);
-            else out.write('\n');
+            else OutputStreams.write('\n', out);
             len--;
         }
         return context.valueOf(new DummyKeyValuePair());
@@ -83,7 +84,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
             byte[] element = parser.rdbLoadEncodedStringObject().first();
             quote(element, out);
             if (len - 1 > 0) delimiter(out);
-            else out.write('\n');
+            else OutputStreams.write('\n', out);
             len--;
         }
         return context.valueOf(new DummyKeyValuePair());
@@ -102,7 +103,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
             delimiter(out);
             escape.encode(score, out, configure);
             if (len - 1 > 0) delimiter(out);
-            else out.write('\n');
+            else OutputStreams.write('\n', out);
             len--;
         }
         return context.valueOf(new DummyKeyValuePair());
@@ -121,7 +122,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
             delimiter(out);
             escape.encode(score, out, configure);
             if (len - 1 > 0) delimiter(out);
-            else out.write('\n');
+            else OutputStreams.write('\n', out);
             len--;
         }
         return context.valueOf(new DummyKeyValuePair());
@@ -140,7 +141,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
             delimiter(out);
             quote(value, out);
             if (len - 1 > 0) delimiter(out);
-            else out.write('\n');
+            else OutputStreams.write('\n', out);
             len--;
         }
         return context.valueOf(new DummyKeyValuePair());
@@ -157,7 +158,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         while (true) {
             int zmEleLen = BaseRdbParser.LenHelper.zmElementLen(stream);
             if (zmEleLen == 255) {
-                out.write('\n');
+                OutputStreams.write('\n', out);
                 return context.valueOf(new DummyKeyValuePair());
             }
             byte[] field = BaseRdbParser.StringHelper.bytes(stream, zmEleLen);
@@ -167,7 +168,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
                 quote(field, out);
                 delimiter(out);
                 quote(null, out);
-                out.write('\n');
+                OutputStreams.write('\n', out);
                 return context.valueOf(new DummyKeyValuePair());
             }
             int free = BaseRdbParser.LenHelper.free(stream);
@@ -194,7 +195,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
             byte[] e = BaseRdbParser.StringHelper.zipListEntry(stream);
             quote(e, out);
             if (i + 1 < zllen) delimiter(out);
-            else out.write('\n');
+            else OutputStreams.write('\n', out);
         }
         int zlend = BaseRdbParser.LenHelper.zlend(stream);
         if (zlend != 255) {
@@ -228,7 +229,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
             }
             quote(element.getBytes(), out);
             if (i + 1 < lenOfContent) delimiter(out);
-            else out.write('\n');
+            else OutputStreams.write('\n', out);
         }
         return context.valueOf(new DummyKeyValuePair());
     }
@@ -251,7 +252,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
             delimiter(out);
             escape.encode(score, out, configure);
             if (zllen - 1 > 0) delimiter(out);
-            else out.write('\n');
+            else OutputStreams.write('\n', out);
         }
         int zlend = BaseRdbParser.LenHelper.zlend(stream);
         if (zlend != 255) {
@@ -278,7 +279,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
             delimiter(out);
             quote(value, out);
             if (zllen - 1 > 0) delimiter(out);
-            else out.write('\n');
+            else OutputStreams.write('\n', out);
         }
         int zlend = BaseRdbParser.LenHelper.zlend(stream);
         if (zlend != 255) {
@@ -303,7 +304,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
                 quote(e, out);
                 if (i + 1 < len) delimiter(out);
                 else if (j + 1 < zllen) delimiter(out);
-                else out.write('\n');
+                else OutputStreams.write('\n', out);
             }
             int zlend = BaseRdbParser.LenHelper.zlend(stream);
             if (zlend != 255) {
@@ -324,7 +325,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
             super.doApplyModule(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
         }
-        out.write('\n');
+        OutputStreams.write('\n', out);
         out.write(configure.getQuote());
         return context.valueOf(new DummyKeyValuePair());
     }
@@ -341,7 +342,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
             replicator.removeRawByteListener(listener);
         }
         out.write(configure.getQuote());
-        out.write('\n');
+        OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
@@ -361,7 +362,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
             replicator.removeRawByteListener(listener);
         }
         out.write(configure.getQuote());
-        out.write('\n');
+        OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
 }

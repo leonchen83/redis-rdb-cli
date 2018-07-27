@@ -1,6 +1,10 @@
+### 0.1.7
+
+`rct` add a new format `count`.  
+
 ### 0.1.6
 
-`rct` command add parameter `--config`.   
+`rmt` command add parameter `--config`.   
 
 ### 0.1.5
 
