@@ -1,5 +1,7 @@
 # redis-cli-tool
 
+## 一个可以解析, 过滤, 分割, 合并 rdb 离线内存分析的工具.
+
 ## 下载
 
 [binary releases](https://github.com/leonchen83/redis-cli-tool/releases)

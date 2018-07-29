@@ -1,5 +1,7 @@
 # redis-cli-tool
 
+## A tool that can parse, filter, split, merge rdb and analyze memory usage offline.
+
 ## Binary release
 
 [binary releases](https://github.com/leonchen83/redis-cli-tool/releases)
