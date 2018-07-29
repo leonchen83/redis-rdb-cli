@@ -31,8 +31,8 @@ public class Version {
         } catch (IOException e) {
         }
     }
-
-    private static final String VERSION = "0.1.7";
+    
+    private static final String VERSION = "0.1.8";
     
     public static final Version INSTANCE = new Version();
     

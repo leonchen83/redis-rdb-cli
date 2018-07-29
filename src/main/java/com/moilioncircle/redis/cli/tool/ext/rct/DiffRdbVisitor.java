@@ -27,6 +27,7 @@ import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
+import com.moilioncircle.redis.replicator.rdb.datatype.ExpiredType;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,16 +44,20 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
         super(replicator, configure, out, db, regexs, types, Escape.REDIS);
     }
     
+    protected void expire(ExpiredType type, Long value) {
+        if (type != NONE) {
+            escape.encode(type.toString().getBytes(), out, configure);
+            delimiter(out);
+            escape.encode(value, out, configure);
+            delimiter(out);
+        }
+    }
+    
     @Override
     public Event doApplyString(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
-        if (context.getExpiredType() != NONE) {
-            escape.encode(context.getExpiredType().toString().getBytes(), out, configure);
-            delimiter(out);
-            escape.encode(context.getExpiredValue(), out, configure);
-            delimiter(out);
-        }
+        expire(context.getExpiredType(), context.getExpiredValue());
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
@@ -67,12 +72,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
     public Event doApplyList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
-        if (context.getExpiredType() != NONE) {
-            escape.encode(context.getExpiredType().toString().getBytes(), out, configure);
-            delimiter(out);
-            escape.encode(context.getExpiredValue(), out, configure);
-            delimiter(out);
-        }
+        expire(context.getExpiredType(), context.getExpiredValue());
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
@@ -87,12 +87,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
     public Event doApplySet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
-        if (context.getExpiredType() != NONE) {
-            escape.encode(context.getExpiredType().toString().getBytes(), out, configure);
-            delimiter(out);
-            escape.encode(context.getExpiredValue(), out, configure);
-            delimiter(out);
-        }
+        expire(context.getExpiredType(), context.getExpiredValue());
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
@@ -107,12 +102,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
     public Event doApplyZSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
-        if (context.getExpiredType() != NONE) {
-            escape.encode(context.getExpiredType().toString().getBytes(), out, configure);
-            delimiter(out);
-            escape.encode(context.getExpiredValue(), out, configure);
-            delimiter(out);
-        }
+        expire(context.getExpiredType(), context.getExpiredValue());
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
@@ -127,12 +117,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
     public Event doApplyZSet2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
-        if (context.getExpiredType() != NONE) {
-            escape.encode(context.getExpiredType().toString().getBytes(), out, configure);
-            delimiter(out);
-            escape.encode(context.getExpiredValue(), out, configure);
-            delimiter(out);
-        }
+        expire(context.getExpiredType(), context.getExpiredValue());
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
@@ -147,12 +132,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
     public Event doApplyHash(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
-        if (context.getExpiredType() != NONE) {
-            escape.encode(context.getExpiredType().toString().getBytes(), out, configure);
-            delimiter(out);
-            escape.encode(context.getExpiredValue(), out, configure);
-            delimiter(out);
-        }
+        expire(context.getExpiredType(), context.getExpiredValue());
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
@@ -167,12 +147,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
     public Event doApplyHashZipMap(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
-        if (context.getExpiredType() != NONE) {
-            escape.encode(context.getExpiredType().toString().getBytes(), out, configure);
-            delimiter(out);
-            escape.encode(context.getExpiredValue(), out, configure);
-            delimiter(out);
-        }
+        expire(context.getExpiredType(), context.getExpiredValue());
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
@@ -187,12 +162,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
     public Event doApplyListZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
-        if (context.getExpiredType() != NONE) {
-            escape.encode(context.getExpiredType().toString().getBytes(), out, configure);
-            delimiter(out);
-            escape.encode(context.getExpiredValue(), out, configure);
-            delimiter(out);
-        }
+        expire(context.getExpiredType(), context.getExpiredValue());
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
@@ -207,12 +177,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
     public Event doApplySetIntSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
-        if (context.getExpiredType() != NONE) {
-            escape.encode(context.getExpiredType().toString().getBytes(), out, configure);
-            delimiter(out);
-            escape.encode(context.getExpiredValue(), out, configure);
-            delimiter(out);
-        }
+        expire(context.getExpiredType(), context.getExpiredValue());
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
@@ -227,12 +192,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
     public Event doApplyZSetZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
-        if (context.getExpiredType() != NONE) {
-            escape.encode(context.getExpiredType().toString().getBytes(), out, configure);
-            delimiter(out);
-            escape.encode(context.getExpiredValue(), out, configure);
-            delimiter(out);
-        }
+        expire(context.getExpiredType(), context.getExpiredValue());
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
@@ -247,12 +207,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
     public Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
-        if (context.getExpiredType() != NONE) {
-            escape.encode(context.getExpiredType().toString().getBytes(), out, configure);
-            delimiter(out);
-            escape.encode(context.getExpiredValue(), out, configure);
-            delimiter(out);
-        }
+        expire(context.getExpiredType(), context.getExpiredValue());
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
@@ -267,12 +222,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
     public Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
-        if (context.getExpiredType() != NONE) {
-            escape.encode(context.getExpiredType().toString().getBytes(), out, configure);
-            delimiter(out);
-            escape.encode(context.getExpiredValue(), out, configure);
-            delimiter(out);
-        }
+        expire(context.getExpiredType(), context.getExpiredValue());
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
@@ -287,12 +237,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
     public Event doApplyModule(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
-        if (context.getExpiredType() != NONE) {
-            escape.encode(context.getExpiredType().toString().getBytes(), out, configure);
-            delimiter(out);
-            escape.encode(context.getExpiredValue(), out, configure);
-            delimiter(out);
-        }
+        expire(context.getExpiredType(), context.getExpiredValue());
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
@@ -307,12 +252,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
     public Event doApplyModule2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
-        if (context.getExpiredType() != NONE) {
-            escape.encode(context.getExpiredType().toString().getBytes(), out, configure);
-            delimiter(out);
-            escape.encode(context.getExpiredValue(), out, configure);
-            delimiter(out);
-        }
+        expire(context.getExpiredType(), context.getExpiredValue());
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
@@ -327,12 +267,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
     public Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escape.encode(key, out, configure);
         delimiter(out);
-        if (context.getExpiredType() != NONE) {
-            escape.encode(context.getExpiredType().toString().getBytes(), out, configure);
-            delimiter(out);
-            escape.encode(context.getExpiredValue(), out, configure);
-            delimiter(out);
-        }
+        expire(context.getExpiredType(), context.getExpiredValue());
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
             replicator.addRawByteListener(listener);
