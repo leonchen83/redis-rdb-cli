@@ -1,3 +1,7 @@
+### 0.1.8
+
+Fix `rct -f count` bug.  
+
 ### 0.1.7
 
 `rct` add a new format `count`.  
