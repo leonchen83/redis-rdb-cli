@@ -1,6 +1,7 @@
 ### 0.1.8
 
 Fix `rct -f count` bug.  
+Fix `expire` bug.  
 
 ### 0.1.7
 
