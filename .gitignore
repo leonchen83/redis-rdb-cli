@@ -27,7 +27,7 @@ hs_err_pid*
 /.settings
 
 # Idea
-/redis-cli-tool.iml
+/redis-rdb-cli.iml
 /.idea
 /bin/
 

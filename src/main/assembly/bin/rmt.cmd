@@ -51,7 +51,7 @@ set LOG_DIR=%RCT_HOME%\log
 set CON_DIR=%RCT_HOME%\conf
 set LOG_FILE=%CON_DIR%\log4j2.xml
 set CON_FILE=%CON_DIR%\redis-cli.conf
-set MAIN_CLASS=com.moilioncircle.redis.cli.tool.Rmt
+set MAIN_CLASS=com.moilioncircle.redis.rdb.cli.Rmt
 set RCT_OPS=-server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -Dlog4j.configurationFile="%LOG_FILE%" -Dcli.log.path="%LOG_DIR%" -Dconf="%CON_FILE%" -Drct.home="%RCT_HOME%"
 
 "%JAVACMD%" %RCT_OPS% -cp %CLASS_PATH% %MAIN_CLASS% %*

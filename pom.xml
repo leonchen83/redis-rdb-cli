@@ -21,12 +21,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.moilioncircle</groupId>
-    <artifactId>redis-cli-tool</artifactId>
+    <artifactId>redis-rdb-cli</artifactId>
     <version>1.0.0</version>
 
-    <name>redis-cli-tool</name>
+    <name>redis-rdb-cli</name>
     <description>redis cli tool</description>
-    <url>https://github.com/leonchen83/redis-cli-tool</url>
+    <url>https://github.com/leonchen83/redis-rdb-cli</url>
 
     <licenses>
         <license>
@@ -49,15 +49,15 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git@github.com:leonchen83/redis-cli-tool.git</connection>
-        <url>scm:git:git@github.com:leonchen83/redis-cli-tool.git</url>
-        <developerConnection>scm:git:git@github.com:leonchen83/redis-cli-tool.git</developerConnection>
+        <connection>scm:git:git@github.com:leonchen83/redis-rdb-cli.git</connection>
+        <url>scm:git:git@github.com:leonchen83/redis-rdb-cli.git</url>
+        <developerConnection>scm:git:git@github.com:leonchen83/redis-rdb-cli.git</developerConnection>
         <tag>0.1.x</tag>
     </scm>
 
     <issueManagement>
         <system>github</system>
-        <url>https://github.com/leonchen83/redis-cli-tool/issues</url>
+        <url>https://github.com/leonchen83/redis-rdb-cli/issues</url>
     </issueManagement>
 
     <properties>
@@ -160,7 +160,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.4</version>
                 <configuration>
-                    <finalName>redis-cli</finalName>
+                    <finalName>redis-rdb</finalName>
                     <descriptors>
                         <descriptor>src/main/assembly/assembly.xml</descriptor>
                     </descriptors>

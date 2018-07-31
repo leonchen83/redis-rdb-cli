@@ -1,10 +1,10 @@
-# redis-cli-tool
+# redis-rdb-cli
 
 ## 一个可以解析, 过滤, 分割, 合并 rdb 离线内存分析的工具.
 
 ## 下载
 
-[binary releases](https://github.com/leonchen83/redis-cli-tool/releases)
+[binary releases](https://github.com/leonchen83/redis-rdb-cli/releases)
 
 ## 运行时依赖
 
@@ -15,10 +15,10 @@ jdk 1.8+
 ## 安装
 
 ```java  
-mkdir redis-cli-tool
-cd ./redis-cli-tool
-wget https://github.com/leonchen83/redis-cli-tool/releases/download/${version}/redis-cli-tool.zip
-unzip redis-cli-tool.zip
+mkdir redis-rdb-cli
+cd ./redis-rdb-cli
+wget https://github.com/leonchen83/redis-rdb-cli/releases/download/${version}/redis-rdb-cli.zip
+unzip redis-rdb-cli.zip
 sudo chmod -R 755 ./
 cd ./bin
 ./rct -h
@@ -36,16 +36,16 @@ maven-3.3.1+
 ## 编译 & 运行
 
 ```java  
-    git clone https://github.com/leonchen83/redis-cli-tool.git
-    cd redis-cli-tool
+    git clone https://github.com/leonchen83/redis-rdb-cli.git
+    cd redis-rdb-cli
     mvn clean install -Dmaven.test.skip=true
-    cd target/redis-cli-tool/bin
+    cd target/redis-rdb-cli/bin
     ./rct -h 
 ```
 
 ## 设置Windows环境变量
   
-把 `/path/to/redis-cli-tool/bin` 添加到 `Path` 中
+把 `/path/to/redis-rdb-cli/bin` 添加到 `Path` 中
   
 ### 使用
 
@@ -267,13 +267,13 @@ rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
 
 ### 其他参数
 
-更多的可配置参数可以在 `/path/to/redis-cli-tool/conf/redis-cli.conf` 这里配置
+更多的可配置参数可以在 `/path/to/redis-rdb-cli/conf/redis-cli.conf` 这里配置
 
 ## Hack rmt
 
 ### Rmt 线程模型
 
-`rmt`使用下面四个参数([redis-cli.conf](https://github.com/leonchen83/redis-cli-tool/blob/master/src/main/resources/redis-cli.conf))来同步数据到远端.  
+`rmt`使用下面四个参数([redis-cli.conf](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-cli.conf))来同步数据到远端.  
   
 ```java  
 migrate_batch_size=4096

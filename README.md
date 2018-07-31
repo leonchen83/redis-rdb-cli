@@ -1,10 +1,10 @@
-# redis-cli-tool
+# redis-rdb-cli
 
 ## A tool that can parse, filter, split, merge rdb and analyze memory usage offline.
 
 ## Binary release
 
-[binary releases](https://github.com/leonchen83/redis-cli-tool/releases)
+[binary releases](https://github.com/leonchen83/redis-rdb-cli/releases)
 
 ## Runtime requirement
 
@@ -15,10 +15,10 @@ jdk 1.8+
 ## Install
 
 ```java  
-mkdir redis-cli-tool
-cd ./redis-cli-tool
-wget https://github.com/leonchen83/redis-cli-tool/releases/download/${version}/redis-cli-tool.zip
-unzip redis-cli-tool.zip
+mkdir redis-rdb-cli
+cd ./redis-rdb-cli
+wget https://github.com/leonchen83/redis-rdb-cli/releases/download/${version}/redis-rdb-cli.zip
+unzip redis-rdb-cli.zip
 sudo chmod -R 755 ./
 cd ./bin
 ./rct -h
@@ -36,16 +36,16 @@ maven-3.3.1+
 ## Compile & run
 
 ```java  
-    git clone https://github.com/leonchen83/redis-cli-tool.git
-    cd redis-cli-tool
+    git clone https://github.com/leonchen83/redis-rdb-cli.git
+    cd redis-rdb-cli
     mvn clean install -Dmaven.test.skip=true
-    cd target/redis-cli-tool/bin
+    cd target/redis-rdb-cli/bin
     ./rct -h 
 ```
 
 ## Windows Environment Variables
   
-Add `/path/to/redis-cli-tool/bin` to `Path` environment variable  
+Add `/path/to/redis-rdb-cli/bin` to `Path` environment variable  
   
 ## Usage
 
@@ -274,13 +274,13 @@ rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
 
 ### Other parameter
 
-More configurable parameter can be modified in `/path/to/redis-cli-tool/conf/redis-cli.conf`
+More configurable parameter can be modified in `/path/to/redis-rdb-cli/conf/redis-cli.conf`
 
 ## Hack rmt
 
 ### Rmt threading model
 
-The `rmt` command use the following 4 parameters([redis-cli.conf](https://github.com/leonchen83/redis-cli-tool/blob/master/src/main/resources/redis-cli.conf)) to migrate data to remote.  
+The `rmt` command use the following 4 parameters([redis-cli.conf](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-cli.conf)) to migrate data to remote.  
   
 ```java  
 migrate_batch_size=4096
