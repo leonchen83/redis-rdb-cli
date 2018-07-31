@@ -42,7 +42,7 @@ public class Configure {
                 }
             } else {
                 ClassLoader loader = Configure.class.getClassLoader();
-                try (InputStream in = loader.getResourceAsStream("redis-cli.conf")) {
+                try (InputStream in = loader.getResourceAsStream("redis-rdb-cli.conf")) {
                     properties.load(in);
                 }
             }

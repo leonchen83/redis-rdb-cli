@@ -267,13 +267,13 @@ rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
 
 ### 其他参数
 
-更多的可配置参数可以在 `/path/to/redis-rdb-cli/conf/redis-cli.conf` 这里配置
+更多的可配置参数可以在 `/path/to/redis-rdb-cli/conf/redis-rdb-cli.conf` 这里配置
 
 ## Hack rmt
 
 ### Rmt 线程模型
 
-`rmt`使用下面四个参数([redis-cli.conf](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-cli.conf))来同步数据到远端.  
+`rmt`使用下面四个参数([redis-rdb-cli.conf](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf))来同步数据到远端.  
   
 ```java  
 migrate_batch_size=4096

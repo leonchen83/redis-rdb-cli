@@ -274,13 +274,13 @@ rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
 
 ### Other parameter
 
-More configurable parameter can be modified in `/path/to/redis-rdb-cli/conf/redis-cli.conf`
+More configurable parameter can be modified in `/path/to/redis-rdb-cli/conf/redis-rdb-cli.conf`
 
 ## Hack rmt
 
 ### Rmt threading model
 
-The `rmt` command use the following 4 parameters([redis-cli.conf](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-cli.conf)) to migrate data to remote.  
+The `rmt` command use the following 4 parameters([redis-rdb-cli.conf](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf)) to migrate data to remote.  
   
 ```java  
 migrate_batch_size=4096
