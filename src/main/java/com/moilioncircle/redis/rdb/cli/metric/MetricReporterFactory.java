@@ -1,5 +1,6 @@
 package com.moilioncircle.redis.rdb.cli.metric;
 
+import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.metric.prometheus.PrometheusReporter;
 import com.moilioncircle.redis.rdb.cli.metric.prometheus.PrometheusSender;
 import com.moilioncircle.redis.rdb.cli.metric.prometheus.PrometheusUriSender;
@@ -15,16 +16,16 @@ import org.slf4j.LoggerFactory;
 public class MetricReporterFactory {
 
     private static final Logger METRIC_LOGGER = LoggerFactory.getLogger("METRIC_LOGGER");
-
-    public static ScheduledReporter create(MetricConfigure configure, MetricRegistry registry, String job) {
-        switch (configure.getGateway()) {
+    
+    public static ScheduledReporter create(Configure configure, MetricRegistry registry, String job) {
+        switch (configure.getMetricGateway()) {
             case LOG:
                 return Slf4jReporter.forRegistry(registry).outputTo(METRIC_LOGGER).build();
             case PROMETHEUS:
                 PrometheusSender prometheus = new PrometheusUriSender(configure);
                 return PrometheusReporter.forRegistry(registry).build(prometheus, job);
             default:
-                throw new UnsupportedOperationException(configure.getGateway().toString());
+                throw new UnsupportedOperationException(configure.getMetricGateway().toString());
         }
     }
 }

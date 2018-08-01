@@ -16,6 +16,7 @@
 
 package com.moilioncircle.redis.rdb.cli.conf;
 
+import com.moilioncircle.redis.rdb.cli.glossary.Gateway;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.UncheckedIOException;
@@ -23,15 +24,16 @@ import com.moilioncircle.redis.replicator.UncheckedIOException;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Properties;
 
 /**
  * @author Baoyi Chen
  */
 public class Configure {
-
+    
     private Properties properties;
-
+    
     private Configure() {
         this.properties = new Properties();
         try {
@@ -50,238 +52,290 @@ public class Configure {
             throw new UncheckedIOException(e);
         }
     }
-
+    
     private Configure(Properties properties) {
         this();
         if (properties != null)
             this.properties.putAll(properties);
     }
-
+    
     /**
      * rct --format resp batch size
      */
     private int batchSize = 128;
-
+    
     /**
      * rct quote
      */
     private byte quote = '"';
-
+    
     /**
      * rct delimiter
      */
     private byte delimiter = ',';
-
+    
     /**
      * rmt --migrate
      */
     private int migrateBatchSize = 4096;
-
+    
     /**
      * rmt --migrate
      */
     private int migrateThreads = 4;
-
+    
     /**
      * rmt --migrate
      */
     private int migrateRetries = 1;
-
+    
     /**
      * rmt --migrate
      */
     private boolean migrateFlush = true;
-
+    
     /**
      * timeout
      */
     private int timeout = 30000;
-
+    
     /**
      * socket receive buffer size
      */
     private int rcvBuf = 0;
-
+    
     /**
      * socket send buffer size
      */
     private int sndBuf = 0;
-
+    
     /**
      * connection retry times. if retries <= 0 then always retry
      */
     private int retries = 5;
-
+    
     /**
      * retry time interval
      */
     private int retryInterval = 1000;
-
+    
     /**
      * redis input stream buffer size
      */
     private int bufferSize = 8 * 1024;
-
+    
     /**
      * async buffer size
      */
     private int asyncCacheSize = 512 * 1024;
-
+    
     /**
      *
      */
     private int dumpRdbVersion = -1;
-
+    
     /**
      * trace event log
      */
     private boolean verbose = false;
-
+    
     /**
      * used in psync heartbeat
      */
     private int heartbeat = 1000;
-
+    
+    /**
+     * metric uri
+     */
+    private URI metricUri;
+    
+    /**
+     * metric user
+     */
+    private String metricUser;
+    
+    /**
+     * metric pass
+     */
+    private String metricPass;
+    
+    /**
+     * metric gateway
+     */
+    private Gateway metricGateway;
+    
     public int getBatchSize() {
         return batchSize;
     }
-
+    
     public void setBatchSize(int batchSize) {
         this.batchSize = batchSize;
     }
-
+    
     public byte getQuote() {
         return quote;
     }
-
+    
     public void setQuote(byte quote) {
         this.quote = quote;
     }
-
+    
     public byte getDelimiter() {
         return delimiter;
     }
-
+    
     public void setDelimiter(byte delimiter) {
         this.delimiter = delimiter;
     }
-
+    
     public int getTimeout() {
         return timeout;
     }
-
+    
     public void setTimeout(int timeout) {
         this.timeout = timeout;
     }
-
+    
     public int getRcvBuf() {
         return rcvBuf;
     }
-
+    
     public void setRcvBuf(int rcvBuf) {
         this.rcvBuf = rcvBuf;
     }
-
+    
     public int getSndBuf() {
         return sndBuf;
     }
-
+    
     public void setSndBuf(int sndBuf) {
         this.sndBuf = sndBuf;
     }
-
+    
     public int getRetries() {
         return retries;
     }
-
+    
     public void setRetries(int retries) {
         this.retries = retries;
     }
-
+    
     public int getMigrateBatchSize() {
         return migrateBatchSize;
     }
-
+    
     public void setMigrateBatchSize(int migrateBatchSize) {
         this.migrateBatchSize = migrateBatchSize;
     }
-
+    
     public int getMigrateThreads() {
         return migrateThreads;
     }
-
+    
     public void setMigrateThreads(int migrateThreads) {
         this.migrateThreads = migrateThreads;
     }
-
+    
     public int getMigrateRetries() {
         return migrateRetries;
     }
-
+    
     public void setMigrateRetries(int migrateRetries) {
         this.migrateRetries = migrateRetries;
     }
-
+    
     public boolean isMigrateFlush() {
         return migrateFlush;
     }
-
+    
     public void setMigrateFlush(boolean migrateFlush) {
         this.migrateFlush = migrateFlush;
     }
-
+    
     public int getRetryInterval() {
         return retryInterval;
     }
-
+    
     public void setRetryInterval(int retryInterval) {
         this.retryInterval = retryInterval;
     }
-
+    
     public int getBufferSize() {
         return bufferSize;
     }
-
+    
     public void setBufferSize(int bufferSize) {
         this.bufferSize = bufferSize;
     }
-
+    
     public int getAsyncCacheSize() {
         return asyncCacheSize;
     }
-
+    
     public void setAsyncCacheSize(int asyncCacheSize) {
         this.asyncCacheSize = asyncCacheSize;
     }
-
+    
     public int getDumpRdbVersion() {
         return dumpRdbVersion;
     }
-
+    
     public void setDumpRdbVersion(int dumpRdbVersion) {
         this.dumpRdbVersion = dumpRdbVersion;
     }
-
+    
     public boolean isVerbose() {
         return verbose;
     }
-
+    
     public void setVerbose(boolean verbose) {
         this.verbose = verbose;
     }
-
+    
     public int getHeartbeat() {
         return heartbeat;
     }
-
+    
     public void setHeartbeat(int heartbeat) {
         this.heartbeat = heartbeat;
     }
-
+    
+    public URI getMetricUri() {
+        return metricUri;
+    }
+    
+    public void setMetricUri(URI metricUri) {
+        this.metricUri = metricUri;
+    }
+    
+    public String getMetricUser() {
+        return metricUser;
+    }
+    
+    public void setMetricUser(String metricUser) {
+        this.metricUser = metricUser;
+    }
+    
+    public String getMetricPass() {
+        return metricPass;
+    }
+    
+    public void setMetricPass(String metricPass) {
+        this.metricPass = metricPass;
+    }
+    
+    public Gateway getMetricGateway() {
+        return metricGateway;
+    }
+    
+    public void setMetricGateway(Gateway metricGateway) {
+        this.metricGateway = metricGateway;
+    }
+    
     public Configuration merge(RedisURI uri) {
         return merge(Configuration.valueOf(uri));
     }
-
+    
     public Configuration merge(Configuration conf) {
         conf.setRetries(this.retries);
         conf.setRetryTimeInterval(this.retryInterval);
@@ -295,11 +349,11 @@ public class Configure {
         conf.setHeartbeatPeriod(this.heartbeat);
         return conf;
     }
-
+    
     public static Configure bind() {
         return bind(null);
     }
-
+    
     public static Configure bind(Properties properties) {
         Configure conf = new Configure(properties);
         conf.batchSize = getInt(conf, "batch_size", 128, true);
@@ -319,21 +373,38 @@ public class Configure {
         conf.asyncCacheSize = getInt(conf, "async_cache_size", 512 * 1024, true);
         conf.verbose = getBool(conf, "verbose", false, true);
         conf.heartbeat = getInt(conf, "heartbeat", 1000, true);
+        conf.metricUser = getString(conf, "metric_uri", "", true);
+        conf.metricPass = getString(conf, "metric_uri", "", true);
+        conf.metricUri = getUri(conf, "metric_uri", "http://localhost:9091", true);
+        conf.metricGateway = Gateway.parse(getString(conf, "metric_gateway", "log", true));
         return conf;
     }
-
+    
+    public static URI getUri(Configure conf, String key) {
+        return getUri(conf, key, null, false);
+    }
+    
     public static String getString(Configure conf, String key) {
         return getString(conf, key, null, false);
     }
-
+    
     public static Integer getInt(Configure conf, String key) {
         return getInt(conf, key, null, false);
     }
-
+    
     public static Boolean getBool(Configure conf, String key) {
         return getBool(conf, key, null, false);
     }
-
+    
+    public static URI getUri(Configure conf, String key, String value, boolean optional) {
+        String v = getString(conf, key, value, optional);
+        try {
+            return v == null ? null : new URI(v);
+        } catch (Throwable e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
+    }
+    
     public static String getString(Configure conf, String key, String value, boolean optional) {
         String v = System.getProperty(key);
         if (v == null && (v = conf.properties.getProperty(key)) == null)
@@ -343,7 +414,7 @@ public class Configure {
         }
         return v;
     }
-
+    
     public static Integer getInt(Configure conf, String key, Integer value, boolean optional) {
         String v = getString(conf, key, value == null ? null : value.toString(), optional);
         try {
@@ -352,7 +423,7 @@ public class Configure {
             throw new IllegalArgumentException("not found the config[key=" + key + "]");
         }
     }
-
+    
     public static Boolean getBool(Configure conf, String key, Boolean value, boolean optional) {
         String v = getString(conf, key, value == null ? null : value.toString(), optional);
         if (v == null)
@@ -363,27 +434,31 @@ public class Configure {
             return Boolean.FALSE;
         throw new IllegalArgumentException("not found the config[key=" + key + "]");
     }
-
+    
     @Override
     public String toString() {
         return "Configure{" +
                 "batchSize=" + batchSize +
                 ", quote=" + quote +
                 ", delimiter=" + delimiter +
-                ", timeout=" + timeout +
-                ", rcvBuf=" + rcvBuf +
-                ", sndBuf=" + sndBuf +
-                ", retries=" + retries +
                 ", migrateBatchSize=" + migrateBatchSize +
                 ", migrateThreads=" + migrateThreads +
                 ", migrateRetries=" + migrateRetries +
                 ", migrateFlush=" + migrateFlush +
+                ", timeout=" + timeout +
+                ", rcvBuf=" + rcvBuf +
+                ", sndBuf=" + sndBuf +
+                ", retries=" + retries +
                 ", retryInterval=" + retryInterval +
                 ", bufferSize=" + bufferSize +
                 ", asyncCacheSize=" + asyncCacheSize +
                 ", dumpRdbVersion=" + dumpRdbVersion +
                 ", verbose=" + verbose +
                 ", heartbeat=" + heartbeat +
+                ", metricUri=" + metricUri +
+                ", metricUser='" + metricUser + '\'' +
+                ", metricPass='" + metricPass + '\'' +
+                ", metricGateway=" + metricGateway +
                 '}';
     }
 }

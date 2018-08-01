@@ -1,6 +1,6 @@
 package com.moilioncircle.redis.rdb.cli.metric.prometheus;
 
-import com.moilioncircle.redis.rdb.cli.metric.MetricConfigure;
+import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.PushGateway;
@@ -15,9 +15,9 @@ import java.util.Map;
 public class PrometheusUriSender implements PrometheusSender {
 
     private PushGateway gateway;
-
-    public PrometheusUriSender(MetricConfigure configure) {
-        URI uri = configure.getUri();
+    
+    public PrometheusUriSender(Configure configure) {
+        URI uri = configure.getMetricUri();
         try {
             this.gateway = new PushGateway(uri.toURL());
         } catch (Exception e) {
