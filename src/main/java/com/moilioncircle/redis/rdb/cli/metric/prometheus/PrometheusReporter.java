@@ -66,6 +66,11 @@ public class PrometheusReporter extends ScheduledReporter {
             reporter.job = job;
             reporter.sender = sender;
             reporter.registry = registry;
+            try {
+                reporter.sender.delete(job);
+            } catch (IOException e) {
+                LOGGER.warn("Unable to delete from Prometheus {}, job {}", sender, job, e);
+            }
             return reporter;
         }
     }
@@ -78,11 +83,6 @@ public class PrometheusReporter extends ScheduledReporter {
 
     protected PrometheusReporter(MetricRegistry registry, MetricFilter filter, ScheduledExecutorService executor, boolean shutdown) {
         super(registry, "prometheus-reporter", filter, SECONDS, MILLISECONDS, executor, shutdown, emptySet());
-        try {
-            sender.delete(job);
-        } catch (IOException e) {
-            LOGGER.warn("Unable to delete from Prometheus {}, job {}", sender, job, e);
-        }
     }
 
     @Override
