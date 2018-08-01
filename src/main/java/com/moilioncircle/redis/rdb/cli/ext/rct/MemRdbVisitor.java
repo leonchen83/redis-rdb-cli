@@ -29,6 +29,7 @@ import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
 import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
+import com.moilioncircle.redis.replicator.event.PreCommandSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.io.RawByteListener;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
@@ -93,7 +94,6 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     
     @Override
     public void accept(Tuple2Ex tuple) {
-        histogram.update(tuple.getV1());
         DummyKeyValuePair kv = tuple.getV2();
         OutputStreams.write(String.valueOf(kv.getDb().getDbNumber()).getBytes(), out);
         delimiter(out);
@@ -124,8 +124,10 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             if (!dkv.isContains() || dkv.getKey() == null) return;
             dkv.setValue(dkv.getValue() + size.object(dkv.getKey(), dkv.getExpiredType() != NONE));
             if (bytes == null || dkv.getValue() >= bytes) heap.add(new Tuple2Ex(dkv.getValue(), dkv));
+            histogram.update(dkv.getValue());
         } else if (event instanceof PostRdbSyncEvent) {
             for (Tuple2Ex tuple : heap.get(true)) accept(tuple);
+            if (this.reporter != null) this.reporter.close();
         } else if (event instanceof PreRdbSyncEvent) {
             // header
             // database,type,key,size_in_bytes,encoding,num_elements,len_largest_element
@@ -153,6 +155,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             if (aux.getAuxKey().equals("used-mem")) {
                 counterMemory.inc(Long.parseLong(aux.getAuxValue()));
             }
+        } else if (event instanceof PreCommandSyncEvent) {
+            if (this.reporter != null) this.reporter.close();
         }
     }
     
