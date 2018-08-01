@@ -125,9 +125,12 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             dkv.setValue(dkv.getValue() + size.object(dkv.getKey(), dkv.getExpiredType() != NONE));
             if (bytes == null || dkv.getValue() >= bytes) heap.add(new Tuple2Ex(dkv.getValue(), dkv));
             histogram.update(dkv.getValue());
-        } else if (event instanceof PostRdbSyncEvent) {
+        } else if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
             for (Tuple2Ex tuple : heap.get(true)) accept(tuple);
-            if (this.reporter != null) this.reporter.close();
+            if (this.reporter != null) {
+                this.reporter.report();
+                this.reporter.close();
+            }
         } else if (event instanceof PreRdbSyncEvent) {
             // header
             // database,type,key,size_in_bytes,encoding,num_elements,len_largest_element
@@ -155,8 +158,6 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             if (aux.getAuxKey().equals("used-mem")) {
                 counterMemory.inc(Long.parseLong(aux.getAuxValue()));
             }
-        } else if (event instanceof PreCommandSyncEvent) {
-            if (this.reporter != null) this.reporter.close();
         }
     }
     
