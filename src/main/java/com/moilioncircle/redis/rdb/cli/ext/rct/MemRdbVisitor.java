@@ -21,6 +21,7 @@ import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.glossary.Escape;
+import com.moilioncircle.redis.rdb.cli.metric.MetricReporterFactory;
 import com.moilioncircle.redis.rdb.cli.util.CmpHeap;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.rdb.cli.util.type.Tuple2;
@@ -32,10 +33,15 @@ import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.io.RawByteListener;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.BaseRdbParser;
+import com.moilioncircle.redis.replicator.rdb.datatype.AuxField;
 import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
 import com.moilioncircle.redis.replicator.rdb.skip.SkipRdbParser;
 import com.moilioncircle.redis.replicator.util.ByteArray;
 import com.moilioncircle.redis.replicator.util.Strings;
+import io.dropwizard.metrics5.Counter;
+import io.dropwizard.metrics5.Histogram;
+import io.dropwizard.metrics5.MetricRegistry;
+import io.dropwizard.metrics5.ScheduledReporter;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +50,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static com.moilioncircle.redis.rdb.cli.ext.rct.MemRdbVisitor.Tuple2Ex;
@@ -64,6 +71,17 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     private final Long bytes;
     private MemCalculator size;
     private final CmpHeap<Tuple2Ex> heap;
+    private MetricRegistry registry = new MetricRegistry();
+    private Counter counterSet = registry.counter("set");
+    private Counter counterList = registry.counter("list");
+    private Counter counterZSet = registry.counter("zset");
+    private Counter counterHash = registry.counter("hash");
+    private Counter counterString = registry.counter("string");
+    private Counter counterModule = registry.counter("module");
+    private Counter counterStream = registry.counter("stream");
+    private Counter counterMemory = registry.counter("used-mem");
+    private Histogram histogram = registry.histogram("mem_histogram");
+    private ScheduledReporter reporter = MetricReporterFactory.create(null, registry, "mem");
 
     public MemRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escape escape, Long largest, Long bytes) {
         super(replicator, configure, out, db, regexs, types, escape);
@@ -75,6 +93,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
 
     @Override
     public void accept(Tuple2Ex tuple) {
+        histogram.update(tuple.getV1());
         DummyKeyValuePair kv = tuple.getV2();
         OutputStreams.write(String.valueOf(kv.getDb().getDbNumber()).getBytes(), out);
         delimiter(out);
@@ -126,6 +145,12 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             delimiter(out);
             OutputStreams.write("expiry".getBytes(), out);
             OutputStreams.write('\n', out);
+            reporter.start(5, TimeUnit.SECONDS);
+        } else if (event instanceof AuxField) {
+            AuxField aux = (AuxField) event;
+            if (aux.getAuxKey().equals("used-mem")) {
+                counterMemory.inc(Long.parseLong(aux.getAuxValue()));
+            }
         }
     }
 
@@ -138,6 +163,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
 
     @Override
     protected Event doApplyString(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        counterString.inc();
         BaseRdbParser parser = new BaseRdbParser(in);
         byte[] val = parser.rdbLoadEncodedStringObject().first();
         DummyKeyValuePair kv = new DummyKeyValuePair();
@@ -152,6 +178,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
 
     @Override
     protected Event doApplyList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        counterList.inc();
         BaseRdbParser parser = new BaseRdbParser(in);
         long len = parser.rdbLoadLen().len;
         long length = len;
@@ -176,6 +203,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
 
     @Override
     protected Event doApplySet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        counterSet.inc();
         BaseRdbParser parser = new BaseRdbParser(in);
         long len = parser.rdbLoadLen().len;
         long length = len;
@@ -200,6 +228,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
 
     @Override
     protected Event doApplyZSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        counterZSet.inc();
         BaseRdbParser parser = new BaseRdbParser(in);
         long len = parser.rdbLoadLen().len;
         long length = 0;
@@ -226,6 +255,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
 
     @Override
     protected Event doApplyZSet2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        counterZSet.inc();
         BaseRdbParser parser = new BaseRdbParser(in);
         long len = parser.rdbLoadLen().len;
         long length = 0;
@@ -252,6 +282,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
 
     @Override
     protected Event doApplyHash(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        counterHash.inc();
         BaseRdbParser parser = new BaseRdbParser(in);
         long len = parser.rdbLoadLen().len;
         long length = 0;
@@ -279,6 +310,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
 
     @Override
     protected Event doApplyHashZipMap(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        counterHash.inc();
         BaseRdbParser parser = new BaseRdbParser(in);
         ByteArray ary = parser.rdbLoadPlainStringObject();
         RedisInputStream stream = new RedisInputStream(ary);
@@ -321,6 +353,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
 
     @Override
     protected Event doApplyListZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        counterList.inc();
         BaseRdbParser parser = new BaseRdbParser(in);
         ByteArray ary = parser.rdbLoadPlainStringObject();
         RedisInputStream stream = new RedisInputStream(ary);
@@ -348,6 +381,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
 
     @Override
     protected Event doApplySetIntSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        counterSet.inc();
         BaseRdbParser parser = new BaseRdbParser(in);
         ByteArray ary = parser.rdbLoadPlainStringObject();
         RedisInputStream stream = new RedisInputStream(ary);
@@ -383,6 +417,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
 
     @Override
     protected Event doApplyZSetZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        counterZSet.inc();
         BaseRdbParser parser = new BaseRdbParser(in);
         ByteArray ary = parser.rdbLoadPlainStringObject();
         RedisInputStream stream = new RedisInputStream(ary);
@@ -415,6 +450,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
 
     @Override
     protected Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        counterHash.inc();
         BaseRdbParser parser = new BaseRdbParser(in);
         ByteArray ary = parser.rdbLoadPlainStringObject();
         RedisInputStream stream = new RedisInputStream(ary);
@@ -448,6 +484,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
 
     @Override
     protected Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        counterList.inc();
         BaseRdbParser parser = new BaseRdbParser(in);
         long len = parser.rdbLoadLen().len;
         long val = 0;
@@ -483,6 +520,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
 
     @Override
     protected Event doApplyModule(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        counterModule.inc();
         LengthRawByteListener listener = new LengthRawByteListener();
         replicator.addRawByteListener(listener);
         super.doApplyModule(in, version, key, contains, type, context);
@@ -499,6 +537,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
 
     @Override
     protected Event doApplyModule2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        counterModule.inc();
         LengthRawByteListener listener = new LengthRawByteListener();
         replicator.addRawByteListener(listener);
         super.doApplyModule2(in, version, key, contains, type, context);
@@ -515,6 +554,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
 
     @Override
     protected Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        counterStream.inc();
         long length = 0;
         long max = 0;
         LengthRawByteListener listener = new LengthRawByteListener();
