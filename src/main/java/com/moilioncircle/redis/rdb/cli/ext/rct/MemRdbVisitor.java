@@ -147,7 +147,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             }
             for (Tuple2Ex tuple : metricHeap.get(true)) {
                 String key = Strings.toString(tuple.getV2().getKey());
-                registry.gauge(build(key), () -> () -> tuple.getV1());
+                registry.gauge(build("key_" + key), () -> () -> tuple.getV1());
             }
             if (this.reporter != null) {
                 this.reporter.report();
