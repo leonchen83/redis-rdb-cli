@@ -60,6 +60,7 @@ import static com.moilioncircle.redis.replicator.Constants.STREAM_ITEM_FLAG_DELE
 import static com.moilioncircle.redis.replicator.Constants.STREAM_ITEM_FLAG_SAMEFIELDS;
 import static com.moilioncircle.redis.replicator.rdb.BaseRdbParser.StringHelper.listPackEntry;
 import static com.moilioncircle.redis.replicator.rdb.datatype.ExpiredType.NONE;
+import static io.dropwizard.metrics5.MetricName.build;
 import static java.time.Instant.ofEpochMilli;
 
 /**
@@ -73,6 +74,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     private MemCalculator size;
     private ScheduledReporter reporter;
     private final CmpHeap<Tuple2Ex> heap;
+    private final CmpHeap<Tuple2Ex> metricHeap;
     private MetricRegistry registry = new MetricRegistry();
 
     private Counter counterSet = registry.counter("count_type_set");
@@ -91,13 +93,13 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     private Counter counterModuleMem = registry.counter("mem_total_type_module");
     private Counter counterStreamMem = registry.counter("mem_total_type_stream");
 
-    private Counter counterMemory = registry.counter("mem_total_type_all");
     private Histogram histogram = registry.histogram("mem_usage_histogram");
 
     public MemRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escape escape, Long largest, Long bytes) {
         super(replicator, configure, out, db, regexs, types, escape);
         this.bytes = bytes;
         this.heap = new CmpHeap<>(largest == null ? -1 : largest.intValue());
+        this.metricHeap = new CmpHeap<>(largest == null ? 100 : largest.intValue());
         this.heap.setConsumer(this);
         this.replicator.addEventListener(this);
     }
@@ -133,10 +135,20 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             DummyKeyValuePair dkv = (DummyKeyValuePair) event;
             if (!dkv.isContains() || dkv.getKey() == null) return;
             dkv.setValue(dkv.getValue() + size.object(dkv.getKey(), dkv.getExpiredType() != NONE));
-            if (bytes == null || dkv.getValue() >= bytes) heap.add(new Tuple2Ex(dkv.getValue(), dkv));
+            if (bytes == null || dkv.getValue() >= bytes) {
+                Tuple2Ex tuple = new Tuple2Ex(dkv.getValue(), dkv);
+                heap.add(tuple);
+                metricHeap.add(tuple);
+            }
             histogram.update(dkv.getValue());
         } else if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
-            for (Tuple2Ex tuple : heap.get(true)) accept(tuple);
+            for (Tuple2Ex tuple : heap.get(true)) {
+                accept(tuple);
+            }
+            for (Tuple2Ex tuple : metricHeap.get(true)) {
+                String key = Strings.toString(tuple.getV2().getKey());
+                registry.gauge(build(key), () -> () -> tuple.getV1());
+            }
             if (this.reporter != null) {
                 this.reporter.report();
                 this.reporter.close();
@@ -166,7 +178,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         } else if (event instanceof AuxField) {
             AuxField aux = (AuxField) event;
             if (aux.getAuxKey().equals("used-mem")) {
-                counterMemory.inc(Long.parseLong(aux.getAuxValue()));
+                registry.gauge(build("mem_total_type_all"), () -> () -> Long.parseLong(aux.getAuxValue()));
             }
         }
     }
