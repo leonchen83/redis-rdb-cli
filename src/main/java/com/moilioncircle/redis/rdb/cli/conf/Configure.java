@@ -373,8 +373,8 @@ public class Configure {
         conf.asyncCacheSize = getInt(conf, "async_cache_size", 512 * 1024, true);
         conf.verbose = getBool(conf, "verbose", false, true);
         conf.heartbeat = getInt(conf, "heartbeat", 1000, true);
-        conf.metricUser = getString(conf, "metric_uri", "", true);
-        conf.metricPass = getString(conf, "metric_uri", "", true);
+        conf.metricUser = getString(conf, "metric_user", "", true);
+        conf.metricPass = getString(conf, "metric_pass", "", true);
         conf.metricUri = getUri(conf, "metric_uri", "http://localhost:9091", true);
         conf.metricGateway = Gateway.parse(getString(conf, "metric_gateway", "log", true));
         return conf;

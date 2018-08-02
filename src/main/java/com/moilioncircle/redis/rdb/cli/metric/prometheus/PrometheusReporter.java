@@ -27,6 +27,11 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  */
 public class PrometheusReporter extends ScheduledReporter {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(PrometheusReporter.class);
+
+    private String job;
+    private PrometheusSender sender;
+    private MetricRegistry registry;
 
     public static PrometheusReporter.Builder forRegistry(MetricRegistry registry) {
         return new PrometheusReporter.Builder(registry);
@@ -35,15 +40,15 @@ public class PrometheusReporter extends ScheduledReporter {
     public static class Builder {
         private final MetricRegistry registry;
         //
+        private boolean shutdown;
         private MetricFilter filter;
-        private boolean shutdownExecutorOnStop;
         private ScheduledExecutorService executor;
 
         private Builder(MetricRegistry registry) {
             this.filter = ALL;
             this.executor = null;
+            this.shutdown = true;
             this.registry = registry;
-            this.shutdownExecutorOnStop = true;
         }
 
         public PrometheusReporter.Builder filter(MetricFilter filter) {
@@ -56,13 +61,13 @@ public class PrometheusReporter extends ScheduledReporter {
             return this;
         }
 
-        public PrometheusReporter.Builder shutdownExecutorOnStop(boolean shutdownExecutorOnStop) {
-            this.shutdownExecutorOnStop = shutdownExecutorOnStop;
+        public PrometheusReporter.Builder shutdownExecutorOnStop(boolean shutdown) {
+            this.shutdown = shutdown;
             return this;
         }
 
         public PrometheusReporter build(PrometheusSender sender, String job) {
-            PrometheusReporter reporter = new PrometheusReporter(registry, filter, executor, shutdownExecutorOnStop);
+            PrometheusReporter reporter = new PrometheusReporter(registry, filter, executor, shutdown);
             reporter.job = job;
             reporter.sender = sender;
             reporter.registry = registry;
@@ -75,23 +80,13 @@ public class PrometheusReporter extends ScheduledReporter {
         }
     }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PrometheusReporter.class);
-
-    private String job;
-    private PrometheusSender sender;
-    private MetricRegistry registry;
-
     protected PrometheusReporter(MetricRegistry registry, MetricFilter filter, ScheduledExecutorService executor, boolean shutdown) {
         super(registry, "prometheus-reporter", filter, SECONDS, MILLISECONDS, executor, shutdown, emptySet());
     }
 
     @Override
-    @SuppressWarnings("rawtypes")
-    public void report(SortedMap<MetricName, Gauge> gauges,
-                       SortedMap<MetricName, Counter> counters,
-                       SortedMap<MetricName, Histogram> histograms,
-                       SortedMap<MetricName, Meter> meters,
-                       SortedMap<MetricName, Timer> timers) {
+    public void report(SortedMap<MetricName, Gauge> gauges, SortedMap<MetricName, Counter> counters,
+                       SortedMap<MetricName, Histogram> histograms, SortedMap<MetricName, Meter> meters, SortedMap<MetricName, Timer> timers) {
         CollectorRegistry registry = new CollectorRegistry();
         new DropwizardExports(this.registry).register(registry);
         try {

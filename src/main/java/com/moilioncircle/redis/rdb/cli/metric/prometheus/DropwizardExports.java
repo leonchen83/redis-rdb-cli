@@ -38,13 +38,13 @@ public class DropwizardExports extends Collector implements Collector.Describabl
         this.registry = registry;
     }
 
-    private static List<MetricFamilySamples> fromCounter(MetricName metricName, Counter counter) {
+    private static List<MetricFamilySamples> counter(MetricName metricName, Counter counter) {
         String name = normalize(metricName);
         Sample sample = new Sample(name, emptyList(), emptyList(), new Long(counter.getCount()).doubleValue());
         return singletonList(new MetricFamilySamples(name, GAUGE, message(metricName, counter), singletonList(sample)));
     }
 
-    private static List<MetricFamilySamples> fromGauge(MetricName metricName, Gauge gauge) {
+    private static List<MetricFamilySamples> gauge(MetricName metricName, Gauge gauge) {
         String name = normalize(metricName);
         Object obj = gauge.getValue();
         double value;
@@ -59,25 +59,27 @@ public class DropwizardExports extends Collector implements Collector.Describabl
         return singletonList(new MetricFamilySamples(name, GAUGE, message(metricName, gauge), singletonList(sample)));
     }
 
-    private static List<MetricFamilySamples> fromHistogram(MetricName metricName, Histogram histogram) {
-        double factor = 1.0;
+    private static List<MetricFamilySamples> histogram(MetricName metricName, Histogram histogram) {
         long count = histogram.getCount();
         String name = normalize(metricName);
         Snapshot snapshot = histogram.getSnapshot();
         String message = message(metricName, histogram);
         List<Sample> samples = Arrays.asList(
-                new Sample(name, singletonList("quantile"), singletonList("0.5"), snapshot.getMedian() * factor),
-                new Sample(name, singletonList("quantile"), singletonList("0.75"), snapshot.get75thPercentile() * factor),
-                new Sample(name, singletonList("quantile"), singletonList("0.95"), snapshot.get95thPercentile() * factor),
-                new Sample(name, singletonList("quantile"), singletonList("0.98"), snapshot.get98thPercentile() * factor),
-                new Sample(name, singletonList("quantile"), singletonList("0.99"), snapshot.get99thPercentile() * factor),
-                new Sample(name, singletonList("quantile"), singletonList("0.999"), snapshot.get999thPercentile() * factor),
-                new Sample(name + "_count", emptyList(), emptyList(), count)
+                new Sample(name, singletonList("quantile"), singletonList("0.5"), snapshot.getMedian()),
+                new Sample(name, singletonList("quantile"), singletonList("0.75"), snapshot.get75thPercentile()),
+                new Sample(name, singletonList("quantile"), singletonList("0.95"), snapshot.get95thPercentile()),
+                new Sample(name, singletonList("quantile"), singletonList("0.98"), snapshot.get98thPercentile()),
+                new Sample(name, singletonList("quantile"), singletonList("0.99"), snapshot.get99thPercentile()),
+                new Sample(name, singletonList("quantile"), singletonList("0.999"), snapshot.get999thPercentile()),
+                new Sample(name + "_count", emptyList(), emptyList(), count),
+                new Sample(name + "_max", emptyList(), emptyList(), snapshot.getMax()),
+                new Sample(name + "_min", emptyList(), emptyList(), snapshot.getMin()),
+                new Sample(name + "_mean", emptyList(), emptyList(), snapshot.getMean())
         );
         return singletonList(new MetricFamilySamples(name, SUMMARY, message, samples));
     }
 
-    private static List<MetricFamilySamples> fromTimer(MetricName metricName, Timer timer) {
+    private static List<MetricFamilySamples> timer(MetricName metricName, Timer timer) {
         String name = normalize(metricName);
         long count = timer.getCount();
         Snapshot snapshot = timer.getSnapshot();
@@ -90,12 +92,15 @@ public class DropwizardExports extends Collector implements Collector.Describabl
                 new Sample(name, singletonList("quantile"), singletonList("0.98"), snapshot.get98thPercentile() * factor),
                 new Sample(name, singletonList("quantile"), singletonList("0.99"), snapshot.get99thPercentile() * factor),
                 new Sample(name, singletonList("quantile"), singletonList("0.999"), snapshot.get999thPercentile() * factor),
-                new Sample(name + "_count", emptyList(), emptyList(), count)
+                new Sample(name + "_count", emptyList(), emptyList(), count),
+                new Sample(name + "_max", emptyList(), emptyList(), snapshot.getMax()),
+                new Sample(name + "_min", emptyList(), emptyList(), snapshot.getMin()),
+                new Sample(name + "_mean", emptyList(), emptyList(), snapshot.getMean())
         );
         return singletonList(new MetricFamilySamples(name, SUMMARY, message, samples));
     }
 
-    private static List<MetricFamilySamples> fromMeter(MetricName metricName, Meter meter) {
+    private static List<MetricFamilySamples> meter(MetricName metricName, Meter meter) {
         String name = normalize(metricName);
         List<Sample> samples = singletonList(new Sample(name + "_total", emptyList(), emptyList(), meter.getCount()));
         return singletonList(new MetricFamilySamples(name + "_total", COUNTER, message(metricName, meter), samples));
@@ -117,19 +122,19 @@ public class DropwizardExports extends Collector implements Collector.Describabl
     public List<MetricFamilySamples> collect() {
         List<MetricFamilySamples> result = new ArrayList<>();
         for (SortedMap.Entry<MetricName, Timer> entry : registry.getTimers().entrySet()) {
-            result.addAll(fromTimer(entry.getKey(), entry.getValue()));
+            result.addAll(timer(entry.getKey(), entry.getValue()));
         }
         for (SortedMap.Entry<MetricName, Meter> entry : registry.getMeters().entrySet()) {
-            result.addAll(fromMeter(entry.getKey(), entry.getValue()));
+            result.addAll(meter(entry.getKey(), entry.getValue()));
         }
         for (SortedMap.Entry<MetricName, Gauge> entry : registry.getGauges().entrySet()) {
-            result.addAll(fromGauge(entry.getKey(), entry.getValue()));
+            result.addAll(gauge(entry.getKey(), entry.getValue()));
         }
         for (SortedMap.Entry<MetricName, Counter> entry : registry.getCounters().entrySet()) {
-            result.addAll(fromCounter(entry.getKey(), entry.getValue()));
+            result.addAll(counter(entry.getKey(), entry.getValue()));
         }
         for (SortedMap.Entry<MetricName, Histogram> entry : registry.getHistograms().entrySet()) {
-            result.addAll(fromHistogram(entry.getKey(), entry.getValue()));
+            result.addAll(histogram(entry.getKey(), entry.getValue()));
         }
         return result;
     }
