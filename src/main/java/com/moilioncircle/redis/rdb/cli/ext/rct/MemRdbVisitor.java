@@ -46,7 +46,6 @@ import io.dropwizard.metrics5.ScheduledReporter;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
@@ -62,6 +61,7 @@ import static com.moilioncircle.redis.replicator.rdb.BaseRdbParser.StringHelper.
 import static com.moilioncircle.redis.replicator.rdb.datatype.ExpiredType.NONE;
 import static io.dropwizard.metrics5.MetricName.build;
 import static java.time.Instant.ofEpochMilli;
+import static java.time.ZoneId.systemDefault;
 
 /**
  * @author Baoyi Chen
@@ -122,7 +122,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         quote(com.moilioncircle.redis.rdb.cli.util.Strings.pretty(kv.getMax()).getBytes(), out, false);
         delimiter(out);
         if (kv.getExpiredType() != NONE) {
-            quote(FORMATTER.format(ofEpochMilli(kv.getExpiredValue()).atZone(ZoneId.systemDefault())).getBytes(), out, false);
+            quote(FORMATTER.format(ofEpochMilli(kv.getExpiredValue()).atZone(systemDefault())).getBytes(), out, false);
         } else {
             quote("".getBytes(), out, false);
         }
@@ -147,7 +147,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             }
             for (Tuple2Ex tuple : metricHeap.get(true)) {
                 String key = Strings.toString(tuple.getV2().getKey());
-                registry.gauge(build("key_" + key), () -> () -> tuple.getV1());
+                registry.gauge(build("key:" + key), () -> tuple::getV1);
             }
             if (this.reporter != null) {
                 this.reporter.report();
