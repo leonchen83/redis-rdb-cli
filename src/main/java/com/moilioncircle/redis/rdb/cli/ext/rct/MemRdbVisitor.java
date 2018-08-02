@@ -76,22 +76,22 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     private final CmpHeap<Tuple2Ex> heap;
     private final CmpHeap<Tuple2Ex> metricHeap;
     private MetricRegistry registry = new MetricRegistry();
-
-    private Counter counterSet = registry.counter("count_type_set");
-    private Counter counterList = registry.counter("count_type_list");
-    private Counter counterZSet = registry.counter("count_type_zset");
-    private Counter counterHash = registry.counter("count_type_hash");
-    private Counter counterString = registry.counter("count_type_string");
-    private Counter counterModule = registry.counter("count_type_module");
-    private Counter counterStream = registry.counter("count_type_stream");
-
-    private Counter counterSetMem = registry.counter("mem_total_type_set");
-    private Counter counterListMem = registry.counter("mem_total_type_list");
-    private Counter counterZSetMem = registry.counter("mem_total_type_zset");
-    private Counter counterHashMem = registry.counter("mem_total_type_hash");
-    private Counter counterStringMem = registry.counter("mem_total_type_string");
-    private Counter counterModuleMem = registry.counter("mem_total_type_module");
-    private Counter counterStreamMem = registry.counter("mem_total_type_stream");
+    
+    private Counter counterSet = registry.counter("set_type_count");
+    private Counter counterList = registry.counter("list_type_count");
+    private Counter counterZSet = registry.counter("zset_type_count");
+    private Counter counterHash = registry.counter("hash_type_count");
+    private Counter counterString = registry.counter("string_type_count");
+    private Counter counterModule = registry.counter("module_type_count");
+    private Counter counterStream = registry.counter("stream_type_count");
+    
+    private Counter counterSetMem = registry.counter("set_type_mem_total");
+    private Counter counterListMem = registry.counter("list_type_mem_total");
+    private Counter counterZSetMem = registry.counter("zset_type_mem_total");
+    private Counter counterHashMem = registry.counter("hash_type_mem_total");
+    private Counter counterStringMem = registry.counter("string_type_mem_total");
+    private Counter counterModuleMem = registry.counter("module_type_mem_total");
+    private Counter counterStreamMem = registry.counter("stream_type_mem_total");
 
     private Histogram histogram = registry.histogram("mem_usage_histogram");
 
@@ -178,7 +178,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         } else if (event instanceof AuxField) {
             AuxField aux = (AuxField) event;
             if (aux.getAuxKey().equals("used-mem")) {
-                registry.gauge(build("mem_total_type_all"), () -> () -> Long.parseLong(aux.getAuxValue()));
+                registry.gauge(build("all_type_mem_total"), () -> () -> Long.parseLong(aux.getAuxValue()));
             }
         }
     }
