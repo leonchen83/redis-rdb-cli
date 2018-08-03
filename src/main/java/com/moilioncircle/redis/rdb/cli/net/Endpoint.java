@@ -24,14 +24,19 @@ import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.net.RedisSocketFactory;
 import com.moilioncircle.redis.replicator.util.ByteBuilder;
 import com.moilioncircle.redis.replicator.util.Strings;
+import io.dropwizard.metrics5.Meter;
+import io.dropwizard.metrics5.MetricRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.Objects;
 
+import static com.moilioncircle.redis.rdb.cli.metric.MetricNames.name;
 import static com.moilioncircle.redis.replicator.Constants.COLON;
 import static com.moilioncircle.redis.replicator.Constants.DOLLAR;
 import static com.moilioncircle.redis.replicator.Constants.MINUS;
@@ -42,14 +47,14 @@ import static com.moilioncircle.redis.replicator.Constants.STAR;
  * @author Baoyi Chen
  */
 public class Endpoint implements Closeable {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(Endpoint.class);
-    
+
     private static final int BUFFER = 64 * 1024;
     private static final byte[] AUTH = "auth".getBytes();
     private static final byte[] PING = "ping".getBytes();
     private static final byte[] SELECT = "select".getBytes();
-    
+
     private int db;
     private int count = 0;
     private final int pipe;
@@ -59,8 +64,12 @@ public class Endpoint implements Closeable {
     private final OutputStream out;
     private final Configuration conf;
     private final RedisInputStream in;
-    
-    public Endpoint(String host, int port, int db, int pipe, Configuration conf) {
+
+    private final Meter meter;
+    private final Meter errMeter;
+    private final MetricRegistry registry;
+
+    public Endpoint(String host, int port, int db, int pipe, MetricRegistry registry, Configuration conf) {
         this.host = host;
         this.port = port;
         this.pipe = pipe;
@@ -80,15 +89,40 @@ public class Endpoint implements Closeable {
             String r = send(SELECT, String.valueOf(db).getBytes());
             if (r != null) throw new RuntimeException(r);
             this.db = db;
+            String address = address(socket);
+            this.registry = registry;
+            this.meter = registry.meter(name("endpoint_meter_" + address, "address", address));
+            this.errMeter = registry.meter(name("endpoint_err_meter_" + address, "address", address));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
-    
+
+    public String address(Socket socket) {
+        Objects.requireNonNull(socket);
+        InetSocketAddress la = (InetSocketAddress) socket.getLocalSocketAddress();
+        InetSocketAddress ra = (InetSocketAddress) socket.getRemoteSocketAddress();
+        StringBuilder builder = new StringBuilder();
+        builder.append("[la=");
+        if (la != null) {
+            builder.append(la.toString());
+        } else {
+            builder.append("N/A");
+        }
+        builder.append(", ra=");
+        if (ra != null) {
+            builder.append(ra.toString());
+        } else {
+            builder.append("N/A");
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+
     public int getDB() {
         return db;
     }
-    
+
     public String send(byte[] command, byte[]... ary) {
         try {
             emit(out, command, ary);
@@ -98,30 +132,34 @@ public class Endpoint implements Closeable {
             throw new RuntimeException(e);
         }
     }
-    
+
     public void select(boolean force, int db) {
         batch(force, SELECT, String.valueOf(db).getBytes());
         this.db = db;
     }
-    
+
     public void batch(boolean force, byte[] command, byte[]... args) {
         try {
             emit(out, command, args);
             if (force) out.flush();
             count++;
             if (count == pipe) flush();
+            meter.mark();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
-    
+
     public void flush() {
         try {
             if (count > 0) {
                 OutputStreams.flush(out);
                 for (int i = 0; i < count; i++) {
                     String r = parse();
-                    if (r != null) logger.error(r);
+                    if (r != null) {
+                        logger.error(r);
+                        errMeter.mark();
+                    }
                 }
                 count = 0;
             }
@@ -129,14 +167,14 @@ public class Endpoint implements Closeable {
             throw new RuntimeException(e);
         }
     }
-    
+
     @Override
     public void close() throws IOException {
         Sockets.closeQuietly(in);
         Sockets.closeQuietly(out);
         Sockets.closeQuietly(socket);
     }
-    
+
     public static void close(Endpoint endpoint) {
         if (endpoint == null) return;
         try {
@@ -145,7 +183,7 @@ public class Endpoint implements Closeable {
             throw new RuntimeException(e);
         }
     }
-    
+
     public static void closeQuietly(Endpoint endpoint) {
         if (endpoint == null) return;
         try {
@@ -153,12 +191,12 @@ public class Endpoint implements Closeable {
         } catch (Throwable e) {
         }
     }
-    
+
     public static Endpoint valueOf(Endpoint endpoint) {
         closeQuietly(endpoint);
-        return new Endpoint(endpoint.host, endpoint.port, endpoint.db, endpoint.pipe, endpoint.conf);
+        return new Endpoint(endpoint.host, endpoint.port, endpoint.db, endpoint.pipe, endpoint.registry, endpoint.conf);
     }
-    
+
     private void emit(OutputStream out, byte[] command, byte[]... ary) throws IOException {
         out.write(STAR);
         out.write(String.valueOf(ary.length + 1).getBytes());
@@ -181,7 +219,7 @@ public class Endpoint implements Closeable {
             out.write('\n');
         }
     }
-    
+
     private String parse() throws IOException {
         while (true) {
             int c = in.read();
@@ -257,7 +295,7 @@ public class Endpoint implements Closeable {
                     }
                 default:
                     throw new RuntimeException("expect [$,:,*,+,-] but: " + (char) c);
-    
+
             }
         }
     }

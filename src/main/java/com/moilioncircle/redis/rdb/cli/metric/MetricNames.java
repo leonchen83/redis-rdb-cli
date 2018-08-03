@@ -18,7 +18,7 @@ package com.moilioncircle.redis.rdb.cli.metric;
 
 import io.dropwizard.metrics5.MetricName;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -26,8 +26,10 @@ import java.util.Map;
  */
 public class MetricNames {
     public static MetricName name(String name, String... tags) {
-        if (tags.length % 2 != 0) throw new IllegalArgumentException("tag.length illegal");
-        Map<String, String> map = new HashMap<>();
+        if ((tags.length & 1) != 0) {
+            throw new IllegalArgumentException("tag.length " + tags.length + " illegal");
+        }
+        Map<String, String> map = new LinkedHashMap<>();
         for (int i = 0; i < tags.length; i += 2) {
             map.put(tags[i], tags[i + 1]);
         }
