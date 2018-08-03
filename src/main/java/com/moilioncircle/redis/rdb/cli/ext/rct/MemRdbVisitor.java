@@ -179,7 +179,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             OutputStreams.write("expiry".getBytes(), out);
             OutputStreams.write('\n', out);
             if (this.reporter != null) this.reporter.close();
-            this.reporter = MetricReporterFactory.create(configure, registry, "redis_rdb_cli_mem");
+            this.reporter = MetricReporterFactory.create(configure, registry, configure.getMetricMemoryJobName());
             this.reporter.start(5, TimeUnit.SECONDS);
         } else if (event instanceof AuxField) {
             AuxField aux = (AuxField) event;

@@ -61,7 +61,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             this.endpoints.set(new Endpoints(lines, pipe, registry, configuration));
 
             if (this.reporter != null) this.reporter.close();
-            this.reporter = MetricReporterFactory.create(configure, registry, "redis_rdb_cli_endpoint");
+            this.reporter = MetricReporterFactory.create(configure, registry, configure.getMetricEndpointJobName());
             this.reporter.start(5, TimeUnit.SECONDS);
         } else if (event instanceof DumpKeyValuePair) {
             retry(event, configure.getMigrateRetries());

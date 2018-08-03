@@ -130,7 +130,7 @@ public class Configure {
     private int asyncCacheSize = 512 * 1024;
     
     /**
-     *
+     * dump rdb version
      */
     private int dumpRdbVersion = -1;
     
@@ -163,6 +163,16 @@ public class Configure {
      * metric gateway
      */
     private Gateway metricGateway;
+    
+    /**
+     * metric memory job name
+     */
+    private String metricMemoryJobName;
+    
+    /**
+     * metric endpoint job name
+     */
+    private String metricEndpointJobName;
     
     public int getBatchSize() {
         return batchSize;
@@ -332,6 +342,22 @@ public class Configure {
         this.metricGateway = metricGateway;
     }
     
+    public String getMetricMemoryJobName() {
+        return metricMemoryJobName;
+    }
+    
+    public void setMetricMemoryJobName(String metricMemoryJobName) {
+        this.metricMemoryJobName = metricMemoryJobName;
+    }
+    
+    public String getMetricEndpointJobName() {
+        return metricEndpointJobName;
+    }
+    
+    public void setMetricEndpointJobName(String metricEndpointJobName) {
+        this.metricEndpointJobName = metricEndpointJobName;
+    }
+    
     public Configuration merge(RedisURI uri) {
         return merge(Configuration.valueOf(uri));
     }
@@ -377,6 +403,8 @@ public class Configure {
         conf.metricPass = getString(conf, "metric_pass", "", true);
         conf.metricUri = getUri(conf, "metric_uri", "http://localhost:9091", true);
         conf.metricGateway = Gateway.parse(getString(conf, "metric_gateway", "log", true));
+        conf.metricMemoryJobName = getString(conf, "metric_memory_job_name", "redis_rdb_cli_memory", true);
+        conf.metricEndpointJobName = getString(conf, "metric_endpoint_job_name", "redis_rdb_cli_endpoint", true);
         return conf;
     }
     
@@ -459,6 +487,8 @@ public class Configure {
                 ", metricUser='" + metricUser + '\'' +
                 ", metricPass='" + metricPass + '\'' +
                 ", metricGateway=" + metricGateway +
+                ", metricMemoryJobName='" + metricMemoryJobName + '\'' +
+                ", metricEndpointJobName='" + metricEndpointJobName + '\'' +
                 '}';
     }
 }
