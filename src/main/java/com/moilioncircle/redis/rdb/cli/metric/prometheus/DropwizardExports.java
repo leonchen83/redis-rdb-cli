@@ -36,8 +36,8 @@ public class DropwizardExports extends Collector implements Collector.Describabl
     private static final Pattern METRIC_NAME_RE = Pattern.compile("[^a-zA-Z0-9:_]");
 
     private MetricRegistry registry;
-
-    public DropwizardExports(MetricRegistry registry) {
+    
+    DropwizardExports(MetricRegistry registry) {
         this.registry = registry;
     }
 

@@ -30,6 +30,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import static com.moilioncircle.redis.rdb.cli.conf.NodeConfParser.slot;
+
 /**
  * @author Baoyi Chen
  */
@@ -46,12 +48,12 @@ public class Endpoints implements Closeable {
     }
 
     public String send(byte[] command, byte[]... args) {
-        short slot = NodeConfParser.slot(args[0]);
+        short slot = slot(args[0]);
         return endpoints.get(slot).send(command, args);
     }
 
     public void batch(boolean force, byte[] command, byte[]... args) {
-        short slot = NodeConfParser.slot(args[0]);
+        short slot = slot(args[0]);
         endpoints.get(slot).batch(force, command, args);
     }
 
@@ -69,8 +71,8 @@ public class Endpoints implements Closeable {
     }
 
     public void update(byte[] key) {
-        short slot = NodeConfParser.slot(key);
-        Endpoint v1 = endpoints.get(key);
+        short slot = slot(key);
+        Endpoint v1 = endpoints.get(slot);
         replace(slot, v1, Endpoint.valueOf(v1));
     }
 
