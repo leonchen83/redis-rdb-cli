@@ -24,7 +24,7 @@ import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.net.RedisSocketFactory;
 import com.moilioncircle.redis.replicator.util.ByteBuilder;
 import com.moilioncircle.redis.replicator.util.Strings;
-import io.dropwizard.metrics5.Meter;
+import io.dropwizard.metrics5.Counter;
 import io.dropwizard.metrics5.MetricRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +35,7 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.moilioncircle.redis.rdb.cli.metric.MetricNames.name;
 import static com.moilioncircle.redis.replicator.Constants.COLON;
@@ -64,10 +65,12 @@ public class Endpoint implements Closeable {
     private final OutputStream out;
     private final Configuration conf;
     private final RedisInputStream in;
-
-    private final Meter meter;
-    private final Meter errMeter;
+    
+    private final Counter counterSuc;
+    private final Counter counterErr;
     private final MetricRegistry registry;
+    
+    private static final AtomicInteger INDEX = new AtomicInteger();
 
     public Endpoint(String host, int port, int db, int pipe, MetricRegistry registry, Configuration conf) {
         this.host = host;
@@ -91,8 +94,8 @@ public class Endpoint implements Closeable {
             this.db = db;
             String address = address(socket);
             this.registry = registry;
-            this.meter = registry.meter(name("endpoint_meter_" + address, "address", address));
-            this.errMeter = registry.meter(name("endpoint_err_meter_" + address, "address", address));
+            this.counterSuc = registry.counter(name("endpoint_suc_" + INDEX.incrementAndGet(), "address", address, "mtype", "suc"));
+            this.counterErr = registry.counter(name("endpoint_err_" + INDEX.incrementAndGet(), "address", address, "mtype", "err"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -144,7 +147,6 @@ public class Endpoint implements Closeable {
             if (force) out.flush();
             count++;
             if (count == pipe) flush();
-            meter.mark();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -158,7 +160,9 @@ public class Endpoint implements Closeable {
                     String r = parse();
                     if (r != null) {
                         logger.error(r);
-                        errMeter.mark();
+                        counterErr.inc();
+                    } else {
+                        counterSuc.inc();
                     }
                 }
                 count = 0;

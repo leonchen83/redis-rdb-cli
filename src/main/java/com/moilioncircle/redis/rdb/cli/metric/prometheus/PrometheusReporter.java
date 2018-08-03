@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.SortedMap;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -33,7 +32,6 @@ public class PrometheusReporter extends ScheduledReporter {
     private String job;
     private PrometheusSender sender;
     private MetricRegistry registry;
-    private Map<String, String> groupingKey;
 
     public static PrometheusReporter.Builder forRegistry(MetricRegistry registry) {
         return new PrometheusReporter.Builder(registry);
@@ -44,7 +42,6 @@ public class PrometheusReporter extends ScheduledReporter {
         //
         private boolean shutdown;
         private MetricFilter filter;
-        private Map<String, String> groupingKey;
         private ScheduledExecutorService executor;
 
         private Builder(MetricRegistry registry) {
@@ -64,11 +61,6 @@ public class PrometheusReporter extends ScheduledReporter {
             return this;
         }
 
-        public PrometheusReporter.Builder groupingKey(Map<String, String> groupingKey) {
-            this.groupingKey = groupingKey;
-            return this;
-        }
-
         public PrometheusReporter.Builder scheduleOn(ScheduledExecutorService executor) {
             this.executor = executor;
             return this;
@@ -79,9 +71,8 @@ public class PrometheusReporter extends ScheduledReporter {
             reporter.job = job;
             reporter.sender = sender;
             reporter.registry = registry;
-            reporter.groupingKey = groupingKey;
             try {
-                reporter.sender.delete(job, groupingKey);
+                reporter.sender.delete(job);
             } catch (IOException e) {
                 logger.warn("Unable to delete from Prometheus {}, job {}", sender, job, e);
             }
@@ -92,14 +83,14 @@ public class PrometheusReporter extends ScheduledReporter {
     protected PrometheusReporter(MetricRegistry registry, MetricFilter filter, ScheduledExecutorService executor, boolean shutdown) {
         super(registry, "prometheus-reporter", filter, SECONDS, MILLISECONDS, executor, shutdown, emptySet());
     }
-
+    
     @Override
     public void report(SortedMap<MetricName, Gauge> gauges, SortedMap<MetricName, Counter> counters,
                        SortedMap<MetricName, Histogram> histograms, SortedMap<MetricName, Meter> meters, SortedMap<MetricName, Timer> timers) {
         CollectorRegistry registry = new CollectorRegistry();
         new DropwizardExports(this.registry).register(registry);
         try {
-            sender.pushAdd(registry, job, groupingKey);
+            sender.pushAdd(registry, job);
         } catch (IOException e) {
             logger.warn("Unable to report to Prometheus {}", sender, e);
         }
