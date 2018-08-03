@@ -28,7 +28,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  */
 public class PrometheusReporter extends ScheduledReporter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PrometheusReporter.class);
+    private static final Logger logger = LoggerFactory.getLogger(PrometheusReporter.class);
 
     private String job;
     private PrometheusSender sender;
@@ -83,7 +83,7 @@ public class PrometheusReporter extends ScheduledReporter {
             try {
                 reporter.sender.delete(job, groupingKey);
             } catch (IOException e) {
-                LOGGER.warn("Unable to delete from Prometheus {}, job {}", sender, job, e);
+                logger.warn("Unable to delete from Prometheus {}, job {}", sender, job, e);
             }
             return reporter;
         }
@@ -101,7 +101,7 @@ public class PrometheusReporter extends ScheduledReporter {
         try {
             sender.pushAdd(registry, job, groupingKey);
         } catch (IOException e) {
-            LOGGER.warn("Unable to report to Prometheus {}", sender, e);
+            logger.warn("Unable to report to Prometheus {}", sender, e);
         }
     }
 }
