@@ -35,7 +35,6 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.moilioncircle.redis.rdb.cli.metric.MetricNames.name;
 import static com.moilioncircle.redis.replicator.Constants.COLON;
@@ -70,8 +69,6 @@ public class Endpoint implements Closeable {
     private final Counter counterErr;
     private final MetricRegistry registry;
     
-    private static final AtomicInteger INDEX = new AtomicInteger();
-
     public Endpoint(String host, int port, int db, int pipe, MetricRegistry registry, Configuration conf) {
         this.host = host;
         this.port = port;
@@ -94,8 +91,10 @@ public class Endpoint implements Closeable {
             this.db = db;
             String address = address(socket);
             this.registry = registry;
-            this.counterSuc = registry.counter(name("endpoint_suc_" + INDEX.incrementAndGet(), "address", address, "mtype", "suc"));
-            this.counterErr = registry.counter(name("endpoint_err_" + INDEX.incrementAndGet(), "address", address, "mtype", "err"));
+            String suc = "endpoint_suc_" + Thread.currentThread().getName();
+            String err = "endpoint_err_" + Thread.currentThread().getName();
+            this.counterSuc = registry.counter(name(suc, "address", address, "mtype", "suc"));
+            this.counterErr = registry.counter(name(err, "address", address, "mtype", "err"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
