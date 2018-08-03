@@ -1,5 +1,7 @@
 package com.moilioncircle.redis.rdb.cli.metric.prometheus;
 
+import com.moilioncircle.redis.rdb.cli.util.Tuples;
+import com.moilioncircle.redis.rdb.cli.util.type.Tuple2;
 import io.dropwizard.metrics5.Counter;
 import io.dropwizard.metrics5.Gauge;
 import io.dropwizard.metrics5.Histogram;
@@ -14,6 +16,7 @@ import io.prometheus.client.Collector;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.regex.Pattern;
 
@@ -40,7 +43,8 @@ public class DropwizardExports extends Collector implements Collector.Describabl
 
     private static List<MetricFamilySamples> counter(MetricName metricName, Counter counter) {
         String name = normalize(metricName);
-        Sample sample = new Sample(name, emptyList(), emptyList(), new Long(counter.getCount()).doubleValue());
+        Tuple2<List<String>, List<String>> tuple = tags(metricName);
+        Sample sample = new Sample(name, tuple.getV1(), tuple.getV2(), new Long(counter.getCount()).doubleValue());
         return singletonList(new MetricFamilySamples(name, GAUGE, message(metricName, counter), singletonList(sample)));
     }
 
@@ -55,7 +59,8 @@ public class DropwizardExports extends Collector implements Collector.Describabl
         } else {
             return emptyList();
         }
-        Sample sample = new Sample(name, emptyList(), emptyList(), value);
+        Tuple2<List<String>, List<String>> tuple = tags(metricName);
+        Sample sample = new Sample(name, tuple.getV1(), tuple.getV2(), value);
         return singletonList(new MetricFamilySamples(name, GAUGE, message(metricName, gauge), singletonList(sample)));
     }
 
@@ -65,6 +70,10 @@ public class DropwizardExports extends Collector implements Collector.Describabl
         Snapshot snapshot = histogram.getSnapshot();
         String message = message(metricName, histogram);
         List<Sample> samples = Arrays.asList(
+                new Sample(name, singletonList("quantile"), singletonList("0.001"), snapshot.getValue(0.001)),
+                new Sample(name, singletonList("quantile"), singletonList("0.01"), snapshot.getValue(0.01)),
+                new Sample(name, singletonList("quantile"), singletonList("0.1"), snapshot.getValue(0.1)),
+                new Sample(name, singletonList("quantile"), singletonList("0.25"), snapshot.getValue(0.25)),
                 new Sample(name, singletonList("quantile"), singletonList("0.5"), snapshot.getMedian()),
                 new Sample(name, singletonList("quantile"), singletonList("0.75"), snapshot.get75thPercentile()),
                 new Sample(name, singletonList("quantile"), singletonList("0.95"), snapshot.get95thPercentile()),
@@ -86,6 +95,10 @@ public class DropwizardExports extends Collector implements Collector.Describabl
         double factor = 1.0d / SECONDS.toNanos(1L);
         String message = message(metricName, timer);
         List<Sample> samples = Arrays.asList(
+                new Sample(name, singletonList("quantile"), singletonList("0.001"), snapshot.getValue(0.001) * factor),
+                new Sample(name, singletonList("quantile"), singletonList("0.01"), snapshot.getValue(0.01) * factor),
+                new Sample(name, singletonList("quantile"), singletonList("0.1"), snapshot.getValue(0.1) * factor),
+                new Sample(name, singletonList("quantile"), singletonList("0.25"), snapshot.getValue(0.25) * factor),
                 new Sample(name, singletonList("quantile"), singletonList("0.5"), snapshot.getMedian() * factor),
                 new Sample(name, singletonList("quantile"), singletonList("0.75"), snapshot.get75thPercentile() * factor),
                 new Sample(name, singletonList("quantile"), singletonList("0.95"), snapshot.get95thPercentile() * factor),
@@ -102,7 +115,8 @@ public class DropwizardExports extends Collector implements Collector.Describabl
 
     private static List<MetricFamilySamples> meter(MetricName metricName, Meter meter) {
         String name = normalize(metricName);
-        List<Sample> samples = singletonList(new Sample(name + "_total", emptyList(), emptyList(), meter.getCount()));
+        Tuple2<List<String>, List<String>> tuple = tags(metricName);
+        List<Sample> samples = singletonList(new Sample(name + "_total", tuple.getV1(), tuple.getV2(), meter.getCount()));
         return singletonList(new MetricFamilySamples(name + "_total", COUNTER, message(metricName, meter), samples));
     }
 
@@ -110,6 +124,16 @@ public class DropwizardExports extends Collector implements Collector.Describabl
         String name = METRIC_NAME_RE.matcher(metricName.getKey()).replaceAll("_");
         if (!name.isEmpty() && Character.isDigit(name.charAt(0))) name = "_" + name;
         return name;
+    }
+    
+    private static Tuple2<List<String>, List<String>> tags(MetricName name) {
+        List<String> keys = new ArrayList<>();
+        List<String> values = new ArrayList<>();
+        for (Map.Entry<String, String> entry : name.getTags().entrySet()) {
+            keys.add(entry.getKey());
+            values.add(entry.getValue());
+        }
+        return Tuples.of(keys, values);
     }
 
     private static String message(MetricName metricName, Metric metric) {
