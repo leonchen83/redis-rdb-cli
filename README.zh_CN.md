@@ -274,7 +274,7 @@ rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
 从 `v0.1.9` 起, `rct -f mem` 支持在grafana上显示结果  
 ![img](./images/memory-dashboard.png)  
 
-如果你想开启这项功能. **必须** 安装 `docker` 和 `docker-compose`, 安装方法请参照 [docker](https://docs.docker.com/install/)  
+如果你想开启这项功能. **必须** 先安装 `docker` 和 `docker-compose`, 安装方法请参照 [docker](https://docs.docker.com/install/)  
 然后遵循如下的步骤:  
 
 ```java  
@@ -283,7 +283,7 @@ docker-compose up -d
 ```
   
 `cd /path/to/redis-rdb-cli/conf/redis-rdb-cli.conf`  
-把 [metric_gateway](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf) 这个参数从 `log` 改成 `prometheus`  
+把 [metric_gateway](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf) 这个参数从 `none` 改成 `prometheus`  
   
 浏览器打开 `http://localhost:3000` 来查看 `rct -f mem` 命令的结果.  
   

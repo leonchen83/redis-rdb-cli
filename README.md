@@ -281,7 +281,7 @@ More configurable parameter can be modified in `/path/to/redis-rdb-cli/conf/redi
 Since `v0.1.9`, the `rct -f mem` support showing result in grafana dashboard like the following:  
 ![img](./images/memory-dashboard.png)  
 
-If you want to turn it on. you **MUST** install `docker` and `docker-compose`, the installation please refer to [docker](https://docs.docker.com/install/)  
+If you want to turn it on. you **MUST** install `docker` and `docker-compose` first, the installation please refer to [docker](https://docs.docker.com/install/)  
 Then run the following command:  
 
 ```java  
@@ -290,7 +290,7 @@ docker-compose up -d
 ```
   
 `cd /path/to/redis-rdb-cli/conf/redis-rdb-cli.conf`  
-Then change parameter [metric_gateway](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf) from `log` to `prometheus`.  
+Then change parameter [metric_gateway](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf) from `none` to `prometheus`.  
   
 Open `http://localhost:3000` to check the `rct -f mem`'s result.  
   
