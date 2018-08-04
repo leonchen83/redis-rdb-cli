@@ -283,7 +283,7 @@ docker-compose up -d
 ```
   
 `cd /path/to/redis-rdb-cli/conf/redis-rdb-cli.conf`  
-把 [metric_gateway](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf) 这个参数从 `none` 改成 `prometheus`  
+把 [metric_gateway](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L149) 这个参数从 `none` 改成 `prometheus`  
   
 浏览器打开 `http://localhost:3000` 来查看 `rct -f mem` 命令的结果.  
   

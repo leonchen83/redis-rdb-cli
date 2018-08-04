@@ -290,7 +290,7 @@ docker-compose up -d
 ```
   
 `cd /path/to/redis-rdb-cli/conf/redis-rdb-cli.conf`  
-Then change parameter [metric_gateway](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf) from `none` to `prometheus`.  
+Then change parameter [metric_gateway](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L149) from `none` to `prometheus`.  
   
 Open `http://localhost:3000` to check the `rct -f mem`'s result.  
   
