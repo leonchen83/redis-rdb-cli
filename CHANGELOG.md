@@ -1,3 +1,7 @@
+### 0.1.9
+
+Add `metric` feature.  
+
 ### 0.1.8
 
 Fix `rct -f count` bug.  
