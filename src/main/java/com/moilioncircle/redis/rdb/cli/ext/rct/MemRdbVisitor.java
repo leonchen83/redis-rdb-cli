@@ -36,6 +36,7 @@ import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.BaseRdbParser;
 import com.moilioncircle.redis.replicator.rdb.datatype.AuxField;
 import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
+import com.moilioncircle.redis.replicator.rdb.datatype.DB;
 import com.moilioncircle.redis.replicator.rdb.skip.SkipRdbParser;
 import com.moilioncircle.redis.replicator.util.ByteArray;
 import com.moilioncircle.redis.replicator.util.Strings;
@@ -87,7 +88,6 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     private Counter counterString = registry.counter(name("string_type_count", "data_type", "string", "mtype", "count"));
     private Counter counterModule = registry.counter(name("module_type_count", "data_type", "module", "mtype", "count"));
     private Counter counterStream = registry.counter(name("stream_type_count", "data_type", "stream", "mtype", "count"));
-    private Counter counterAll = registry.counter("key_count");
     
     private Counter counterSetMem = registry.counter(name("set_type_mem_total", "data_type", "set", "mtype", "mem"));
     private Counter counterListMem = registry.counter(name("list_type_mem_total", "data_type", "list", "mtype", "mem"));
@@ -197,6 +197,15 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     }
     
     @Override
+    public DB applyResizeDB(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
+        DB db = super.applyResizeDB(in, version, context);
+        String dbnum = String.valueOf(db.getDbNumber());
+        registry.gauge(name("rdb_db_size" + db.getDbNumber(), "dbnum", dbnum, "mtype", "db_size"), () -> () -> db.getDbsize());
+        registry.gauge(name("rdb_db_expire" + db.getDbNumber(), "dbnum", dbnum, "mtype", "db_expire"), () -> () -> db.getExpires());
+        return db;
+    }
+    
+    @Override
     protected Event doApplyString(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         BaseRdbParser parser = new BaseRdbParser(in);
         byte[] val = parser.rdbLoadEncodedStringObject().first();
@@ -209,7 +218,6 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(size.element(val));
         counterString.inc();
         counterStringMem.inc(kv.getValue());
-        counterAll.inc();
         return context.valueOf(kv);
     }
     
@@ -236,7 +244,6 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(max);
         counterList.inc();
         counterListMem.inc(kv.getValue());
-        counterAll.inc();
         return context.valueOf(kv);
     }
     
@@ -263,7 +270,6 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(max);
         counterSet.inc();
         counterSetMem.inc(kv.getValue());
-        counterAll.inc();
         return context.valueOf(kv);
     }
     
@@ -292,7 +298,6 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(max);
         counterZSet.inc();
         counterZSetMem.inc(kv.getValue());
-        counterAll.inc();
         return context.valueOf(kv);
     }
     
@@ -321,7 +326,6 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(max);
         counterZSet.inc();
         counterZSetMem.inc(kv.getValue());
-        counterAll.inc();
         return context.valueOf(kv);
     }
     
@@ -351,7 +355,6 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(max);
         counterHash.inc();
         counterHashMem.inc(kv.getValue());
-        counterAll.inc();
         return context.valueOf(kv);
     }
     
@@ -375,7 +378,6 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
                 kv.setMax(max);
                 counterHash.inc();
                 counterHashMem.inc(kv.getValue());
-                counterAll.inc();
                 return context.valueOf(kv);
             }
             byte[] field = BaseRdbParser.StringHelper.bytes(stream, zmEleLen);
@@ -391,7 +393,6 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
                 kv.setMax(max);
                 counterHash.inc();
                 counterHashMem.inc(kv.getValue());
-                counterAll.inc();
                 return context.valueOf(kv);
             }
             int free = BaseRdbParser.LenHelper.free(stream);
@@ -429,7 +430,6 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(max);
         counterList.inc();
         counterListMem.inc(kv.getValue());
-        counterAll.inc();
         return context.valueOf(kv);
     }
     
@@ -467,7 +467,6 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(max);
         counterSet.inc();
         counterSetMem.inc(kv.getValue());
-        counterAll.inc();
         return context.valueOf(kv);
     }
     
@@ -502,7 +501,6 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(max);
         counterZSet.inc();
         counterZSetMem.inc(kv.getValue());
-        counterAll.inc();
         return context.valueOf(kv);
     }
     
@@ -538,7 +536,6 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(max);
         counterHash.inc();
         counterHashMem.inc(kv.getValue());
-        counterAll.inc();
         return context.valueOf(kv);
     }
     
@@ -576,7 +573,6 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(max);
         counterList.inc();
         counterListMem.inc(kv.getValue());
-        counterAll.inc();
         return context.valueOf(kv);
     }
     
@@ -595,7 +591,6 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(listener.length);
         counterModule.inc();
         counterModuleMem.inc(kv.getValue());
-        counterAll.inc();
         return context.valueOf(kv);
     }
     
@@ -614,7 +609,6 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(listener.length);
         counterModule.inc();
         counterModuleMem.inc(kv.getValue());
-        counterAll.inc();
         return context.valueOf(kv);
     }
     
@@ -705,7 +699,6 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setMax(max);
         counterStream.inc();
         counterStreamMem.inc(kv.getValue());
-        counterAll.inc();
         return context.valueOf(kv);
     }
     
