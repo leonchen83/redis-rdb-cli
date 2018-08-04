@@ -1,0 +1,13 @@
+{
+  "folder": "Redis rdb cli",
+  "config": [
+    {
+      "datasource": "prometheus",
+      "name": "Redis-rdb-cli",
+      "titles": {
+        "memory": "Redis memory dashboard",
+        "endpoint": "Redis endpoint dashboard"
+      }
+    }
+  ]
+}

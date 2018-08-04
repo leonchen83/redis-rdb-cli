@@ -30,4 +30,5 @@ services:
       - ./config/grafana-datasource.json:/datasource.json:ro
       - ./config/endpoint.json:/endpoint.json:ro
       - ./config/memory.json:/memory.json:ro
+      - ./config/dests.json:/dests.json:ro
     restart: on-failure
