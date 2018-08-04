@@ -199,7 +199,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     @Override
     public DB applyResizeDB(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         DB db = super.applyResizeDB(in, version, context);
-        String dbnum = String.valueOf(db.getDbNumber());
+        String dbnum = "db" + String.valueOf(db.getDbNumber());
         registry.gauge(name("rdb_db_size" + db.getDbNumber(), "dbnum", dbnum, "mtype", "db_size"), () -> () -> db.getDbsize());
         registry.gauge(name("rdb_db_expire" + db.getDbNumber(), "dbnum", dbnum, "mtype", "db_expire"), () -> () -> db.getExpires());
         return db;
