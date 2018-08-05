@@ -24,7 +24,7 @@ services:
       - "3000:3000"
     restart: on-failure
   dashboard-installer:
-    image: redisrdbcli/dashboard-installer:v1.0.0
+    image: redisrdbcli/dashboard-installer:v1.0.1
     command: ["grafana:3000"]
     volumes:
       - ./config/grafana-datasource.json:/datasource.json:ro
