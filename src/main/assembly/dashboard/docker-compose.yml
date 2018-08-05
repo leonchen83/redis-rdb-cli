@@ -4,7 +4,7 @@ services:
   pushgateway:
     image: prom/pushgateway:v0.5.2
     ports:
-      - 9091:9091
+      - "9091:9091"
     restart: on-failure
   prometheus:
     user: root
