@@ -16,7 +16,6 @@ services:
       - "9090:9090"
     volumes:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ./data:/data
     restart: on-failure
   grafana:
     image: grafana/grafana:5.2.2
