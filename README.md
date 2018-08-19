@@ -246,7 +246,12 @@ rmt -s /path/to/dump.rdb -m redis://192.168.1.105:6379 -r
 ```java  
 rmt -s /path/to/dump.rdb -c ./nodes-30001.conf -r
 ```
-
+  
+or simply use following cmd without `nodes-30001.conf`  
+  
+```java  
+rmt -s /path/to/dump.rdb -m redis://127.0.0.1:30001 -r
+```
 
 ### Backup remote redis's rdb
 

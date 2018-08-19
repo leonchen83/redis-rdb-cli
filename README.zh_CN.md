@@ -241,6 +241,18 @@ rct -f resp -s /path/to/dump.rdb -o /path/to/appendonly.aof
 rmt -s /path/to/dump.rdb -m redis://192.168.1.105:6379 -r
 ```
 
+### 同步rdb到远端redis集群
+
+```java  
+rmt -s /path/to/dump.rdb -c ./nodes-30001.conf -r
+```
+  
+或者不用 `nodes-30001.conf` 这个配置文件, 直接使用如下命令  
+  
+```java  
+rmt -s /path/to/dump.rdb -m redis://127.0.0.1:30001 -r
+```
+
 ### 备份远端redis的rdb
 
 ```java  

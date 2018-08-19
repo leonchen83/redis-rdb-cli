@@ -1,3 +1,7 @@
+### 0.1.10
+
+`rmt` support cluster migration.  
+
 ### 0.1.9
 
 Add `metric` feature.  
