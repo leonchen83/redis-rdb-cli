@@ -43,10 +43,10 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
     private final RedisURI uri;
     private final Configuration conf;
     private ThreadLocal<Endpoint> endpoint = new ThreadLocal<>();
-
-    public SingleRdbVisitor(Replicator replicator, Configure configure, String uri, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) throws Exception {
+    
+    public SingleRdbVisitor(Replicator replicator, Configure configure, RedisURI uri, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) throws Exception {
         super(replicator, configure, db, regexs, types, replace);
-        this.uri = new RedisURI(uri);
+        this.uri = uri;
         this.conf = configure.merge(this.uri);
         this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure));
     }

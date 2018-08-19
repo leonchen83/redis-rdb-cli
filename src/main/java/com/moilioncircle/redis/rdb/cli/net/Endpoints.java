@@ -46,8 +46,8 @@ public class Endpoints implements Closeable {
         };
         new NodeConfParser(mapper).parse(lines, set, endpoints);
     }
-
-    public String send(byte[] command, byte[]... args) {
+    
+    public Endpoint.RedisObject send(byte[] command, byte[]... args) {
         short slot = slot(args[0]);
         return endpoints.get(slot).send(command, args);
     }

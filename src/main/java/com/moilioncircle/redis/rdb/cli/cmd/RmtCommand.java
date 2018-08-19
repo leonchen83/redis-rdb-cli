@@ -20,6 +20,8 @@ import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.CliRedisReplicator;
 import com.moilioncircle.redis.rdb.cli.ext.rmt.ClusterRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rmt.SingleRdbVisitor;
+import com.moilioncircle.redis.rdb.cli.glossary.DataType;
+import com.moilioncircle.redis.rdb.cli.net.Endpoint;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
 import com.moilioncircle.redis.replicator.FileType;
 import com.moilioncircle.redis.replicator.RedisURI;
@@ -27,11 +29,13 @@ import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreCommandSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
+import com.moilioncircle.redis.replicator.rdb.RdbVisitor;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.moilioncircle.redis.rdb.cli.glossary.DataType.parse;
@@ -112,7 +116,7 @@ public class RmtCommand extends AbstractCommand {
                 }
                 try (ProgressBar bar = new ProgressBar(-1)) {
                     Replicator r = new CliRedisReplicator(source, configure);
-                    r.setRdbVisitor(new SingleRdbVisitor(r, configure, migrate, db, regexs, parse(type), replace));
+                    r.setRdbVisitor(getRdbVisitor(r, configure, uri, db, regexs, parse(type), replace));
                     Runtime.getRuntime().addShutdownHook(new Thread(() -> CliRedisReplicator.closeQuietly(r)));
                     r.addExceptionListener((rep, tx, e) -> {
                         throw new RuntimeException(tx.getMessage(), tx);
@@ -146,6 +150,19 @@ public class RmtCommand extends AbstractCommand {
                     });
                     r.open();
                 }
+            }
+        }
+    }
+    
+    private RdbVisitor getRdbVisitor(Replicator replicator, Configure configure, RedisURI uri, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) throws Exception {
+        try (Endpoint endpoint = new Endpoint(uri.getHost(), uri.getPort())) {
+            Endpoint.RedisObject r = endpoint.send("cluster".getBytes(), "nodes".getBytes());
+            if (r.type.isError()) {
+                return new SingleRdbVisitor(replicator, configure, uri, db, regexs, types, replace);
+            } else {
+                String config = r.getString();
+                List<String> lines = Arrays.asList(config.split("\n"));
+                return new ClusterRdbVisitor(replicator, configure, lines, regexs, types, replace);
             }
         }
     }
