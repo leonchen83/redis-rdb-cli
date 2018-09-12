@@ -831,7 +831,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         
         public long[] parseLong(byte[] array) {
             long[] err = new long[]{-1L, -1L};
-            if (array == null) return err;
+            if (array == null || array.length == 0)
+                return err;
             long t = 0L;
             long sig = 1L;
             int i = 0;
