@@ -24,6 +24,7 @@ import com.moilioncircle.redis.rdb.cli.glossary.Escape;
 import com.moilioncircle.redis.rdb.cli.metric.MetricReporterFactory;
 import com.moilioncircle.redis.rdb.cli.util.CmpHeap;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.rdb.cli.util.Tuples;
 import com.moilioncircle.redis.rdb.cli.util.type.Tuple2;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
@@ -49,7 +50,9 @@ import java.io.File;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -64,6 +67,7 @@ import static com.moilioncircle.redis.replicator.rdb.BaseRdbParser.StringHelper.
 import static com.moilioncircle.redis.replicator.rdb.datatype.ExpiredType.NONE;
 import static io.dropwizard.metrics5.MetricName.build;
 import static java.lang.Integer.min;
+import static java.lang.System.currentTimeMillis;
 import static java.time.Instant.ofEpochMilli;
 import static java.time.ZoneId.systemDefault;
 
@@ -96,8 +100,12 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     private Counter counterStringMem = registry.counter(name("string_type_mem_total", "data_type", "string", "mtype", "mem"));
     private Counter counterModuleMem = registry.counter(name("module_type_mem_total", "data_type", "module", "mtype", "mem"));
     private Counter counterStreamMem = registry.counter(name("stream_type_mem_total", "data_type", "stream", "mtype", "mem"));
-    
     private Histogram histogram = registry.histogram("mem_usage_histogram");
+    
+    //
+    private long totalMem = 0;
+    private boolean rdb6 = true;
+    private Map<Long, Tuple2<Long, Long>> dbInfo = new LinkedHashMap<>();
     
     public MemRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escape escape, Long largest, Long bytes) {
         super(replicator, configure, out, db, regexs, types, escape);
@@ -137,6 +145,23 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     public void onEvent(Replicator replicator, Event event) {
         if (event instanceof DummyKeyValuePair) {
             DummyKeyValuePair dkv = (DummyKeyValuePair) event;
+    
+            if (rdb6) {
+                //
+                totalMem += dkv.getValue();
+                //
+                long expire = 0L;
+                final Long expiry = dkv.getExpiredValue();
+                final long dbnum = dkv.getDb() == null ? 0 : dkv.getDb().getDbNumber();
+                if (dkv.getExpiredType() != null && expiry != null && expire - currentTimeMillis() < 0) {
+                    expire = 1L;
+                }
+        
+                Tuple2<Long, Long> tuple = dbInfo.get(dbnum);
+                if (tuple == null) dbInfo.put(dbnum, Tuples.of(1L, expire));
+                else dbInfo.put(dbnum, Tuples.of(tuple.getV1() + 1L, tuple.getV2() + expire));
+            }
+            
             if (!dkv.isContains() || dkv.getKey() == null) return;
             dkv.setValue(dkv.getValue() + size.object(dkv.getKey(), dkv.getExpiredType() != NONE));
             if (bytes == null || dkv.getValue() >= bytes) {
@@ -155,10 +180,21 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
                 String type = parse(tuple.getV2().getValueRdbType()).getValue();
                 registry.gauge(name("key" + (idx++), "key", key, "data_type", type, "mtype", "key"), () -> tuple::getV1);
             }
+    
+            if (rdb6) {
+                registry.gauge(build("key_mem_total"), () -> () -> totalMem);
+                for (Map.Entry<Long, Tuple2<Long, Long>> entry : dbInfo.entrySet()) {
+                    String dbnum = "db" + String.valueOf(entry.getKey());
+                    registry.gauge(name("rdb_db_size" + entry.getKey(), "dbnum", dbnum, "mtype", "db_size"), () -> () -> entry.getValue().getV1());
+                    registry.gauge(name("rdb_db_expire" + entry.getKey(), "dbnum", dbnum, "mtype", "db_expire"), () -> () -> entry.getValue().getV2());
+                }
+            }
+            
             if (this.reporter != null) {
                 this.reporter.report();
                 this.reporter.close();
             }
+    
         } else if (event instanceof PreRdbSyncEvent) {
             // header
             // database,type,key,size_in_bytes,encoding,num_elements,len_largest_element
@@ -193,6 +229,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     public int applyVersion(RedisInputStream in) throws IOException {
         int version = super.applyVersion(in);
         this.size = new MemCalculator(version);
+        if (version > 6) rdb6 = false;
         return version;
     }
     

@@ -32,7 +32,7 @@ public class Version {
         }
     }
     
-    private static final String VERSION = "0.1.10";
+    private static final String VERSION = "0.1.11";
     
     public static final Version INSTANCE = new Version();
     
