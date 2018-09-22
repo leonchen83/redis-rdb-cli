@@ -1,3 +1,7 @@
+### 0.1.11
+
+Fix `rct` bug in redis-3.0.  
+
 ### 0.1.10
 
 `rmt` support cluster migration.  
