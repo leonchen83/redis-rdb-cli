@@ -153,7 +153,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
                 long expire = 0L;
                 final Long expiry = dkv.getExpiredValue();
                 final long dbnum = dkv.getDb() == null ? 0 : dkv.getDb().getDbNumber();
-                if (dkv.getExpiredType() != null && expiry != null && expire - currentTimeMillis() < 0) {
+                if (dkv.getExpiredType() != null && expiry != null && expiry - currentTimeMillis() < 0) {
                     expire = 1L;
                 }
         
