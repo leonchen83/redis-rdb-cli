@@ -1,3 +1,8 @@
+### 0.1.12
+
+Support Redis-5.0-GA.  
+Upgrade dependencies.  
+
 ### 0.1.11
 
 Fix `rct` bug in redis-3.0.  
