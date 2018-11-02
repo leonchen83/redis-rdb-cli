@@ -24,6 +24,7 @@ import com.moilioncircle.redis.rdb.cli.glossary.Format;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
 import com.moilioncircle.redis.replicator.FileType;
 import com.moilioncircle.redis.replicator.Replicator;
+import com.moilioncircle.redis.replicator.Replicators;
 import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreCommandSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
@@ -121,12 +122,12 @@ public class RctCommand extends AbstractCommand {
                     throw new RuntimeException(tx.getMessage(), tx);
                 });
                 Format.parse(format).dress(r, configure, output, db, regexs, largest, bytes, DataType.parse(type), Escape.parse(escape), replace);
-                Runtime.getRuntime().addShutdownHook(new Thread(() -> CliRedisReplicator.closeQuietly(r)));
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> Replicators.closeQuietly(r)));
                 r.addEventListener((rep, event) -> {
                     if (event instanceof PreRdbSyncEvent)
                         rep.addRawByteListener(b -> bar.react(b.length));
                     if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent)
-                        CliRedisReplicator.closeQuietly(rep);
+	                    Replicators.closeQuietly(rep);
                 });
                 r.open();
             }

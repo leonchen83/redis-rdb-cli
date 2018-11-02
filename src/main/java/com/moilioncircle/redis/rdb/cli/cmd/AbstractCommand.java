@@ -25,7 +25,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
 import java.io.File;
-import java.net.URI;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
 import static com.moilioncircle.redis.rdb.cli.cmd.Version.INSTANCE;
@@ -71,12 +71,14 @@ public abstract class AbstractCommand implements Command {
     }
     
     protected String normalize(String source, FileType type, String message) throws URISyntaxException {
-        RedisURI uri;
+        RedisURI uri = null;
         try {
             uri = new RedisURI(source);
         } catch (Throwable e) {
-            URI u = new File(source).toURI();
-            uri = new RedisURI(new URI("redis", u.getRawAuthority(), u.getRawPath(), u.getRawQuery(), u.getRawFragment()).toString());
+            try {
+                uri = new RedisURI(new File(source));
+            } catch (MalformedURLException e1) {
+            }
         }
         if (uri != null && (uri.getFileType() == null || type == null || uri.getFileType() == type)) {
             return uri.toString();

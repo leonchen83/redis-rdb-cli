@@ -194,21 +194,4 @@ public class CliRedisReplicator implements Replicator {
     public void close() throws IOException {
         replicator.close();
     }
-    
-    public static void close(Replicator replicator) {
-        if (replicator == null) return;
-        try {
-            replicator.close();
-        } catch (Throwable txt) {
-            throw new RuntimeException(txt);
-        }
-    }
-    
-    public static void closeQuietly(Replicator replicator) {
-        if (replicator == null) return;
-        try {
-            replicator.close();
-        } catch (Throwable t) {
-        }
-    }
 }

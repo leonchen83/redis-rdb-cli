@@ -24,6 +24,7 @@ import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
 import com.moilioncircle.redis.rdb.cli.util.type.Tuple2;
 import com.moilioncircle.redis.replicator.FileType;
 import com.moilioncircle.redis.replicator.Replicator;
+import com.moilioncircle.redis.replicator.Replicators;
 import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreCommandSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
@@ -136,7 +137,7 @@ public class RdtCommand extends AbstractCommand {
             try (ProgressBar bar = new ProgressBar(-1)) {
                 List<Tuple2<Replicator, String>> list = action.dress(configure, split, backup, merge, output, db, regexs, conf, DataType.parse(type));
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                    for (Tuple2<Replicator, String> tuple : list) CliRedisReplicator.closeQuietly(tuple.getV1());
+                    for (Tuple2<Replicator, String> tuple : list) Replicators.closeQuietly(tuple.getV1());
                 }));
 
                 for (Tuple2<Replicator, String> tuple : list) {
@@ -147,7 +148,7 @@ public class RdtCommand extends AbstractCommand {
                         if (event instanceof PreRdbSyncEvent)
                             rep.addRawByteListener(b -> bar.react(b.length, tuple.getV2()));
                         if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent)
-                            CliRedisReplicator.closeQuietly(rep);
+                            Replicators.closeQuietly(rep);
                     });
                     tuple.getV1().open();
                 }

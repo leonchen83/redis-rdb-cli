@@ -19,11 +19,11 @@ package com.moilioncircle.redis.rdb.cli.conf;
 import com.moilioncircle.redis.rdb.cli.glossary.Gateway;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.RedisURI;
-import com.moilioncircle.redis.replicator.UncheckedIOException;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.util.Properties;
 
