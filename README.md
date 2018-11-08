@@ -19,7 +19,6 @@ mkdir redis-rdb-cli
 cd ./redis-rdb-cli
 wget https://github.com/leonchen83/redis-rdb-cli/releases/download/${version}/redis-rdb-cli.zip
 unzip redis-rdb-cli.zip
-sudo chmod -R 755 ./
 cd ./bin
 ./rct -h
 ```
