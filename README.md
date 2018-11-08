@@ -15,8 +15,8 @@ jdk 1.8+
 ## Install
 
 ```java  
-wget https://github.com/leonchen83/redis-rdb-cli/releases/download/${version}/redis-rdb-cli.zip
-unzip redis-rdb-cli.zip
+wget https://github.com/leonchen83/redis-rdb-cli/releases/download/${version}/redis-rdb-cli-release.zip
+unzip redis-rdb-cli-release.zip
 cd .redis-rdb-cli/bin
 ./rct -h
 ```
@@ -36,7 +36,7 @@ maven-3.3.1+
     git clone https://github.com/leonchen83/redis-rdb-cli.git
     cd redis-rdb-cli
     mvn clean install -Dmaven.test.skip=true
-    cd target/redis-rdb-cli/bin
+    cd target/redis-rdb-cli-release/redis-rdb-cli/bin
     ./rct -h 
 ```
 
