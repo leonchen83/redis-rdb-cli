@@ -15,11 +15,9 @@ jdk 1.8+
 ## 安装
 
 ```java  
-mkdir redis-rdb-cli
-cd ./redis-rdb-cli
 wget https://github.com/leonchen83/redis-rdb-cli/releases/download/${version}/redis-rdb-cli.zip
 unzip redis-rdb-cli.zip
-cd ./bin
+cd .redis-rdb-cli/bin
 ./rct -h
 ```
 
