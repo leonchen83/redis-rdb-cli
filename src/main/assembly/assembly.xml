@@ -54,6 +54,12 @@
             <fileMode>0755</fileMode>
             <directoryMode>0755</directoryMode>
         </fileSet>
+        <fileSet>
+            <directory>src/main/assembly/log</directory>
+            <outputDirectory>log</outputDirectory>
+            <fileMode>0755</fileMode>
+            <directoryMode>0755</directoryMode>
+        </fileSet>
     </fileSets>
 
     <files>
