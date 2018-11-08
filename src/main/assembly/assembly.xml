@@ -36,11 +36,13 @@
             <directory>src/main/assembly/bin</directory>
             <outputDirectory>bin</outputDirectory>
             <fileMode>0755</fileMode>
+            <directoryMode>0755</directoryMode>
         </fileSet>
         <fileSet>
             <directory>target/classes</directory>
             <outputDirectory>conf</outputDirectory>
             <fileMode>0755</fileMode>
+            <directoryMode>0755</directoryMode>
             <includes>
                 <include>*.conf</include>
                 <include>log4j2.xml</include>
@@ -50,6 +52,7 @@
             <directory>src/main/assembly/dashboard</directory>
             <outputDirectory>dashboard</outputDirectory>
             <fileMode>0755</fileMode>
+            <directoryMode>0755</directoryMode>
         </fileSet>
     </fileSets>
 
