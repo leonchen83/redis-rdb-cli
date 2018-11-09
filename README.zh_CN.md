@@ -33,11 +33,18 @@ maven-3.3.1+
 ## 编译 & 运行
 
 ```java  
-    git clone https://github.com/leonchen83/redis-rdb-cli.git
-    cd redis-rdb-cli
-    mvn clean install -Dmaven.test.skip=true
-    cd target/redis-rdb-cli-release/redis-rdb-cli/bin
-    ./rct -h 
+git clone https://github.com/leonchen83/redis-rdb-cli.git
+cd redis-rdb-cli
+mvn clean install -Dmaven.test.skip=true
+cd target/redis-rdb-cli-release/redis-rdb-cli/bin
+./rct -h 
+```
+
+## 在docker中运行
+
+```java  
+docker run -it --rm redisrdb/redis-rdb-cli
+rct -v
 ```
 
 ## 设置Windows环境变量

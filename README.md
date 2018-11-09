@@ -33,11 +33,18 @@ maven-3.3.1+
 ## Compile & run
 
 ```java  
-    git clone https://github.com/leonchen83/redis-rdb-cli.git
-    cd redis-rdb-cli
-    mvn clean install -Dmaven.test.skip=true
-    cd target/redis-rdb-cli-release/redis-rdb-cli/bin
-    ./rct -h 
+git clone https://github.com/leonchen83/redis-rdb-cli.git
+cd redis-rdb-cli
+mvn clean install -Dmaven.test.skip=true
+cd target/redis-rdb-cli-release/redis-rdb-cli/bin
+./rct -h 
+```
+
+## Run in docker
+
+```java  
+docker run -it --rm redisrdb/redis-rdb-cli
+rct -v
 ```
 
 ## Windows Environment Variables
