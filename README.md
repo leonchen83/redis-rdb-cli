@@ -43,7 +43,7 @@ cd target/redis-rdb-cli-release/redis-rdb-cli/bin
 ## Run in docker
 
 ```java  
-docker run -it --rm redisrdb/redis-rdb-cli
+docker run -it --rm redisrdbcli/redis-rdb-cli
 rct -v
 ```
 
