@@ -401,4 +401,8 @@ The `migrate_flush=yes` means we write every 1 command to socket. then we invoke
 ### limitation of cluster migration
 
 We use cluster's `nodes.conf` to migrate data to cluster. because of we did't handle the `MOVED` `ASK` redirection. so the only limitation is that the cluster **MUST** in stable state during the migration. this means the cluster **MUST** have no `migrating`, `importing` slot and no switch slave to master. 
-
+  
+## Contributors
+  
+* [Baoyi Chen](https://github.com/leonchen83)
+* [TaoBeier](https://github.com/tao12345666333)
