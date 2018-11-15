@@ -1,40 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_PROMETHEUS",
-      "label": "prometheus",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "prometheus",
-      "pluginName": "Prometheus"
-    }
-  ],
-  "__requires": [
-    {
-      "type": "grafana",
-      "id": "grafana",
-      "name": "Grafana",
-      "version": "5.2.2"
-    },
-    {
-      "type": "panel",
-      "id": "graph",
-      "name": "Graph",
-      "version": "5.0.0"
-    },
-    {
-      "type": "datasource",
-      "id": "prometheus",
-      "name": "Prometheus",
-      "version": "5.0.0"
-    },
-    {
-      "type": "panel",
-      "id": "singlestat",
-      "name": "Singlestat",
-      "version": "5.0.0"
-    }
-  ],
   "annotations": {
     "list": [
       {
@@ -52,6 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
+  "iteration": 1542285766678,
   "links": [],
   "panels": [
     {
@@ -115,7 +80,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum({mtype=\"suc\", job=\"redis_rdb_cli_endpoint\"}) + sum({mtype=\"err\", job=\"redis_rdb_cli_endpoint\"})",
+          "expr": "sum({mtype=\"suc\", job=~\"$job\"}) + sum({mtype=\"err\", job=~\"$job\"})",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -197,7 +162,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum({mtype=\"suc\", job=\"redis_rdb_cli_endpoint\"})",
+          "expr": "sum({mtype=\"suc\", job=~\"$job\"})",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -278,7 +243,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum({mtype=\"err\", job=\"redis_rdb_cli_endpoint\"})",
+          "expr": "sum({mtype=\"err\", job=~\"$job\"})",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -336,7 +301,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sort({mtype=\"suc\", job=\"redis_rdb_cli_endpoint\"})",
+          "expr": "sort({mtype=\"suc\", job=~\"$job\"})",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -368,13 +333,13 @@
           "decimals": 0,
           "format": "none",
           "label": null,
-          "logBase": 1,
+          "logBase": 2,
           "max": null,
           "min": null,
           "show": true
         },
         {
-          "format": "short",
+          "format": "none",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -424,7 +389,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sort({mtype=\"err\", job=\"redis_rdb_cli_endpoint\"})",
+          "expr": "sort({mtype=\"err\", job=~\"$job\"})",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -456,13 +421,13 @@
           "decimals": 0,
           "format": "none",
           "label": null,
-          "logBase": 1,
+          "logBase": 2,
           "max": null,
           "min": null,
           "show": true
         },
         {
-          "format": "short",
+          "format": "none",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -481,7 +446,28 @@
   "style": "dark",
   "tags": [],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "${DS_PROMETHEUS}",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Instance",
+        "multi": false,
+        "name": "job",
+        "options": [],
+        "query": "label_values(push_time_seconds, job)",
+        "refresh": 2,
+        "regex": "",
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
   },
   "time": {
     "from": "now-6h",
@@ -515,5 +501,5 @@
   "timezone": "",
   "title": "redis endpoint dashboard",
   "uid": "QHnwnm5mz",
-  "version": 21
+  "version": 2
 }
