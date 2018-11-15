@@ -58,7 +58,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1542266209527,
+  "iteration": 1542271972205,
   "links": [],
   "panels": [
     {
@@ -909,7 +909,7 @@
       "type": "table"
     }
   ],
-  "refresh": false,
+  "refresh": "10s",
   "schemaVersion": 16,
   "style": "dark",
   "tags": [],
@@ -926,7 +926,7 @@
         "name": "job",
         "options": [],
         "query": "label_values(push_time_seconds, job)",
-        "refresh": 1,
+        "refresh": 2,
         "regex": "",
         "sort": 1,
         "tagValuesQuery": "",
@@ -969,5 +969,5 @@
   "timezone": "",
   "title": "Redis memory dashboard",
   "uid": "HTpQ2Rcmz",
-  "version": 4
+  "version": 5
 }
