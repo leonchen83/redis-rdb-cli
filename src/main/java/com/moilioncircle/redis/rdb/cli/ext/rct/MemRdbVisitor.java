@@ -21,7 +21,7 @@ import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.glossary.Escape;
-import com.moilioncircle.redis.rdb.cli.metric.MetricReporterFactory;
+import com.moilioncircle.redis.rdb.cli.metric.MetricJobs;
 import com.moilioncircle.redis.rdb.cli.util.CmpHeap;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.rdb.cli.util.Tuples;
@@ -60,6 +60,7 @@ import java.util.function.Consumer;
 import static com.moilioncircle.redis.rdb.cli.ext.rct.MemRdbVisitor.Tuple2Ex;
 import static com.moilioncircle.redis.rdb.cli.glossary.DataType.parse;
 import static com.moilioncircle.redis.rdb.cli.metric.MetricNames.name;
+import static com.moilioncircle.redis.rdb.cli.metric.MetricReporterFactory.create;
 import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
 import static com.moilioncircle.redis.replicator.Constants.STREAM_ITEM_FLAG_DELETED;
 import static com.moilioncircle.redis.replicator.Constants.STREAM_ITEM_FLAG_SAMEFIELDS;
@@ -215,7 +216,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             OutputStreams.write("expiry".getBytes(), out);
             OutputStreams.write('\n', out);
             if (this.reporter != null) this.reporter.close();
-            this.reporter = MetricReporterFactory.create(configure, registry, configure.getMetricMemoryJobName());
+            this.reporter = create(configure, registry, MetricJobs.memory(configure));
             this.reporter.start(5, TimeUnit.SECONDS);
         } else if (event instanceof AuxField) {
             AuxField aux = (AuxField) event;

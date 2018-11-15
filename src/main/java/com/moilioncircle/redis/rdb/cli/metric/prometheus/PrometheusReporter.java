@@ -1,5 +1,6 @@
 package com.moilioncircle.redis.rdb.cli.metric.prometheus;
 
+import com.moilioncircle.redis.rdb.cli.metric.MetricJob;
 import io.dropwizard.metrics5.Counter;
 import io.dropwizard.metrics5.Gauge;
 import io.dropwizard.metrics5.Histogram;
@@ -28,8 +29,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 public class PrometheusReporter extends ScheduledReporter {
 
     private static final Logger logger = LoggerFactory.getLogger(PrometheusReporter.class);
-
-    private String job;
+    
+    private MetricJob job;
     private PrometheusSender sender;
     private MetricRegistry registry;
 
@@ -65,14 +66,14 @@ public class PrometheusReporter extends ScheduledReporter {
             this.executor = executor;
             return this;
         }
-
-        public PrometheusReporter build(PrometheusSender sender, String job) {
+    
+        public PrometheusReporter build(PrometheusSender sender, MetricJob job) {
             PrometheusReporter reporter = new PrometheusReporter(registry, filter, executor, shutdown);
             reporter.job = job;
             reporter.sender = sender;
             reporter.registry = registry;
             try {
-                reporter.sender.delete(job);
+                reporter.sender.delete(job.getJob(), job.getLabels());
             } catch (IOException e) {
                 logger.warn("Unable to delete from Prometheus {}, job {}", sender, job, e);
             }
@@ -90,7 +91,7 @@ public class PrometheusReporter extends ScheduledReporter {
         CollectorRegistry registry = new CollectorRegistry();
         new DropwizardExports(this.registry).register(registry);
         try {
-            sender.pushAdd(registry, job);
+            sender.pushAdd(registry, job.getJob(), job.getLabels());
         } catch (IOException e) {
             logger.warn("Unable to report to Prometheus {}", sender, e);
         }

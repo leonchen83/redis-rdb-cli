@@ -19,7 +19,7 @@ package com.moilioncircle.redis.rdb.cli.ext.rmt;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AsyncEventListener;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
-import com.moilioncircle.redis.rdb.cli.metric.MetricReporterFactory;
+import com.moilioncircle.redis.rdb.cli.metric.MetricJobs;
 import com.moilioncircle.redis.rdb.cli.net.Endpoints;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static com.moilioncircle.redis.rdb.cli.metric.MetricReporterFactory.create;
 import static com.moilioncircle.redis.replicator.Configuration.defaultSetting;
 import static java.util.Collections.singletonList;
 
@@ -61,7 +62,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             this.endpoints.set(new Endpoints(lines, pipe, registry, configuration));
 
             if (this.reporter != null) this.reporter.close();
-            this.reporter = MetricReporterFactory.create(configure, registry, configure.getMetricEndpointJobName());
+            this.reporter = create(configure, registry, MetricJobs.endpoint(configure));
             this.reporter.start(5, TimeUnit.SECONDS);
         } else if (event instanceof DumpKeyValuePair) {
             retry(event, configure.getMigrateRetries());

@@ -1,3 +1,7 @@
+### 0.1.13
+
+Support multi instance dashboard.  
+
 ### 0.1.12
 
 Support Redis-5.0-GA.  

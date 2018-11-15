@@ -18,7 +18,7 @@ public class MetricReporterFactory {
     
     private static final Logger METRIC_LOGGER = LoggerFactory.getLogger("METRIC_LOGGER");
     
-    public static ScheduledReporter create(Configure configure, MetricRegistry registry, String job) {
+    public static ScheduledReporter create(Configure configure, MetricRegistry registry, MetricJob job) {
         switch (configure.getMetricGateway()) {
             case NONE:
                 return NoneReporter.forRegistry(registry).build();
