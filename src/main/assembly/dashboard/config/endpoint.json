@@ -39,7 +39,7 @@
     "list": [
       {
         "builtIn": 1,
-        "datasource": "-- Grafana --",
+        "datasource": "${DS_PROMETHEUS}",
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
@@ -52,6 +52,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
+  "iteration": 1542273193673,
   "links": [],
   "panels": [
     {
@@ -115,7 +116,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum({mtype=\"suc\", job=\"redis_rdb_cli_endpoint\"}) + sum({mtype=\"err\", job=\"redis_rdb_cli_endpoint\"})",
+          "expr": "sum({mtype=\"suc\", job=~\"$job\"}) + sum({mtype=\"err\", job=~\"$job\"})",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -197,7 +198,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum({mtype=\"suc\", job=\"redis_rdb_cli_endpoint\"})",
+          "expr": "sum({mtype=\"suc\", job=~\"$job\"})",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -278,7 +279,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum({mtype=\"err\", job=\"redis_rdb_cli_endpoint\"})",
+          "expr": "sum({mtype=\"err\", job=~\"$job\"})",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -336,7 +337,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sort({mtype=\"suc\", job=\"redis_rdb_cli_endpoint\"})",
+          "expr": "sort({mtype=\"suc\", job=~\"$job\"})",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -424,7 +425,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sort({mtype=\"err\", job=\"redis_rdb_cli_endpoint\"})",
+          "expr": "sort({mtype=\"err\", job=~\"$job\"})",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -476,12 +477,33 @@
       }
     }
   ],
-  "refresh": false,
+  "refresh": "10s",
   "schemaVersion": 16,
   "style": "dark",
   "tags": [],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "${DS_PROMETHEUS}",
+        "hide": 0,
+        "includeAll": false,
+        "label": "job",
+        "multi": false,
+        "name": "job",
+        "options": [],
+        "query": "label_values(push_time_seconds, job)",
+        "refresh": 2,
+        "regex": "",
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
   },
   "time": {
     "from": "now-6h",
@@ -513,7 +535,7 @@
     ]
   },
   "timezone": "",
-  "title": "redis endpoint dashboard",
+  "title": "Redis endpoint dashboard",
   "uid": "QHnwnm5mz",
-  "version": 21
+  "version": 3
 }
