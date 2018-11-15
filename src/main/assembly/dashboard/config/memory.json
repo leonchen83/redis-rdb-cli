@@ -58,6 +58,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
+  "iteration": 1542266209527,
   "links": [],
   "panels": [
     {
@@ -121,7 +122,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum({job=\"redis_rdb_cli_memory\", mtype=\"db_size\"})",
+          "expr": "sum({job=~\"$job\", mtype=\"db_size\"})",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -184,7 +185,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "mem_usage_histogram{job=\"redis_rdb_cli_memory\"}",
+          "expr": "mem_usage_histogram{job=~\"$job\"}",
           "format": "time_series",
           "instant": true,
           "interval": "",
@@ -298,7 +299,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum({job=\"redis_rdb_cli_memory\", mtype=\"db_expire\"})",
+          "expr": "sum({job=~\"$job\", mtype=\"db_expire\"})",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -380,7 +381,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "key_mem_total{job=\"redis_rdb_cli_memory\"}",
+          "expr": "key_mem_total{job=~\"$job\"}",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -437,7 +438,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "{job=\"redis_rdb_cli_memory\", mtype=\"db_size\"}",
+          "expr": "{job=~\"$job\", mtype=\"db_size\"}",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -526,7 +527,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "{job=\"redis_rdb_cli_memory\", mtype=\"db_expire\"}",
+          "expr": "{job=~\"$job\", mtype=\"db_expire\"}",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -614,7 +615,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sort({mtype=\"count\", job=\"redis_rdb_cli_memory\"})",
+          "expr": "sort({mtype=\"count\", job=~\"$job\"})",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -702,7 +703,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sort({mtype=\"mem\", job=\"redis_rdb_cli_memory\"})",
+          "expr": "sort({mtype=\"mem\", job=~\"$job\"})",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -895,7 +896,7 @@
       ],
       "targets": [
         {
-          "expr": "sort_desc({mtype=\"key\", job=\"redis_rdb_cli_memory\"})",
+          "expr": "sort_desc({mtype=\"key\", job=~\"$job\"})",
           "format": "table",
           "instant": true,
           "intervalFactor": 1,
@@ -913,7 +914,28 @@
   "style": "dark",
   "tags": [],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "${DS_PROMETHEUS}",
+        "hide": 0,
+        "includeAll": false,
+        "label": "job",
+        "multi": false,
+        "name": "job",
+        "options": [],
+        "query": "label_values(push_time_seconds, job)",
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
   },
   "time": {
     "from": "now-6h",
@@ -947,5 +969,5 @@
   "timezone": "",
   "title": "Redis memory dashboard",
   "uid": "HTpQ2Rcmz",
-  "version": 2
+  "version": 4
 }
