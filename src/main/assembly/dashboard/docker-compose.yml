@@ -2,13 +2,13 @@ version: '2.1'
 
 services:
   pushgateway:
-    image: prom/pushgateway:v0.5.2
+    image: prom/pushgateway:v0.6.0
     ports:
       - "9091:9091"
     restart: on-failure
   prometheus:
     user: root
-    image: prom/prometheus:v2.3.2
+    image: prom/prometheus:v2.5.0
     command:
       - --storage.tsdb.path=/data/prometheus
       - --config.file=/etc/prometheus/prometheus.yml
@@ -18,15 +18,15 @@ services:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     restart: on-failure
   grafana:
-    image: grafana/grafana:5.2.2
+    image: grafana/grafana:5.3.2
     ports:
       - "3000:3000"
     restart: on-failure
   dashboard-installer:
-    image: redisrdbcli/dashboard-installer:v1.0.1
+    image: redisrdbcli/dashboard-installer:v1.0.2
     command: ["grafana:3000"]
     volumes:
-      - ./config/grafana-datasource.json:/datasource.json:ro
+      - ./config/datasource.json:/datasource.json:ro
       - ./config/endpoint.json:/endpoint.json:ro
       - ./config/memory.json:/memory.json:ro
       - ./config/dests.json:/dests.json:ro

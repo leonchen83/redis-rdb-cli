@@ -14,7 +14,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "5.2.2"
+      "version": "5.3.2"
     },
     {
       "type": "panel",
@@ -52,7 +52,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1542285766678,
+  "iteration": 1542353371796,
   "links": [],
   "panels": [
     {
@@ -535,7 +535,7 @@
     ]
   },
   "timezone": "",
-  "title": "redis endpoint dashboard",
+  "title": "Redis endpoint dashboard",
   "uid": "QHnwnm5mz",
   "version": 2
 }
