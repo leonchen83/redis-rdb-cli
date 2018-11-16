@@ -295,7 +295,12 @@ Then run the following command:
 
 ```java  
 cd /path/to/redis-rdb-cli/dashboard
+
+# start
 docker-compose up -d
+
+# stop
+docker-compose down
 ```
   
 `cd /path/to/redis-rdb-cli/conf/redis-rdb-cli.conf`  
@@ -303,7 +308,7 @@ Then change parameter [metric_gateway](https://github.com/leonchen83/redis-rdb-c
   
 Open `http://localhost:3000` to check the `rct -f mem`'s result.  
   
-All done!  
+If you deployed this tool in multi instance, you need to change parameter [metric_memory_job_name](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L169) and [metric_endpoint_job_name](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L181) to make sure unique between instances.  
   
 
 ## Hack rmt

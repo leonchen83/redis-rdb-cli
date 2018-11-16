@@ -295,7 +295,12 @@ rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
 
 ```java  
 cd /path/to/redis-rdb-cli/dashboard
+
+# start
 docker-compose up -d
+
+# stop
+docker-compose down
 ```
   
 `cd /path/to/redis-rdb-cli/conf/redis-rdb-cli.conf`  
@@ -303,7 +308,8 @@ docker-compose up -d
   
 浏览器打开 `http://localhost:3000` 来查看 `rct -f mem` 命令的结果.  
   
-结束!  
+如果你把这个工具部署在多个实例上, 需要更改如下参数 [metric_memory_job_name](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L169) and [metric_endpoint_job_name](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L181) 并保证在每个实例上参数名唯一  
+  
   
 ## Hack rmt
 
