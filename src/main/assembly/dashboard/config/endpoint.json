@@ -477,7 +477,7 @@
       }
     }
   ],
-  "refresh": false,
+  "refresh": "10s",
   "schemaVersion": 16,
   "style": "dark",
   "tags": [],
@@ -493,7 +493,7 @@
         "multi": false,
         "name": "job",
         "options": [],
-        "query": "label_values(push_time_seconds, job)",
+        "query": "label_values(push_time_seconds{type=\"endpoint\"}, job)",
         "refresh": 2,
         "regex": "",
         "sort": 1,
