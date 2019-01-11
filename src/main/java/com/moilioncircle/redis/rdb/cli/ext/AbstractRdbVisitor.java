@@ -70,15 +70,19 @@ import static java.util.stream.Collectors.toList;
  * @author Baoyi Chen
  */
 public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
-
+    
+    protected static final byte[] ONE = "1".getBytes();
     protected static final byte[] ZERO = "0".getBytes();
     protected static final byte[] DEL = "del".getBytes();
     protected static final byte[] SET = "set".getBytes();
     protected static final byte[] SADD = "sadd".getBytes();
     protected static final byte[] ZADD = "zadd".getBytes();
+    protected static final byte[] LOAD = "load".getBytes();
     protected static final byte[] RPUSH = "rpush".getBytes();
     protected static final byte[] HMSET = "hmset".getBytes();
     protected static final byte[] SELECT = "select".getBytes();
+    protected static final byte[] SCRIPT = "script".getBytes();
+    protected static final byte[] EVALSHA = "evalsha".getBytes();
     protected static final byte[] REPLACE = "replace".getBytes();
     protected static final byte[] RESTORE = "restore".getBytes();
     protected static final byte[] EXPIREAT = "expireat".getBytes();

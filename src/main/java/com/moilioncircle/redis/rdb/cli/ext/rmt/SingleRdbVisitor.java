@@ -43,12 +43,21 @@ import static com.moilioncircle.redis.rdb.cli.metric.MetricReporterFactory.creat
 public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements EventListener {
     
     private final RedisURI uri;
+    private final boolean legacy;
+    private volatile byte[] evalSha;
     private final Configuration conf;
     private ThreadLocal<Endpoint> endpoint = new ThreadLocal<>();
     
-    public SingleRdbVisitor(Replicator replicator, Configure configure, RedisURI uri, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) throws Exception {
+    public SingleRdbVisitor(Replicator replicator,
+                            Configure configure,
+                            RedisURI uri,
+                            List<Long> db,
+                            List<String> regexs,
+                            List<DataType> types,
+                            boolean replace, boolean legacy) throws Exception {
         super(replicator, configure, db, regexs, types, replace);
         this.uri = uri;
+        this.legacy = legacy;
         this.conf = configure.merge(this.uri);
         this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure));
     }
@@ -94,8 +103,10 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
             }
             if (!replace) {
                 endpoint.get().batch(flush, RESTORE, dkv.getKey(), expire, dkv.getValue());
-            } else {
+            } else if (rdb6 && legacy) {
                 // https://github.com/leonchen83/redis-rdb-cli/issues/6
+                eval(dkv.getKey(), dkv.getValue(), expire);
+            } else {
                 endpoint.get().batch(flush, RESTORE, dkv.getKey(), expire, dkv.getValue(), REPLACE);
             }
         } catch (Throwable e) {
@@ -104,6 +115,29 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
                 endpoint.set(Endpoint.valueOf(endpoint.get()));
                 retry(event, times);
             }
+        }
+    }
+    
+    /*
+     * LUA
+     * step 1 : SCRIPT LOAD script
+     * step 2 : EVALSHA sha1
+     */
+    private static final byte[] SCRIPT =
+            ("redis.call('del', KEYS[1]);" +
+                    "redis.call('restore', KEYS[1], ARGV[1], ARGV[2]);").getBytes();
+    
+    protected void eval(byte[] key, byte[] value, byte[] expire) {
+        if (evalSha != null) {
+            Endpoint.RedisObject r = endpoint.get().send(SCRIPT, LOAD, SCRIPT);
+            if (r.type == Endpoint.RedisObject.Type.STRING) {
+                this.evalSha = r.getBytes();
+                eval(key, value, expire);
+            } else {
+                throw new RuntimeException(); // retry in the caller method.
+            }
+        } else {
+            endpoint.get().batch(flush, EVALSHA, ONE, key, expire, value);
         }
     }
 }

@@ -331,6 +331,14 @@ public class Endpoint implements Closeable {
             }
             return null;
         }
+    
+        public byte[] getBytes() {
+            if (type.isString() || type.isError()) {
+                byte[] bytes = (byte[]) object;
+                return bytes;
+            }
+            return null;
+        }
         
         public enum Type {
             ARRAY, NUMBER, STRING, BULK, ERR, NULL;

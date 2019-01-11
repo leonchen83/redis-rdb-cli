@@ -24,6 +24,7 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
 
     protected final boolean flush;
     protected final boolean replace;
+    protected volatile boolean rdb6;
     protected ScheduledReporter reporter;
     protected MetricRegistry registry = new MetricRegistry();
 
@@ -31,6 +32,13 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
         super(replicator, configure, db, regexs, types);
         this.replace = replace;
         this.flush = configure.isMigrateFlush();
+    }
+    
+    @Override
+    public int applyVersion(RedisInputStream in) throws IOException {
+        int version = super.applyVersion(in);
+        if (version == 6) rdb6 = true;
+        return version;
     }
 
     @Override
