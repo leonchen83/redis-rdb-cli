@@ -24,7 +24,6 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
 
     protected final boolean flush;
     protected final boolean replace;
-    protected volatile boolean rdb6;
     protected ScheduledReporter reporter;
     protected MetricRegistry registry = new MetricRegistry();
 
@@ -34,13 +33,6 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
         this.flush = configure.isMigrateFlush();
     }
     
-    @Override
-    public int applyVersion(RedisInputStream in) throws IOException {
-        int version = super.applyVersion(in);
-        if (version == 6) rdb6 = true;
-        return version;
-    }
-
     @Override
     protected Event doApplyString(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();

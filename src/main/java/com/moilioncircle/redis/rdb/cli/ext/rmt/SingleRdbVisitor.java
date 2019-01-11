@@ -103,7 +103,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
             }
             if (!replace) {
                 endpoint.get().batch(flush, RESTORE, dkv.getKey(), expire, dkv.getValue());
-            } else if (rdb6 && legacy) {
+            } else if (legacy) {
                 // https://github.com/leonchen83/redis-rdb-cli/issues/6
                 eval(dkv.getKey(), dkv.getValue(), expire);
             } else {
