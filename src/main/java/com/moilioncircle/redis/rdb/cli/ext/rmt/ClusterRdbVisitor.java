@@ -46,8 +46,13 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
     private final List<String> lines;
     private final Configuration configuration;
     private ThreadLocal<Endpoints> endpoints = new ThreadLocal<>();
-
-    public ClusterRdbVisitor(Replicator replicator, Configure configure, List<String> lines, List<String> regexs, List<DataType> types, boolean replace) throws IOException {
+    
+    public ClusterRdbVisitor(Replicator replicator,
+                             Configure configure,
+                             List<String> lines,
+                             List<String> regexs,
+                             List<DataType> types,
+                             boolean replace) throws IOException {
         super(replicator, configure, singletonList(0L), regexs, types, replace);
         this.lines = lines;
         this.configuration = configure.merge(defaultSetting());

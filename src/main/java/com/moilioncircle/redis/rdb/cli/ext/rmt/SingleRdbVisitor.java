@@ -54,7 +54,8 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
                             List<Long> db,
                             List<String> regexs,
                             List<DataType> types,
-                            boolean replace, boolean legacy) throws Exception {
+                            boolean replace,
+                            boolean legacy) throws Exception {
         super(replicator, configure, db, regexs, types, replace);
         this.uri = uri;
         this.legacy = legacy;
