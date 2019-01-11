@@ -90,6 +90,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             if (!replace) {
                 endpoints.get().batch(flush, RESTORE_ASKING, dkv.getKey(), expire, dkv.getValue());
             } else {
+                // https://github.com/leonchen83/redis-rdb-cli/issues/6 --no need to use lua script
                 endpoints.get().batch(flush, RESTORE_ASKING, dkv.getKey(), expire, dkv.getValue(), REPLACE);
             }
         } catch (Throwable e) {

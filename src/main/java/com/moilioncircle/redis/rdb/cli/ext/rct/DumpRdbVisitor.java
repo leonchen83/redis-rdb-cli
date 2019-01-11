@@ -38,6 +38,7 @@ import java.util.List;
  */
 public class DumpRdbVisitor extends AbstractRdbVisitor {
     
+    // TODO https://github.com/leonchen83/redis-rdb-cli/issues/6
     private final boolean replace;
     
     public DumpRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) {
