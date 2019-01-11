@@ -129,6 +129,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
     
     protected void eval(byte[] key, byte[] value, byte[] expire) {
         if (evalSha == null) {
+            endpoint.get().flush(); // flush prev commands so that to read script.
             Endpoint.RedisObject r = endpoint.get().send(SCRIPT, LOAD, LUA_SCRIPT);
             byte[] evalSha = r.getBytes();
             if (evalSha == null) throw new RuntimeException(); // retry in the caller method.
