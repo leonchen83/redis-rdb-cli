@@ -72,6 +72,7 @@ public class RmtCommand extends AbstractCommand {
     }
 
     @Override
+    @SuppressWarnings("all")
     protected void doExecute(CommandLine line) throws Exception {
         if (line.hasOption("help")) {
             HelpFormatter formatter = new HelpFormatter();

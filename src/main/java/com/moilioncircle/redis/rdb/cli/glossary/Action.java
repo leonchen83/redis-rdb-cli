@@ -48,7 +48,8 @@ public enum Action {
     SPLIT,
     MERGE,
     BACKUP;
-
+    
+    @SuppressWarnings("all")
     public List<Tuple2<Replicator, String>> dress(Configure configure, String split, String backup, List<File> merge, String output, List<Long> db, List<String> regexs, File conf, List<DataType> types) throws Exception {
         List<Tuple2<Replicator, String>> list = new ArrayList<>();
         switch (this) {

@@ -72,6 +72,7 @@ import static java.util.stream.Collectors.toList;
 public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
 
     protected static final byte[] ZERO = "0".getBytes();
+    protected static final byte[] DEL = "del".getBytes();
     protected static final byte[] SET = "set".getBytes();
     protected static final byte[] SADD = "sadd".getBytes();
     protected static final byte[] ZADD = "zadd".getBytes();

@@ -47,7 +47,7 @@ public class ShardableFileOutputStream extends OutputStream {
         Function<Tuple3<String, Integer, String>, CRCOutputStream> mapper = t -> {
             return OutputStreams.newCRCOutputStream(get(path, t.getV3() + ".rdb").toFile(), configure.getBufferSize());
         };
-        new NodeConfParser(mapper).parse(lines, set, map);
+        new NodeConfParser<>(mapper).parse(lines, set, map);
     }
 
     public void shard(byte[] key) {
