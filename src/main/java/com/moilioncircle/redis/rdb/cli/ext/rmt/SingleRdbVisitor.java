@@ -123,19 +123,16 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
      * step 1 : SCRIPT LOAD script
      * step 2 : EVALSHA sha1
      */
-    private static final byte[] SCRIPT =
-            ("redis.call('del', KEYS[1]);" +
-                    "redis.call('restore', KEYS[1], ARGV[1], ARGV[2]);").getBytes();
+    private static final byte[] LUA_SCRIPT =
+            ("redis.call('del', KEYS[1]);redis.call('restore', KEYS[1], ARGV[1], ARGV[2]);").getBytes();
     
     protected void eval(byte[] key, byte[] value, byte[] expire) {
-        if (evalSha != null) {
-            Endpoint.RedisObject r = endpoint.get().send(SCRIPT, LOAD, SCRIPT);
-            if (r.type == Endpoint.RedisObject.Type.STRING) {
-                this.evalSha = r.getBytes();
-                eval(key, value, expire);
-            } else {
-                throw new RuntimeException(); // retry in the caller method.
-            }
+        if (evalSha == null) {
+            Endpoint.RedisObject r = endpoint.get().send(SCRIPT, LOAD, LUA_SCRIPT);
+            byte[] evalSha = r.getBytes();
+            if (evalSha == null) throw new RuntimeException(); // retry in the caller method.
+            this.evalSha = evalSha;
+            eval(key, value, expire);
         } else {
             endpoint.get().batch(flush, EVALSHA, evalSha, ONE, key, expire, value);
         }
