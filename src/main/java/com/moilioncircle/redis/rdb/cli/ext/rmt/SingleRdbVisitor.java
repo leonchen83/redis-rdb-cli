@@ -137,7 +137,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
                 throw new RuntimeException(); // retry in the caller method.
             }
         } else {
-            endpoint.get().batch(flush, EVALSHA, ONE, key, expire, value);
+            endpoint.get().batch(flush, EVALSHA, evalSha, ONE, key, expire, value);
         }
     }
 }
