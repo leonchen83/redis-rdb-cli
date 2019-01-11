@@ -101,7 +101,7 @@ examples:
 ```java  
 
 usage: rmt -s <source> [-m <uri> | -c <file>] [-d <num num...>] [-k <regex
-           regex...>] [-t <type type...>] [-r]
+           regex...>] [-t <type type...>] [-r] [-l]
 
 options:
  -c,--config <file>          migrate data to cluster via redis cluster's
@@ -113,6 +113,10 @@ options:
  -h,--help                   rmt usage.
  -k,--key <regex regex...>   keys to export. this can be a regex. if not
                              specified, all keys will be returned.
+ -l,--legacy                 if specify the <replace> and this parameter.
+                             then use lua script to migrate data to
+                             target. if target redis version is greater
+                             than 3.0. no need to add this parameter.
  -m,--migrate <uri>          migrate to uri. eg:
                              redis://host:port?authPassword=foobar.
  -r,--replace                replace exist key value. if not specified,

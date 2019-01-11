@@ -1,3 +1,8 @@
+### 0.1.14
+
+Fix `rmt` bug in prior to Redis 3.0.  
+Add `rmt -l` parameter.  
+
 ### 0.1.13
 
 Support multi instance dashboard.  
