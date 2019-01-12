@@ -125,7 +125,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
      * step 2 : EVALSHA sha1
      */
     private static final byte[] LUA_SCRIPT =
-            ("redis.call('del', KEYS[1]);return redis.call('restore', KEYS[1], ARGV[1], ARGV[2]);").getBytes();
+            ("redis.call('del',KEYS[1]);return redis.call('restore',KEYS[1],ARGV[1],ARGV[2]);").getBytes();
     
     protected void eval(byte[] key, byte[] value, byte[] expire) {
         if (evalSha == null) {
