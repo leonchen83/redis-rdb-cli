@@ -174,13 +174,6 @@ public class Endpoint implements Closeable {
         }
     }
     
-    public void flushQuietly() {
-        try {
-            flush();
-        } catch (Throwable e) {
-        }
-    }
-    
     @Override
     public void close() throws IOException {
         Sockets.closeQuietly(in);
@@ -332,11 +325,8 @@ public class Endpoint implements Closeable {
         }
         
         public String getString() {
-            if (type.isString() || type.isError()) {
-                byte[] bytes = (byte[]) object;
-                return new String(bytes);
-            }
-            return null;
+            byte[] b = getBytes();
+            return b == null ? null : new String(b);
         }
     
         public byte[] getBytes() {

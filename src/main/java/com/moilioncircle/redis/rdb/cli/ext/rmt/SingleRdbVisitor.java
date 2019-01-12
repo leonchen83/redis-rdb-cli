@@ -113,7 +113,6 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
         } catch (Throwable e) {
             times--;
             if (times >= 0 && flush) {
-                endpoint.get().flushQuietly();
                 endpoint.set(Endpoint.valueOf(endpoint.get()));
                 retry(event, times);
             }
