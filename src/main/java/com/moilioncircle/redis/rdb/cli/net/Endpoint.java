@@ -174,6 +174,13 @@ public class Endpoint implements Closeable {
         }
     }
     
+    public void flushQuietly() {
+        try {
+            flush();
+        } catch (Throwable e) {
+        }
+    }
+    
     @Override
     public void close() throws IOException {
         Sockets.closeQuietly(in);
