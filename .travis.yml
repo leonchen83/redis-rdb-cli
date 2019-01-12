@@ -1,9 +1,13 @@
-language: bash
+language: java
+
+jdk:
+  - oraclejdk8
 
 services:
   - docker
 
 script:
+  # push to docker hub
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - export TAG0=latest
   - export TAG1=`cat ./.version`
@@ -11,6 +15,8 @@ script:
   - docker build -t $REPO:$TAG1 .
   - docker push $REPO:$TAG0
   - docker push $REPO:$TAG1
+  # push to github releases
+  - mvn clean package -Dmaven.test.skip=true --batch-mode --quiet
 
 before_deploy:
   # Set up git user name and tag this commit
