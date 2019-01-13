@@ -10,7 +10,7 @@ script:
   # push to docker hub
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - export TAG0=latest
-  - export TAG1=`cat ./.version`
+  - export TAG1=`cat ./src/main/resources/.version`
   - docker build -t $REPO:$TAG0 .
   - docker build -t $REPO:$TAG1 .
   - docker push $REPO:$TAG0
@@ -22,7 +22,7 @@ before_deploy:
   # Set up git user name and tag this commit
   - git config --local user.name "$GITHUB_USER_NAME"
   - git config --local user.email "$GITHUB_USER_MAIL"
-  - export TRAVIS_TAG=`cat ./.version`
+  - export TRAVIS_TAG=`cat ./src/main/resources/.version`
   - git tag $TRAVIS_TAG
 
 deploy:

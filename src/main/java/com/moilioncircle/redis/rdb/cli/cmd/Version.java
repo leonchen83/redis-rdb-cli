@@ -16,8 +16,10 @@
 
 package com.moilioncircle.redis.rdb.cli.cmd;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
 /**
  * @author Baoyi Chen
@@ -30,9 +32,12 @@ public class Version {
             System.getProperties().load(in);
         } catch (IOException e) {
         }
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(loader.getResourceAsStream(".version")))) {
+            String version = reader.readLine();
+            if (version != null) System.setProperty("rct.version", version);
+        } catch (IOException e) {
+        }
     }
-    
-    private static final String VERSION = "0.1.14";
     
     public static final Version INSTANCE = new Version();
     
@@ -40,7 +45,7 @@ public class Version {
     }
     
     public String version() {
-        return VERSION;
+        return System.getProperty("rct.version");
     }
     
     public String home() {

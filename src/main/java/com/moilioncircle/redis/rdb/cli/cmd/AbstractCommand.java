@@ -88,7 +88,10 @@ public abstract class AbstractCommand implements Command {
 
     protected String version() {
         StringBuilder builder = new StringBuilder();
-        builder.append("redis rdb cli: ").append(INSTANCE.version());
+        builder.append("redis rdb cli: ");
+        if (INSTANCE.version() != null) {
+            builder.append(INSTANCE.version());
+        }
         if (!Strings.isEmpty(INSTANCE.commit())) {
             builder.append(" (").append(INSTANCE.commit()).append(": ");
             builder.append(INSTANCE.date()).append(")");
