@@ -10,7 +10,6 @@ branches:
   only:
     - 0.1.x
 
-
 script:
   # push to docker hub
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
@@ -42,4 +41,4 @@ deploy:
   skip_cleanup: true
 
   on:
-    tags: true
+    branches: 0.1.x
