@@ -42,4 +42,4 @@ deploy:
   skip_cleanup: true
 
   on:
-    branches: 0.1.x
+    tags: true
