@@ -1,3 +1,7 @@
+### 0.1.15
+
+Fix offset bug.  
+
 ### 0.1.14
 
 Fix `rmt` bug in prior to Redis 3.0.  
