@@ -8,7 +8,7 @@ services:
 
 branches:
   only:
-    - 0.1.x
+    - master
 
 script:
   # push to docker hub
@@ -39,6 +39,3 @@ deploy:
     - "./target/redis-rdb-cli-release.zip"
 
   skip_cleanup: true
-
-  on:
-    branches: 0.1.x
