@@ -6,6 +6,10 @@ jdk:
 services:
   - docker
 
+branches:
+  only:
+    - 0.1.x
+
 script:
   # push to docker hub
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
