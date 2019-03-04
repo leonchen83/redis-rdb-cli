@@ -185,7 +185,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             if (rdb6) {
                 registry.gauge(build("key_mem_total"), () -> () -> totalMem);
                 for (Map.Entry<Long, Tuple2<Long, Long>> entry : dbInfo.entrySet()) {
-                    String dbnum = "db" + String.valueOf(entry.getKey());
+                    String dbnum = "db" + entry.getKey();
                     registry.gauge(name("rdb_db_size" + entry.getKey(), "dbnum", dbnum, "mtype", "db_size"), () -> () -> entry.getValue().getV1());
                     registry.gauge(name("rdb_db_expire" + entry.getKey(), "dbnum", dbnum, "mtype", "db_expire"), () -> () -> entry.getValue().getV2());
                 }
@@ -237,7 +237,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     @Override
     public DB applyResizeDB(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         DB db = super.applyResizeDB(in, version, context);
-        String dbnum = "db" + String.valueOf(db.getDbNumber());
+        String dbnum = "db" + db.getDbNumber();
         registry.gauge(name("rdb_db_size" + db.getDbNumber(), "dbnum", dbnum, "mtype", "db_size"), () -> () -> db.getDbsize());
         registry.gauge(name("rdb_db_expire" + db.getDbNumber(), "dbnum", dbnum, "mtype", "db_expire"), () -> () -> db.getExpires());
         return db;
