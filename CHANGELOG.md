@@ -1,6 +1,6 @@
 ### 0.1.16
 
-Fix cli exit code bug.  
+Fix CLI exit code bug.  
 
 ### 0.1.15
 
