@@ -53,6 +53,8 @@ public abstract class AbstractCommand implements Command {
         } catch (Throwable e) {
             if (e.getMessage() != null) {
                 writeLine(e.getMessage());
+                // https://github.com/leonchen83/redis-rdb-cli/issues/7
+                System.exit(1);
             } else {
                 throw e;
             }
