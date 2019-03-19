@@ -1,3 +1,7 @@
+### 0.1.16
+
+Fix cli exit code bug.  
+
 ### 0.1.15
 
 Fix offset bug.  
