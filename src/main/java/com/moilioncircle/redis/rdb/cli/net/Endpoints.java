@@ -44,7 +44,7 @@ public class Endpoints implements Closeable {
         Function<Tuple3<String, Integer, String>, Endpoint> mapper = t -> {
             return new Endpoint(t.getV1(), t.getV2(), 0, pipe, registry, configuration);
         };
-        new NodeConfParser(mapper).parse(lines, set, endpoints);
+        new NodeConfParser<>(mapper).parse(lines, set, endpoints);
     }
     
     public Endpoint.RedisObject send(byte[] command, byte[]... args) {

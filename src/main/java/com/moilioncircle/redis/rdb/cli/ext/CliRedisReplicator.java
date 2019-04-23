@@ -27,6 +27,7 @@ import com.moilioncircle.redis.replicator.RedisSocketReplicator;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.Status;
+import com.moilioncircle.redis.replicator.StatusListener;
 import com.moilioncircle.redis.replicator.cmd.Command;
 import com.moilioncircle.redis.replicator.cmd.CommandName;
 import com.moilioncircle.redis.replicator.cmd.CommandParser;
@@ -169,7 +170,17 @@ public class CliRedisReplicator implements Replicator {
     public boolean removeExceptionListener(ExceptionListener listener) {
         return replicator.removeExceptionListener(listener);
     }
-    
+
+    @Override
+    public boolean addStatusListener(StatusListener listener) {
+        return replicator.addStatusListener(listener);
+    }
+
+    @Override
+    public boolean removeStatusListener(StatusListener listener) {
+        return replicator.removeStatusListener(listener);
+    }
+
     @Override
     public boolean verbose() {
         return replicator.verbose();
