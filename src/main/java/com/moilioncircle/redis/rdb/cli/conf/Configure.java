@@ -17,6 +17,7 @@
 package com.moilioncircle.redis.rdb.cli.conf;
 
 import com.moilioncircle.redis.rdb.cli.glossary.Gateway;
+import com.moilioncircle.redis.rdb.cli.sentinel.RedisSentinelURI;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.RedisURI;
 
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URI;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -361,6 +363,10 @@ public class Configure {
     public Configuration merge(RedisURI uri) {
         return merge(Configuration.valueOf(uri));
     }
+
+    public Configuration merge(RedisSentinelURI uri) {
+        return merge(valueOf(uri));
+    }
     
     public Configuration merge(Configuration conf) {
         conf.setRetries(this.retries);
@@ -406,6 +412,96 @@ public class Configure {
         conf.metricMemoryJobName = getString(conf, "metric_memory_job_name", "redis_rdb_cli_memory", true);
         conf.metricEndpointJobName = getString(conf, "metric_endpoint_job_name", "redis_rdb_cli_endpoint", true);
         return conf;
+    }
+    
+    public static Configuration valueOf(RedisSentinelURI uri) {
+        Configuration configuration = Configuration.defaultSetting();
+        Map<String, String> parameters = uri.getParameters();
+        if (parameters.containsKey("connectionTimeout")) {
+            configuration.setConnectionTimeout(getInt(parameters.get("connectionTimeout"), 30000));
+        }
+        if (parameters.containsKey("readTimeout")) {
+            configuration.setReadTimeout(getInt(parameters.get("readTimeout"), 30000));
+        }
+        if (parameters.containsKey("receiveBufferSize")) {
+            configuration.setReceiveBufferSize(getInt(parameters.get("receiveBufferSize"), 0));
+        }
+        if (parameters.containsKey("sendBufferSize")) {
+            configuration.setSendBufferSize(getInt(parameters.get("sendBufferSize"), 0));
+        }
+        if (parameters.containsKey("retries")) {
+            configuration.setRetries(getInt(parameters.get("retries"), 5));
+        }
+        if (parameters.containsKey("retryTimeInterval")) {
+            configuration.setRetryTimeInterval(getInt(parameters.get("retryTimeInterval"), 1000));
+        }
+        if (parameters.containsKey("bufferSize")) {
+            configuration.setBufferSize(getInt(parameters.get("bufferSize"), 8 * 1024));
+        }
+        if (parameters.containsKey("authPassword")) {
+            configuration.setAuthPassword(parameters.get("authPassword"));
+        }
+        if (parameters.containsKey("discardRdbEvent")) {
+            configuration.setDiscardRdbEvent(getBool(parameters.get("discardRdbEvent"), false));
+        }
+        if (parameters.containsKey("asyncCachedBytes")) {
+            configuration.setAsyncCachedBytes(getInt(parameters.get("asyncCachedBytes"), 512 * 1024));
+        }
+        if (parameters.containsKey("rateLimit")) {
+            configuration.setRateLimit(getInt(parameters.get("rateLimit"), 0));
+        }
+        if (parameters.containsKey("verbose")) {
+            configuration.setVerbose(getBool(parameters.get("verbose"), false));
+        }
+        if (parameters.containsKey("heartbeatPeriod")) {
+            configuration.setHeartbeatPeriod(getInt(parameters.get("heartbeatPeriod"), 1000));
+        }
+        if (parameters.containsKey("useDefaultExceptionListener")) {
+            configuration.setUseDefaultExceptionListener(getBool(parameters.get("useDefaultExceptionListener"), false));
+        }
+        if (parameters.containsKey("ssl")) {
+            configuration.setSsl(getBool(parameters.get("ssl"), false));
+        }
+        if (parameters.containsKey("replId")) {
+            configuration.setReplId(parameters.get("replId"));
+        }
+        if (parameters.containsKey("replStreamDB")) {
+            configuration.setReplStreamDB(getInt(parameters.get("replStreamDB"), -1));
+        }
+        if (parameters.containsKey("replOffset")) {
+            configuration.setReplOffset(getLong(parameters.get("replOffset"), -1L));
+        }
+        return configuration;
+    }
+
+    public static boolean getBool(String value, boolean defaultValue) {
+        if (value == null)
+            return defaultValue;
+        if (value.equals("false") || value.equals("no"))
+            return false;
+        if (value.equals("true") || value.equals("yes"))
+            return true;
+        return defaultValue;
+    }
+
+    public static int getInt(String value, int defaultValue) {
+        if (value == null)
+            return defaultValue;
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    public static long getLong(String value, long defaultValue) {
+        if (value == null)
+            return defaultValue;
+        try {
+            return Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
     
     public static URI getUri(Configure conf, String key) {

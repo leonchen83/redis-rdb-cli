@@ -67,7 +67,7 @@ public enum Action {
                         in.skip(5); // skip REDIS
                         version = Math.max(version, Integer.parseInt(in.readString(4)));
                     }
-                    Replicator r = new CliRedisReplicator(uri, configure);
+                    Replicator r = new CliRedisReplicator(uri.toString(), configure);
                     r.setRdbVisitor(new MergeRdbVisitor(r, configure, db, regexs, types, () -> out));
                     list.add(Tuples.of(r, file.getName()));
                 }
