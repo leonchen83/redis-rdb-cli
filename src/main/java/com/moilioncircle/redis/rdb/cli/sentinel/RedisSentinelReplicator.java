@@ -56,21 +56,20 @@ public class RedisSentinelReplicator implements Replicator, SentinelListener {
     protected static final Logger logger = LoggerFactory.getLogger(RedisSentinelReplicator.class);
 
     private HostAndPort prev;
-    private final Sentinel sentinel;
-    private final RedisSocketReplicator replicator;
+    private Sentinel sentinel;
+    private RedisSocketReplicator replicator;
     protected final ExecutorService executors = newSingleThreadExecutor();
 
     public RedisSentinelReplicator(RedisSentinelURI uri, Configuration configuration) {
         Objects.requireNonNull(uri);
-        Objects.requireNonNull(uri.getHosts());
-        String master = uri.getParameters().get("master");
-        Objects.requireNonNull(master);
-        this.replicator = new RedisSocketReplicator("", 1, configuration);
-        this.sentinel = new DefaultSentinel(uri.getHosts(), master, configuration);
-        this.sentinel.addSentinelListener(this);
+        initialize(uri.getHosts(), Objects.requireNonNull(uri.getParameters().get("master")), configuration);
     }
 
     public RedisSentinelReplicator(List<HostAndPort> hosts, String name, Configuration configuration) {
+        initialize(hosts, name, configuration);
+    }
+
+    private void initialize(List<HostAndPort> hosts, String name, Configuration configuration) {
         Objects.requireNonNull(hosts);
         Objects.requireNonNull(configuration);
         this.replicator = new RedisSocketReplicator("", 1, configuration);
