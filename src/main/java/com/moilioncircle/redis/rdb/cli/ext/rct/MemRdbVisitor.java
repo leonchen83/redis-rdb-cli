@@ -897,7 +897,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             if (idx < 0) idx = -idx - 1;
             return idx < JEMALLOC_SIZE.length ? JEMALLOC_SIZE[idx] : size;
         }
-        
+
         public static final long[] JEMALLOC_SIZE = new long[]{
                 8L, 16L, 24L, 32L, 40L, 48L, 56L, 64L, 80L, 96L, 112L, 128L, 160L, 192L, 224L, 256L, 320L, 384L, 448L,
                 512L, 640L, 768L, 896L, 1024L, 1280L, 1536L, 1792L, 2048L, 2560L, 3072L, 3584L, 4096L, 5120L, 6144L,
