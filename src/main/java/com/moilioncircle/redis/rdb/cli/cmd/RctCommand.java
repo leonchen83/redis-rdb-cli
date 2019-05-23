@@ -97,7 +97,7 @@ public class RctCommand extends AbstractCommand {
             }
 
             if (sb.length() > 0) {
-                writeLine("Missing required options: " + sb.toString() + ", Try `rct -h` for more information.");
+                writeError("Missing required options: " + sb.toString() + ", Try `rct -h` for more information.");
                 return;
             }
 

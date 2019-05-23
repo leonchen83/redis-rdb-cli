@@ -52,9 +52,8 @@ public abstract class AbstractCommand implements Command {
             doExecute(new CommandLine(line));
         } catch (Throwable e) {
             if (e.getMessage() != null) {
-                writeLine(e.getMessage());
                 // https://github.com/leonchen83/redis-rdb-cli/issues/7
-                System.exit(1);
+                writeError(e.getMessage());
             } else {
                 throw e;
             }
@@ -70,6 +69,12 @@ public abstract class AbstractCommand implements Command {
     @Override
     public void writeLine(String message) throws Exception {
         System.out.println(message);
+    }
+
+    @Override
+    public void writeError(String message) throws Exception {
+        System.out.println(message);
+        System.exit(-1);
     }
     
     protected String normalize(String source, FileType type, String message) throws URISyntaxException {

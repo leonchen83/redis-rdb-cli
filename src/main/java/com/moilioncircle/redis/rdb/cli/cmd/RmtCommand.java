@@ -95,7 +95,7 @@ public class RmtCommand extends AbstractCommand {
             }
 
             if (sb.length() > 0) {
-                writeLine("Missing required options: " + sb.toString() + ". Try `rmt -h` for more information.");
+                writeError("Missing required options: " + sb.toString() + ". Try `rmt -h` for more information.");
                 return;
             }
 
@@ -116,7 +116,7 @@ public class RmtCommand extends AbstractCommand {
             if (migrate != null) {
                 RedisURI uri = new RedisURI(migrate);
                 if (uri.getFileType() != null) {
-                    writeLine("Invalid options: m. Try `rmt -h` for more information.");
+                    writeError("Invalid options: m. Try `rmt -h` for more information.");
                     return;
                 }
                 try (ProgressBar bar = new ProgressBar(-1)) {
@@ -136,7 +136,7 @@ public class RmtCommand extends AbstractCommand {
                 }
             } else {
                 if (conf == null || !Files.exists(conf.toPath())) {
-                    writeLine("Invalid options: c. Try `rmt -h` for more information.");
+                    writeError("Invalid options: c. Try `rmt -h` for more information.");
                     return;
                 }
                 try (ProgressBar bar = new ProgressBar(-1)) {

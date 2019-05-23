@@ -32,4 +32,6 @@ public interface Command {
     void write(String message) throws Exception;
 
     void writeLine(String message) throws Exception;
+
+    void writeError(String message) throws Exception;
 }
