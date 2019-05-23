@@ -16,6 +16,7 @@
 
 package com.moilioncircle.redis.rdb.cli.cmd;
 
+import com.moilioncircle.redis.rdb.cli.sentinel.RedisSentinelURI;
 import com.moilioncircle.redis.rdb.cli.util.Strings;
 import com.moilioncircle.redis.replicator.FileType;
 import com.moilioncircle.redis.replicator.RedisURI;
@@ -78,17 +79,22 @@ public abstract class AbstractCommand implements Command {
     }
     
     protected String normalize(String source, FileType type, String message) throws URISyntaxException {
-        RedisURI uri = null;
         try {
-            uri = new RedisURI(source);
-        } catch (Throwable e) {
-            try {
-                uri = new RedisURI(new File(source));
-            } catch (MalformedURLException e1) {
-            }
-        }
-        if (uri != null && (uri.getFileType() == null || type == null || uri.getFileType() == type)) {
+            RedisSentinelURI uri = new RedisSentinelURI(source);
             return uri.toString();
+        } catch (Throwable e1) {
+            RedisURI uri = null;
+            try {
+                uri = new RedisURI(source);
+            } catch (Throwable e2) {
+                try {
+                    uri = new RedisURI(new File(source));
+                } catch (Throwable e3) {
+                }
+            }
+            if (uri != null && (uri.getFileType() == null || type == null || uri.getFileType() == type)) {
+                return uri.toString();
+            }
         }
         throw new AssertionError(message);
     }
