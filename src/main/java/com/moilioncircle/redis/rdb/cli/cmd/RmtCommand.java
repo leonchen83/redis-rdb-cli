@@ -16,6 +16,16 @@
 
 package com.moilioncircle.redis.rdb.cli.cmd;
 
+import static com.moilioncircle.redis.rdb.cli.glossary.DataType.parse;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.CliRedisReplicator;
 import com.moilioncircle.redis.rdb.cli.ext.rmt.ClusterRdbVisitor;
@@ -23,7 +33,6 @@ import com.moilioncircle.redis.rdb.cli.ext.rmt.SingleRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.net.Endpoint;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
-import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.FileType;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -32,19 +41,6 @@ import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreCommandSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.rdb.RdbVisitor;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-
-import java.io.File;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.List;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
-
-import static com.moilioncircle.redis.rdb.cli.glossary.DataType.parse;
 
 /**
  * @author Baoyi Chen
@@ -165,22 +161,7 @@ public class RmtCommand extends AbstractCommand {
     }
 
     private RdbVisitor getRdbVisitor(Replicator replicator, Configure configure, RedisURI uri, List<Long> db, List<String> regexs, List<DataType> types, boolean replace, boolean legacy) throws Exception {
-        Configuration configuration = Configuration.defaultSetting();
-        String uriQuery = uri.getQuery();
-        List<NameValuePair> params = URLEncodedUtils.parse(uriQuery, Charset.forName("UTF-8"));
-        String authPassword = null;
-
-        for (NameValuePair param : params) {
-            if (param.getName().equals("authPassword")) {
-                authPassword = param.getValue();
-            }
-        }
-
-        if (authPassword != null) {
-            configuration.setAuthPassword(authPassword);
-        }
-
-        try (Endpoint endpoint = new Endpoint(uri.getHost(), uri.getPort(), 0, 1, null, configuration)) {
+        try (Endpoint endpoint = new Endpoint(uri.getHost(), uri.getPort(), 0, 1, null, configure.merge(uri))) {
             Endpoint.RedisObject r = endpoint.send("cluster".getBytes(), "nodes".getBytes());
             if (r.type.isError()) {
                 return new SingleRdbVisitor(replicator, configure, uri, db, regexs, types, replace, legacy);
