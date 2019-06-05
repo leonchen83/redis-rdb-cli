@@ -17,7 +17,6 @@
 package com.moilioncircle.redis.rdb.cli.cmd;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.ext.CliRedisReplicator;
 import com.moilioncircle.redis.rdb.cli.glossary.Action;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;

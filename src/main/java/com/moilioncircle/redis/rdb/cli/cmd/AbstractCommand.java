@@ -26,7 +26,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
 import static com.moilioncircle.redis.rdb.cli.cmd.Version.INSTANCE;
