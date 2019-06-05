@@ -23,6 +23,7 @@ import com.moilioncircle.redis.rdb.cli.ext.rmt.SingleRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.net.Endpoint;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
+import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.FileType;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -35,9 +36,13 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 
 import static com.moilioncircle.redis.rdb.cli.glossary.DataType.parse;
 
@@ -56,7 +61,7 @@ public class RmtCommand extends AbstractCommand {
     private static final Option DB = Option.builder("d").longOpt("db").required(false).hasArg().argName("num num...").valueSeparator(' ').type(Number.class).desc("database number. multiple databases can be provided. if not specified, all databases will be included.").build();
     private static final Option KEY = Option.builder("k").longOpt("key").required(false).hasArg().argName("regex regex...").valueSeparator(' ').type(String.class).desc("keys to export. this can be a regex. if not specified, all keys will be returned.").build();
     private static final Option TYPE = Option.builder("t").longOpt("type").required(false).hasArgs().argName("type type...").valueSeparator(' ').type(String.class).desc("data type to export. possible values are string, hash, set, sortedset, list, module, stream. multiple types can be provided. if not specified, all data types will be returned.").build();
-    
+
     private static final String HEADER = "rmt -s <source> [-m <uri> | -c <file>] [-d <num num...>] [-k <regex regex...>] [-t <type type...>] [-r] [-l]";
     private static final String EXAMPLE = "\nexamples:\n rmt -s ./dump.rdb -c ./nodes.conf -t string -r\n rmt -s ./dump.rdb -m redis://127.0.0.1:6380 -t list -d 0\n rmt -s redis://120.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0\n";
 
@@ -158,9 +163,24 @@ public class RmtCommand extends AbstractCommand {
             }
         }
     }
-    
+
     private RdbVisitor getRdbVisitor(Replicator replicator, Configure configure, RedisURI uri, List<Long> db, List<String> regexs, List<DataType> types, boolean replace, boolean legacy) throws Exception {
-        try (Endpoint endpoint = new Endpoint(uri.getHost(), uri.getPort())) {
+        Configuration configuration = Configuration.defaultSetting();
+        String uriQuery = uri.getQuery();
+        List<NameValuePair> params = URLEncodedUtils.parse(uriQuery, Charset.forName("UTF-8"));
+        String authPassword = null;
+
+        for (NameValuePair param : params) {
+            if (param.getName().equals("authPassword")) {
+                authPassword = param.getValue();
+            }
+        }
+
+        if (authPassword != null) {
+            configuration.setAuthPassword(authPassword);
+        }
+
+        try (Endpoint endpoint = new Endpoint(uri.getHost(), uri.getPort(), 0, 1, null, configuration)) {
             Endpoint.RedisObject r = endpoint.send("cluster".getBytes(), "nodes".getBytes());
             if (r.type.isError()) {
                 return new SingleRdbVisitor(replicator, configure, uri, db, regexs, types, replace, legacy);
