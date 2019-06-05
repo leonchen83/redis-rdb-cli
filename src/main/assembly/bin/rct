@@ -15,7 +15,7 @@ if [[ "$_java" ]]; then
     fi
 fi
 
-base_dir="$(dirname "$(readlink -f "$0")")"/..
+base_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/..
 
 lib_dir="$base_dir"/lib
 log_dir="$base_dir"/log
@@ -29,7 +29,7 @@ do
     CLASSPATH="$CLASSPATH":"$file"
 done
 
-ulimit -n 65535
+ulimit -n 65535 || true
 
 export CLASSPATH
 
