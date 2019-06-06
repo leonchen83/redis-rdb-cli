@@ -415,3 +415,6 @@ We use cluster's `nodes.conf` to migrate data to cluster. because of we did't ha
   
 * [Baoyi Chen](https://github.com/leonchen83)
 * [TaoBeier](https://github.com/tao12345666333)
+* [Maz Ahmadi](https://github.com/cmdshepard)
+* [Anish Karandikar](https://github.com/anishkny)
+* Special thanks to[Kater Technologies](https://www.kater.com/)

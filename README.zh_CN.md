@@ -415,3 +415,6 @@ migrate_flush=yes
   
 * [Baoyi Chen](https://github.com/leonchen83)
 * [TaoBeier](https://github.com/tao12345666333)
+* [Maz Ahmadi](https://github.com/cmdshepard)
+* [Anish Karandikar](https://github.com/anishkny)
+* 特别感谢[Kater Technologies](https://www.kater.com/)
