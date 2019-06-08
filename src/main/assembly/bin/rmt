@@ -15,17 +15,14 @@ if [[ "$_java" ]]; then
     fi
 fi
 
-argv0=$(echo "$0" | sed -e 's,\\,/,g')
-base_dir=$(dirname "$(readlink "$0" || echo "$argv0")")
+base_dir="$( cd "$( dirname "$(readlink -f "$0")" )" >/dev/null 2>&1 && pwd )"/..
 
 case "$(uname -s)" in
-  Darwin) base_dir="$( cd "$( dirname "$argv0" )" && pwd )";;
-  Linux) base_dir=$(dirname "$(readlink -f "$0" || echo "$argv0")");;
+  Darwin) base_dir="$( cd "$( dirname "$(readlink "$0")" )" >/dev/null 2>&1 && pwd )"/..;;
+  Linux) base_dir="$( cd "$( dirname "$(readlink -f "$0")" )" >/dev/null 2>&1 && pwd )"/..;;
   *CYGWIN*) base_dir=`cygpath -w "$base_dir"`;;
   *MSYS*) base_dir=`cygpath -w "$base_dir"`;;
 esac
-
-base_dir="$base_dir"/..
 
 lib_dir="$base_dir"/lib
 log_dir="$base_dir"/log
