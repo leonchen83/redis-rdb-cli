@@ -15,7 +15,7 @@ if [[ "$_java" ]]; then
     fi
 fi
 
-base_dir="$( cd "$( dirname "$(readlink -f "$0")" )" >/dev/null 2>&1 && pwd )"/..
+base_dir="$( cd "$( dirname "$(readlink "$0")" )" >/dev/null 2>&1 && pwd )"/..
 
 case "$(uname -s)" in
   Darwin) base_dir="$( cd "$( dirname "$(readlink "$0")" )" >/dev/null 2>&1 && pwd )"/..;;
