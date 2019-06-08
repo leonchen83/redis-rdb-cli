@@ -16,7 +16,6 @@
 
 package com.moilioncircle.redis.rdb.cli.util;
 
-
 import com.moilioncircle.redis.rdb.cli.util.type.Tuple2;
 import com.moilioncircle.redis.rdb.cli.util.type.Tuple3;
 import com.moilioncircle.redis.rdb.cli.util.type.Tuple4;

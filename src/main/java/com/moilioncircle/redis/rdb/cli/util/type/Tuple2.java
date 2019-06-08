@@ -16,7 +16,6 @@
 
 package com.moilioncircle.redis.rdb.cli.util.type;
 
-
 import com.moilioncircle.redis.rdb.cli.util.Iterators;
 
 import java.lang.reflect.Array;

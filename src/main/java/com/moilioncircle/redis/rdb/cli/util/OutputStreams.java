@@ -16,7 +16,6 @@
 
 package com.moilioncircle.redis.rdb.cli.util;
 
-
 import com.moilioncircle.redis.replicator.io.CRCOutputStream;
 
 import java.io.BufferedOutputStream;
