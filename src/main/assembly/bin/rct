@@ -39,7 +39,7 @@ do
     CLASSPATH="$CLASSPATH":"$file"
 done
 
-ulimit -n 65535 || true
+(ulimit -n 65535 || true) 2>/dev/null
 
 export CLASSPATH
 
