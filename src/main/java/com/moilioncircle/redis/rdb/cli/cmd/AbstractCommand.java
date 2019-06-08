@@ -80,7 +80,7 @@ public abstract class AbstractCommand implements Command {
     protected String normalize(String source, FileType type, String message) throws URISyntaxException {
         try {
             RedisSentinelURI uri = new RedisSentinelURI(source);
-            return uri.toString();
+            if (uri != null) return uri.toString();
         } catch (Throwable e1) {
             RedisURI uri = null;
             try {
