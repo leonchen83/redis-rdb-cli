@@ -1,3 +1,15 @@
+### 0.1.19
+
+Improve dashboard
+
+### 0.1.18
+
+Improve dashboard
+
+### 0.1.17
+
+Add sentinel support
+
 ### 0.1.16
 
 Fix CLI exit code bug.  

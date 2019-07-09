@@ -58,7 +58,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1562637138775,
+  "iteration": 1562637363009,
   "links": [],
   "panels": [
     {
@@ -855,7 +855,7 @@
         },
         {
           "alias": "Type",
-          "colorMode": "cell",
+          "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
             "#fce2de",
@@ -899,36 +899,6 @@
           "pattern": "mtype",
           "thresholds": [],
           "type": "hidden",
-          "unit": "short"
-        },
-        {
-          "alias": "",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "mappingType": 1,
-          "pattern": "",
-          "thresholds": [],
-          "type": "number",
-          "unit": "short"
-        },
-        {
-          "alias": "",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "decimals": 2,
-          "pattern": "/.*/",
-          "thresholds": [],
-          "type": "number",
           "unit": "short"
         }
       ],
@@ -1009,5 +979,5 @@
   "timezone": "",
   "title": "redis memory dashboard",
   "uid": "HTpQ2Rcmz",
-  "version": 3
+  "version": 4
 }
