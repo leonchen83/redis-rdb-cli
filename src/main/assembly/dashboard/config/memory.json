@@ -58,7 +58,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1562574144787,
+  "iteration": 1562637138775,
   "links": [],
   "panels": [
     {
@@ -848,8 +848,7 @@
           "mappingType": 1,
           "pattern": "Value",
           "thresholds": [
-            "104857600",
-            "204857600"
+            ""
           ],
           "type": "number",
           "unit": "bytes"
@@ -1010,5 +1009,5 @@
   "timezone": "",
   "title": "redis memory dashboard",
   "uid": "HTpQ2Rcmz",
-  "version": 1
+  "version": 3
 }
