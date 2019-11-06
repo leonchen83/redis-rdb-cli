@@ -94,6 +94,7 @@ public class AsyncEventListener implements EventListener {
                 this.executors[i].submit(() -> this.listener.onEvent(replicator, event));
             } else if (event instanceof Command) {
                 // at this point all rdb event process done by Syncer.
+                // so we can process aof event safely.
                 this.executors[0].submit(() -> this.listener.onEvent(replicator, event));
             }
         }
