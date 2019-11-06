@@ -23,6 +23,7 @@ import com.moilioncircle.redis.rdb.cli.metric.MetricJobs;
 import com.moilioncircle.redis.rdb.cli.net.Endpoints;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.Replicator;
+import com.moilioncircle.redis.replicator.cmd.Command;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
 import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
@@ -79,6 +80,10 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
                 this.reporter.report();
                 this.reporter.close();
             }
+        } else if (event instanceof AsyncEventListener.Syncer) {
+            ((AsyncEventListener.Syncer)event).await();
+        } else if (event instanceof Command) {
+            // TODO
         }
     }
 

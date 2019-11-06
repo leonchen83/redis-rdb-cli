@@ -18,6 +18,7 @@ package com.moilioncircle.redis.rdb.cli.ext;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.replicator.Replicator;
+import com.moilioncircle.redis.replicator.cmd.Command;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
 import com.moilioncircle.redis.replicator.event.PostCommandSyncEvent;
@@ -26,6 +27,8 @@ import com.moilioncircle.redis.replicator.event.PreCommandSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
 
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -40,6 +43,7 @@ public class AsyncEventListener implements EventListener {
     private int count;
     private ExecutorService[] executors;
     private final EventListener listener;
+    private final Syncer syncer = new Syncer();
 
     public AsyncEventListener(EventListener listener, Replicator r, Configure c) {
         this.listener = listener;
@@ -69,13 +73,48 @@ public class AsyncEventListener implements EventListener {
                     event instanceof PostRdbSyncEvent ||
                     event instanceof PreCommandSyncEvent ||
                     event instanceof PostCommandSyncEvent) {
+                // 1
+                if (event instanceof PreRdbSyncEvent) {
+                    syncer.reset();
+                }
+                
+                // 2
                 for (int i = 0; i < this.executors.length; i++) {
                     this.executors[i].submit(() -> this.listener.onEvent(replicator, event));
+                }
+                
+                // 3
+                if (event instanceof PostRdbSyncEvent) {
+                    for (int i = 0; i < this.executors.length; i++) {
+                        this.executors[i].submit(() -> this.listener.onEvent(replicator, syncer));
+                    }
                 }
             } else if (event instanceof DumpKeyValuePair) {
                 int i = count++ & (executors.length - 1);
                 this.executors[i].submit(() -> this.listener.onEvent(replicator, event));
+            } else if (event instanceof Command) {
+                this.executors[0].submit(() -> this.listener.onEvent(replicator, event));
             }
+        }
+    }
+    
+    public class Syncer implements Event {
+        
+        private CyclicBarrier barrier = new CyclicBarrier(executors.length);
+        
+        public int await() {
+            try {
+                return barrier.await();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return 0;
+            } catch (BrokenBarrierException e) {
+                return 0;
+            }
+        }
+        
+        public void reset() {
+            barrier.reset();
         }
     }
 }

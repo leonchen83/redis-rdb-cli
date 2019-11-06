@@ -24,6 +24,7 @@ import com.moilioncircle.redis.rdb.cli.net.Endpoint;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
+import com.moilioncircle.redis.replicator.cmd.Command;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
 import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
@@ -83,6 +84,10 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
                 this.reporter.report();
                 this.reporter.close();
             }
+        } else if (event instanceof AsyncEventListener.Syncer) {
+            ((AsyncEventListener.Syncer)event).await();
+        } else if (event instanceof Command) {
+            // TODO
         }
     }
     
