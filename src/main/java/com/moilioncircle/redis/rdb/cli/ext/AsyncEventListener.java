@@ -93,6 +93,7 @@ public class AsyncEventListener implements EventListener {
                 int i = count++ & (executors.length - 1);
                 this.executors[i].submit(() -> this.listener.onEvent(replicator, event));
             } else if (event instanceof Command) {
+                // at this point all rdb event process done by Syncer.
                 this.executors[0].submit(() -> this.listener.onEvent(replicator, event));
             }
         }
