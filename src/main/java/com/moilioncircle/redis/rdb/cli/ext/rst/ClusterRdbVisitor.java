@@ -81,14 +81,15 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             this.reporter = create(configure, registry, MetricJobs.endpoint(configure));
             this.reporter.start(5, TimeUnit.SECONDS);
         } else if (event instanceof DumpKeyValuePair) {
-            retry(event, configure.getMigrateRetries());
+            retry((DumpKeyValuePair)event, configure.getMigrateRetries());
         } else if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
             this.endpoints.get().flush();
         } else if (event instanceof Command) {
-            // TODO
+            retry((Command) event, configure.getMigrateRetries());
         } else if (event instanceof CloseEvent) {
             this.endpoints.get().flush();
             Endpoints.closeQuietly(this.endpoints.get());
+            
             if (this.reporter != null) {
                 this.reporter.report();
                 this.reporter.close();
@@ -96,8 +97,11 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
         }
     }
 
-    public void retry(Event event, int times) {
-        DumpKeyValuePair dkv = (DumpKeyValuePair) event;
+    public void retry(Command command, int times) {
+        
+    }
+
+    public void retry(DumpKeyValuePair dkv, int times) {
         try {
             byte[] expire = ZERO;
             if (dkv.getExpiredMs() != null) {
@@ -116,7 +120,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             times--;
             if (times >= 0 && flush) {
                 this.endpoints.get().update(dkv.getKey());
-                retry(event, times);
+                retry(dkv, times);
             }
         }
     }

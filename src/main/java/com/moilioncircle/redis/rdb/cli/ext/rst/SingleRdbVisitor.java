@@ -85,11 +85,11 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
             this.reporter = create(configure, registry, MetricJobs.endpoint(configure));
             this.reporter.start(5, TimeUnit.SECONDS);
         } else if (event instanceof DumpKeyValuePair) {
-            retry(event, configure.getMigrateRetries());
+            retry((DumpKeyValuePair)event, configure.getMigrateRetries());
         } else if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
             this.endpoint.get().flush();
         } else if (event instanceof Command) {
-            // TODO
+            retry((Command)event, configure.getMigrateRetries());
         } else if (event instanceof CloseEvent) {
             this.endpoint.get().flush();
             Endpoint.closeQuietly(this.endpoint.get());
@@ -101,9 +101,12 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
         }
     }
     
-    public void retry(Event event, int times) {
+    public void retry(Command command, int times) {
+        
+    }
+    
+    public void retry(DumpKeyValuePair dkv, int times) {
         try {
-            DumpKeyValuePair dkv = (DumpKeyValuePair) event;
             DB db = dkv.getDb();
     
             int index;
@@ -129,7 +132,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
             times--;
             if (times >= 0 && flush) {
                 endpoint.set(Endpoint.valueOf(endpoint.get()));
-                retry(event, times);
+                retry(dkv, times);
             }
         }
     }
