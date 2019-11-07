@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractMigrateRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.AsyncEventListener;
+import com.moilioncircle.redis.rdb.cli.ext.CloseEvent;
 import com.moilioncircle.redis.rdb.cli.metric.MetricJobs;
 import com.moilioncircle.redis.rdb.cli.net.Endpoints;
 import com.moilioncircle.redis.replicator.Configuration;
@@ -83,14 +84,15 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             retry(event, configure.getMigrateRetries());
         } else if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
             this.endpoints.get().flush();
+        } else if (event instanceof Command) {
+            // TODO
+        } else if (event instanceof CloseEvent) {
+            this.endpoints.get().flush();
             Endpoints.closeQuietly(this.endpoints.get());
-
             if (this.reporter != null) {
                 this.reporter.report();
                 this.reporter.close();
             }
-        } else if (event instanceof Command) {
-            // TODO
         }
     }
 

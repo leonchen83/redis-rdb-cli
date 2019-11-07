@@ -58,12 +58,12 @@ public class AsyncEventListener implements EventListener {
             }
             r.addCloseListener(rep -> {
                 for (int i = 0; i < this.executors.length; i++) {
+                    this.executors[i].submit(() -> this.listener.onEvent(r, new CloseEvent()));
                     terminateQuietly(this.executors[i], c.getTimeout(), TimeUnit.MILLISECONDS);
                 }
             });
             this.barrier = new CyclicBarrier(n);
         }
-        
     }
 
     @Override
