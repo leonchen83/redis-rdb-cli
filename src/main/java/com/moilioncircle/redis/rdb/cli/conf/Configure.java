@@ -16,18 +16,21 @@
 
 package com.moilioncircle.redis.rdb.cli.conf;
 
-import com.moilioncircle.redis.rdb.cli.glossary.Gateway;
-import com.moilioncircle.redis.rdb.cli.sentinel.RedisSentinelURI;
-import com.moilioncircle.redis.replicator.Configuration;
-import com.moilioncircle.redis.replicator.RedisURI;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
+
+import com.moilioncircle.redis.rdb.cli.glossary.Gateway;
+import com.moilioncircle.redis.rdb.cli.sentinel.RedisSentinelURI;
+import com.moilioncircle.redis.replicator.Configuration;
+import com.moilioncircle.redis.replicator.RedisURI;
 
 /**
  * @author Baoyi Chen
@@ -60,7 +63,7 @@ public class Configure {
         if (properties != null)
             this.properties.putAll(properties);
     }
-    
+
     /**
      * rct --format resp batch size
      */
@@ -95,7 +98,12 @@ public class Configure {
      * rmt --migrate
      */
     private boolean migrateFlush = true;
-    
+
+    /**
+     * rst --migrate
+     */
+    private List<String> migrateDisableCommands = Arrays.asList("flushall", "flushdb", "swapdb");
+
     /**
      * timeout
      */
@@ -263,7 +271,15 @@ public class Configure {
     public void setMigrateFlush(boolean migrateFlush) {
         this.migrateFlush = migrateFlush;
     }
-    
+
+    public List<String> getMigrateDisableCommands() {
+        return migrateDisableCommands;
+    }
+
+    public void setMigrateDisableCommands(List<String> migrateDisableCommands) {
+        this.migrateDisableCommands = migrateDisableCommands;
+    }
+
     public int getRetryInterval() {
         return retryInterval;
     }
@@ -393,6 +409,7 @@ public class Configure {
         conf.migrateThreads = getInt(conf, "migrate_threads", 4, true);
         conf.migrateRetries = getInt(conf, "migrate_retries", 1, true);
         conf.migrateFlush = getBool(conf, "migrate_flush", true, true);
+        conf.migrateDisableCommands = getList(conf, "migrate_disable_commands", "flushall,flushdb,swapdb", true);
         conf.dumpRdbVersion = getInt(conf, "dump_rdb_version", -1, true);
         conf.quote = (byte) getString(conf, "quote", "\"", true).charAt(0);
         conf.delimiter = (byte) getString(conf, "delimiter", ",", true).charAt(0);
@@ -519,6 +536,10 @@ public class Configure {
     public static Boolean getBool(Configure conf, String key) {
         return getBool(conf, key, null, false);
     }
+
+    public static List<String> getList(Configure conf, String key) {
+        return getList(conf, key, null, false);
+    }
     
     public static URI getUri(Configure conf, String key, String value, boolean optional) {
         String v = getString(conf, key, value, optional);
@@ -558,6 +579,13 @@ public class Configure {
             return Boolean.FALSE;
         throw new IllegalArgumentException("not found the config[key=" + key + "]");
     }
+
+    public static List<String> getList(Configure conf, String key, String value, boolean optional) {
+        String v = getString(conf, key, value == null ? null : value, optional);
+        if (v == null) 
+            return null;
+        return Arrays.stream(v.split(",")).map(e -> e.trim()).collect(Collectors.toList());
+    }
     
     @Override
     public String toString() {
@@ -569,6 +597,7 @@ public class Configure {
                 ", migrateThreads=" + migrateThreads +
                 ", migrateRetries=" + migrateRetries +
                 ", migrateFlush=" + migrateFlush +
+                ", migrateDisableCommands='" + migrateDisableCommands + '\'' +
                 ", timeout=" + timeout +
                 ", rcvBuf=" + rcvBuf +
                 ", sndBuf=" + sndBuf +

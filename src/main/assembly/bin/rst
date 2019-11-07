@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+if type -P java &>/dev/null; then
+    _java=java
+elif [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]]; then
+    _java="$JAVA_HOME/bin/java"
+else
+    echo "no found java."
+fi
+
+if [[ "$_java" ]]; then
+    version=$("$_java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
+    if [[ "$version" < "1.8" ]]; then
+        echo "java -version is less than 1.8"
+    fi
+fi
+
+base_dir="$( cd "$( dirname "$(readlink "$0")" )" >/dev/null 2>&1 && pwd )"/..
+
+case "$(uname -s)" in
+  Darwin) base_dir="$( cd "$( dirname "$(readlink "$0")" )" >/dev/null 2>&1 && pwd )"/..;;
+  Linux) base_dir="$( cd "$( dirname "$(readlink -f "$0")" )" >/dev/null 2>&1 && pwd )"/..;;
+  *CYGWIN*) base_dir=`cygpath -w "$base_dir"`;;
+  *MSYS*) base_dir=`cygpath -w "$base_dir"`;;
+esac
+
+lib_dir="$base_dir"/lib
+log_dir="$base_dir"/log
+con_dir="$base_dir"/conf
+
+log_file="$con_dir"/log4j2.xml
+con_file="$con_dir"/redis-rdb-cli.conf
+
+for file in "$lib_dir"/*.jar;
+do
+    CLASSPATH="$CLASSPATH":"$file"
+done
+
+(ulimit -n 65535 || true) 2>/dev/null
+
+export CLASSPATH
+
+$_java -server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -Dlog4j.configurationFile=${log_file} -Dcli.log.path=${log_dir} -Dconf=${con_file} -Drct.home=${base_dir} com.moilioncircle.redis.rdb.cli.Rst $@
