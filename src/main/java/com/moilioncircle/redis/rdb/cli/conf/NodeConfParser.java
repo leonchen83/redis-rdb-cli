@@ -17,8 +17,8 @@
 package com.moilioncircle.redis.rdb.cli.conf;
 
 import com.moilioncircle.redis.rdb.cli.util.CRC16;
-import com.moilioncircle.redis.rdb.cli.util.Tuples;
-import com.moilioncircle.redis.rdb.cli.util.type.Tuple3;
+import com.moilioncircle.redis.replicator.util.Tuples;
+import com.moilioncircle.redis.replicator.util.type.Tuple3;
 
 import java.util.ArrayList;
 import java.util.HashMap;

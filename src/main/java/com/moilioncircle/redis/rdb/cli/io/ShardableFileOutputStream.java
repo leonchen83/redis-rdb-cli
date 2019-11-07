@@ -19,8 +19,8 @@ package com.moilioncircle.redis.rdb.cli.io;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.conf.NodeConfParser;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
-import com.moilioncircle.redis.rdb.cli.util.type.Tuple3;
 import com.moilioncircle.redis.replicator.io.CRCOutputStream;
+import com.moilioncircle.redis.replicator.util.type.Tuple3;
 
 import java.io.IOException;
 import java.io.OutputStream;

@@ -20,13 +20,14 @@ import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.glossary.Action;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
-import com.moilioncircle.redis.rdb.cli.util.type.Tuple2;
 import com.moilioncircle.redis.replicator.FileType;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.Replicators;
 import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreCommandSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
+import com.moilioncircle.redis.replicator.util.type.Tuple2;
+
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 

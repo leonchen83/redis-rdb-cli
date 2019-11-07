@@ -17,8 +17,9 @@
 package com.moilioncircle.redis.rdb.cli.net;
 
 import com.moilioncircle.redis.rdb.cli.conf.NodeConfParser;
-import com.moilioncircle.redis.rdb.cli.util.type.Tuple3;
 import com.moilioncircle.redis.replicator.Configuration;
+import com.moilioncircle.redis.replicator.util.type.Tuple3;
+
 import io.dropwizard.metrics5.MetricRegistry;
 
 import java.io.Closeable;

@@ -16,8 +16,6 @@
 
 package com.moilioncircle.redis.rdb.cli.metric.prometheus;
 
-import com.moilioncircle.redis.rdb.cli.util.Tuples;
-import com.moilioncircle.redis.rdb.cli.util.type.Tuple2;
 import io.dropwizard.metrics5.Counter;
 import io.dropwizard.metrics5.Gauge;
 import io.dropwizard.metrics5.Histogram;
@@ -44,9 +42,13 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
+import com.moilioncircle.redis.replicator.util.Tuples;
+import com.moilioncircle.redis.replicator.util.type.Tuple2;
+
 /**
  * @author Baoyi Chen
  */
+@SuppressWarnings("rawtypes")
 public class DropwizardExports extends Collector implements Collector.Describable {
 
     private static final Pattern METRIC_NAME_RE = Pattern.compile("[^a-zA-Z0-9:_]");

@@ -24,8 +24,6 @@ import com.moilioncircle.redis.rdb.cli.glossary.Escape;
 import com.moilioncircle.redis.rdb.cli.metric.MetricJobs;
 import com.moilioncircle.redis.rdb.cli.util.CmpHeap;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
-import com.moilioncircle.redis.rdb.cli.util.Tuples;
-import com.moilioncircle.redis.rdb.cli.util.type.Tuple2;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
@@ -41,6 +39,9 @@ import com.moilioncircle.redis.replicator.rdb.datatype.DB;
 import com.moilioncircle.redis.replicator.rdb.skip.SkipRdbParser;
 import com.moilioncircle.redis.replicator.util.ByteArray;
 import com.moilioncircle.redis.replicator.util.Strings;
+import com.moilioncircle.redis.replicator.util.Tuples;
+import com.moilioncircle.redis.replicator.util.type.Tuple2;
+
 import io.dropwizard.metrics5.Counter;
 import io.dropwizard.metrics5.Histogram;
 import io.dropwizard.metrics5.MetricRegistry;
@@ -741,6 +742,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     }
     
     static class Tuple2Ex extends Tuple2<Long, DummyKeyValuePair> implements Comparable<Tuple2Ex> {
+
+        private static final long serialVersionUID = 1L;
         
         public Tuple2Ex(Long v1, DummyKeyValuePair v2) {
             super(v1, v2);

@@ -41,8 +41,8 @@ import static com.moilioncircle.redis.replicator.util.Concurrents.terminateQuiet
 public class AsyncEventListener implements EventListener {
 
     private int count;
+    private CyclicBarrier barrier;
     private ExecutorService[] executors;
-    private final CyclicBarrier barrier;
     private final EventListener listener;
 
     public AsyncEventListener(EventListener listener, Replicator r, Configure c) {
@@ -61,8 +61,9 @@ public class AsyncEventListener implements EventListener {
                     terminateQuietly(this.executors[i], c.getTimeout(), TimeUnit.MILLISECONDS);
                 }
             });
+            this.barrier = new CyclicBarrier(n);
         }
-        this.barrier = new CyclicBarrier(n);
+        
     }
 
     @Override
@@ -76,7 +77,7 @@ public class AsyncEventListener implements EventListener {
                     event instanceof PostCommandSyncEvent) {
                 // 1
                 if (event instanceof PreRdbSyncEvent) {
-                    barrier.reset();
+                    reset();
                 }
                 
                 // 2
@@ -87,23 +88,27 @@ public class AsyncEventListener implements EventListener {
                 // 3
                 if (event instanceof PostRdbSyncEvent) {
                     for (int i = 0; i < this.executors.length; i++) {
-                        this.executors[i].submit(() -> this.barrier.await());
+                        this.executors[i].submit(() -> await());
                     }
                 }
             } else if (event instanceof DumpKeyValuePair) {
                 int i = count++ & (executors.length - 1);
                 this.executors[i].submit(() -> this.listener.onEvent(replicator, event));
             } else if (event instanceof Command) {
-                // at this point all rdb event process done by barrier.
-                // so we can process aof event safely.
+                // at this point all rdb event process done controlled by barrier.
+                // so we can process aof event use thread 0 safely.
                 this.executors[0].submit(() -> this.listener.onEvent(replicator, event));
             }
         }
     }
+    
+    private void reset() {
+        if (barrier != null) barrier.reset();
+    }
 
     private void await() {
         try {
-            barrier.await();
+            if (barrier != null) barrier.await();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (BrokenBarrierException e) {

@@ -24,12 +24,12 @@ import com.moilioncircle.redis.rdb.cli.ext.rdt.SplitRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.io.ShardableFileOutputStream;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.rdb.cli.util.Strings;
-import com.moilioncircle.redis.rdb.cli.util.Tuples;
-import com.moilioncircle.redis.rdb.cli.util.type.Tuple2;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.io.CRCOutputStream;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
+import com.moilioncircle.redis.replicator.util.Tuples;
+import com.moilioncircle.redis.replicator.util.type.Tuple2;
 
 import java.io.File;
 import java.io.FileInputStream;
