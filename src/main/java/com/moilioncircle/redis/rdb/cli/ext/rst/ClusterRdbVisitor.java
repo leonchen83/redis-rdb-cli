@@ -14,24 +14,25 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.ext.rmt;
+package com.moilioncircle.redis.rdb.cli.ext.rst;
 
 import static com.moilioncircle.redis.rdb.cli.metric.MetricReporterFactory.create;
 import static com.moilioncircle.redis.replicator.Configuration.defaultSetting;
 import static java.util.Collections.singletonList;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractMigrateRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.AsyncEventListener;
-import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.metric.MetricJobs;
 import com.moilioncircle.redis.rdb.cli.net.Endpoints;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.Replicator;
+import com.moilioncircle.redis.replicator.cmd.Command;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
 import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
@@ -51,13 +52,21 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
     public ClusterRdbVisitor(Replicator replicator,
                              Configure configure,
                              List<String> lines,
-                             List<String> regexs,
-                             List<DataType> types,
                              boolean replace) throws IOException {
-        super(replicator, configure, singletonList(0L), regexs, types, replace);
+        super(replicator, configure, singletonList(0L), new ArrayList<>(), new ArrayList<>(), replace);
         this.lines = lines;
         this.configuration = configure.merge(defaultSetting());
         this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure));
+    }
+
+    @Override
+    protected boolean contains(int type) {
+        return true;
+    }
+
+    @Override
+    protected boolean contains(String key) {
+        return true;
     }
 
     @Override
@@ -80,6 +89,8 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
                 this.reporter.report();
                 this.reporter.close();
             }
+        } else if (event instanceof Command) {
+            // TODO
         }
     }
 

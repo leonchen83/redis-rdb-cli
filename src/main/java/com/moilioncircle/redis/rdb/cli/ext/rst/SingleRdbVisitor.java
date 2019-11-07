@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.ext.rmt;
+package com.moilioncircle.redis.rdb.cli.ext.rst;
+
+import static com.moilioncircle.redis.rdb.cli.metric.MetricReporterFactory.create;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractMigrateRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.AsyncEventListener;
-import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.metric.MetricJobs;
 import com.moilioncircle.redis.rdb.cli.net.Endpoint;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
+import com.moilioncircle.redis.replicator.cmd.Command;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
 import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
@@ -32,11 +38,6 @@ import com.moilioncircle.redis.replicator.event.PreCommandSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
 import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
-
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import static com.moilioncircle.redis.rdb.cli.metric.MetricReporterFactory.create;
 
 /**
  * @author Baoyi Chen
@@ -53,15 +54,23 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
                             Configure configure,
                             RedisURI uri,
                             List<Long> db,
-                            List<String> regexs,
-                            List<DataType> types,
                             boolean replace,
                             boolean legacy) throws Exception {
-        super(replicator, configure, db, regexs, types, replace);
+        super(replicator, configure, db, new ArrayList<>(), new ArrayList<>(), replace);
         this.uri = uri;
         this.legacy = legacy;
         this.conf = configure.merge(this.uri);
         this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure));
+    }
+
+    @Override
+    protected boolean contains(int type) {
+        return true;
+    }
+
+    @Override
+    protected boolean contains(String key) {
+        return true;
     }
     
     @Override
@@ -84,6 +93,8 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
                 this.reporter.report();
                 this.reporter.close();
             }
+        } else if (event instanceof Command) {
+            // TODO
         }
     }
     

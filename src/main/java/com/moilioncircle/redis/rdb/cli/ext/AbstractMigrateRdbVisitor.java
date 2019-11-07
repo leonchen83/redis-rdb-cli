@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.ext.rmt;
+package com.moilioncircle.redis.rdb.cli.ext;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
-import com.moilioncircle.redis.rdb.cli.ext.DumpRawByteListener;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.glossary.Escape;
 import com.moilioncircle.redis.replicator.Replicator;

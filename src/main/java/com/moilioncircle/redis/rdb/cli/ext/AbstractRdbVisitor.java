@@ -101,7 +101,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
     protected GuardRawByteListener listener;
 
     /**
-     * rmt
+     * rmt rst
      */
     public AbstractRdbVisitor(Replicator replicator, Configure configure, List<Long> db, List<String> regexs, List<DataType> types) {
         super(replicator);
