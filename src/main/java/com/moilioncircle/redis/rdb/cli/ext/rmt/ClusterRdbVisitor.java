@@ -80,8 +80,6 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
                 this.reporter.report();
                 this.reporter.close();
             }
-        } else if (event instanceof AsyncEventListener.Syncer) {
-            ((AsyncEventListener.Syncer)event).await();
         } else if (event instanceof Command) {
             // TODO
         }

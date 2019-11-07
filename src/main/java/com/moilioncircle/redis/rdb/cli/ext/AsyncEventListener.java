@@ -42,8 +42,8 @@ public class AsyncEventListener implements EventListener {
 
     private int count;
     private ExecutorService[] executors;
+    private final CyclicBarrier barrier;
     private final EventListener listener;
-    private final Syncer syncer = new Syncer();
 
     public AsyncEventListener(EventListener listener, Replicator r, Configure c) {
         this.listener = listener;
@@ -62,6 +62,7 @@ public class AsyncEventListener implements EventListener {
                 }
             });
         }
+        this.barrier = new CyclicBarrier(n);
     }
 
     @Override
@@ -75,7 +76,7 @@ public class AsyncEventListener implements EventListener {
                     event instanceof PostCommandSyncEvent) {
                 // 1
                 if (event instanceof PreRdbSyncEvent) {
-                    syncer.reset();
+                    barrier.reset();
                 }
                 
                 // 2
@@ -86,37 +87,26 @@ public class AsyncEventListener implements EventListener {
                 // 3
                 if (event instanceof PostRdbSyncEvent) {
                     for (int i = 0; i < this.executors.length; i++) {
-                        this.executors[i].submit(() -> this.listener.onEvent(replicator, syncer));
+                        this.executors[i].submit(() -> this.barrier.await());
                     }
                 }
             } else if (event instanceof DumpKeyValuePair) {
                 int i = count++ & (executors.length - 1);
                 this.executors[i].submit(() -> this.listener.onEvent(replicator, event));
             } else if (event instanceof Command) {
-                // at this point all rdb event process done by Syncer.
+                // at this point all rdb event process done by barrier.
                 // so we can process aof event safely.
                 this.executors[0].submit(() -> this.listener.onEvent(replicator, event));
             }
         }
     }
-    
-    public class Syncer implements Event {
-        
-        private CyclicBarrier barrier = new CyclicBarrier(executors.length);
-        
-        public int await() {
-            try {
-                return barrier.await();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return 0;
-            } catch (BrokenBarrierException e) {
-                return 0;
-            }
-        }
-        
-        public void reset() {
-            barrier.reset();
+
+    private void await() {
+        try {
+            barrier.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (BrokenBarrierException e) {
         }
     }
 }
