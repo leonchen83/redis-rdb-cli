@@ -44,15 +44,15 @@ public class RstCommand extends AbstractCommand {
 
     private static final Option HELP = Option.builder("h").longOpt("help").required(false).hasArg(false).desc("rst usage.").build();
     private static final Option VERSION = Option.builder("v").longOpt("version").required(false).hasArg(false).desc("rst version.").build();
-    private static final Option SOURCE = Option.builder("s").longOpt("source").required(false).hasArg().argName("source").type(String.class).desc("<source> eg:\n /path/to/dump.rdb redis://host:port?authPassword=foobar redis:///path/to/dump.rdb").build();
+    private static final Option SOURCE = Option.builder("s").longOpt("source").required(false).hasArg().argName("source").type(String.class).desc("<source> eg:\n redis://host:port?authPassword=foobar").build();
     private static final Option REPLACE = Option.builder("r").longOpt("replace").required(false).desc("replace exist key value. if not specified, default value is false.").build();
     private static final Option LEGACY = Option.builder("l").longOpt("legacy").required(false).desc("if specify the <replace> and this parameter. then use lua script to migrate data to target. if target redis version is greater than 3.0. no need to add this parameter.").build();
     private static final Option CONFIG = Option.builder("c").longOpt("config").required(false).hasArg().argName("file").type(File.class).desc("migrate data to cluster via redis cluster's <nodes.conf> file, if specified, no need to specify --migrate.").build();
     private static final Option MIGRATE = Option.builder("m").longOpt("migrate").required(false).hasArg().argName("uri").type(String.class).desc("migrate to uri. eg: redis://host:port?authPassword=foobar.").build();
     private static final Option DB = Option.builder("d").longOpt("db").required(false).hasArg().argName("num num...").valueSeparator(' ').type(Number.class).desc("database number. multiple databases can be provided. if not specified, all databases will be included.").build();
 
-    private static final String HEADER = "rst -s <source> [-m <uri> | -c <file>] [-d <num num...>] [-k <regex regex...>] [-t <type type...>] [-r] [-l]";
-    private static final String EXAMPLE = "\nexamples:\n rst -s ./dump.rdb -c ./nodes.conf -t string -r\n rst -s ./dump.rdb -m redis://127.0.0.1:6380 -t list -d 0\n rst -s redis://120.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0\n";
+    private static final String HEADER = "rst -s <source> [-m <uri> | -c <file>] [-d <num num...>] [-r] [-l]";
+    private static final String EXAMPLE = "\nexamples:\n rst -s redis://127.0.0.1:6379 -c ./nodes.conf -r\n rst -s redis://120.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0\n";
 
     private RstCommand() {
         addOption(HELP);

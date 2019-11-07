@@ -91,7 +91,7 @@ public abstract class AbstractCommand implements Command {
                 } catch (Throwable e3) {
                 }
             }
-            if (uri != null && (uri.getFileType() == null || type == null || uri.getFileType() == type)) {
+            if (uri != null && (uri.getFileType() == null || uri.getFileType() == type)) {
                 return uri.toString();
             }
         }
