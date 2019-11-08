@@ -63,7 +63,7 @@ public abstract class AbstractCommand implements Command {
                 throw e;
             }
         } finally {
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> closeQuietly(manager)));
+            MonitorManager.closeQuietly(manager);
         }
     }
 
