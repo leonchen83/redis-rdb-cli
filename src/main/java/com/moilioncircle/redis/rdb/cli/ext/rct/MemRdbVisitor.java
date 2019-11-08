@@ -16,14 +16,37 @@
 
 package com.moilioncircle.redis.rdb.cli.ext.rct;
 
+import static com.moilioncircle.redis.rdb.cli.glossary.DataType.parse;
+import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
+import static com.moilioncircle.redis.replicator.Constants.STREAM_ITEM_FLAG_DELETED;
+import static com.moilioncircle.redis.replicator.Constants.STREAM_ITEM_FLAG_SAMEFIELDS;
+import static com.moilioncircle.redis.replicator.rdb.BaseRdbParser.StringHelper.listPackEntry;
+import static com.moilioncircle.redis.replicator.rdb.datatype.ExpiredType.NONE;
+import static java.lang.Integer.min;
+import static java.lang.System.currentTimeMillis;
+import static java.time.Instant.ofEpochMilli;
+import static java.time.ZoneId.systemDefault;
+
+import java.io.File;
+import java.io.IOException;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
+
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.glossary.Escape;
-import com.moilioncircle.redis.rdb.cli.metric.MetricJobs;
+import com.moilioncircle.redis.rdb.cli.monitor.Monitor;
+import com.moilioncircle.redis.rdb.cli.monitor.MonitorFactory;
 import com.moilioncircle.redis.rdb.cli.util.CmpHeap;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.rdb.cli.util.Tuple2Ex;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
@@ -42,37 +65,6 @@ import com.moilioncircle.redis.replicator.util.Strings;
 import com.moilioncircle.redis.replicator.util.Tuples;
 import com.moilioncircle.redis.replicator.util.type.Tuple2;
 
-import io.dropwizard.metrics5.Counter;
-import io.dropwizard.metrics5.Histogram;
-import io.dropwizard.metrics5.MetricRegistry;
-import io.dropwizard.metrics5.ScheduledReporter;
-
-import java.io.File;
-import java.io.IOException;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-
-import static com.moilioncircle.redis.rdb.cli.ext.rct.MemRdbVisitor.Tuple2Ex;
-import static com.moilioncircle.redis.rdb.cli.glossary.DataType.parse;
-import static com.moilioncircle.redis.rdb.cli.metric.MetricNames.name;
-import static com.moilioncircle.redis.rdb.cli.metric.MetricReporterFactory.create;
-import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
-import static com.moilioncircle.redis.replicator.Constants.STREAM_ITEM_FLAG_DELETED;
-import static com.moilioncircle.redis.replicator.Constants.STREAM_ITEM_FLAG_SAMEFIELDS;
-import static com.moilioncircle.redis.replicator.rdb.BaseRdbParser.StringHelper.listPackEntry;
-import static com.moilioncircle.redis.replicator.rdb.datatype.ExpiredType.NONE;
-import static io.dropwizard.metrics5.MetricName.build;
-import static java.lang.Integer.min;
-import static java.lang.System.currentTimeMillis;
-import static java.time.Instant.ofEpochMilli;
-import static java.time.ZoneId.systemDefault;
-
 /**
  * @author Baoyi Chen
  */
@@ -82,27 +74,9 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     
     private final Long bytes;
     private MemCalculator size;
-    private ScheduledReporter reporter;
     private final CmpHeap<Tuple2Ex> heap;
     private final CmpHeap<Tuple2Ex> metricHeap;
-    private MetricRegistry registry = new MetricRegistry();
-    
-    private Counter counterSet = registry.counter(name("set_type_count", "data_type", "set", "mtype", "count"));
-    private Counter counterList = registry.counter(name("list_type_count", "data_type", "list", "mtype", "count"));
-    private Counter counterZSet = registry.counter(name("zset_type_count", "data_type", "zset", "mtype", "count"));
-    private Counter counterHash = registry.counter(name("hash_type_count", "data_type", "hash", "mtype", "count"));
-    private Counter counterString = registry.counter(name("string_type_count", "data_type", "string", "mtype", "count"));
-    private Counter counterModule = registry.counter(name("module_type_count", "data_type", "module", "mtype", "count"));
-    private Counter counterStream = registry.counter(name("stream_type_count", "data_type", "stream", "mtype", "count"));
-    
-    private Counter counterSetMem = registry.counter(name("set_type_mem_total", "data_type", "set", "mtype", "mem"));
-    private Counter counterListMem = registry.counter(name("list_type_mem_total", "data_type", "list", "mtype", "mem"));
-    private Counter counterZSetMem = registry.counter(name("zset_type_mem_total", "data_type", "zset", "mtype", "mem"));
-    private Counter counterHashMem = registry.counter(name("hash_type_mem_total", "data_type", "hash", "mtype", "mem"));
-    private Counter counterStringMem = registry.counter(name("string_type_mem_total", "data_type", "string", "mtype", "mem"));
-    private Counter counterModuleMem = registry.counter(name("module_type_mem_total", "data_type", "module", "mtype", "mem"));
-    private Counter counterStreamMem = registry.counter(name("stream_type_mem_total", "data_type", "stream", "mtype", "mem"));
-    private Histogram histogram = registry.histogram("mem_usage_histogram");
+    private Monitor monitor = MonitorFactory.getMonitor("memory_statistics");
     
     //
     private long totalMem = 0;
@@ -171,32 +145,22 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
                 heap.add(tuple);
                 metricHeap.add(tuple);
             }
-            histogram.update(dkv.getValue());
         } else if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
             for (Tuple2Ex tuple : heap.get(true)) {
                 accept(tuple);
             }
-            int idx = 0;
             for (Tuple2Ex tuple : metricHeap.get(true)) {
                 String key = Strings.toString(tuple.getV2().getKey());
-                String type = parse(tuple.getV2().getValueRdbType()).getValue();
-                registry.gauge(name("key" + (idx++), "key", key, "data_type", type, "mtype", "key"), () -> tuple::getV1);
+                //TODO 
             }
     
             if (rdb6) {
-                registry.gauge(build("key_mem_total"), () -> () -> totalMem);
+                monitor.set("all_memory", totalMem);
                 for (Map.Entry<Long, Tuple2<Long, Long>> entry : dbInfo.entrySet()) {
-                    String dbnum = "db" + entry.getKey();
-                    registry.gauge(name("rdb_db_size" + entry.getKey(), "dbnum", dbnum, "mtype", "db_size"), () -> () -> entry.getValue().getV1());
-                    registry.gauge(name("rdb_db_expire" + entry.getKey(), "dbnum", dbnum, "mtype", "db_expire"), () -> () -> entry.getValue().getV2());
+                    monitor.set("dbnum_" + entry.getKey(), entry.getValue().getV1());
+                    monitor.set("dbexp_" + entry.getKey(), entry.getValue().getV2());
                 }
             }
-            
-            if (this.reporter != null) {
-                this.reporter.report();
-                this.reporter.close();
-            }
-    
         } else if (event instanceof PreRdbSyncEvent) {
             // header
             // database,type,key,size_in_bytes,encoding,num_elements,len_largest_element
@@ -216,13 +180,10 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             delimiter(out);
             OutputStreams.write("expiry".getBytes(), out);
             OutputStreams.write('\n', out);
-            if (this.reporter != null) this.reporter.close();
-            this.reporter = create(configure, registry, MetricJobs.memory(configure));
-            this.reporter.start(5, TimeUnit.SECONDS);
         } else if (event instanceof AuxField) {
             AuxField aux = (AuxField) event;
             if (aux.getAuxKey().equals("used-mem")) {
-                registry.gauge(build("key_mem_total"), () -> () -> Long.parseLong(aux.getAuxValue()));
+                monitor.set("all_memory", Long.parseLong(aux.getAuxValue()));
             }
         }
     }
@@ -238,9 +199,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     @Override
     public DB applyResizeDB(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         DB db = super.applyResizeDB(in, version, context);
-        String dbnum = "db" + db.getDbNumber();
-        registry.gauge(name("rdb_db_size" + db.getDbNumber(), "dbnum", dbnum, "mtype", "db_size"), () -> () -> db.getDbsize());
-        registry.gauge(name("rdb_db_expire" + db.getDbNumber(), "dbnum", dbnum, "mtype", "db_expire"), () -> () -> db.getExpires());
+        monitor.set("dbnum_" + db.getDbNumber(), db.getDbsize());
+        monitor.set("dbexp_" + db.getDbNumber(), db.getExpires());
         return db;
     }
     
@@ -255,8 +215,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(1);
         kv.setMax(size.element(val));
-        counterString.inc();
-        counterStringMem.inc(kv.getValue());
+        monitor.add("string_count", 1);
+        monitor.add("string_memory", kv.getValue());
         return context.valueOf(kv);
     }
     
@@ -281,8 +241,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(length);
         kv.setMax(max);
-        counterList.inc();
-        counterListMem.inc(kv.getValue());
+        monitor.add("list_count", 1);
+        monitor.add("list_memory", kv.getValue());
         return context.valueOf(kv);
     }
     
@@ -307,8 +267,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(length);
         kv.setMax(max);
-        counterSet.inc();
-        counterSetMem.inc(kv.getValue());
+        monitor.add("set_count", 1);
+        monitor.add("set_memory", kv.getValue());
         return context.valueOf(kv);
     }
     
@@ -335,8 +295,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(length);
         kv.setMax(max);
-        counterZSet.inc();
-        counterZSetMem.inc(kv.getValue());
+        monitor.add("zset_count", 1);
+        monitor.add("zset_memory", kv.getValue());
         return context.valueOf(kv);
     }
     
@@ -363,8 +323,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(length);
         kv.setMax(max);
-        counterZSet.inc();
-        counterZSetMem.inc(kv.getValue());
+        monitor.add("zset_count", 1);
+        monitor.add("zset_memory", kv.getValue());
         return context.valueOf(kv);
     }
     
@@ -392,8 +352,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(length);
         kv.setMax(max);
-        counterHash.inc();
-        counterHashMem.inc(kv.getValue());
+        monitor.add("hash_count", 1);
+        monitor.add("hash_memory", kv.getValue());
         return context.valueOf(kv);
     }
     
@@ -415,8 +375,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
                 kv.setContains(contains);
                 kv.setLength(length);
                 kv.setMax(max);
-                counterHash.inc();
-                counterHashMem.inc(kv.getValue());
+                monitor.add("hash_count", 1);
+                monitor.add("hash_memory", kv.getValue());
                 return context.valueOf(kv);
             }
             byte[] field = BaseRdbParser.StringHelper.bytes(stream, zmEleLen);
@@ -430,8 +390,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
                 kv.setContains(contains);
                 kv.setLength(length);
                 kv.setMax(max);
-                counterHash.inc();
-                counterHashMem.inc(kv.getValue());
+                monitor.add("hash_count", 1);
+                monitor.add("hash_memory", kv.getValue());
                 return context.valueOf(kv);
             }
             int free = BaseRdbParser.LenHelper.free(stream);
@@ -467,8 +427,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(length);
         kv.setMax(max);
-        counterList.inc();
-        counterListMem.inc(kv.getValue());
+        monitor.add("list_count", 1);
+        monitor.add("list_memory", kv.getValue());
         return context.valueOf(kv);
     }
     
@@ -504,8 +464,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(length);
         kv.setMax(max);
-        counterSet.inc();
-        counterSetMem.inc(kv.getValue());
+        monitor.add("set_count", 1);
+        monitor.add("set_memory", kv.getValue());
         return context.valueOf(kv);
     }
     
@@ -538,8 +498,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(length);
         kv.setMax(max);
-        counterZSet.inc();
-        counterZSetMem.inc(kv.getValue());
+        monitor.add("zset_count", 1);
+        monitor.add("zset_memory", kv.getValue());
         return context.valueOf(kv);
     }
     
@@ -573,8 +533,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(length);
         kv.setMax(max);
-        counterHash.inc();
-        counterHashMem.inc(kv.getValue());
+        monitor.add("hash_count", 1);
+        monitor.add("hash_memory", kv.getValue());
         return context.valueOf(kv);
     }
     
@@ -610,8 +570,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(length);
         kv.setMax(max);
-        counterList.inc();
-        counterListMem.inc(kv.getValue());
+        monitor.add("list_count", 1);
+        monitor.add("list_memory", kv.getValue());
         return context.valueOf(kv);
     }
     
@@ -628,8 +588,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(1);
         kv.setMax(listener.length);
-        counterModule.inc();
-        counterModuleMem.inc(kv.getValue());
+        monitor.add("module_count", 1);
+        monitor.add("module_memory", kv.getValue());
         return context.valueOf(kv);
     }
     
@@ -646,8 +606,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(1);
         kv.setMax(listener.length);
-        counterModule.inc();
-        counterModuleMem.inc(kv.getValue());
+        monitor.add("module_count", 1);
+        monitor.add("module_memory", kv.getValue());
         return context.valueOf(kv);
     }
     
@@ -736,23 +696,9 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(length);
         kv.setMax(max);
-        counterStream.inc();
-        counterStreamMem.inc(kv.getValue());
+        monitor.add("stream_count", 1);
+        monitor.add("stream_memory", kv.getValue());
         return context.valueOf(kv);
-    }
-    
-    static class Tuple2Ex extends Tuple2<Long, DummyKeyValuePair> implements Comparable<Tuple2Ex> {
-
-        private static final long serialVersionUID = 1L;
-        
-        public Tuple2Ex(Long v1, DummyKeyValuePair v2) {
-            super(v1, v2);
-        }
-        
-        @Override
-        public int compareTo(Tuple2Ex that) {
-            return Long.compare(this.getV1(), that.getV1());
-        }
     }
     
     private static class LengthRawByteListener implements RawByteListener {

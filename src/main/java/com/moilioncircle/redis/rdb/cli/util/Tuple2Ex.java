@@ -14,15 +14,24 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli;
+package com.moilioncircle.redis.rdb.cli.util;
 
-import com.moilioncircle.redis.rdb.cli.cmd.RstCommand;
+import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
+import com.moilioncircle.redis.replicator.util.type.Tuple2;
 
 /**
  * @author Baoyi Chen
  */
-public class Rst {
-    public static void main(String[] args) throws Exception {
-        RstCommand.run(args);
+public class Tuple2Ex extends Tuple2<Long, DummyKeyValuePair> implements Comparable<Tuple2Ex> {
+
+    private static final long serialVersionUID = 1L;
+
+    public Tuple2Ex(Long v1, DummyKeyValuePair v2) {
+        super(v1, v2);
+    }
+
+    @Override
+    public int compareTo(Tuple2Ex that) {
+        return Long.compare(this.getV1(), that.getV1());
     }
 }

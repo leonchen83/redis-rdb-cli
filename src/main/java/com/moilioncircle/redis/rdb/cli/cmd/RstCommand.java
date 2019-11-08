@@ -67,7 +67,7 @@ public class RstCommand extends AbstractCommand {
 
     @Override
     @SuppressWarnings("all")
-    protected void doExecute(CommandLine line) throws Exception {
+    protected void doExecute(CommandLine line, Configure configure) throws Exception {
         if (line.hasOption("help")) {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp(HEADER, "\noptions:", options, EXAMPLE);
@@ -100,8 +100,6 @@ public class RstCommand extends AbstractCommand {
             boolean legacy = line.hasOption("legacy");
 
             source = normalize(source, null, "Invalid options: s. Try `rst -h` for more information.");
-
-            Configure configure = Configure.bind();
 
             if (migrate != null) {
                 RedisURI uri = new RedisURI(migrate);
@@ -146,7 +144,7 @@ public class RstCommand extends AbstractCommand {
     }
 
     private RdbVisitor getRdbVisitor(Replicator replicator, Configure configure, RedisURI uri, List<Long> db, boolean replace, boolean legacy) throws Exception {
-        try (Endpoint endpoint = new Endpoint(uri.getHost(), uri.getPort(), 0, 1, null, Configuration.valueOf(uri))) {
+        try (Endpoint endpoint = new Endpoint(uri.getHost(), uri.getPort(), Configuration.valueOf(uri))) {
             Endpoint.RedisObject r = endpoint.send("cluster".getBytes(), "nodes".getBytes());
             if (r.type.isError()) {
                 return new SingleRdbVisitor(replicator, configure, uri, db, replace, legacy);

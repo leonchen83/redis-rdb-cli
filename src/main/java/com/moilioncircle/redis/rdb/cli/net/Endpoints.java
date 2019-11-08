@@ -16,11 +16,7 @@
 
 package com.moilioncircle.redis.rdb.cli.net;
 
-import com.moilioncircle.redis.rdb.cli.conf.NodeConfParser;
-import com.moilioncircle.redis.replicator.Configuration;
-import com.moilioncircle.redis.replicator.util.type.Tuple3;
-
-import io.dropwizard.metrics5.MetricRegistry;
+import static com.moilioncircle.redis.rdb.cli.conf.NodeConfParser.slot;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -31,7 +27,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-import static com.moilioncircle.redis.rdb.cli.conf.NodeConfParser.slot;
+import com.moilioncircle.redis.rdb.cli.conf.NodeConfParser;
+import com.moilioncircle.redis.replicator.Configuration;
+import com.moilioncircle.redis.replicator.util.type.Tuple3;
 
 /**
  * @author Baoyi Chen
@@ -41,9 +39,9 @@ public class Endpoints implements Closeable {
     private final Set<Endpoint> set = new HashSet<>();
     private final Map<Short, Endpoint> endpoints = new HashMap<>();
 
-    public Endpoints(List<String> lines, int pipe, MetricRegistry registry, Configuration configuration) {
+    public Endpoints(List<String> lines, int pipe, boolean statistics, Configuration configuration) {
         Function<Tuple3<String, Integer, String>, Endpoint> mapper = t -> {
-            return new Endpoint(t.getV1(), t.getV2(), 0, pipe, registry, configuration);
+            return new Endpoint(t.getV1(), t.getV2(), 0, pipe, statistics, configuration);
         };
         new NodeConfParser<>(mapper).parse(lines, set, endpoints);
     }

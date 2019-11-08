@@ -16,19 +16,22 @@
 
 package com.moilioncircle.redis.rdb.cli.cmd;
 
-import com.moilioncircle.redis.rdb.cli.sentinel.RedisSentinelURI;
-import com.moilioncircle.redis.rdb.cli.util.Strings;
-import com.moilioncircle.redis.replicator.FileType;
-import com.moilioncircle.redis.replicator.RedisURI;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
+import static com.moilioncircle.redis.rdb.cli.cmd.Version.INSTANCE;
+import static com.moilioncircle.redis.rdb.cli.monitor.MonitorManager.closeQuietly;
 
 import java.io.File;
 import java.net.URISyntaxException;
 
-import static com.moilioncircle.redis.rdb.cli.cmd.Version.INSTANCE;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+
+import com.moilioncircle.redis.rdb.cli.conf.Configure;
+import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
+import com.moilioncircle.redis.rdb.cli.sentinel.RedisSentinelURI;
+import com.moilioncircle.redis.rdb.cli.util.Strings;
+import com.moilioncircle.redis.replicator.FileType;
+import com.moilioncircle.redis.replicator.RedisURI;
 
 /**
  * @author Baoyi Chen
@@ -37,7 +40,7 @@ public abstract class AbstractCommand implements Command {
     
     protected Options options = new Options();
     
-    protected abstract void doExecute(CommandLine line) throws Exception;
+    protected abstract void doExecute(CommandLine line, Configure configure) throws Exception;
     
     @Override
     public void addOption(Option option) {
@@ -46,10 +49,12 @@ public abstract class AbstractCommand implements Command {
     
     @Override
     public void execute(String[] args) throws Exception {
-        CommandLineParser parser = new DefaultParser();
+        Configure configure = Configure.bind();
+        MonitorManager manager = new MonitorManager(configure);
         try {
-            org.apache.commons.cli.CommandLine line = parser.parse(options, args);
-            doExecute(new CommandLine(line));
+            manager.open();
+            org.apache.commons.cli.CommandLine line = new DefaultParser().parse(options, args);
+            doExecute(new CommandLine(line), configure);
         } catch (Throwable e) {
             if (e.getMessage() != null) {
                 // https://github.com/leonchen83/redis-rdb-cli/issues/7
@@ -57,6 +62,8 @@ public abstract class AbstractCommand implements Command {
             } else {
                 throw e;
             }
+        } finally {
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> closeQuietly(manager)));
         }
     }
 

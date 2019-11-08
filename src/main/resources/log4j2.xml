@@ -32,26 +32,12 @@
             </Policies>
         </RollingFile>
 
-        <RollingFile name="METRIC" fileName="${sys:cli.log.path:-/var/log/redis-rdb-cli}/redis-rdb-metric.log"
-                     filePattern="${sys:cli.log.path:-/var/log/redis-rdb-cli}/$${date:yyyy-MM}/redis-rdb-metric-%d{yyyy-MM-dd}-%i.log.gz">
-            <PatternLayout>
-                <Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
-            </PatternLayout>
-            <Policies>
-                <TimeBasedTriggeringPolicy/>
-                <SizeBasedTriggeringPolicy size="128 MB"/>
-            </Policies>
-        </RollingFile>
-
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="${pattern}"/>
             <RegexFilter regex=".*socket error.*" onMatch="DENY" onMismatch="ACCEPT"/>
         </Console>
     </Appenders>
     <Loggers>
-        <Logger name="METRIC_LOGGER" level="info" additivity="false">
-            <AppenderRef ref="METRIC"/>
-        </Logger>
         <Logger name="com.moilioncircle" level="info" additivity="false">
             <AppenderRef ref="ROLLING"/>
         </Logger>

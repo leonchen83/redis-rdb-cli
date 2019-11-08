@@ -175,14 +175,19 @@ public class Configure {
     private Gateway metricGateway;
     
     /**
-     * metric memory job name
+     * metric database
      */
-    private String metricMemoryJobName;
+    private String metricDatabase;
     
     /**
-     * metric endpoint job name
+     * metric retention policy
      */
-    private String metricEndpointJobName;
+    private String metricRetentionPolicy;
+    
+    /**
+     * metric instance
+     */
+    private String metricInstance;
     
     public int getBatchSize() {
         return batchSize;
@@ -359,21 +364,29 @@ public class Configure {
     public void setMetricGateway(Gateway metricGateway) {
         this.metricGateway = metricGateway;
     }
-    
-    public String getMetricMemoryJobName() {
-        return metricMemoryJobName;
+
+    public String getMetricDatabase() {
+        return metricDatabase;
+    }
+
+    public void setMetricDatabase(String metricDatabase) {
+        this.metricDatabase = metricDatabase;
+    }
+
+    public String getMetricRetentionPolicy() {
+        return metricRetentionPolicy;
+    }
+
+    public void setMetricRetentionPolicy(String metricRetentionPolicy) {
+        this.metricRetentionPolicy = metricRetentionPolicy;
+    }
+
+    public String getMetricInstance() {
+        return metricInstance;
     }
     
-    public void setMetricMemoryJobName(String metricMemoryJobName) {
-        this.metricMemoryJobName = metricMemoryJobName;
-    }
-    
-    public String getMetricEndpointJobName() {
-        return metricEndpointJobName;
-    }
-    
-    public void setMetricEndpointJobName(String metricEndpointJobName) {
-        this.metricEndpointJobName = metricEndpointJobName;
+    public void setMetricInstance(String metricInstance) {
+        this.metricInstance = metricInstance;
     }
     
     public Configuration merge(RedisURI uri) {
@@ -422,12 +435,13 @@ public class Configure {
         conf.asyncCacheSize = getInt(conf, "async_cache_size", 512 * 1024, true);
         conf.verbose = getBool(conf, "verbose", false, true);
         conf.heartbeat = getInt(conf, "heartbeat", 1000, true);
-        conf.metricUser = getString(conf, "metric_user", "", true);
-        conf.metricPass = getString(conf, "metric_pass", "", true);
-        conf.metricUri = getUri(conf, "metric_uri", "http://localhost:9091", true);
-        conf.metricGateway = Gateway.parse(getString(conf, "metric_gateway", "log", true));
-        conf.metricMemoryJobName = getString(conf, "metric_memory_job_name", "redis_rdb_cli_memory", true);
-        conf.metricEndpointJobName = getString(conf, "metric_endpoint_job_name", "redis_rdb_cli_endpoint", true);
+        conf.metricUser = getString(conf, "metric_user", null, true);
+        conf.metricPass = getString(conf, "metric_pass", null, true);
+        conf.metricUri = getUri(conf, "metric_uri", "http://localhost:8086", true);
+        conf.metricGateway = Gateway.parse(getString(conf, "metric_gateway", "none", true));
+        conf.metricDatabase = getString(conf, "metric_database", "redis_rdb_cli", true);
+        conf.metricRetentionPolicy = getString(conf, "metric_retention_policy", "30days", true);
+        conf.metricInstance = getString(conf, "metric_instance", "redis_rdb_cli", true);
         return conf;
     }
     
@@ -612,8 +626,9 @@ public class Configure {
                 ", metricUser='" + metricUser + '\'' +
                 ", metricPass='" + metricPass + '\'' +
                 ", metricGateway=" + metricGateway +
-                ", metricMemoryJobName='" + metricMemoryJobName + '\'' +
-                ", metricEndpointJobName='" + metricEndpointJobName + '\'' +
+                ", metricDatabase='" + metricDatabase + '\'' +
+                ", metricRetentionPolicy='" + metricRetentionPolicy + '\'' +
+                ", metricInstance='" + metricInstance + '\'' +
                 '}';
     }
 }

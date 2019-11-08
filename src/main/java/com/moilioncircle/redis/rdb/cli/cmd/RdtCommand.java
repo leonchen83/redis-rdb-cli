@@ -70,7 +70,7 @@ public class RdtCommand extends AbstractCommand {
     }
 
     @Override
-    protected void doExecute(CommandLine line) throws Exception {
+    protected void doExecute(CommandLine line, Configure configure) throws Exception {
         if (line.hasOption("help")) {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp(HEADER, "\noptions:", options, EXAMPLE);
@@ -103,7 +103,6 @@ public class RdtCommand extends AbstractCommand {
                 return;
             }
 
-            Configure configure = Configure.bind();
             Action action = Action.NONE;
             if (split != null) {
                 split = normalize(split, FileType.RDB, "Invalid options: s. Try `rdt -h` for more information.");

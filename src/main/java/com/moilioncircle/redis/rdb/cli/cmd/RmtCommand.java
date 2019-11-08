@@ -77,7 +77,7 @@ public class RmtCommand extends AbstractCommand {
 
     @Override
     @SuppressWarnings("all")
-    protected void doExecute(CommandLine line) throws Exception {
+    protected void doExecute(CommandLine line, Configure configure) throws Exception {
         if (line.hasOption("help")) {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp(HEADER, "\noptions:", options, EXAMPLE);
@@ -112,8 +112,6 @@ public class RmtCommand extends AbstractCommand {
             List<String> regexs = line.getOptions("key");
 
             source = normalize(source, FileType.RDB, "Invalid options: s. Try `rmt -h` for more information.");
-
-            Configure configure = Configure.bind();
 
             if (migrate != null) {
                 RedisURI uri = new RedisURI(migrate);
@@ -162,7 +160,7 @@ public class RmtCommand extends AbstractCommand {
     }
 
     private RdbVisitor getRdbVisitor(Replicator replicator, Configure configure, RedisURI uri, List<Long> db, List<String> regexs, List<DataType> types, boolean replace, boolean legacy) throws Exception {
-        try (Endpoint endpoint = new Endpoint(uri.getHost(), uri.getPort(), 0, 1, null, Configuration.valueOf(uri))) {
+        try (Endpoint endpoint = new Endpoint(uri.getHost(), uri.getPort(), Configuration.valueOf(uri))) {
             Endpoint.RedisObject r = endpoint.send("cluster".getBytes(), "nodes".getBytes());
             if (r.type.isError()) {
                 return new SingleRdbVisitor(replicator, configure, uri, db, regexs, types, replace, legacy);

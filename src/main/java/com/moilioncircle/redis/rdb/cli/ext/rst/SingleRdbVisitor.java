@@ -16,17 +16,14 @@
 
 package com.moilioncircle.redis.rdb.cli.ext.rst;
 
-import static com.moilioncircle.redis.rdb.cli.metric.MetricReporterFactory.create;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractMigrateRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.AsyncEventListener;
 import com.moilioncircle.redis.rdb.cli.ext.CloseEvent;
-import com.moilioncircle.redis.rdb.cli.metric.MetricJobs;
 import com.moilioncircle.redis.rdb.cli.net.Endpoint;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.RedisURI;
@@ -79,11 +76,8 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
         if (event instanceof PreRdbSyncEvent) {
             Endpoint.closeQuietly(this.endpoint.get());
             int pipe = configure.getMigrateBatchSize();
-            this.endpoint.set(new Endpoint(uri.getHost(), uri.getPort(), 0, pipe, registry, conf));
+            this.endpoint.set(new Endpoint(uri.getHost(), uri.getPort(), 0, pipe, true, conf));
     
-            if (this.reporter != null) this.reporter.close();
-            this.reporter = create(configure, registry, MetricJobs.endpoint(configure));
-            this.reporter.start(5, TimeUnit.SECONDS);
         } else if (event instanceof DumpKeyValuePair) {
             retry((DumpKeyValuePair)event, configure.getMigrateRetries());
         } else if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
@@ -93,11 +87,6 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
         } else if (event instanceof CloseEvent) {
             this.endpoint.get().flush();
             Endpoint.closeQuietly(this.endpoint.get());
-
-            if (this.reporter != null) {
-                this.reporter.report();
-                this.reporter.close();
-            }
         }
     }
     

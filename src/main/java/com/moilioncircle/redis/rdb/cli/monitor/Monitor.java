@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Baoyi Chen
+ * Copyright 2016-2017 Leon Chen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,37 +14,37 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.metric;
+package com.moilioncircle.redis.rdb.cli.monitor;
 
 import java.util.Map;
+
+import com.moilioncircle.redis.rdb.cli.monitor.entity.Counter;
+import com.moilioncircle.redis.rdb.cli.monitor.entity.Gauge;
 
 /**
  * @author Baoyi Chen
  */
-public class MetricJob {
-    
-    private String job;
-    
-    private Map<String, String> labels;
-    
-    public MetricJob(String job, Map<String, String> labels) {
-        this.job = job;
-        this.labels = labels;
+public interface Monitor {
+    interface Factory {
+        Monitor create(String name);
     }
-    
-    public String getJob() {
-        return job;
-    }
-    
-    public void setJob(String job) {
-        this.job = job;
-    }
-    
-    public Map<String, String> getLabels() {
-        return labels;
-    }
-    
-    public void setLabels(Map<String, String> labels) {
-        this.labels = labels;
-    }
+
+    String getName();
+
+    Map<String, ? extends Gauge> getGauges();
+
+    Map<String, ? extends Counter> getCounters();
+
+    /**
+     * Gauge
+     */
+    void set(String key, long value);
+
+    /**
+     * Counter
+     */
+    void add(String key, long count);
+
+    void add(String key, long count, long time);
+
 }

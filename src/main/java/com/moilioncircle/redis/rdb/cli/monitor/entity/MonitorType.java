@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Baoyi Chen
+ * Copyright 2016-2017 Leon Chen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,29 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.metric;
-
-import io.dropwizard.metrics5.MetricName;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
+package com.moilioncircle.redis.rdb.cli.monitor.entity;
 
 /**
  * @author Baoyi Chen
  */
-public class MetricNames {
-    public static MetricName name(String name, String... tags) {
-        if ((tags.length & 1) != 0) {
-            throw new IllegalArgumentException("tag.length " + tags.length + " illegal");
+public enum MonitorType {
+    GAUGE(1), COUNTER(2);
+    private int value;
+
+    MonitorType(int value) {
+        this.value = value;
+    }
+
+    public int getValue() {
+        return value;
+    }
+    
+    public static MonitorType valueOf(int value) {
+        switch (value) {
+            case 1 : return GAUGE;
+            case 2 : return COUNTER;
+            default:
+                throw new UnsupportedOperationException(String.valueOf(value));
         }
-        Map<String, String> map = new LinkedHashMap<>();
-        for (int i = 0; i < tags.length; i += 2) {
-            map.put(tags[i], tags[i + 1]);
-        }
-        return new MetricName(name, map);
     }
 }

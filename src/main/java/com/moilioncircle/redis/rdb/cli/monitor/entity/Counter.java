@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli;
+package com.moilioncircle.redis.rdb.cli.monitor.entity;
 
-import com.moilioncircle.redis.rdb.cli.cmd.RstCommand;
+import com.moilioncircle.redis.replicator.util.type.Tuple2;
 
 /**
- * @author Baoyi Chen
+ * 
+ * @author Jingqi Xu
  */
-public class Rst {
-    public static void main(String[] args) throws Exception {
-        RstCommand.run(args);
-    }
+public interface Counter {
+    
+    Counter reset();
+    
+    Tuple2<Long, Long> getCounter();
 }

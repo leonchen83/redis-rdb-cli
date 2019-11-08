@@ -24,8 +24,6 @@ import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
 import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
-import io.dropwizard.metrics5.MetricRegistry;
-import io.dropwizard.metrics5.ScheduledReporter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -38,8 +36,6 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
 
     protected final boolean flush;
     protected final boolean replace;
-    protected ScheduledReporter reporter;
-    protected MetricRegistry registry = new MetricRegistry();
 
     public AbstractMigrateRdbVisitor(Replicator replicator, Configure configure, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) {
         super(replicator, configure, db, regexs, types);

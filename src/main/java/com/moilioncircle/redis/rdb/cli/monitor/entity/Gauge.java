@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli;
-
-import com.moilioncircle.redis.rdb.cli.cmd.RstCommand;
+package com.moilioncircle.redis.rdb.cli.monitor.entity;
 
 /**
- * @author Baoyi Chen
+ * 
+ * @author Jingqi Xu
  */
-public class Rst {
-    public static void main(String[] args) throws Exception {
-        RstCommand.run(args);
-    }
+public interface Gauge {
+    
+    Gauge reset();
+    
+    long getGauge();
 }

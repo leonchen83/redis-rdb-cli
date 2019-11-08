@@ -16,17 +16,11 @@
 
 package com.moilioncircle.redis.rdb.cli.net;
 
-import com.moilioncircle.redis.rdb.cli.io.BufferedOutputStream;
-import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
-import com.moilioncircle.redis.rdb.cli.util.Sockets;
-import com.moilioncircle.redis.replicator.Configuration;
-import com.moilioncircle.redis.replicator.io.RedisInputStream;
-import com.moilioncircle.redis.replicator.net.RedisSocketFactory;
-import com.moilioncircle.redis.replicator.util.ByteBuilder;
-import io.dropwizard.metrics5.Counter;
-import io.dropwizard.metrics5.MetricRegistry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.moilioncircle.redis.replicator.Constants.COLON;
+import static com.moilioncircle.redis.replicator.Constants.DOLLAR;
+import static com.moilioncircle.redis.replicator.Constants.MINUS;
+import static com.moilioncircle.redis.replicator.Constants.PLUS;
+import static com.moilioncircle.redis.replicator.Constants.STAR;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -35,12 +29,18 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Objects;
 
-import static com.moilioncircle.redis.rdb.cli.metric.MetricNames.name;
-import static com.moilioncircle.redis.replicator.Constants.COLON;
-import static com.moilioncircle.redis.replicator.Constants.DOLLAR;
-import static com.moilioncircle.redis.replicator.Constants.MINUS;
-import static com.moilioncircle.redis.replicator.Constants.PLUS;
-import static com.moilioncircle.redis.replicator.Constants.STAR;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.moilioncircle.redis.rdb.cli.io.BufferedOutputStream;
+import com.moilioncircle.redis.rdb.cli.monitor.Monitor;
+import com.moilioncircle.redis.rdb.cli.monitor.MonitorFactory;
+import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.rdb.cli.util.Sockets;
+import com.moilioncircle.redis.replicator.Configuration;
+import com.moilioncircle.redis.replicator.io.RedisInputStream;
+import com.moilioncircle.redis.replicator.net.RedisSocketFactory;
+import com.moilioncircle.redis.replicator.util.ByteBuilder;
 
 /**
  * @author Baoyi Chen
@@ -60,23 +60,24 @@ public class Endpoint implements Closeable {
     private final int port;
     private final String host;
     private final Socket socket;
+    private final String address;
     private final OutputStream out;
     private final Configuration conf;
+    private final boolean statistics;
     private final RedisInputStream in;
+
+    private Monitor monitor = MonitorFactory.getMonitor("endpoint_statistics");
     
-    private final Counter counterSuc;
-    private final Counter counterErr;
-    private final MetricRegistry registry;
-    
-    public Endpoint(String host, int port) {
-        this(host, port, 0, 1, null, Configuration.defaultSetting());
+    public Endpoint(String host, int port, Configuration conf) {
+        this(host, port, 0, 1, false, conf);
     }
     
-    public Endpoint(String host, int port, int db, int pipe, MetricRegistry registry, Configuration conf) {
+    public Endpoint(String host, int port, int db, int pipe, boolean statistics, Configuration conf) {
         this.host = host;
         this.port = port;
         this.pipe = pipe;
         this.conf = conf;
+        this.statistics = statistics;
         try {
             RedisSocketFactory factory = new RedisSocketFactory(conf);
             this.socket = factory.createSocket(host, port, conf.getConnectionTimeout());
@@ -92,12 +93,7 @@ public class Endpoint implements Closeable {
             RedisObject r = send(SELECT, String.valueOf(db).getBytes());
             if (r != null && r.type.isError()) throw new RuntimeException(r.getString());
             this.db = db;
-            String address = address(socket);
-            this.registry = registry;
-            String suc = "endpoint_suc_" + Thread.currentThread().getName();
-            String err = "endpoint_err_" + Thread.currentThread().getName();
-            this.counterSuc = registry != null ? registry.counter(name(suc, "address", address, "mtype", "suc")) : null;
-            this.counterErr = registry != null ? registry.counter(name(err, "address", address, "mtype", "err")) : null;
+            this.address = address(socket).replaceAll("\\.", "_");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -114,7 +110,7 @@ public class Endpoint implements Closeable {
         } else {
             builder.append("N/A");
         }
-        builder.append(", ra=");
+        builder.append(",ra=");
         if (ra != null) {
             builder.append(ra.toString());
         } else {
@@ -162,9 +158,9 @@ public class Endpoint implements Closeable {
                     RedisObject r = parse();
                     if (r != null && r.type.isError()) {
                         logger.error(r.getString());
-                        if (counterErr != null) counterErr.inc();
+                        if (statistics) monitor.add("send_suc_" + address, 1);
                     } else {
-                        if (counterSuc != null) counterSuc.inc();
+                        if (statistics) monitor.add("send_err_" + address, 1);
                     }
                 }
                 count = 0;
@@ -200,7 +196,7 @@ public class Endpoint implements Closeable {
     
     public static Endpoint valueOf(Endpoint endpoint) {
         closeQuietly(endpoint);
-        return new Endpoint(endpoint.host, endpoint.port, endpoint.db, endpoint.pipe, endpoint.registry, endpoint.conf);
+        return new Endpoint(endpoint.host, endpoint.port, endpoint.db, endpoint.pipe, endpoint.statistics, endpoint.conf);
     }
     
     private void emit(OutputStream out, byte[] command, byte[]... ary) throws IOException {

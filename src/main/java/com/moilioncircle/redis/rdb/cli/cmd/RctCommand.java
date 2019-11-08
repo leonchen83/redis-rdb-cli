@@ -76,7 +76,7 @@ public class RctCommand extends AbstractCommand {
     }
 
     @Override
-    protected void doExecute(CommandLine line) throws Exception {
+    protected void doExecute(CommandLine line, Configure configure) throws Exception {
         if (line.hasOption("help")) {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp(HEADER, "\noptions:", options, EXAMPLE);
@@ -116,7 +116,6 @@ public class RctCommand extends AbstractCommand {
             source = normalize(source, FileType.RDB, "Invalid options: s, Try `rct -h` for more information.");
 
             try (ProgressBar bar = new ProgressBar(-1)) {
-                Configure configure = Configure.bind();
                 Replicator r = new CliRedisReplicator(source, configure);
                 r.addExceptionListener((rep, tx, e) -> {
                     throw new RuntimeException(tx.getMessage(), tx);
@@ -127,7 +126,7 @@ public class RctCommand extends AbstractCommand {
                     if (event instanceof PreRdbSyncEvent)
                         rep.addRawByteListener(b -> bar.react(b.length));
                     if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent)
-	                    Replicators.closeQuietly(rep);
+                        Replicators.closeQuietly(rep);
                 });
                 r.open();
             }
