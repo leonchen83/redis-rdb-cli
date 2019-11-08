@@ -158,9 +158,9 @@ public class Endpoint implements Closeable {
                     RedisObject r = parse();
                     if (r != null && r.type.isError()) {
                         logger.error(r.getString());
-                        if (statistics) monitor.add("send_suc_" + address, 1);
-                    } else {
                         if (statistics) monitor.add("send_err_" + address, 1);
+                    } else {
+                        if (statistics) monitor.add("send_suc_" + address, 1);
                     }
                 }
                 count = 0;
