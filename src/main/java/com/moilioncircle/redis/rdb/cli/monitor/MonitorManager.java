@@ -64,8 +64,8 @@ public class MonitorManager implements Closeable {
     }
 
     public void report() {
+        List<MonitorPoint> points = new ArrayList<>();
         try {
-            List<MonitorPoint> points = new ArrayList<>();
             for (Monitor monitor : MonitorFactory.getAllMonitors().values()) {
                 for (final Map.Entry<String, ? extends Gauge> e : monitor.getGauges().entrySet()) {
                     final Gauge gauge = e.getValue().reset();
@@ -81,7 +81,7 @@ public class MonitorManager implements Closeable {
             }
             if (gateway == INFLUXDB) influxdb.save(points);
         } catch (Throwable e) {
-            logger.error("failed to report points.", e);
+            logger.error("failed to report points {}.", points, e);
         }
     }
 

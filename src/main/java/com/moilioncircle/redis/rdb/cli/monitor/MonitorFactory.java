@@ -29,7 +29,7 @@ import com.moilioncircle.redis.rdb.cli.monitor.impl.XMonitor;
 public class MonitorFactory {
 
     private static final Monitor.Factory FACTORY = new XMonitor.FactoryImpl();
-    private static final ConcurrentMap<String, Monitor> CACHE = new ConcurrentHashMap<>(1024);
+    private static final ConcurrentMap<String, Monitor> CACHE = new ConcurrentHashMap<>(64);
 
     public static Map<String, Monitor> getAllMonitors() {
         final Map<String, Monitor> r = new HashMap<String, Monitor>(CACHE);
