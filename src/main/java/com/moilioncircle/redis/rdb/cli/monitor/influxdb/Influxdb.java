@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.monitor.entity.MonitorPoint;
+import com.moilioncircle.redis.rdb.cli.monitor.MonitorPoint;
 
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;

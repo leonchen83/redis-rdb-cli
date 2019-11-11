@@ -16,27 +16,32 @@
 
 package com.moilioncircle.redis.rdb.cli.monitor.entity;
 
+import java.util.Map;
+
 /**
  * @author Baoyi Chen
  */
-public enum MonitorType {
-    GAUGE(1), COUNTER(2);
-    private int value;
-
-    MonitorType(int value) {
-        this.value = value;
+public interface Monitor {
+    interface Factory {
+        Monitor create(String name);
     }
 
-    public int getValue() {
-        return value;
-    }
-    
-    public static MonitorType valueOf(int value) {
-        switch (value) {
-            case 1 : return GAUGE;
-            case 2 : return COUNTER;
-            default:
-                throw new UnsupportedOperationException(String.valueOf(value));
-        }
-    }
+    String getName();
+
+    Map<String, ? extends Gauge> getGauges();
+
+    Map<String, ? extends Counter> getCounters();
+
+    /**
+     * Gauge
+     */
+    void set(String key, long value);
+
+    /**
+     * Counter
+     */
+    void add(String key, long count);
+
+    void add(String key, long count, long time);
+
 }

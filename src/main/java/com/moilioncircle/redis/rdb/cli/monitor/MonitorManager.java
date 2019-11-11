@@ -36,7 +36,7 @@ import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.glossary.Gateway;
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Counter;
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Gauge;
-import com.moilioncircle.redis.rdb.cli.monitor.entity.MonitorPoint;
+import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
 import com.moilioncircle.redis.rdb.cli.monitor.influxdb.Influxdb;
 
 /**

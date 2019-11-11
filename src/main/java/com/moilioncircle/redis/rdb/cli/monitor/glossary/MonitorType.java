@@ -14,37 +14,29 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.monitor;
-
-import java.util.Map;
-
-import com.moilioncircle.redis.rdb.cli.monitor.entity.Counter;
-import com.moilioncircle.redis.rdb.cli.monitor.entity.Gauge;
+package com.moilioncircle.redis.rdb.cli.monitor.glossary;
 
 /**
  * @author Baoyi Chen
  */
-public interface Monitor {
-    interface Factory {
-        Monitor create(String name);
+public enum MonitorType {
+    GAUGE(1), COUNTER(2);
+    private int value;
+
+    MonitorType(int value) {
+        this.value = value;
     }
 
-    String getName();
-
-    Map<String, ? extends Gauge> getGauges();
-
-    Map<String, ? extends Counter> getCounters();
-
-    /**
-     * Gauge
-     */
-    void set(String key, long value);
-
-    /**
-     * Counter
-     */
-    void add(String key, long count);
-
-    void add(String key, long count, long time);
-
+    public int getValue() {
+        return value;
+    }
+    
+    public static MonitorType valueOf(int value) {
+        switch (value) {
+            case 1 : return GAUGE;
+            case 2 : return COUNTER;
+            default:
+                throw new UnsupportedOperationException(String.valueOf(value));
+        }
+    }
 }

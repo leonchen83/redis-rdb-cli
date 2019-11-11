@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.monitor.entity;
+package com.moilioncircle.redis.rdb.cli.monitor;
 
-import static com.moilioncircle.redis.rdb.cli.monitor.entity.MonitorType.COUNTER;
-import static com.moilioncircle.redis.rdb.cli.monitor.entity.MonitorType.GAUGE;
+import static com.moilioncircle.redis.rdb.cli.monitor.glossary.MonitorType.COUNTER;
+import static com.moilioncircle.redis.rdb.cli.monitor.glossary.MonitorType.GAUGE;
 
-import com.moilioncircle.redis.rdb.cli.monitor.Monitor;
+import com.moilioncircle.redis.rdb.cli.monitor.entity.Counter;
+import com.moilioncircle.redis.rdb.cli.monitor.entity.Gauge;
+import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
+import com.moilioncircle.redis.rdb.cli.monitor.glossary.MonitorType;
 import com.moilioncircle.redis.replicator.util.type.Tuple2;
 
 /**
