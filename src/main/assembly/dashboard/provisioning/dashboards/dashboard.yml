@@ -1,0 +1,13 @@
+apiVersion: 1
+
+providers:
+  - name: 'redis-rdb-cli'
+    orgId: 1
+    folder: 'redis-rdb-cli'
+    type: file
+    disableDeletion: false
+    editable: true
+    updateIntervalSeconds: 15
+    allowUiUpdates: false
+    options:
+      path: /var/lib/grafana/dashboards
