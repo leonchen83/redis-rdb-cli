@@ -18,15 +18,7 @@ services:
       - "GF_SECURITY_ADMIN_PASSWORD=admin"
     volumes:
       - ./provisioning/:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
     restart: on-failure
     links:
       - influxdb
-  dashboard-installer:
-    image: redisrdbcli/dashboard-installer:v1.0.2
-    command: ["grafana:3000"]
-    volumes:
-      - ./config/datasource.json:/datasource.json:ro
-      - ./config/endpoint.json:/endpoint.json:ro
-      - ./config/memory.json:/memory.json:ro
-      - ./config/dests.json:/dests.json:ro
-    restart: on-failure
