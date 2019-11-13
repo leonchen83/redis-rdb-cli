@@ -1,0 +1,11 @@
+apiVersion: 1
+datasources:
+  - name: influxdb
+    type: influxdb
+    access: proxy
+    database: redis_rdb_cli
+    user: redis_rdb_cli
+    password: redis_rdb_cli
+    url: http://influxdb:8086
+    isDefault: true
+    editable: true

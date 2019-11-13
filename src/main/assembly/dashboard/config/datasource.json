@@ -1,7 +1,7 @@
 {
-  "name": "prometheus",
-  "type": "prometheus",
-  "url": "http://prometheus:9090",
+  "name": "influxdb",
+  "type": "influxdb",
+  "url": "http://influxdb:8086",
   "access": "proxy",
   "basicAuth": false
 }
