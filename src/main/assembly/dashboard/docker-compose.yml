@@ -19,6 +19,6 @@ services:
     volumes:
       - ./provisioning/:/etc/grafana/provisioning
       - ./grafana/dashboards:/var/lib/grafana/dashboards
-    restart: on-failure
     links:
       - influxdb
+    restart: on-failure
