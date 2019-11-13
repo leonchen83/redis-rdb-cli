@@ -8,6 +8,8 @@ services:
       - "8086:8086"
     environment:
       - "INFLUXDB_REPORTING_DISABLED=false"
+    volumes:
+      - ./influxdb/:/docker-entrypoint-initdb.d
     restart: on-failure
   grafana:
     image: grafana/grafana:5.3.2
