@@ -1,0 +1,4 @@
+create database "redis_rdb_cli";
+create user "redis_rdb_cli" with password 'redis_rdb_cli';
+grant all on "redis_rdb_cli" to "redis_rdb_cli";
+create retention policy "30days" on "redis_rdb_cli" duration 30d replication 1 default;

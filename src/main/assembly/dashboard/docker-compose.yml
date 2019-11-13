@@ -1,27 +1,21 @@
 version: '2.1'
 
 services:
-  pushgateway:
-    image: prom/pushgateway:v0.6.0
+  influxdb:
+    image: influxdb:1.7.9
+    container_name: influxdb
     ports:
-      - "9091:9091"
-    restart: on-failure
-  prometheus:
-    user: root
-    image: prom/prometheus:v2.5.0
-    command:
-      - --storage.tsdb.path=/data/prometheus
-      - --config.file=/etc/prometheus/prometheus.yml
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - "8086:8086"
+    environment:
+      - "INFLUXDB_REPORTING_DISABLED=false"
     restart: on-failure
   grafana:
     image: grafana/grafana:5.3.2
     ports:
       - "3000:3000"
     restart: on-failure
+    links:
+      - influxdb
   dashboard-installer:
     image: redisrdbcli/dashboard-installer:v1.0.2
     command: ["grafana:3000"]
