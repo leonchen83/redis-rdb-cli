@@ -16,6 +16,7 @@ import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDB.ConsistencyLevel;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Point;
+import org.influxdb.dto.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +59,12 @@ public class Influxdb implements Closeable {
         this.instance = configure.getMetricInstance();
         this.retention = configure.getMetricRetentionPolicy();
         create();
+    }
+    
+    public void reset(String measurement) {
+        if (this.influxdb != null) {
+            this.influxdb.query(new Query("DROP MEASUREMENT \"" + measurement + "\""));
+        }
     }
 
     @Override
