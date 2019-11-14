@@ -24,6 +24,7 @@ import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractMigrateRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.AsyncEventListener;
 import com.moilioncircle.redis.rdb.cli.ext.CloseEvent;
+import com.moilioncircle.redis.rdb.cli.ext.rst.cmd.CombineCommand;
 import com.moilioncircle.redis.rdb.cli.net.Endpoint;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.RedisURI;
@@ -93,9 +94,9 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
                 command.setArgs(new byte[][]{String.valueOf(db).getBytes()});
                 retry(command, configure.getMigrateRetries());
             }
-        } else if (event instanceof DefaultCommand) {
+        } else if (event instanceof CombineCommand) {
             if (containsDB(db)) {
-                retry((DefaultCommand)event, configure.getMigrateRetries());
+                retry(((CombineCommand)event).getDefaultCommand(), configure.getMigrateRetries());
             }
         } else if (event instanceof CloseEvent) {
             this.endpoint.get().flush();

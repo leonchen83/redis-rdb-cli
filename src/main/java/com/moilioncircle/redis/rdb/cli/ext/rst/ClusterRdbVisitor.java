@@ -27,11 +27,16 @@ import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractMigrateRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.AsyncEventListener;
 import com.moilioncircle.redis.rdb.cli.ext.CloseEvent;
+import com.moilioncircle.redis.rdb.cli.ext.rst.cmd.CombineCommand;
 import com.moilioncircle.redis.rdb.cli.net.Endpoints;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.Replicator;
+import com.moilioncircle.redis.replicator.cmd.Command;
 import com.moilioncircle.redis.replicator.cmd.impl.DefaultCommand;
+import com.moilioncircle.redis.replicator.cmd.impl.DelCommand;
+import com.moilioncircle.redis.replicator.cmd.impl.GenericKeyCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.SelectCommand;
+import com.moilioncircle.redis.replicator.cmd.impl.UnLinkCommand;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
 import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
@@ -82,24 +87,45 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
         } else if (event instanceof SelectCommand) {
             SelectCommand select = (SelectCommand)event;
             this.db = select.getIndex();
+        } else if (event instanceof CombineCommand) {
             if (containsDB(db)) {
-                DefaultCommand command = new DefaultCommand();
-                command.setCommand("SELECT".getBytes());
-                command.setArgs(new byte[][]{String.valueOf(db).getBytes()});
-                retry(command, configure.getMigrateRetries());
-            }
-        } else if (event instanceof DefaultCommand) {
-            if (containsDB(db)) {
-                retry((DefaultCommand)event, configure.getMigrateRetries());
+                retry((CombineCommand)event, configure.getMigrateRetries());
             }
         } else if (event instanceof CloseEvent) {
             this.endpoints.get().flush();
             Endpoints.closeQuietly(this.endpoints.get());
         }
     }
+    
+    public void retry(CombineCommand command, byte[] key, int times) {
+        try {
+            DefaultCommand dcmd = command.getDefaultCommand();
+            endpoints.get().batchCommand(flush, key, dcmd.getCommand(), dcmd.getArgs());
+        } catch (Throwable e) {
+            times--;
+            if (times >= 0 && flush) {
+                this.endpoints.get().update(key);
+                retry(command, times);
+            }
+        }
+    }
 
-    public void retry(DefaultCommand command, int times) {
-        
+    public void retry(CombineCommand command, int times) {
+        Command parsedCommand = command.getParsedCommand();
+        if (parsedCommand instanceof GenericKeyCommand) {
+            GenericKeyCommand cmd = (GenericKeyCommand) parsedCommand;
+            retry(command, cmd.getKey(), times);
+        } else if (parsedCommand instanceof UnLinkCommand) {
+            UnLinkCommand cmd = (UnLinkCommand) parsedCommand; 
+            if (cmd.getKeys().length == 1) {
+                retry(command, cmd.getKeys()[0], times);
+            }
+        } else if (parsedCommand instanceof DelCommand) {
+            DelCommand cmd = (DelCommand) parsedCommand;
+            if (cmd.getKeys().length == 1) {
+                retry(command, cmd.getKeys()[0], times);
+            }
+        }
     }
 
     public void retry(DumpKeyValuePair dkv, int times) {

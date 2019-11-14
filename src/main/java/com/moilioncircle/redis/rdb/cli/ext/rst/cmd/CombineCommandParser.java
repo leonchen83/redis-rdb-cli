@@ -16,6 +16,7 @@
 
 package com.moilioncircle.redis.rdb.cli.ext.rst.cmd;
 
+import com.moilioncircle.redis.replicator.cmd.Command;
 import com.moilioncircle.redis.replicator.cmd.CommandParser;
 import com.moilioncircle.redis.replicator.cmd.parser.DefaultCommandParser;
 
@@ -27,7 +28,7 @@ public class CombineCommandParser implements CommandParser<CombineCommand> {
     private CommandParser<?> parser2;
     private DefaultCommandParser parser1;
     
-    public CombineCommandParser(CommandParser<?> parser) {
+    public CombineCommandParser(CommandParser<? extends Command> parser) {
         this.parser2 = parser;
         this.parser1 = new DefaultCommandParser();
     }

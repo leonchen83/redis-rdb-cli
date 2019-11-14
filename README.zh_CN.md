@@ -320,11 +320,11 @@ docker-compose down
 ```
   
 `cd /path/to/redis-rdb-cli/conf/redis-rdb-cli.conf`  
-把 [metric_gateway](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L157) 这个参数从 `none` 改成 `influxdb`  
+把 [metric_gateway](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L148) 这个参数从 `none` 改成 `influxdb`  
   
 浏览器打开 `http://localhost:3000` 来查看 `rct -f mem` 命令的结果.  
   
-如果你把这个工具部署在多个实例上, 需要更改如下参数 [metric_memory_instance](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L203) 和 [metric_endpoint_instance](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L213) 并保证在每个实例上参数名唯一  
+如果你把这个工具部署在多个实例上, 需要更改如下参数 [metric_memory_instance](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L194) 和 [metric_endpoint_instance](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L204) 并保证在每个实例上参数名唯一  
   
   
 ## Hack rmt

@@ -100,11 +100,6 @@ public class Configure {
     private boolean migrateFlush = true;
 
     /**
-     * rst --migrate
-     */
-    private List<String> migrateDisableCommands = Arrays.asList("flushall", "flushdb", "swapdb");
-
-    /**
      * timeout
      */
     private int timeout = 30000;
@@ -282,14 +277,6 @@ public class Configure {
         this.migrateFlush = migrateFlush;
     }
 
-    public List<String> getMigrateDisableCommands() {
-        return migrateDisableCommands;
-    }
-
-    public void setMigrateDisableCommands(List<String> migrateDisableCommands) {
-        this.migrateDisableCommands = migrateDisableCommands;
-    }
-
     public int getRetryInterval() {
         return retryInterval;
     }
@@ -435,7 +422,6 @@ public class Configure {
         conf.migrateThreads = getInt(conf, "migrate_threads", 4, true);
         conf.migrateRetries = getInt(conf, "migrate_retries", 1, true);
         conf.migrateFlush = getBool(conf, "migrate_flush", true, true);
-        conf.migrateDisableCommands = getList(conf, "migrate_disable_commands", "flushall,flushdb,swapdb", true);
         conf.dumpRdbVersion = getInt(conf, "dump_rdb_version", -1, true);
         conf.quote = (byte) getString(conf, "quote", "\"", true).charAt(0);
         conf.delimiter = (byte) getString(conf, "delimiter", ",", true).charAt(0);
@@ -625,7 +611,6 @@ public class Configure {
                 ", migrateThreads=" + migrateThreads +
                 ", migrateRetries=" + migrateRetries +
                 ", migrateFlush=" + migrateFlush +
-                ", migrateDisableCommands='" + migrateDisableCommands + '\'' +
                 ", timeout=" + timeout +
                 ", rcvBuf=" + rcvBuf +
                 ", sndBuf=" + sndBuf +
