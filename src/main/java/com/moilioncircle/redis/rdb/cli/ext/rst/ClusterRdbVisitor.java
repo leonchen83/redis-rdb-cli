@@ -30,7 +30,8 @@ import com.moilioncircle.redis.rdb.cli.ext.CloseEvent;
 import com.moilioncircle.redis.rdb.cli.net.Endpoints;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.Replicator;
-import com.moilioncircle.redis.replicator.cmd.Command;
+import com.moilioncircle.redis.replicator.cmd.impl.DefaultCommand;
+import com.moilioncircle.redis.replicator.cmd.impl.SelectCommand;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
 import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
@@ -43,6 +44,7 @@ import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
  */
 public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements EventListener {
 
+    private int db;
     private final List<String> lines;
     private final Configuration configuration;
     private ThreadLocal<Endpoints> endpoints = new ThreadLocal<>();
@@ -58,12 +60,12 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
     }
 
     @Override
-    protected boolean contains(int type) {
+    protected boolean containsType(int type) {
         return true;
     }
 
     @Override
-    protected boolean contains(String key) {
+    protected boolean containsKey(String key) {
         return true;
     }
 
@@ -77,15 +79,26 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             retry((DumpKeyValuePair)event, configure.getMigrateRetries());
         } else if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
             this.endpoints.get().flush();
-        } else if (event instanceof Command) {
-            retry((Command) event, configure.getMigrateRetries());
+        } else if (event instanceof SelectCommand) {
+            SelectCommand select = (SelectCommand)event;
+            this.db = select.getIndex();
+            if (containsDB(db)) {
+                DefaultCommand command = new DefaultCommand();
+                command.setCommand("SELECT".getBytes());
+                command.setArgs(new byte[][]{String.valueOf(db).getBytes()});
+                retry(command, configure.getMigrateRetries());
+            }
+        } else if (event instanceof DefaultCommand) {
+            if (containsDB(db)) {
+                retry((DefaultCommand)event, configure.getMigrateRetries());
+            }
         } else if (event instanceof CloseEvent) {
             this.endpoints.get().flush();
             Endpoints.closeQuietly(this.endpoints.get());
         }
     }
 
-    public void retry(Command command, int times) {
+    public void retry(DefaultCommand command, int times) {
         
     }
 

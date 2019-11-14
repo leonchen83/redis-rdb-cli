@@ -28,7 +28,8 @@ import com.moilioncircle.redis.rdb.cli.net.Endpoint;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
-import com.moilioncircle.redis.replicator.cmd.Command;
+import com.moilioncircle.redis.replicator.cmd.impl.DefaultCommand;
+import com.moilioncircle.redis.replicator.cmd.impl.SelectCommand;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
 import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
@@ -42,6 +43,7 @@ import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
  */
 public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements EventListener {
     
+    private int db;
     private final RedisURI uri;
     private final boolean legacy;
     private volatile byte[] evalSha;
@@ -62,12 +64,12 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
     }
 
     @Override
-    protected boolean contains(int type) {
+    protected boolean containsType(int type) {
         return true;
     }
 
     @Override
-    protected boolean contains(String key) {
+    protected boolean containsKey(String key) {
         return true;
     }
     
@@ -82,16 +84,35 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
             retry((DumpKeyValuePair)event, configure.getMigrateRetries());
         } else if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
             this.endpoint.get().flush();
-        } else if (event instanceof Command) {
-            retry((Command)event, configure.getMigrateRetries());
+        } else if (event instanceof SelectCommand) {
+            SelectCommand select = (SelectCommand)event;
+            this.db = select.getIndex();
+            if (containsDB(db)) {
+                DefaultCommand command = new DefaultCommand();
+                command.setCommand("SELECT".getBytes());
+                command.setArgs(new byte[][]{String.valueOf(db).getBytes()});
+                retry(command, configure.getMigrateRetries());
+            }
+        } else if (event instanceof DefaultCommand) {
+            if (containsDB(db)) {
+                retry((DefaultCommand)event, configure.getMigrateRetries());
+            }
         } else if (event instanceof CloseEvent) {
             this.endpoint.get().flush();
             Endpoint.closeQuietly(this.endpoint.get());
         }
     }
     
-    public void retry(Command command, int times) {
-        
+    public void retry(DefaultCommand command, int times) {
+        try {
+            endpoint.get().batch(flush, command.getCommand(), command.getArgs());
+        } catch (Throwable e) {
+            times--;
+            if (times >= 0 && flush) {
+                endpoint.set(Endpoint.valueOf(endpoint.get()));
+                retry(command, times);
+            }
+        }
     }
     
     public void retry(DumpKeyValuePair dkv, int times) {

@@ -136,15 +136,15 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         this.replicator.addRawByteListener(listener);
     }
 
-    protected boolean contains(int type) {
+    protected boolean containsType(int type) {
         return DataType.contains(types, type);
     }
 
-    protected boolean contains(long db) {
+    protected boolean containsDB(long db) {
         return this.db.isEmpty() || this.db.contains(db);
     }
 
-    protected boolean contains(String key) {
+    protected boolean containsKey(String key) {
         if (keys.isEmpty() || keys.contains(key)) return true;
         for (Pattern pattern : regexs) {
             if (pattern.matcher(key).matches()) return true;
@@ -153,7 +153,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
     }
 
     protected boolean contains(long db, int type, String key) {
-        return contains(db) && contains(type) && contains(key);
+        return containsDB(db) && containsType(type) && containsKey(key);
     }
 
     protected void delimiter(OutputStream out) {

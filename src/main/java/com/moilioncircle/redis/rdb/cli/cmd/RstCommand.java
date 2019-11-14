@@ -34,6 +34,10 @@ import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.Replicators;
+import com.moilioncircle.redis.replicator.cmd.CommandName;
+import com.moilioncircle.redis.replicator.cmd.parser.DefaultCommandParser;
+import com.moilioncircle.redis.replicator.cmd.parser.PingParser;
+import com.moilioncircle.redis.replicator.cmd.parser.SelectParser;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.rdb.RdbVisitor;
 
@@ -118,7 +122,7 @@ public class RstCommand extends AbstractCommand {
                         if (event instanceof PreRdbSyncEvent)
                             rep.addRawByteListener(b -> bar.react(b.length));
                     });
-                    r.open();
+                    dress(r).open();
                 }
             } else {
                 if (conf == null || !Files.exists(conf.toPath())) {
@@ -137,7 +141,7 @@ public class RstCommand extends AbstractCommand {
                         if (event instanceof PreRdbSyncEvent)
                             rep.addRawByteListener(b -> bar.react(b.length));
                     });
-                    r.open();
+                    dress(r).open();
                 }
             }
         }
@@ -156,6 +160,94 @@ public class RstCommand extends AbstractCommand {
         }
     }
 
+    private Replicator dress(Replicator replicator) {
+        replicator.addCommandParser(CommandName.name("PING"), new PingParser());
+        replicator.addCommandParser(CommandName.name("SELECT"), new SelectParser());
+        replicator.addCommandParser(CommandName.name("APPEND"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("SET"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("SETEX"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("MSET"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("DEL"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("SADD"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("HMSET"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("HSET"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("LSET"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("EXPIRE"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("EXPIREAT"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("GETSET"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("HSETNX"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("MSETNX"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("PSETEX"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("SETNX"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("SETRANGE"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("HDEL"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("LPOP"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("LPUSH"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("LPUSHX"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("LRem"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("RPOP"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("RPUSH"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("RPUSHX"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("ZREM"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("RENAME"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("INCR"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("DECR"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("INCRBY"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("DECRBY"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("PERSIST"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("FLUSHALL"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("FLUSHDB"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("HINCRBY"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("ZINCRBY"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("MOVE"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("SMOVE"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("PFADD"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("PFCOUNT"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("PFMERGE"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("SDIFFSTORE"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("SINTERSTORE"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("SUNIONSTORE"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("ZADD"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("ZINTERSTORE"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("ZUNIONSTORE"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("BRPOPLPUSH"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("LINSERT"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("RENAMENX"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("RESTORE"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("PEXPIRE"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("PEXPIREAT"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("GEOADD"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("EVAL"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("EVALSHA"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("SCRIPT"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("PUBLISH"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("BITOP"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("BITFIELD"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("SETBIT"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("SREM"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("UNLINK"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("SWAPDB"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("MULTI"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("EXEC"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("ZREMRANGEBYSCORE"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("ZREMRANGEBYRANK"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("ZREMRANGEBYLEX"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("LTRIM"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("SORT"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("RPOPLPUSH"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("ZPOPMIN"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("ZPOPMAX"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("REPLCONF"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("XACK"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("XADD"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("XCLAIM"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("XDEL"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("XGROUP"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("XTRIM"), new DefaultCommandParser());
+        replicator.addCommandParser(CommandName.name("XSETID"), new DefaultCommandParser());
+        return replicator;
+    }
+
     @Override
     public String name() {
         return "rst";
@@ -165,4 +257,6 @@ public class RstCommand extends AbstractCommand {
         RstCommand command = new RstCommand();
         command.execute(args);
     }
+    
+
 }
