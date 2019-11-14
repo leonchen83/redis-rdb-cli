@@ -32,12 +32,12 @@ import okhttp3.OkHttpClient;
 public class Influxdb implements Closeable {
     private static final Logger LOGGER = LoggerFactory.getLogger(Influxdb.class);
 
-    private static final String AVG = "avg";
-    private static final String TYPE = "type";
-    private static final String VALUE = "value";
-    private static final String MODULE = "module";
-    private static final String FACADE = "facade";
-    private static final String INSTANCE = "instance";
+    public static final String AVG = "avg";
+    public static final String TYPE = "type";
+    public static final String VALUE = "value";
+    public static final String MODULE = "module";
+    public static final String FACADE = "facade";
+    public static final String INSTANCE = "instance";
 
     protected int port;
     protected int threads = 2;
@@ -61,9 +61,9 @@ public class Influxdb implements Closeable {
         create();
     }
     
-    public void reset(String measurement) {
+    public void reset(String instance) {
         if (this.influxdb != null) {
-            this.influxdb.query(new Query("drop measurement \"" + measurement + "\"", database));
+            this.influxdb.query(new Query("drop series where instance = '" + instance + "'", database));
         }
     }
 
