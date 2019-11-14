@@ -154,21 +154,21 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
         Command parsedCommand = command.getParsedCommand();
         if (parsedCommand instanceof RenameCommand) {
             RenameCommand cmd = (RenameCommand) parsedCommand;
-            if (isSameSlot(cmd.getKey(), cmd.getNewKey())) {
+            if (isSameSlot1(cmd.getKey(), cmd.getNewKey())) {
                 retry(command, cmd.getKey(), times);
             } else {
                 logger.error("failed to sync command [{}]", command);
             }
         } else if (parsedCommand instanceof RenameNxCommand) {
             RenameNxCommand cmd = (RenameNxCommand) parsedCommand;
-            if (isSameSlot(cmd.getKey(), cmd.getNewKey())) {
+            if (isSameSlot1(cmd.getKey(), cmd.getNewKey())) {
                 retry(command, cmd.getKey(), times);
             } else {
                 logger.error("failed to sync command [{}]", command);
             }
         } else if (parsedCommand instanceof PFMergeCommand) {
             PFMergeCommand cmd = (PFMergeCommand) parsedCommand;
-            if (isSameSlot(cmd.getDestkey(), cmd.getSourcekeys())) {
+            if (isSameSlot1(cmd.getDestkey(), cmd.getSourcekeys())) {
                 retry(command, cmd.getDestkey(), times);
             } else {
                 logger.error("failed to sync command [{}]", command);
@@ -204,7 +204,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             }
         } else if (parsedCommand instanceof BitOpCommand) {
             BitOpCommand cmd = (BitOpCommand) parsedCommand;
-            if (isSameSlot(cmd.getDestkey(), cmd.getKeys())) {
+            if (isSameSlot1(cmd.getDestkey(), cmd.getKeys())) {
                 retry(command, cmd.getDestkey(), times);
             } else {
                 logger.error("failed to sync command [{}]", command);
@@ -233,42 +233,42 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             }
         } else if (parsedCommand instanceof ZUnionStoreCommand) {
             ZUnionStoreCommand cmd = (ZUnionStoreCommand) parsedCommand;
-            if (isSameSlot(cmd.getDestination(), cmd.getKeys())) {
+            if (isSameSlot1(cmd.getDestination(), cmd.getKeys())) {
                 retry(command, cmd.getDestination(), times);
             } else {
                 logger.error("failed to sync command [{}]", command);
             }
         } else if (parsedCommand instanceof ZInterStoreCommand) {
             ZInterStoreCommand cmd = (ZInterStoreCommand) parsedCommand;
-            if (isSameSlot(cmd.getDestination(), cmd.getKeys())) {
+            if (isSameSlot1(cmd.getDestination(), cmd.getKeys())) {
                 retry(command, cmd.getDestination(), times);
             } else {
                 logger.error("failed to sync command [{}]", command);
             }
         } else if (parsedCommand instanceof SMoveCommand) {
             SMoveCommand cmd = (SMoveCommand) parsedCommand;
-            if (isSameSlot(cmd.getDestination(), cmd.getSource())) {
+            if (isSameSlot1(cmd.getDestination(), cmd.getSource())) {
                 retry(command, cmd.getDestination(), times);
             } else {
                 logger.error("failed to sync command [{}]", command);
             }
         } else if (parsedCommand instanceof SInterStoreCommand) {
             SInterStoreCommand cmd = (SInterStoreCommand) parsedCommand;
-            if (isSameSlot(cmd.getDestination(), cmd.getKeys())) {
+            if (isSameSlot1(cmd.getDestination(), cmd.getKeys())) {
                 retry(command, cmd.getDestination(), times);
             } else {
                 logger.error("failed to sync command [{}]", command);
             }
         } else if (parsedCommand instanceof SDiffStoreCommand) {
             SDiffStoreCommand cmd = (SDiffStoreCommand) parsedCommand;
-            if (isSameSlot(cmd.getDestination(), cmd.getKeys())) {
+            if (isSameSlot1(cmd.getDestination(), cmd.getKeys())) {
                 retry(command, cmd.getDestination(), times);
             } else {
                 logger.error("failed to sync command [{}]", command);
             }
         } else if (parsedCommand instanceof RPopLPushCommand) {
             RPopLPushCommand cmd = (RPopLPushCommand) parsedCommand;
-            if (isSameSlot(cmd.getDestination(), cmd.getSource())) {
+            if (isSameSlot1(cmd.getDestination(), cmd.getSource())) {
                 retry(command, cmd.getDestination(), times);
             } else {
                 logger.error("failed to sync command [{}]", command);
@@ -282,27 +282,26 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             // flushdb
             // script flush
             // script load
-            // replconf getack
             // publish
             // multi
             // exec
             // eval
             // evalsha
-            logger.error("un-support to sync command [{}]", command);
+            logger.error("unsupported to sync command [{}]", command);
         }
     }
 
-    public boolean isSameSlot(byte[] key, byte[]... keys) {
-        int slot = slot(key);;
-        for (int i = 0; i < keys.length; i++) {
+    public static boolean isSameSlot0(byte[]... keys) {
+        int slot = slot(keys[0]);
+        for (int i = 1; i < keys.length; i++) {
             if (slot != slot(keys[i])) return false;
         }
         return true;
     }
 
-    public boolean isSameSlot0(byte[]... keys) {
-        int slot = slot(keys[0]);;
-        for (int i = 1; i < keys.length; i++) {
+    public static boolean isSameSlot1(byte[] key, byte[]... keys) {
+        int slot = slot(key);
+        for (int i = 0; i < keys.length; i++) {
             if (slot != slot(keys[i])) return false;
         }
         return true;

@@ -58,9 +58,9 @@ public class CombineCommand extends AbstractCommand {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append(new String(defaultCommand.getCommand()));
-        for (int i = 0; i < defaultCommand.getArgs().length; i++) {
+        for (byte[] arg : defaultCommand.getArgs()) {
             builder.append(" ");
-            builder.append(new String(CODEC.encode(defaultCommand.getArgs()[i])));
+            builder.append(new String(CODEC.encode(arg)));
         }
         return builder.toString();
     }

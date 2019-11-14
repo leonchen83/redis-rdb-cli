@@ -246,6 +246,8 @@ public class RstCommand extends AbstractCommand {
     private Replicator dress(Replicator replicator) {
         replicator.addCommandParser(CommandName.name("PING"), new PingParser());
         replicator.addCommandParser(CommandName.name("SELECT"), new SelectParser());
+        replicator.addCommandParser(CommandName.name("REPLCONF"), new ReplConfParser());
+        //
         replicator.addCommandParser(CommandName.name("APPEND"), new CombineCommandParser(new AppendParser()));
         replicator.addCommandParser(CommandName.name("SET"), new CombineCommandParser(new SetParser()));
         replicator.addCommandParser(CommandName.name("SETEX"), new CombineCommandParser(new SetExParser()));
@@ -320,7 +322,6 @@ public class RstCommand extends AbstractCommand {
         replicator.addCommandParser(CommandName.name("RPOPLPUSH"), new CombineCommandParser(new RPopLPushParser()));
         replicator.addCommandParser(CommandName.name("ZPOPMIN"), new CombineCommandParser(new ZPopMinParser()));
         replicator.addCommandParser(CommandName.name("ZPOPMAX"), new CombineCommandParser(new ZPopMaxParser()));
-        replicator.addCommandParser(CommandName.name("REPLCONF"), new CombineCommandParser(new ReplConfParser()));
         replicator.addCommandParser(CommandName.name("XACK"), new CombineCommandParser(new XAckParser()));
         replicator.addCommandParser(CommandName.name("XADD"), new CombineCommandParser(new XAddParser()));
         replicator.addCommandParser(CommandName.name("XCLAIM"), new CombineCommandParser(new XClaimParser()));
