@@ -63,7 +63,7 @@ public class Influxdb implements Closeable {
     
     public void reset(String measurement) {
         if (this.influxdb != null) {
-            this.influxdb.query(new Query("DROP MEASUREMENT \"" + measurement + "\""));
+            this.influxdb.query(new Query("drop measurement \"" + measurement + "\"", database));
         }
     }
 
