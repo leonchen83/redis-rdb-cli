@@ -146,7 +146,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             times--;
             if (times >= 0 && flush) {
                 this.endpoints.get().update(slot);
-                retry(command, times);
+                retry(command, slot, times);
             }
         }
     }
