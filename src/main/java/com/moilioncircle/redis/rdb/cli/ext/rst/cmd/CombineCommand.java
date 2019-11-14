@@ -17,6 +17,7 @@
 package com.moilioncircle.redis.rdb.cli.ext.rst.cmd;
 
 import com.moilioncircle.redis.replicator.cmd.Command;
+import com.moilioncircle.redis.replicator.cmd.RedisCodec;
 import com.moilioncircle.redis.replicator.cmd.impl.AbstractCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.DefaultCommand;
 
@@ -26,6 +27,7 @@ import com.moilioncircle.redis.replicator.cmd.impl.DefaultCommand;
 public class CombineCommand extends AbstractCommand {
     private Command parsedCommand;
     private DefaultCommand defaultCommand;
+    private static RedisCodec CODEC = new RedisCodec();
 
     public CombineCommand() {
         
@@ -50,5 +52,16 @@ public class CombineCommand extends AbstractCommand {
 
     public void setParsedCommand(Command parsedCommand) {
         this.parsedCommand = parsedCommand;
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(new String(defaultCommand.getCommand()));
+        for (int i = 0; i < defaultCommand.getArgs().length; i++) {
+            builder.append(" ");
+            builder.append(new String(CODEC.encode(defaultCommand.getArgs()[i])));
+        }
+        return builder.toString();
     }
 }
