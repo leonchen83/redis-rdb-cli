@@ -86,7 +86,8 @@ public class MonitorManager implements Closeable {
     }
 
     public void open() {
-        influxdb.reset(configure.getMetricInstance());
+        influxdb.reset("memory_statistics");
+        influxdb.reset("endpoint_statistics");
         executor.scheduleWithFixedDelay(this::report, timeout, timeout, TimeUnit.MILLISECONDS);
     }
 

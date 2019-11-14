@@ -47,11 +47,13 @@ public class Influxdb implements Closeable {
     protected int jitter = 1000;
     protected int interval = 2000;
     protected int capacity = 8192;
+    protected Configure configure;
     protected String retention = "autogen";
     protected ConsistencyLevel consistency = ONE;
     protected String url, database, user, password;
 
     public Influxdb(Configure configure) {
+        this.configure = configure;
         this.user = configure.getMetricUser();
         this.password = configure.getMetricPass();
         this.url = configure.getMetricUri().toString();
@@ -61,9 +63,9 @@ public class Influxdb implements Closeable {
         create();
     }
     
-    public void reset(String instance) {
+    public void reset(String measurement) {
         if (this.influxdb != null) {
-            this.influxdb.query(new Query("drop series where instance = '" + instance + "'", database));
+            this.influxdb.query(new Query("drop series from \"" + measurement + "\" where instance = '" + instance + "'", database));
         }
     }
 
