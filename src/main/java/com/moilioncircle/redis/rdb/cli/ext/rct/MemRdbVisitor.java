@@ -206,6 +206,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     
     @Override
     protected Event doApplyString(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        long mark = System.nanoTime();
         BaseRdbParser parser = new BaseRdbParser(in);
         byte[] val = parser.rdbLoadEncodedStringObject().first();
         DummyKeyValuePair kv = new DummyKeyValuePair();
@@ -215,13 +216,14 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(1);
         kv.setMax(size.element(val));
-        monitor.add("string_count", 1);
+        monitor.add("string_count", 1, System.nanoTime() - mark);
         monitor.add("string_memory", kv.getValue());
         return context.valueOf(kv);
     }
     
     @Override
     protected Event doApplyList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        long mark = System.nanoTime();
         BaseRdbParser parser = new BaseRdbParser(in);
         long len = parser.rdbLoadLen().len;
         long length = len;
@@ -241,13 +243,14 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(length);
         kv.setMax(max);
-        monitor.add("list_count", 1);
+        monitor.add("list_count", 1, System.nanoTime() - mark);
         monitor.add("list_memory", kv.getValue());
         return context.valueOf(kv);
     }
     
     @Override
     protected Event doApplySet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        long mark = System.nanoTime();
         BaseRdbParser parser = new BaseRdbParser(in);
         long len = parser.rdbLoadLen().len;
         long length = len;
@@ -267,13 +270,14 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(length);
         kv.setMax(max);
-        monitor.add("set_count", 1);
+        monitor.add("set_count", 1, System.nanoTime() - mark);
         monitor.add("set_memory", kv.getValue());
         return context.valueOf(kv);
     }
     
     @Override
     protected Event doApplyZSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        long mark = System.nanoTime();
         BaseRdbParser parser = new BaseRdbParser(in);
         long len = parser.rdbLoadLen().len;
         long length = 0;
@@ -295,13 +299,14 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(length);
         kv.setMax(max);
-        monitor.add("zset_count", 1);
+        monitor.add("zset_count", 1, System.nanoTime() - mark);
         monitor.add("zset_memory", kv.getValue());
         return context.valueOf(kv);
     }
     
     @Override
     protected Event doApplyZSet2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        long mark = System.nanoTime();
         BaseRdbParser parser = new BaseRdbParser(in);
         long len = parser.rdbLoadLen().len;
         long length = 0;
@@ -323,13 +328,14 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(length);
         kv.setMax(max);
-        monitor.add("zset_count", 1);
+        monitor.add("zset_count", 1, System.nanoTime() - mark);
         monitor.add("zset_memory", kv.getValue());
         return context.valueOf(kv);
     }
     
     @Override
     protected Event doApplyHash(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        long mark = System.nanoTime();
         BaseRdbParser parser = new BaseRdbParser(in);
         long len = parser.rdbLoadLen().len;
         long length = 0;
@@ -352,13 +358,14 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(length);
         kv.setMax(max);
-        monitor.add("hash_count", 1);
+        monitor.add("hash_count", 1, System.nanoTime() - mark);
         monitor.add("hash_memory", kv.getValue());
         return context.valueOf(kv);
     }
     
     @Override
     protected Event doApplyHashZipMap(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        long mark = System.nanoTime();
         BaseRdbParser parser = new BaseRdbParser(in);
         ByteArray ary = parser.rdbLoadPlainStringObject();
         RedisInputStream stream = new RedisInputStream(ary);
@@ -375,7 +382,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
                 kv.setContains(contains);
                 kv.setLength(length);
                 kv.setMax(max);
-                monitor.add("hash_count", 1);
+                monitor.add("hash_count", 1, System.nanoTime() - mark);
                 monitor.add("hash_memory", kv.getValue());
                 return context.valueOf(kv);
             }
@@ -390,7 +397,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
                 kv.setContains(contains);
                 kv.setLength(length);
                 kv.setMax(max);
-                monitor.add("hash_count", 1);
+                monitor.add("hash_count", 1, System.nanoTime() - mark);
                 monitor.add("hash_memory", kv.getValue());
                 return context.valueOf(kv);
             }
@@ -405,6 +412,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     
     @Override
     protected Event doApplyListZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        long mark = System.nanoTime();
         BaseRdbParser parser = new BaseRdbParser(in);
         ByteArray ary = parser.rdbLoadPlainStringObject();
         RedisInputStream stream = new RedisInputStream(ary);
@@ -427,13 +435,14 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(length);
         kv.setMax(max);
-        monitor.add("list_count", 1);
+        monitor.add("list_count", 1, System.nanoTime() - mark);
         monitor.add("list_memory", kv.getValue());
         return context.valueOf(kv);
     }
     
     @Override
     protected Event doApplySetIntSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        long mark = System.nanoTime();
         BaseRdbParser parser = new BaseRdbParser(in);
         ByteArray ary = parser.rdbLoadPlainStringObject();
         RedisInputStream stream = new RedisInputStream(ary);
@@ -464,13 +473,14 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(length);
         kv.setMax(max);
-        monitor.add("set_count", 1);
+        monitor.add("set_count", 1, System.nanoTime() - mark);
         monitor.add("set_memory", kv.getValue());
         return context.valueOf(kv);
     }
     
     @Override
     protected Event doApplyZSetZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        long mark = System.nanoTime();
         BaseRdbParser parser = new BaseRdbParser(in);
         ByteArray ary = parser.rdbLoadPlainStringObject();
         RedisInputStream stream = new RedisInputStream(ary);
@@ -498,13 +508,14 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(length);
         kv.setMax(max);
-        monitor.add("zset_count", 1);
+        monitor.add("zset_count", 1, System.nanoTime() - mark);
         monitor.add("zset_memory", kv.getValue());
         return context.valueOf(kv);
     }
     
     @Override
     protected Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        long mark = System.nanoTime();
         BaseRdbParser parser = new BaseRdbParser(in);
         ByteArray ary = parser.rdbLoadPlainStringObject();
         RedisInputStream stream = new RedisInputStream(ary);
@@ -533,13 +544,14 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(length);
         kv.setMax(max);
-        monitor.add("hash_count", 1);
+        monitor.add("hash_count", 1, System.nanoTime() - mark);
         monitor.add("hash_memory", kv.getValue());
         return context.valueOf(kv);
     }
     
     @Override
     protected Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        long mark = System.nanoTime();
         BaseRdbParser parser = new BaseRdbParser(in);
         long len = parser.rdbLoadLen().len;
         long val = 0;
@@ -570,13 +582,14 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(length);
         kv.setMax(max);
-        monitor.add("list_count", 1);
+        monitor.add("list_count", 1, System.nanoTime() - mark);
         monitor.add("list_memory", kv.getValue());
         return context.valueOf(kv);
     }
     
     @Override
     protected Event doApplyModule(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        long mark = System.nanoTime();
         LengthRawByteListener listener = new LengthRawByteListener();
         replicator.addRawByteListener(listener);
         super.doApplyModule(in, version, key, contains, type, context);
@@ -588,13 +601,14 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(1);
         kv.setMax(listener.length);
-        monitor.add("module_count", 1);
+        monitor.add("module_count", 1, System.nanoTime() - mark);
         monitor.add("module_memory", kv.getValue());
         return context.valueOf(kv);
     }
     
     @Override
     protected Event doApplyModule2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        long mark = System.nanoTime();
         LengthRawByteListener listener = new LengthRawByteListener();
         replicator.addRawByteListener(listener);
         super.doApplyModule2(in, version, key, contains, type, context);
@@ -606,13 +620,14 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(1);
         kv.setMax(listener.length);
-        monitor.add("module_count", 1);
+        monitor.add("module_count", 1, System.nanoTime() - mark);
         monitor.add("module_memory", kv.getValue());
         return context.valueOf(kv);
     }
     
     @Override
     protected Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        long mark = System.nanoTime();
         long length = 0;
         long max = 0;
         LengthRawByteListener listener = new LengthRawByteListener();
@@ -696,7 +711,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         kv.setContains(contains);
         kv.setLength(length);
         kv.setMax(max);
-        monitor.add("stream_count", 1);
+        monitor.add("stream_count", 1, System.nanoTime() - mark);
         monitor.add("stream_memory", kv.getValue());
         return context.valueOf(kv);
     }

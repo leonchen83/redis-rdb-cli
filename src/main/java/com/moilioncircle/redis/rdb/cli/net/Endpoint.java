@@ -153,6 +153,8 @@ public class Endpoint implements Closeable {
     public void flush() {
         try {
             if (count > 0) {
+                int temp = count;
+                long mark = System.nanoTime();
                 OutputStreams.flush(out);
                 for (int i = 0; i < count; i++) {
                     RedisObject r = parse();
@@ -164,6 +166,7 @@ public class Endpoint implements Closeable {
                     }
                 }
                 count = 0;
+                if (statistics) monitor.add("send_" + address, temp, System.nanoTime() - mark);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
