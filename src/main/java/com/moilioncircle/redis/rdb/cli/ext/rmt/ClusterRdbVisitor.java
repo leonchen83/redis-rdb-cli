@@ -16,6 +16,7 @@
 
 package com.moilioncircle.redis.rdb.cli.ext.rmt;
 
+import static com.moilioncircle.redis.rdb.cli.conf.NodeConfParser.slot;
 import static com.moilioncircle.redis.replicator.Configuration.defaultSetting;
 import static java.util.Collections.singletonList;
 
@@ -64,15 +65,15 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             int pipe = configure.getMigrateBatchSize();
             this.endpoints.set(new Endpoints(lines, pipe, true, configuration, configure));
         } else if (event instanceof DumpKeyValuePair) {
-            retry(event, configure.getMigrateRetries());
+            retry((DumpKeyValuePair)event, configure.getMigrateRetries());
         } else if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
             this.endpoints.get().flush();
             Endpoints.closeQuietly(this.endpoints.get());
         }
     }
 
-    public void retry(Event event, int times) {
-        DumpKeyValuePair dkv = (DumpKeyValuePair) event;
+    public void retry(DumpKeyValuePair dkv, int times) {
+        short slot = slot(dkv.getKey());
         try {
             byte[] expire = ZERO;
             if (dkv.getExpiredMs() != null) {
@@ -82,16 +83,16 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             }
 
             if (!replace) {
-                endpoints.get().batch(flush, RESTORE_ASKING, dkv.getKey(), expire, dkv.getValue());
+                endpoints.get().batch(flush, slot, RESTORE_ASKING, dkv.getKey(), expire, dkv.getValue());
             } else {
                 // https://github.com/leonchen83/redis-rdb-cli/issues/6 --no need to use lua script
-                endpoints.get().batch(flush, RESTORE_ASKING, dkv.getKey(), expire, dkv.getValue(), REPLACE);
+                endpoints.get().batch(flush, slot, RESTORE_ASKING, dkv.getKey(), expire, dkv.getValue(), REPLACE);
             }
         } catch (Throwable e) {
             times--;
             if (times >= 0 && flush) {
-                this.endpoints.get().update(dkv.getKey());
-                retry(event, times);
+                this.endpoints.get().update(slot);
+                retry(dkv, times);
             }
         }
     }

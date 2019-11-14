@@ -52,13 +52,7 @@ public class Endpoints implements Closeable {
         return endpoints.get(slot).send(command, args);
     }
 
-    public void batch(boolean force, byte[] command, byte[]... args) {
-        short slot = slot(args[0]);
-        endpoints.get(slot).batch(force, command, args);
-    }
-
-    public void batchCommand(boolean force, byte[] key, byte[] command, byte[]... args) {
-        short slot = slot(key);
+    public void batch(boolean force, short slot, byte[] command, byte[]... args) {
         endpoints.get(slot).batch(force, command, args);
     }
 
@@ -75,8 +69,7 @@ public class Endpoints implements Closeable {
         }
     }
 
-    public void update(byte[] key) {
-        short slot = slot(key);
+    public void update(short slot) {
         Endpoint v1 = endpoints.get(slot);
         replace(slot, v1, Endpoint.valueOf(v1));
     }
