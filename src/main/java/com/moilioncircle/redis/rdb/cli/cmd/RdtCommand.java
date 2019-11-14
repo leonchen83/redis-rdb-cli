@@ -19,6 +19,7 @@ package com.moilioncircle.redis.rdb.cli.cmd;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.glossary.Action;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
+import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
 import com.moilioncircle.redis.replicator.FileType;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -70,7 +71,7 @@ public class RdtCommand extends AbstractCommand {
     }
 
     @Override
-    protected void doExecute(CommandLine line, Configure configure) throws Exception {
+    protected void doExecute(CommandLine line) throws Exception {
         if (line.hasOption("help")) {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp(HEADER, "\noptions:", options, EXAMPLE);
@@ -133,6 +134,9 @@ public class RdtCommand extends AbstractCommand {
                 action = Action.MERGE;
             }
 
+            Configure configure = Configure.bind();
+            MonitorManager manager = new MonitorManager(configure);
+            manager.open();
             try (ProgressBar bar = new ProgressBar(-1)) {
                 List<Tuple2<Replicator, String>> list = action.dress(configure, split, backup, merge, output, db, regexs, conf, DataType.parse(type));
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -151,6 +155,8 @@ public class RdtCommand extends AbstractCommand {
                     });
                     tuple.getV1().open();
                 }
+            } finally {
+                MonitorManager.closeQuietly(manager);
             }
         }
     }

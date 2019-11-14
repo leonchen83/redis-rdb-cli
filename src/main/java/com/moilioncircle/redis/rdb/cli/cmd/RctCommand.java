@@ -21,6 +21,7 @@ import com.moilioncircle.redis.rdb.cli.ext.CliRedisReplicator;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.glossary.Escape;
 import com.moilioncircle.redis.rdb.cli.glossary.Format;
+import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
 import com.moilioncircle.redis.replicator.FileType;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -76,7 +77,7 @@ public class RctCommand extends AbstractCommand {
     }
 
     @Override
-    protected void doExecute(CommandLine line, Configure configure) throws Exception {
+    protected void doExecute(CommandLine line) throws Exception {
         if (line.hasOption("help")) {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp(HEADER, "\noptions:", options, EXAMPLE);
@@ -115,6 +116,9 @@ public class RctCommand extends AbstractCommand {
 
             source = normalize(source, FileType.RDB, "Invalid options: s, Try `rct -h` for more information.");
 
+            Configure configure = Configure.bind();
+            MonitorManager manager = new MonitorManager(configure);
+            manager.open();
             try (ProgressBar bar = new ProgressBar(-1)) {
                 Replicator r = new CliRedisReplicator(source, configure);
                 r.addExceptionListener((rep, tx, e) -> {
@@ -129,6 +133,8 @@ public class RctCommand extends AbstractCommand {
                         Replicators.closeQuietly(rep);
                 });
                 r.open();
+            } finally {
+                MonitorManager.closeQuietly(manager);
             }
         }
     }

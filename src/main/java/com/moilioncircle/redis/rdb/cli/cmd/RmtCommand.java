@@ -31,6 +31,7 @@ import com.moilioncircle.redis.rdb.cli.ext.CliRedisReplicator;
 import com.moilioncircle.redis.rdb.cli.ext.rmt.ClusterRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rmt.SingleRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
+import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
 import com.moilioncircle.redis.rdb.cli.net.Endpoint;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
 import com.moilioncircle.redis.replicator.Configuration;
@@ -77,7 +78,7 @@ public class RmtCommand extends AbstractCommand {
 
     @Override
     @SuppressWarnings("all")
-    protected void doExecute(CommandLine line, Configure configure) throws Exception {
+    protected void doExecute(CommandLine line) throws Exception {
         if (line.hasOption("help")) {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp(HEADER, "\noptions:", options, EXAMPLE);
@@ -113,48 +114,55 @@ public class RmtCommand extends AbstractCommand {
 
             source = normalize(source, FileType.RDB, "Invalid options: s. Try `rmt -h` for more information.");
 
-            if (migrate != null) {
-                RedisURI uri = new RedisURI(migrate);
-                if (uri.getFileType() != null) {
-                    writeError("Invalid options: m. Try `rmt -h` for more information.");
-                    return;
+            Configure configure = Configure.bind();
+            MonitorManager manager = new MonitorManager(configure);
+            manager.open();
+            try {
+                if (migrate != null) {
+                    RedisURI uri = new RedisURI(migrate);
+                    if (uri.getFileType() != null) {
+                        writeError("Invalid options: m. Try `rmt -h` for more information.");
+                        return;
+                    }
+                    try (ProgressBar bar = new ProgressBar(-1)) {
+                        Replicator r = new CliRedisReplicator(source, configure);
+                        r.setRdbVisitor(getRdbVisitor(r, configure, uri, db, regexs, parse(type), replace, legacy));
+                        Runtime.getRuntime().addShutdownHook(new Thread(() -> Replicators.closeQuietly(r)));
+                        r.addExceptionListener((rep, tx, e) -> {
+                            throw new RuntimeException(tx.getMessage(), tx);
+                        });
+                        r.addEventListener((rep, event) -> {
+                            if (event instanceof PreRdbSyncEvent)
+                                rep.addRawByteListener(b -> bar.react(b.length));
+                            if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent)
+                                Replicators.closeQuietly(rep);
+                        });
+                        r.open();
+                    }
+                } else {
+                    if (conf == null || !Files.exists(conf.toPath())) {
+                        writeError("Invalid options: c. Try `rmt -h` for more information.");
+                        return;
+                    }
+                    try (ProgressBar bar = new ProgressBar(-1)) {
+                        Replicator r = new CliRedisReplicator(source, configure);
+                        List<String> lines = Files.readAllLines(conf.toPath());
+                        r.setRdbVisitor(new ClusterRdbVisitor(r, configure, lines, regexs, parse(type), replace));
+                        Runtime.getRuntime().addShutdownHook(new Thread(() -> Replicators.closeQuietly(r)));
+                        r.addExceptionListener((rep, tx, e) -> {
+                            throw new RuntimeException(tx.getMessage(), tx);
+                        });
+                        r.addEventListener((rep, event) -> {
+                            if (event instanceof PreRdbSyncEvent)
+                                rep.addRawByteListener(b -> bar.react(b.length));
+                            if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent)
+                                Replicators.closeQuietly(rep);
+                        });
+                        r.open();
+                    }
                 }
-                try (ProgressBar bar = new ProgressBar(-1)) {
-                    Replicator r = new CliRedisReplicator(source, configure);
-                    r.setRdbVisitor(getRdbVisitor(r, configure, uri, db, regexs, parse(type), replace, legacy));
-                    Runtime.getRuntime().addShutdownHook(new Thread(() -> Replicators.closeQuietly(r)));
-                    r.addExceptionListener((rep, tx, e) -> {
-                        throw new RuntimeException(tx.getMessage(), tx);
-                    });
-                    r.addEventListener((rep, event) -> {
-                        if (event instanceof PreRdbSyncEvent)
-                            rep.addRawByteListener(b -> bar.react(b.length));
-                        if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent)
-                            Replicators.closeQuietly(rep);
-                    });
-                    r.open();
-                }
-            } else {
-                if (conf == null || !Files.exists(conf.toPath())) {
-                    writeError("Invalid options: c. Try `rmt -h` for more information.");
-                    return;
-                }
-                try (ProgressBar bar = new ProgressBar(-1)) {
-                    Replicator r = new CliRedisReplicator(source, configure);
-                    List<String> lines = Files.readAllLines(conf.toPath());
-                    r.setRdbVisitor(new ClusterRdbVisitor(r, configure, lines, regexs, parse(type), replace));
-                    Runtime.getRuntime().addShutdownHook(new Thread(() -> Replicators.closeQuietly(r)));
-                    r.addExceptionListener((rep, tx, e) -> {
-                        throw new RuntimeException(tx.getMessage(), tx);
-                    });
-                    r.addEventListener((rep, event) -> {
-                        if (event instanceof PreRdbSyncEvent)
-                            rep.addRawByteListener(b -> bar.react(b.length));
-                        if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent)
-                            Replicators.closeQuietly(rep);
-                    });
-                    r.open();
-                }
+            } finally {
+                MonitorManager.closeQuietly(manager);
             }
         }
     }

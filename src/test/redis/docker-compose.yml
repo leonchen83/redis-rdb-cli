@@ -1,0 +1,12 @@
+version: '2.1'
+
+services:
+  redis0:
+    image: redis:5.0.6
+    container_name: redis0
+    ports:
+      - "6379:6379"
+  redis1:
+    image: redis:5.0.6
+    ports:
+      - "6380:6379"

@@ -54,8 +54,8 @@ public class MonitorManager implements Closeable {
 
     public MonitorManager(Configure configure) {
         this.configure = configure;
-        this.influxdb = new Influxdb(configure);
         this.gateway = this.configure.getMetricGateway();
+        if (gateway == INFLUXDB) influxdb = new Influxdb(configure);
         this.executor = Executors.newSingleThreadScheduledExecutor();
     }
 
@@ -86,14 +86,16 @@ public class MonitorManager implements Closeable {
     }
 
     public void open() {
-        influxdb.reset("memory_statistics", configure.getMetricMemoryInstance());
-        influxdb.reset("endpoint_statistics", configure.getMetricEndpointInstance());
+        if (gateway == INFLUXDB) {
+            influxdb.reset("memory_statistics", configure.getMetricMemoryInstance());
+            influxdb.reset("endpoint_statistics", configure.getMetricEndpointInstance());
+        }
         executor.scheduleWithFixedDelay(this::report, timeout, timeout, TimeUnit.MILLISECONDS);
     }
 
     @Override
     public void close() throws IOException {
-        influxdb.close();
+        if (gateway == INFLUXDB && influxdb != null) influxdb.close();
         terminateQuietly(executor, configure.getTimeout(), TimeUnit.MILLISECONDS);
     }
 
