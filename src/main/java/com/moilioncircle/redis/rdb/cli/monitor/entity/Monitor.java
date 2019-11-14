@@ -23,10 +23,12 @@ import java.util.Map;
  */
 public interface Monitor {
     interface Factory {
-        Monitor create(String name);
+        Monitor create(String name, String instance);
     }
 
     String getName();
+    
+    String getInstance();
 
     Map<String, ? extends Gauge> getGauges();
 

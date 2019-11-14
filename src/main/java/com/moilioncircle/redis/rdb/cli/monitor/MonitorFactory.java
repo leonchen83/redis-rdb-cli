@@ -37,9 +37,9 @@ public class MonitorFactory {
         return r;
     }
 
-    public static Monitor getMonitor(String name) {
+    public static Monitor getMonitor(String name, String instance) {
         Monitor r = CACHE.get(name);
-        if (r == null) r = CACHE.putIfAbsent(name, FACTORY.create(name));
+        if (r == null) r = CACHE.putIfAbsent(name, FACTORY.create(name, instance));
         return r;
     }
 }

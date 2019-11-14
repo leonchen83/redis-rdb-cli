@@ -76,7 +76,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
         if (event instanceof PreRdbSyncEvent) {
             Endpoint.closeQuietly(this.endpoint.get());
             int pipe = configure.getMigrateBatchSize();
-            this.endpoint.set(new Endpoint(uri.getHost(), uri.getPort(), 0, pipe, true, conf));
+            this.endpoint.set(new Endpoint(uri.getHost(), uri.getPort(), 0, pipe, true, conf, configure));
     
         } else if (event instanceof DumpKeyValuePair) {
             retry((DumpKeyValuePair)event, configure.getMigrateRetries());

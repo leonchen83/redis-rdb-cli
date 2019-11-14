@@ -32,6 +32,7 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.io.BufferedOutputStream;
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorFactory;
@@ -64,20 +65,23 @@ public class Endpoint implements Closeable {
     private final OutputStream out;
     private final Configuration conf;
     private final boolean statistics;
+    private final Configure configure;
     private final RedisInputStream in;
 
-    private Monitor monitor = MonitorFactory.getMonitor("endpoint_statistics");
+    private final Monitor monitor;
     
-    public Endpoint(String host, int port, Configuration conf) {
-        this(host, port, 0, 1, false, conf);
+    public Endpoint(String host, int port, Configuration conf, Configure configure) {
+        this(host, port, 0, 1, false, conf, configure);
     }
     
-    public Endpoint(String host, int port, int db, int pipe, boolean statistics, Configuration conf) {
+    public Endpoint(String host, int port, int db, int pipe, boolean statistics, Configuration conf, Configure configure) {
         this.host = host;
         this.port = port;
         this.pipe = pipe;
         this.conf = conf;
+        this.configure = configure;
         this.statistics = statistics;
+        this.monitor = MonitorFactory.getMonitor("endpoint_statistics", configure.getMetricEndpointInstance());
         try {
             RedisSocketFactory factory = new RedisSocketFactory(conf);
             this.socket = factory.createSocket(host, port, conf.getConnectionTimeout());
@@ -199,7 +203,7 @@ public class Endpoint implements Closeable {
     
     public static Endpoint valueOf(Endpoint endpoint) {
         closeQuietly(endpoint);
-        return new Endpoint(endpoint.host, endpoint.port, endpoint.db, endpoint.pipe, endpoint.statistics, endpoint.conf);
+        return new Endpoint(endpoint.host, endpoint.port, endpoint.db, endpoint.pipe, endpoint.statistics, endpoint.conf, endpoint.configure);
     }
     
     private void emit(OutputStream out, byte[] command, byte[]... ary) throws IOException {

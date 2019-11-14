@@ -72,7 +72,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
         if (event instanceof PreRdbSyncEvent) {
             Endpoints.closeQuietly(this.endpoints.get());
             int pipe = configure.getMigrateBatchSize();
-            this.endpoints.set(new Endpoints(lines, pipe, true, configuration));
+            this.endpoints.set(new Endpoints(lines, pipe, true, configuration, configure));
         } else if (event instanceof DumpKeyValuePair) {
             retry((DumpKeyValuePair)event, configure.getMigrateRetries());
         } else if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {

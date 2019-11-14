@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.conf.NodeConfParser;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.util.type.Tuple3;
@@ -39,9 +40,9 @@ public class Endpoints implements Closeable {
     private final Set<Endpoint> set = new HashSet<>();
     private final Map<Short, Endpoint> endpoints = new HashMap<>();
 
-    public Endpoints(List<String> lines, int pipe, boolean statistics, Configuration configuration) {
+    public Endpoints(List<String> lines, int pipe, boolean statistics, Configuration conf, Configure configure) {
         Function<Tuple3<String, Integer, String>, Endpoint> mapper = t -> {
-            return new Endpoint(t.getV1(), t.getV2(), 0, pipe, statistics, configuration);
+            return new Endpoint(t.getV1(), t.getV2(), 0, pipe, statistics, conf, configure);
         };
         new NodeConfParser<>(mapper).parse(lines, set, endpoints);
     }

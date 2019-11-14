@@ -144,7 +144,7 @@ public class RstCommand extends AbstractCommand {
     }
 
     private RdbVisitor getRdbVisitor(Replicator replicator, Configure configure, RedisURI uri, List<Long> db, boolean replace, boolean legacy) throws Exception {
-        try (Endpoint endpoint = new Endpoint(uri.getHost(), uri.getPort(), Configuration.valueOf(uri))) {
+        try (Endpoint endpoint = new Endpoint(uri.getHost(), uri.getPort(), Configuration.valueOf(uri), configure)) {
             Endpoint.RedisObject r = endpoint.send("cluster".getBytes(), "nodes".getBytes());
             if (r.type.isError()) {
                 return new SingleRdbVisitor(replicator, configure, uri, db, replace, legacy);
