@@ -8,5 +8,6 @@ services:
       - "6379:6379"
   redis1:
     image: redis:5.0.6
+    container_name: redis1
     ports:
       - "6380:6379"
