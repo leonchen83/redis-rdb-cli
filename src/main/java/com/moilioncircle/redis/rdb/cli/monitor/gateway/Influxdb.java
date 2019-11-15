@@ -1,4 +1,4 @@
-package com.moilioncircle.redis.rdb.cli.monitor.influxdb;
+package com.moilioncircle.redis.rdb.cli.monitor.gateway;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.influxdb.BatchOptions.DEFAULTS;

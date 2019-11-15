@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.monitor.glossary;
+package com.moilioncircle.redis.rdb.cli.glossary;
 
 /**
  * @author Baoyi Chen

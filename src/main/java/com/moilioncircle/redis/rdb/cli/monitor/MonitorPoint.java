@@ -16,13 +16,13 @@
 
 package com.moilioncircle.redis.rdb.cli.monitor;
 
-import static com.moilioncircle.redis.rdb.cli.monitor.glossary.MonitorType.COUNTER;
-import static com.moilioncircle.redis.rdb.cli.monitor.glossary.MonitorType.GAUGE;
+import static com.moilioncircle.redis.rdb.cli.glossary.MonitorType.COUNTER;
+import static com.moilioncircle.redis.rdb.cli.glossary.MonitorType.GAUGE;
 
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Counter;
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Gauge;
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
-import com.moilioncircle.redis.rdb.cli.monitor.glossary.MonitorType;
+import com.moilioncircle.redis.rdb.cli.glossary.MonitorType;
 import com.moilioncircle.redis.replicator.util.type.Tuple2;
 
 /**
