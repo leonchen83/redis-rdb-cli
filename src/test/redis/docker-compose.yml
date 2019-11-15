@@ -5,6 +5,7 @@ services:
     image: redis:5.0.6
     container_name: redis0
     volumes:
+      - ./conf/redis.conf:/usr/local/etc/redis/r‌​edis.conf
       - /Users/leon/Workspace/test/dump.rdb:/data/dump.rdb
     ports:
       - "6379:6379"
