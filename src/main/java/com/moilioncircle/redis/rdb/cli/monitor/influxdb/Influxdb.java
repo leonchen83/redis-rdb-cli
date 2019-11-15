@@ -129,7 +129,7 @@ public class Influxdb implements Closeable {
         BatchOptions opt = DEFAULTS;
         opt = opt.consistency(consistency).jitterDuration(jitter);
         opt = opt.actions(this.actions);
-        opt = opt.exceptionHandler(new ExceptionHandler()).bufferLimit(this.capacity).flushDuration(interval);
+        opt = opt.exceptionHandler(new ExceptionHandler()).bufferLimit(capacity).flushDuration(interval);
         r.setDatabase(this.database).setRetentionPolicy(retention).enableBatch((opt)).enableGzip();
         return r;
     }

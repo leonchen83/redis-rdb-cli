@@ -119,4 +119,17 @@ public final class MonitorPoint {
         r.value = value;
         return r;
     }
+
+    @Override
+    public String toString() {
+        return "MonitorPoint{" +
+                "time=" + time +
+                ", value=" + value +
+                ", timestamp=" + timestamp +
+                ", monitorKey='" + monitorKey + '\'' +
+                ", monitorName='" + monitorName + '\'' +
+                ", monitorInstance='" + monitorInstance + '\'' +
+                ", monitorType=" + monitorType +
+                '}';
+    }
 }
