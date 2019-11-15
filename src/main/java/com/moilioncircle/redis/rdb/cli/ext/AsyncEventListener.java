@@ -80,6 +80,7 @@ public class AsyncEventListener implements EventListener {
                 this.executors[0].submit(() -> this.listener.onEvent(r, new CloseEvent()));
                 terminateQuietly(this.executors[0], c.getTimeout(), MILLISECONDS);
             });
+            this.barrier = new CyclicBarrier(1);
         }
     }
 
