@@ -69,7 +69,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
         } else if (event instanceof DumpKeyValuePair) {
             retry(event, configure.getMigrateRetries());
         } else if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
-            this.endpoint.get().flush();
+            this.endpoint.get().flushQuietly();
             Endpoint.closeQuietly(this.endpoint.get());
         }
     }

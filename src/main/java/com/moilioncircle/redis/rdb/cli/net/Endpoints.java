@@ -56,7 +56,7 @@ public class Endpoints implements Closeable {
         endpoints.get(slot).batch(force, command, args);
     }
 
-    public void flush() {
+    public void flushQuietly() {
         for (Endpoint endpoint : set) {
             endpoint.flush();
         }

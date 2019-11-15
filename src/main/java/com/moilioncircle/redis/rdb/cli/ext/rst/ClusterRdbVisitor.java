@@ -29,6 +29,7 @@ import com.moilioncircle.redis.rdb.cli.ext.AbstractMigrateRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.AsyncEventListener;
 import com.moilioncircle.redis.rdb.cli.ext.CloseEvent;
 import com.moilioncircle.redis.rdb.cli.ext.rst.cmd.CombineCommand;
+import com.moilioncircle.redis.rdb.cli.ext.rst.cmd.FlushCommand;
 import com.moilioncircle.redis.rdb.cli.net.Endpoints;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -98,8 +99,12 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             this.endpoints.set(new Endpoints(lines, pipe, true, configuration, configure));
         } else if (event instanceof DumpKeyValuePair) {
             retry((DumpKeyValuePair)event, configure.getMigrateRetries());
-        } else if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
-            this.endpoints.get().flush();
+        } else if (event instanceof PostRdbSyncEvent) {
+            this.endpoints.get().flushQuietly();
+        } else if (event instanceof PreCommandSyncEvent) {
+            this.endpoints.get().flushQuietly();
+        } else if (event instanceof FlushCommand) {
+            this.endpoints.get().flushQuietly();
         } else if (event instanceof SelectCommand) {
             SelectCommand select = (SelectCommand)event;
             this.db = select.getIndex();
@@ -108,7 +113,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
                 retry((CombineCommand)event, configure.getMigrateRetries());
             }
         } else if (event instanceof CloseEvent) {
-            this.endpoints.get().flush();
+            this.endpoints.get().flushQuietly();
             Endpoints.closeQuietly(this.endpoints.get());
         }
     }

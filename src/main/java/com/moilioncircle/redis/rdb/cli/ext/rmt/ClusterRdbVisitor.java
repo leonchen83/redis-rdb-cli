@@ -67,7 +67,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
         } else if (event instanceof DumpKeyValuePair) {
             retry((DumpKeyValuePair)event, configure.getMigrateRetries());
         } else if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
-            this.endpoints.get().flush();
+            this.endpoints.get().flushQuietly();
             Endpoints.closeQuietly(this.endpoints.get());
         }
     }

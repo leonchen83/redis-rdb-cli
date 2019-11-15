@@ -154,6 +154,13 @@ public class Endpoint implements Closeable {
         }
     }
     
+    public void flushQuietly() {
+        try {
+            flush();
+        } catch (Throwable e) {
+        }
+    }
+    
     public void flush() {
         try {
             if (count > 0) {

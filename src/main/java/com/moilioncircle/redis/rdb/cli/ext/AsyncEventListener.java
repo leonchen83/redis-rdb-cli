@@ -16,9 +16,21 @@
 
 package com.moilioncircle.redis.rdb.cli.ext;
 
+import static com.moilioncircle.redis.replicator.util.Concurrents.terminateQuietly;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
+import com.moilioncircle.redis.rdb.cli.ext.rst.cmd.FlushCommand;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.cmd.Command;
+import com.moilioncircle.redis.replicator.cmd.impl.FlushAllCommand;
+import com.moilioncircle.redis.replicator.cmd.impl.PingCommand;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
 import com.moilioncircle.redis.replicator.event.PostCommandSyncEvent;
@@ -27,14 +39,6 @@ import com.moilioncircle.redis.replicator.event.PreCommandSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
 
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
-import static com.moilioncircle.redis.replicator.util.Concurrents.terminateQuietly;
-
 /**
  * @author Baoyi Chen
  */
@@ -42,8 +46,9 @@ public class AsyncEventListener implements EventListener {
 
     private int count;
     private CyclicBarrier barrier;
-    private ExecutorService[] executors;
     private final EventListener listener;
+    private ScheduledExecutorService[] executors;
+    private long interval = SECONDS.toMillis(30);
 
     public AsyncEventListener(EventListener listener, Replicator r, Configure c) {
         this.listener = listener;
@@ -52,14 +57,14 @@ public class AsyncEventListener implements EventListener {
             if ((n & (n - 1)) != 0) {
                 throw new IllegalArgumentException("migrate_thread_size " + n + " must power of 2");
             }
-            this.executors = new ExecutorService[n];
+            this.executors = new ScheduledExecutorService[n];
             for (int i = 0; i < this.executors.length; i++) {
-                this.executors[i] = Executors.newSingleThreadExecutor();
+                this.executors[i] = Executors.newSingleThreadScheduledExecutor();
             }
             r.addCloseListener(rep -> {
                 for (int i = 0; i < this.executors.length; i++) {
                     this.executors[i].submit(() -> this.listener.onEvent(r, new CloseEvent()));
-                    terminateQuietly(this.executors[i], c.getTimeout(), TimeUnit.MILLISECONDS);
+                    terminateQuietly(this.executors[i], c.getTimeout(), MILLISECONDS);
                 }
             });
             this.barrier = new CyclicBarrier(n);
@@ -90,6 +95,10 @@ public class AsyncEventListener implements EventListener {
                     for (int i = 0; i < this.executors.length; i++) {
                         this.executors[i].submit(() -> await());
                     }
+                }
+                if (event instanceof PreCommandSyncEvent) {
+                    Runnable runnable = () -> this.listener.onEvent(replicator, new FlushCommand());
+                    this.executors[0].scheduleWithFixedDelay(runnable, interval, interval, MILLISECONDS);
                 }
             } else if (event instanceof DumpKeyValuePair) {
                 int i = count++ & (executors.length - 1);
