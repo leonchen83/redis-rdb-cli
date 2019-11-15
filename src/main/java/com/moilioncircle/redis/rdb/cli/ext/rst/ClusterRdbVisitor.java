@@ -27,7 +27,7 @@ import java.util.List;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractMigrateRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.AsyncEventListener;
-import com.moilioncircle.redis.rdb.cli.ext.CloseEvent;
+import com.moilioncircle.redis.rdb.cli.ext.rst.cmd.CloseCommand;
 import com.moilioncircle.redis.rdb.cli.ext.rst.cmd.CombineCommand;
 import com.moilioncircle.redis.rdb.cli.ext.rst.cmd.FlushCommand;
 import com.moilioncircle.redis.rdb.cli.net.Endpoints;
@@ -112,7 +112,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             if (containsDB(db)) {
                 retry((CombineCommand)event, configure.getMigrateRetries());
             }
-        } else if (event instanceof CloseEvent) {
+        } else if (event instanceof CloseCommand) {
             this.endpoints.get().flushQuietly();
             Endpoints.closeQuietly(this.endpoints.get());
         }

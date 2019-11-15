@@ -26,6 +26,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
+import com.moilioncircle.redis.rdb.cli.ext.rst.cmd.CloseCommand;
 import com.moilioncircle.redis.rdb.cli.ext.rst.cmd.FlushCommand;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.cmd.Command;
@@ -68,7 +69,7 @@ public class AsyncEventListener implements EventListener {
             }
             r.addCloseListener(rep -> {
                 for (int i = 0; i < this.executors.length; i++) {
-                    this.executors[i].submit(() -> this.listener.onEvent(r, new CloseEvent()));
+                    this.executors[i].submit(() -> this.listener.onEvent(r, new CloseCommand()));
                     terminateQuietly(this.executors[i], c.getTimeout(), MILLISECONDS);
                 }
             });
@@ -77,7 +78,7 @@ public class AsyncEventListener implements EventListener {
             this.executors = new ScheduledExecutorService[1];
             this.executors[0] = Executors.newSingleThreadScheduledExecutor();
             r.addCloseListener(rep -> {
-                this.executors[0].submit(() -> this.listener.onEvent(r, new CloseEvent()));
+                this.executors[0].submit(() -> this.listener.onEvent(r, new CloseCommand()));
                 terminateQuietly(this.executors[0], c.getTimeout(), MILLISECONDS);
             });
             this.barrier = new CyclicBarrier(1);

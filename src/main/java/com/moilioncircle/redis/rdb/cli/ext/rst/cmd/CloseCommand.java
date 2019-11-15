@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.ext;
+package com.moilioncircle.redis.rdb.cli.ext.rst.cmd;
 
 import com.moilioncircle.redis.replicator.event.Event;
 
 /**
  * @author Baoyi Chen
  */
-public class CloseEvent implements Event {
+public class CloseCommand implements Event {
 }
