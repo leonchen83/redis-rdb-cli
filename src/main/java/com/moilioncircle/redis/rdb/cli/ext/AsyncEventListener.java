@@ -29,8 +29,6 @@ import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.rst.cmd.FlushCommand;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.cmd.Command;
-import com.moilioncircle.redis.replicator.cmd.impl.FlushAllCommand;
-import com.moilioncircle.redis.replicator.cmd.impl.PingCommand;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
 import com.moilioncircle.redis.replicator.event.PostCommandSyncEvent;
