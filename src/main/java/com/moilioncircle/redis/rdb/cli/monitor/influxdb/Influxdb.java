@@ -120,7 +120,7 @@ public class Influxdb implements Closeable {
         //
         final OkHttpClient.Builder http = new OkHttpClient.Builder();
         Dispatcher dispatcher = new Dispatcher();
-        dispatcher.setMaxRequests(5); dispatcher.setMaxRequestsPerHost(5);
+        dispatcher.setMaxRequests(2); dispatcher.setMaxRequestsPerHost(2);
         http.dispatcher(dispatcher);
         http.connectionPool(new ConnectionPool(threads, 5, TimeUnit.MINUTES));
         
