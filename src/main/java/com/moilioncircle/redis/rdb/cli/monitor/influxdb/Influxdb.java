@@ -24,6 +24,7 @@ import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorPoint;
 
 import okhttp3.ConnectionPool;
+import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
 
 /**
@@ -40,7 +41,7 @@ public class Influxdb implements Closeable {
     public static final String INSTANCE = "instance";
 
     protected int port;
-    protected int threads = 2;
+    protected int threads = 1;
     protected InfluxDB influxdb;
     protected int actions = 256;
     protected int jitter = 1000;
@@ -118,8 +119,11 @@ public class Influxdb implements Closeable {
     protected InfluxDB create() {
         //
         final OkHttpClient.Builder http = new OkHttpClient.Builder();
+        Dispatcher dispatcher = new Dispatcher();
+        dispatcher.setMaxRequests(5); dispatcher.setMaxRequestsPerHost(5);
+        http.dispatcher(dispatcher);
         http.connectionPool(new ConnectionPool(threads, 5, TimeUnit.MINUTES));
-
+        
         //
         final InfluxDB r = InfluxDBFactory.connect(url, user, password, http);
         BatchOptions opt = DEFAULTS;
