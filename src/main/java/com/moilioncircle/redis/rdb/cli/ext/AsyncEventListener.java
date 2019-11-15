@@ -43,19 +43,26 @@ import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
 public class AsyncEventListener implements EventListener {
 
     private int count;
+    private final int threads; 
+    private final boolean flush;
     private CyclicBarrier barrier;
     private final EventListener listener;
     private ScheduledExecutorService[] executors;
     private long interval = SECONDS.toMillis(30);
 
     public AsyncEventListener(EventListener listener, Replicator r, Configure c) {
+        this(listener, r, c, false);
+    }
+
+    public AsyncEventListener(EventListener listener, Replicator r, Configure c, boolean flush) {
+        this.flush = flush;
         this.listener = listener;
-        int n = c.getMigrateThreads();
-        if (n > 0) {
-            if ((n & (n - 1)) != 0) {
-                throw new IllegalArgumentException("migrate_thread_size " + n + " must power of 2");
+        this.threads = c.getMigrateThreads();
+        if (threads > 0) {
+            if ((threads & (threads - 1)) != 0) {
+                throw new IllegalArgumentException("migrate_thread_size " + threads + " must power of 2");
             }
-            this.executors = new ScheduledExecutorService[n];
+            this.executors = new ScheduledExecutorService[threads];
             for (int i = 0; i < this.executors.length; i++) {
                 this.executors[i] = Executors.newSingleThreadScheduledExecutor();
             }
@@ -65,15 +72,20 @@ public class AsyncEventListener implements EventListener {
                     terminateQuietly(this.executors[i], c.getTimeout(), MILLISECONDS);
                 }
             });
-            this.barrier = new CyclicBarrier(n);
+            this.barrier = new CyclicBarrier(threads);
+        } else if (flush) {
+            this.executors = new ScheduledExecutorService[1];
+            this.executors[0] = Executors.newSingleThreadScheduledExecutor();
+            r.addCloseListener(rep -> {
+                this.executors[0].submit(() -> this.listener.onEvent(r, new CloseEvent()));
+                terminateQuietly(this.executors[0], c.getTimeout(), MILLISECONDS);
+            });
         }
     }
 
     @Override
     public void onEvent(Replicator replicator, Event event) {
-        if (executors == null) {
-            this.listener.onEvent(replicator, event);
-        } else {
+        if (threads > 0 || flush) {
             if (event instanceof PreRdbSyncEvent ||
                     event instanceof PostRdbSyncEvent ||
                     event instanceof PreCommandSyncEvent ||
@@ -96,7 +108,7 @@ public class AsyncEventListener implements EventListener {
                 }
                 if (event instanceof PreCommandSyncEvent) {
                     Runnable runnable = () -> this.listener.onEvent(replicator, new FlushCommand());
-                    this.executors[0].scheduleWithFixedDelay(runnable, interval, interval, MILLISECONDS);
+                    if (flush) this.executors[0].scheduleWithFixedDelay(runnable, interval, interval, MILLISECONDS);
                 }
             } else if (event instanceof DumpKeyValuePair) {
                 int i = count++ & (executors.length - 1);
@@ -106,6 +118,8 @@ public class AsyncEventListener implements EventListener {
                 // so we can process aof event use thread 0 safely.
                 this.executors[0].submit(() -> this.listener.onEvent(replicator, event));
             }
+        } else {
+            this.listener.onEvent(replicator, event);
         }
     }
     

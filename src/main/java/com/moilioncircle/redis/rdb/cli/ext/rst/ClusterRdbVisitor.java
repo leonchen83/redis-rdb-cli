@@ -78,7 +78,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
         super(replicator, configure, singletonList(0L), new ArrayList<>(), new ArrayList<>(), replace);
         this.lines = lines;
         this.configuration = configure.merge(defaultSetting());
-        this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure));
+        this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure, true));
     }
 
     @Override

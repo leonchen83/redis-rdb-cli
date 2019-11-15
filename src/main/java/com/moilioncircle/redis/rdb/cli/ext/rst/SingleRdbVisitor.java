@@ -62,7 +62,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
         this.uri = uri;
         this.legacy = legacy;
         this.conf = configure.merge(this.uri);
-        this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure));
+        this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure, true));
     }
 
     @Override
