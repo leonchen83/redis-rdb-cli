@@ -73,7 +73,7 @@ public class AsyncEventListener implements EventListener {
                 }
             });
             this.barrier = new CyclicBarrier(threads);
-        } else if (flush) {
+        } else if (flush) /* threads <=0 && flush */{
             this.executors = new ScheduledExecutorService[1];
             this.executors[0] = Executors.newSingleThreadScheduledExecutor();
             r.addCloseListener(rep -> {
