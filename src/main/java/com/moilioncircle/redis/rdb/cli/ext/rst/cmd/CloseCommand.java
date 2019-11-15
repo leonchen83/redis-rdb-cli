@@ -16,10 +16,10 @@
 
 package com.moilioncircle.redis.rdb.cli.ext.rst.cmd;
 
-import com.moilioncircle.redis.replicator.event.Event;
+import com.moilioncircle.redis.replicator.cmd.impl.AbstractCommand;
 
 /**
  * @author Baoyi Chen
  */
-public class CloseCommand implements Event {
+public class CloseCommand extends AbstractCommand {
 }
