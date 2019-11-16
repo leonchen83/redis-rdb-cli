@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.rst.cmd.CloseCommand;
 import com.moilioncircle.redis.rdb.cli.ext.rst.cmd.FlushCommand;
-import com.moilioncircle.redis.rdb.cli.net.Endpoint;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.cmd.Command;
 import com.moilioncircle.redis.replicator.event.Event;
@@ -110,6 +109,7 @@ public class AsyncEventListener implements EventListener {
                 
                 // 3
                 if (event instanceof PostRdbSyncEvent) {
+                    logger.info("processed {} rdb event.", count);
                     for (int i = 0; i < this.executors.length; i++) {
                         final int thread = i;
                         this.executors[i].submit(() -> await(thread));
@@ -117,7 +117,6 @@ public class AsyncEventListener implements EventListener {
                 }
                 if (event instanceof PreCommandSyncEvent) {
                     Runnable runnable = () -> {
-                        logger.info("start processing aof event.");
                         this.listener.onEvent(replicator, new FlushCommand());
                     };
                     if (flush) this.executors[0].scheduleWithFixedDelay(runnable, interval, interval, MILLISECONDS);
@@ -132,6 +131,12 @@ public class AsyncEventListener implements EventListener {
             }
         } else {
             this.listener.onEvent(replicator, event);
+            if (event instanceof DumpKeyValuePair) {
+                count++;
+            } 
+            if (event instanceof PostRdbSyncEvent) {
+                logger.info("processed {} rdb event.", count);
+            }
         }
     }
     
@@ -141,7 +146,7 @@ public class AsyncEventListener implements EventListener {
 
     private void await(int i) {
         try {
-            logger.info("thread {} awaiting.", i);
+            logger.debug("thread {} awaiting.", i);
             if (barrier != null) barrier.await();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

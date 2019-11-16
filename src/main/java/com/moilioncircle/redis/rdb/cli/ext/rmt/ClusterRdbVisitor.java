@@ -23,6 +23,9 @@ import static java.util.Collections.singletonList;
 import java.io.IOException;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractMigrateRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.AsyncEventListener;
@@ -41,6 +44,8 @@ import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
  * @author Baoyi Chen
  */
 public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements EventListener {
+
+    private static final Logger logger = LoggerFactory.getLogger(ClusterRdbVisitor.class);
 
     private final List<String> lines;
     private final Configuration configuration;
@@ -78,7 +83,10 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             byte[] expire = ZERO;
             if (dkv.getExpiredMs() != null) {
                 long ms = dkv.getExpiredMs() - System.currentTimeMillis();
-                if (ms <= 0) return;
+                if (ms <= 0) {
+                    logger.debug("expired key {}.", new String(dkv.getKey()));
+                    return;
+                }
                 expire = String.valueOf(ms).getBytes();
             }
 
