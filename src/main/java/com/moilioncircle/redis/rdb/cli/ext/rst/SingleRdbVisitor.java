@@ -121,6 +121,8 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
             if (times >= 0 && flush) {
                 endpoint.set(Endpoint.valueOf(endpoint.get()));
                 retry(command, times);
+            } else {
+                logger.error("failed to sync command: [{}], reason: {}", CombineCommand.toString(command), e.getMessage());
             }
         }
     }
@@ -156,6 +158,8 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
             if (times >= 0 && flush) {
                 endpoint.set(Endpoint.valueOf(endpoint.get()));
                 retry(dkv, times);
+            } else {
+                logger.error("failed to sync rdb event, key:[{}], reason: {}", new String(dkv.getKey()), e.getMessage());
             }
         }
     }

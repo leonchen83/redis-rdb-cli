@@ -56,6 +56,10 @@ public class CombineCommand extends AbstractCommand {
     
     @Override
     public String toString() {
+        return toString(this.defaultCommand);
+    }
+    
+    public static String toString(DefaultCommand defaultCommand) {
         StringBuilder builder = new StringBuilder();
         builder.append(new String(defaultCommand.getCommand()));
         for (byte[] arg : defaultCommand.getArgs()) {

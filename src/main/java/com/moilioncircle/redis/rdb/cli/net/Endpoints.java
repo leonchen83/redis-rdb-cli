@@ -58,7 +58,7 @@ public class Endpoints implements Closeable {
 
     public void flushQuietly() {
         for (Endpoint endpoint : set) {
-            endpoint.flush();
+            endpoint.flushQuietly();
         }
     }
 

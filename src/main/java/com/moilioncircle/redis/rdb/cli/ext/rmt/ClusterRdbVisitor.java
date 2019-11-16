@@ -101,6 +101,8 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             if (times >= 0 && flush) {
                 this.endpoints.get().update(slot);
                 retry(dkv, times);
+            } else {
+                logger.error("failed to sync rdb event, key:[{}], reason: {}", new String(dkv.getKey()), e.getMessage());
             }
         }
     }

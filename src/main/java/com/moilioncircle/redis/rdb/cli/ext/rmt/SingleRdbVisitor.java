@@ -72,16 +72,15 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
             int pipe = configure.getMigrateBatchSize();
             this.endpoint.set(new Endpoint(uri.getHost(), uri.getPort(), 0, pipe, true, conf, configure));
         } else if (event instanceof DumpKeyValuePair) {
-            retry(event, configure.getMigrateRetries());
+            retry((DumpKeyValuePair)event, configure.getMigrateRetries());
         } else if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
             this.endpoint.get().flushQuietly();
             Endpoint.closeQuietly(this.endpoint.get());
         }
     }
     
-    public void retry(Event event, int times) {
+    public void retry(DumpKeyValuePair dkv, int times) {
         try {
-            DumpKeyValuePair dkv = (DumpKeyValuePair) event;
             DB db = dkv.getDb();
     
             int index;
@@ -110,7 +109,9 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
             times--;
             if (times >= 0 && flush) {
                 endpoint.set(Endpoint.valueOf(endpoint.get()));
-                retry(event, times);
+                retry(dkv, times);
+            } else {
+                logger.error("failed to sync rdb event, key:[{}], reason: {}", new String(dkv.getKey()), e.getMessage());
             }
         }
     }

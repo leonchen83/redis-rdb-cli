@@ -146,6 +146,8 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             if (times >= 0 && flush) {
                 this.endpoints.get().update(slot);
                 retry(dkv, times);
+            } else {
+                logger.error("failed to sync rdb event, key:[{}], reason: {}", new String(dkv.getKey()), e.getMessage());
             }
         }
     }
@@ -159,6 +161,8 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             if (times >= 0 && flush) {
                 this.endpoints.get().update(slot);
                 retry(command, slot, times);
+            } else {
+                logger.error("failed to sync command: [{}], reason: {}", command, e.getMessage());
             }
         }
     }
@@ -171,7 +175,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                logger.error("failed to sync command [{}]", command);
+                logger.error("failed to sync command: [{}]", command);
             }
         } else if (parsedCommand instanceof RenameNxCommand) {
             RenameNxCommand cmd = (RenameNxCommand) parsedCommand;
@@ -179,7 +183,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                logger.error("failed to sync command [{}]", command);
+                logger.error("failed to sync command: [{}]", command);
             }
         } else if (parsedCommand instanceof PFMergeCommand) {
             PFMergeCommand cmd = (PFMergeCommand) parsedCommand;
@@ -187,7 +191,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                logger.error("failed to sync command [{}]", command);
+                logger.error("failed to sync command: [{}]", command);
             }
         } else if (parsedCommand instanceof PFCountCommand) {
             PFCountCommand cmd = (PFCountCommand) parsedCommand;
@@ -195,7 +199,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                logger.error("failed to sync command [{}]", command);
+                logger.error("failed to sync command: [{}]", command);
             }
         } else if (parsedCommand instanceof MSetNxCommand) {
             MSetNxCommand cmd = (MSetNxCommand) parsedCommand;
@@ -204,7 +208,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                logger.error("failed to sync command [{}]", command);
+                logger.error("failed to sync command: [{}]", command);
             }
         } else if (parsedCommand instanceof BRPopLPushCommand) {
             BRPopLPushCommand cmd = (BRPopLPushCommand) parsedCommand;
@@ -212,7 +216,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                logger.error("failed to sync command [{}]", command);
+                logger.error("failed to sync command: [{}]", command);
             }
         } else if (parsedCommand instanceof BitOpCommand) {
             BitOpCommand cmd = (BitOpCommand) parsedCommand;
@@ -220,7 +224,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                logger.error("failed to sync command [{}]", command);
+                logger.error("failed to sync command: [{}]", command);
             }
         } else if (parsedCommand instanceof MSetCommand) {
             MSetCommand cmd = (MSetCommand) parsedCommand;
@@ -229,7 +233,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                logger.error("failed to sync command [{}]", command);
+                logger.error("failed to sync command: [{}]", command);
             }
         } else if (parsedCommand instanceof UnLinkCommand) {
             UnLinkCommand cmd = (UnLinkCommand) parsedCommand;
@@ -237,7 +241,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             if (slot != -1) {
                 retry(command, slot(cmd.getKeys()[0]), times);
             } else {
-                logger.error("failed to sync command [{}]", command);
+                logger.error("failed to sync command: [{}]", command);
             }
         } else if (parsedCommand instanceof DelCommand) {
             DelCommand cmd = (DelCommand) parsedCommand;
@@ -245,7 +249,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             if (slot != -1) {
                 retry(command, slot(cmd.getKeys()[0]), times);
             } else {
-                logger.error("failed to sync command [{}]", command);
+                logger.error("failed to sync command: [{}]", command);
             }
         } else if (parsedCommand instanceof ZUnionStoreCommand) {
             ZUnionStoreCommand cmd = (ZUnionStoreCommand) parsedCommand;
@@ -253,7 +257,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                logger.error("failed to sync command [{}]", command);
+                logger.error("failed to sync command: [{}]", command);
             }
         } else if (parsedCommand instanceof ZInterStoreCommand) {
             ZInterStoreCommand cmd = (ZInterStoreCommand) parsedCommand;
@@ -261,7 +265,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                logger.error("failed to sync command [{}]", command);
+                logger.error("failed to sync command: [{}]", command);
             }
         } else if (parsedCommand instanceof SMoveCommand) {
             SMoveCommand cmd = (SMoveCommand) parsedCommand;
@@ -269,7 +273,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                logger.error("failed to sync command [{}]", command);
+                logger.error("failed to sync command: [{}]", command);
             }
         } else if (parsedCommand instanceof SInterStoreCommand) {
             SInterStoreCommand cmd = (SInterStoreCommand) parsedCommand;
@@ -277,7 +281,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                logger.error("failed to sync command [{}]", command);
+                logger.error("failed to sync command: [{}]", command);
             }
         } else if (parsedCommand instanceof SDiffStoreCommand) {
             SDiffStoreCommand cmd = (SDiffStoreCommand) parsedCommand;
@@ -285,7 +289,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                logger.error("failed to sync command [{}]", command);
+                logger.error("failed to sync command: [{}]", command);
             }
         } else if (parsedCommand instanceof RPopLPushCommand) {
             RPopLPushCommand cmd = (RPopLPushCommand) parsedCommand;
@@ -293,7 +297,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                logger.error("failed to sync command [{}]", command);
+                logger.error("failed to sync command: [{}]", command);
             }
         } else if (parsedCommand instanceof GenericKeyCommand) {
             GenericKeyCommand cmd = (GenericKeyCommand) parsedCommand;
