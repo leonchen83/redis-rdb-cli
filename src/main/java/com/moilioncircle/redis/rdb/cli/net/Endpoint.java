@@ -158,6 +158,7 @@ public class Endpoint implements Closeable {
         try {
             flush();
         } catch (Throwable e) {
+            logger.error("failed to flush.", e);
         }
     }
     
