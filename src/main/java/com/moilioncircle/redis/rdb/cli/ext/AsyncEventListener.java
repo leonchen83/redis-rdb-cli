@@ -46,8 +46,6 @@ import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
  */
 public class AsyncEventListener implements EventListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(AsyncEventListener.class);
-
     private int count;
     private final int threads; 
     private final boolean flush;
@@ -109,7 +107,6 @@ public class AsyncEventListener implements EventListener {
                 
                 // 3
                 if (event instanceof PostRdbSyncEvent) {
-                    logger.info("processed {} rdb event.", count);
                     for (int i = 0; i < this.executors.length; i++) {
                         final int thread = i;
                         this.executors[i].submit(() -> await(thread));
@@ -131,12 +128,6 @@ public class AsyncEventListener implements EventListener {
             }
         } else {
             this.listener.onEvent(replicator, event);
-            if (event instanceof DumpKeyValuePair) {
-                count++;
-            } 
-            if (event instanceof PostRdbSyncEvent) {
-                logger.info("processed {} rdb event.", count);
-            }
         }
     }
     
@@ -146,7 +137,6 @@ public class AsyncEventListener implements EventListener {
 
     private void await(int i) {
         try {
-            logger.debug("thread {} awaiting.", i);
             if (barrier != null) barrier.await();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

@@ -81,13 +81,17 @@ public class XMonitor implements Monitor {
 
     protected void doSet(String k, final long v) {
         XGauge x = this.gauges.get(k);
-        if (x == null) x = this.gauges.putIfAbsent(k, new XGauge());
+        if (x == null) x = putIfAbsent(gauges, k, new XGauge());
         x.set(v);
     }
 
     protected void doAdd(String k, long c, long t) {
         XCounter x = counters.get(k);
-        if (x == null) x = this.counters.putIfAbsent(k, new XCounter());
+        if (x == null) x = putIfAbsent(counters, k, new XCounter());
         x.add(c, t);
+    }
+
+    private static final <K, V> V putIfAbsent(Map<K, V> m, K k, V v) {
+        final V r = m.putIfAbsent(k, v); return r != null ? r : v;
     }
 }
