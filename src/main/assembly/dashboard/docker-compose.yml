@@ -13,6 +13,7 @@ services:
     restart: on-failure
   grafana:
     image: grafana/grafana:5.3.2
+    container_name: grafana
     ports:
       - "3000:3000"
     environment:
