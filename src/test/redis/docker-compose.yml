@@ -2,8 +2,9 @@ version: '2.1'
 
 services:
   redis0:
-    image: redis:4.0.8-alpine
+    image: redis:4.0.8
     container_name: redis0
+    privileged: true
     command: redis-server /usr/local/etc/redis/redis.conf
     volumes:
       - ./conf/redis.conf:/usr/local/etc/redis/redis.conf
@@ -12,8 +13,9 @@ services:
       - "6379:6379"
     restart: on-failure
   redis1:
-    image: redis:4.0.8-alpine
+    image: redis:4.0.8
     container_name: redis1
+    privileged: true
     command: redis-server /usr/local/etc/redis/redis.conf
     volumes:
       - ./conf/redis.conf:/usr/local/etc/redis/redis.conf
