@@ -59,7 +59,7 @@ public class Influxdb implements Closeable {
         this.url = configure.getMetricUri().toString();
         this.database = configure.getMetricDatabase();
         this.retention = configure.getMetricRetentionPolicy();
-        create();
+        this.influxdb = create();
     }
     
     public void reset(String measurement, String instance) {
