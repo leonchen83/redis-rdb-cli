@@ -44,7 +44,6 @@ import com.moilioncircle.redis.replicator.cmd.impl.DelCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.GenericKeyCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.MSetCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.MSetNxCommand;
-import com.moilioncircle.redis.replicator.cmd.impl.MoveCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.PFCountCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.PFMergeCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.RPopLPushCommand;
