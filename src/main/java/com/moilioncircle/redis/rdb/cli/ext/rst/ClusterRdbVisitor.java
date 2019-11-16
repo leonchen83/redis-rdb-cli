@@ -215,13 +215,6 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             } else {
                 logger.error("failed to sync command [{}]", command);
             }
-        } else if (parsedCommand instanceof MoveCommand) {
-            MoveCommand cmd = (MoveCommand) parsedCommand;
-            if (cmd.getDb() == 0) {
-                retry(command, slot(cmd.getKey()), times);
-            } else {
-                logger.error("failed to sync command [{}]", command);
-            }
         } else if (parsedCommand instanceof BitOpCommand) {
             BitOpCommand cmd = (BitOpCommand) parsedCommand;
             short slot = slot1(cmd.getDestkey(), cmd.getKeys());
@@ -240,15 +233,17 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
                 logger.error("failed to sync command [{}]", command);
             }
         } else if (parsedCommand instanceof UnLinkCommand) {
-            UnLinkCommand cmd = (UnLinkCommand) parsedCommand; 
-            if (cmd.getKeys().length == 1) {
+            UnLinkCommand cmd = (UnLinkCommand) parsedCommand;
+            short slot = slot0(cmd.getKeys());
+            if (slot != -1) {
                 retry(command, slot(cmd.getKeys()[0]), times);
             } else {
                 logger.error("failed to sync command [{}]", command);
             }
         } else if (parsedCommand instanceof DelCommand) {
             DelCommand cmd = (DelCommand) parsedCommand;
-            if (cmd.getKeys().length == 1) {
+            short slot = slot0(cmd.getKeys());
+            if (slot != -1) {
                 retry(command, slot(cmd.getKeys()[0]), times);
             } else {
                 logger.error("failed to sync command [{}]", command);
@@ -306,13 +301,14 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             retry(command, slot(cmd.getKey()), times);
         } else {
             // swapdb
+            // move
             // flushall
             // flushdb
-            // script flush
-            // script load
             // publish
             // multi
             // exec
+            // script flush
+            // script load
             // eval
             // evalsha
             logger.error("unsupported to sync command [{}]", command);
@@ -333,5 +329,9 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             if (slot != slot(keys[i])) return -1;
         }
         return slot;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(slot0("{user}:1".getBytes(), "{user}:2".getBytes()));
     }
 }
