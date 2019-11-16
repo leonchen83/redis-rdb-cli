@@ -2,15 +2,21 @@ version: '2.1'
 
 services:
   redis0:
-    image: redis:5.0.6
+    image: redis:4.0.8-alpine
     container_name: redis0
+    command: redis-server /usr/local/etc/redis/redis.conf
     volumes:
-      - ./conf/redis.conf:/usr/local/etc/redis/r‌​edis.conf
-      - /Users/leon/Workspace/test/dump.rdb:/data/dump.rdb
+      - ./conf/redis.conf:/usr/local/etc/redis/redis.conf
+      - /Users/leon/Workspace/test:/data
     ports:
       - "6379:6379"
+    restart: on-failure
   redis1:
-    image: redis:5.0.6
+    image: redis:4.0.8-alpine
     container_name: redis1
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./conf/redis.conf:/usr/local/etc/redis/redis.conf
     ports:
       - "6380:6379"
+    restart: on-failure
