@@ -18,19 +18,15 @@ package com.moilioncircle.redis.rdb.cli.ext;
 
 import static com.moilioncircle.redis.replicator.util.Concurrents.terminateQuietly;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.rst.cmd.CloseCommand;
-import com.moilioncircle.redis.rdb.cli.ext.rst.cmd.FlushCommand;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.cmd.Command;
 import com.moilioncircle.redis.replicator.event.Event;
@@ -48,18 +44,11 @@ public class AsyncEventListener implements EventListener {
 
     private int count;
     private final int threads; 
-    private final boolean flush;
     private CyclicBarrier barrier;
     private final EventListener listener;
-    private ScheduledExecutorService[] executors;
-    private long interval = SECONDS.toMillis(30);
+    private ExecutorService[] executors;
 
     public AsyncEventListener(EventListener listener, Replicator r, Configure c) {
-        this(listener, r, c, false);
-    }
-
-    public AsyncEventListener(EventListener listener, Replicator r, Configure c, boolean flush) {
-        this.flush = flush;
         this.listener = listener;
         this.threads = c.getMigrateThreads();
         if (threads > 0) {
@@ -77,20 +66,12 @@ public class AsyncEventListener implements EventListener {
                 }
             });
             this.barrier = new CyclicBarrier(threads);
-        } else if (flush) /* threads <=0 && flush */{
-            this.executors = new ScheduledExecutorService[1];
-            this.executors[0] = Executors.newSingleThreadScheduledExecutor();
-            r.addCloseListener(rep -> {
-                this.executors[0].submit(() -> this.listener.onEvent(r, new CloseCommand()));
-                terminateQuietly(this.executors[0], 0, MILLISECONDS);
-            });
-            this.barrier = new CyclicBarrier(1);
         }
     }
 
     @Override
     public void onEvent(Replicator replicator, Event event) {
-        if (threads > 0 || flush) {
+        if (threads > 0) {
             if (event instanceof PreRdbSyncEvent ||
                     event instanceof PostRdbSyncEvent ||
                     event instanceof PreCommandSyncEvent ||
@@ -111,12 +92,6 @@ public class AsyncEventListener implements EventListener {
                         final int thread = i;
                         this.executors[i].submit(() -> await(thread));
                     }
-                }
-                if (event instanceof PreCommandSyncEvent) {
-                    Runnable runnable = () -> {
-                        this.listener.onEvent(replicator, new FlushCommand());
-                    };
-                    if (flush) this.executors[0].scheduleWithFixedDelay(runnable, interval, interval, MILLISECONDS);
                 }
             } else if (event instanceof DumpKeyValuePair) {
                 int i = count++ & (executors.length - 1);

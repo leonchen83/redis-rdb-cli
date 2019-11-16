@@ -28,7 +28,6 @@ import com.moilioncircle.redis.rdb.cli.ext.AbstractMigrateRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.AsyncEventListener;
 import com.moilioncircle.redis.rdb.cli.ext.rst.cmd.CloseCommand;
 import com.moilioncircle.redis.rdb.cli.ext.rst.cmd.CombineCommand;
-import com.moilioncircle.redis.rdb.cli.ext.rst.cmd.FlushCommand;
 import com.moilioncircle.redis.rdb.cli.net.Endpoint;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.RedisURI;
@@ -67,7 +66,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
         this.uri = uri;
         this.legacy = legacy;
         this.conf = configure.merge(this.uri);
-        this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure, true));
+        this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure));
     }
 
     @Override
@@ -91,8 +90,6 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
         } else if (event instanceof PostRdbSyncEvent) {
             this.endpoint.get().flushQuietly();
         } else if (event instanceof PreCommandSyncEvent) {
-            this.endpoint.get().flushQuietly();
-        } else if (event instanceof FlushCommand) {
             this.endpoint.get().flushQuietly();
         } else if (event instanceof SelectCommand) {
             SelectCommand select = (SelectCommand)event;
