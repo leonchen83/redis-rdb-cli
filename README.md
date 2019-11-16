@@ -196,9 +196,41 @@ examples:
 
 ```
 
+```java  
+
+usage: rst -s <source> [-m <uri> | -c <file>] [-d <num num...>] [-r] [-l]
+
+options:
+ -c,--config <file>     migrate data to cluster via redis cluster's
+                        <nodes.conf> file, if specified, no need to
+                        specify --migrate.
+ -d,--db <num num...>   database number. multiple databases can be
+                        provided. if not specified, all databases will be
+                        included.
+ -h,--help              rst usage.
+ -l,--legacy            if specify the <replace> and this parameter. then
+                        use lua script to migrate data to target. if
+                        target redis version is greater than 3.0. no need
+                        to add this parameter.
+ -m,--migrate <uri>     migrate to uri. eg:
+                        redis://host:port?authPassword=foobar.
+ -r,--replace           replace exist key value. if not specified, default
+                        value is false.
+ -s,--source <source>   <source> eg:
+                        redis://host:port?authPassword=foobar
+ -v,--version           rst version.
+
+examples:
+ rst -s redis://127.0.0.1:6379 -c ./nodes.conf -r
+ rst -s redis://120.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0
+
+```
+
 ### Filter
 
-`rct`, `rdt` and `rmt` all these commands support data filter by `type`,`db` and `key` RegEx(Java style).  
+1. `rct`, `rdt` and `rmt` these 3 commands support data filter by `type`,`db` and `key` RegEx(Java style).  
+2. `rst` this command only support data filter by `db`.  
+  
 For example:
 
 ```java  
@@ -206,6 +238,7 @@ For example:
 rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -d 0
 rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -t string hash
 rmt -s /path/to/dump.rdb -m redis://192.168.1.105:6379 -r -d 0 1 -t list
+rst -s redis://120.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0
 ```
 
 ### Redis mass insertion
