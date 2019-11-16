@@ -25,9 +25,13 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.rst.cmd.CloseCommand;
 import com.moilioncircle.redis.rdb.cli.ext.rst.cmd.FlushCommand;
+import com.moilioncircle.redis.rdb.cli.net.Endpoint;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.cmd.Command;
 import com.moilioncircle.redis.replicator.event.Event;
@@ -42,6 +46,8 @@ import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
  * @author Baoyi Chen
  */
 public class AsyncEventListener implements EventListener {
+
+    private static final Logger logger = LoggerFactory.getLogger(AsyncEventListener.class);
 
     private int count;
     private final int threads; 
@@ -70,7 +76,7 @@ public class AsyncEventListener implements EventListener {
             r.addCloseListener(rep -> {
                 for (int i = 0; i < this.executors.length; i++) {
                     this.executors[i].submit(() -> this.listener.onEvent(r, new CloseCommand()));
-                    terminateQuietly(this.executors[i], c.getTimeout(), MILLISECONDS);
+                    terminateQuietly(this.executors[i], 0, MILLISECONDS);
                 }
             });
             this.barrier = new CyclicBarrier(threads);
@@ -79,7 +85,7 @@ public class AsyncEventListener implements EventListener {
             this.executors[0] = Executors.newSingleThreadScheduledExecutor();
             r.addCloseListener(rep -> {
                 this.executors[0].submit(() -> this.listener.onEvent(r, new CloseCommand()));
-                terminateQuietly(this.executors[0], c.getTimeout(), MILLISECONDS);
+                terminateQuietly(this.executors[0], 0, MILLISECONDS);
             });
             this.barrier = new CyclicBarrier(1);
         }
@@ -105,11 +111,15 @@ public class AsyncEventListener implements EventListener {
                 // 3
                 if (event instanceof PostRdbSyncEvent) {
                     for (int i = 0; i < this.executors.length; i++) {
-                        this.executors[i].submit(() -> await());
+                        final int thread = i;
+                        this.executors[i].submit(() -> await(thread));
                     }
                 }
                 if (event instanceof PreCommandSyncEvent) {
-                    Runnable runnable = () -> this.listener.onEvent(replicator, new FlushCommand());
+                    Runnable runnable = () -> {
+                        logger.info("start processing aof event.");
+                        this.listener.onEvent(replicator, new FlushCommand());
+                    };
                     if (flush) this.executors[0].scheduleWithFixedDelay(runnable, interval, interval, MILLISECONDS);
                 }
             } else if (event instanceof DumpKeyValuePair) {
@@ -129,8 +139,9 @@ public class AsyncEventListener implements EventListener {
         if (barrier != null) barrier.reset();
     }
 
-    private void await() {
+    private void await(int i) {
         try {
+            logger.info("thread {} awaiting.", i);
             if (barrier != null) barrier.await();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
