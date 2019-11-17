@@ -42,6 +42,7 @@ public class Influxdb implements Closeable {
 
     protected int port;
     protected int threads = 1;
+    protected String instance;
     protected InfluxDB influxdb;
     protected int actions = 256;
     protected int jitter = 1000;
@@ -56,13 +57,14 @@ public class Influxdb implements Closeable {
         this.configure = configure;
         this.user = configure.getMetricUser();
         this.password = configure.getMetricPass();
+        this.instance = configure.getMetricInstance();
         this.url = configure.getMetricUri().toString();
         this.database = configure.getMetricDatabase();
         this.retention = configure.getMetricRetentionPolicy();
         this.influxdb = create();
     }
     
-    public void reset(String measurement, String instance) {
+    public void reset(String measurement) {
         if (this.influxdb != null) {
             this.influxdb.query(new Query("drop series from \"" + measurement + "\" where instance = '" + instance + "'", database));
         }
@@ -106,7 +108,7 @@ public class Influxdb implements Closeable {
 
         //
         return Point.measurement(name).time(point.getTimestamp(), MILLISECONDS).addField(VALUE, point.getValue()).addField(AVG, avg)
-                .tag(MODULE, module).tag(TYPE, point.getMonitorType().name()).tag(FACADE, facade).tag(INSTANCE, point.getMonitorInstance()).build();
+                .tag(MODULE, module).tag(TYPE, point.getMonitorType().name()).tag(FACADE, facade).tag(INSTANCE, instance).build();
     }
 
     public class ExceptionHandler implements BiConsumer<Iterable<Point>, Throwable> {

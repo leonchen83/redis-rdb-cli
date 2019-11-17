@@ -81,7 +81,7 @@ public class Endpoint implements Closeable {
         this.conf = conf;
         this.configure = configure;
         this.statistics = statistics;
-        this.monitor = MonitorFactory.getMonitor("endpoint_statistics", configure.getMetricEndpointInstance());
+        this.monitor = MonitorFactory.getMonitor("endpoint_statistics");
         try {
             RedisSocketFactory factory = new RedisSocketFactory(conf);
             this.socket = factory.createSocket(host, port, conf.getConnectionTimeout());

@@ -90,7 +90,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         this.metricHeap = new CmpHeap<>(min(100, largest == null ? 100 : largest.intValue()));
         this.heap.setConsumer(this);
         this.replicator.addEventListener(this);
-        this.monitor = MonitorFactory.getMonitor("memory_statistics", configure.getMetricMemoryInstance());
+        this.monitor = MonitorFactory.getMonitor("memory_statistics");
     }
     
     @Override

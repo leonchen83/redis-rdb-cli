@@ -28,23 +28,16 @@ import com.moilioncircle.redis.rdb.cli.monitor.entity.Gauge;
  */
 public class XMonitor implements Monitor {
     protected final String name;
-    protected final String instance;
     private final Map<String, XGauge> gauges = new ConcurrentHashMap<>(8);
     private final Map<String, XCounter> counters = new ConcurrentHashMap<>(8);
 
-    public XMonitor(String name, String instance) {
+    public XMonitor(String name) {
         this.name = name;
-        this.instance = instance;
     }
 
     @Override
     public final String getName() {
         return name;
-    }
-
-    @Override
-    public String getInstance() {
-        return instance;
     }
 
     @Override
@@ -74,8 +67,8 @@ public class XMonitor implements Monitor {
 
     public static final class FactoryImpl implements Monitor.Factory {
         @Override
-        public Monitor create(String name, String instance) {
-            return new XMonitor(name, instance);
+        public Monitor create(String name) {
+            return new XMonitor(name);
         }
     }
 

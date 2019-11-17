@@ -35,7 +35,6 @@ public final class MonitorPoint {
     private long timestamp;
     private String monitorKey;
     private String monitorName;
-    private String monitorInstance;
     private MonitorType monitorType;
 
     /**
@@ -89,14 +88,6 @@ public final class MonitorPoint {
         this.monitorType = type;
     }
 
-    public String getMonitorInstance() {
-        return monitorInstance;
-    }
-
-    public void setMonitorInstance(String monitorInstance) {
-        this.monitorInstance = monitorInstance;
-    }
-
     public static final MonitorPoint valueOf(Monitor m, String k, Gauge v) {
         long now = System.currentTimeMillis();
         return valueOf(now, m, k, GAUGE, null, 0L, v.getGauge());
@@ -111,7 +102,6 @@ public final class MonitorPoint {
     protected static MonitorPoint valueOf(long now, Monitor m, String k, MonitorType t, String p, long time, long value) {
         final MonitorPoint r = new MonitorPoint();
         r.monitorName = m.getName();
-        r.monitorInstance = m.getInstance();
         r.monitorType = t;
         r.monitorKey = k;
         r.timestamp = now;
@@ -128,7 +118,6 @@ public final class MonitorPoint {
                 ", timestamp=" + timestamp +
                 ", monitorKey='" + monitorKey + '\'' +
                 ", monitorName='" + monitorName + '\'' +
-                ", monitorInstance='" + monitorInstance + '\'' +
                 ", monitorType=" + monitorType +
                 '}';
     }

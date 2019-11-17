@@ -180,14 +180,9 @@ public class Configure {
     private String metricRetentionPolicy;
     
     /**
-     * metric memory instance
+     * metric instance
      */
-    private String metricMemoryInstance;
-
-    /**
-     * metric endpoint instance
-     */
-    private String metricEndpointInstance;
+    private String metricInstance;
     
     public int getBatchSize() {
         return batchSize;
@@ -373,20 +368,12 @@ public class Configure {
         this.metricRetentionPolicy = metricRetentionPolicy;
     }
 
-    public String getMetricMemoryInstance() {
-        return metricMemoryInstance;
+    public String getMetricInstance() {
+        return metricInstance;
     }
 
-    public void setMetricMemoryInstance(String metricMemoryInstance) {
-        this.metricMemoryInstance = metricMemoryInstance;
-    }
-
-    public String getMetricEndpointInstance() {
-        return metricEndpointInstance;
-    }
-
-    public void setMetricEndpointInstance(String metricEndpointInstance) {
-        this.metricEndpointInstance = metricEndpointInstance;
+    public void setMetricInstance(String metricInstance) {
+        this.metricInstance = metricInstance;
     }
     
     public Configuration merge(RedisURI uri) {
@@ -440,8 +427,7 @@ public class Configure {
         conf.metricGateway = Gateway.parse(getString(conf, "metric_gateway", "none", true));
         conf.metricDatabase = getString(conf, "metric_database", "redis_rdb_cli", true);
         conf.metricRetentionPolicy = getString(conf, "metric_retention_policy", "30days", true);
-        conf.metricMemoryInstance = getString(conf, "metric_memory_instance", "memory0", true);
-        conf.metricEndpointInstance = getString(conf, "metric_endpoint_instance", "endpoint0", true);
+        conf.metricInstance = getString(conf, "metric_instance", "instance0", true);
         return conf;
     }
     
@@ -627,8 +613,7 @@ public class Configure {
                 ", metricGateway=" + metricGateway +
                 ", metricDatabase='" + metricDatabase + '\'' +
                 ", metricRetentionPolicy='" + metricRetentionPolicy + '\'' +
-                ", metricMemoryInstance='" + metricMemoryInstance + '\'' +
-                ", metricEndpointInstance='" + metricEndpointInstance + '\'' +
+                ", metricInstance='" + metricInstance + '\'' +
                 '}';
     }
 }
