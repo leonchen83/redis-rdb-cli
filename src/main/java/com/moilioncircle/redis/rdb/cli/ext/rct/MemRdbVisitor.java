@@ -69,10 +69,10 @@ import com.moilioncircle.redis.replicator.util.type.Tuple2;
  * @author Baoyi Chen
  */
 public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2Ex>, EventListener {
-    
+
+    private static final Monitor monitor = MonitorFactory.getMonitor("memory_statistics");
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
-    private Monitor monitor;
     private final Long bytes;
     private MemCalculator size;
     private final CmpHeap<Tuple2Ex> heap;
@@ -90,7 +90,6 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         this.metricHeap = new CmpHeap<>(min(100, largest == null ? 100 : largest.intValue()));
         this.heap.setConsumer(this);
         this.replicator.addEventListener(this);
-        this.monitor = MonitorFactory.getMonitor("memory_statistics");
     }
     
     @Override

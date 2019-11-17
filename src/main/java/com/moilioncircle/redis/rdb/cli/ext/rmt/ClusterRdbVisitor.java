@@ -48,11 +48,11 @@ import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
 public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements EventListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ClusterRdbVisitor.class);
+    private static final Monitor monitor = MonitorFactory.getMonitor("endpoint_statistics");
 
     private final List<String> lines;
     private final Configuration configuration;
     private ThreadLocal<Endpoints> endpoints = new ThreadLocal<>();
-    private Monitor monitor = MonitorFactory.getMonitor("endpoint_statistics");
     
     public ClusterRdbVisitor(Replicator replicator,
                              Configure configure,

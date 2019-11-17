@@ -39,7 +39,11 @@ public class MonitorFactory {
 
     public static Monitor getMonitor(String name) {
         Monitor r = CACHE.get(name);
-        if (r == null) r = CACHE.putIfAbsent(name, FACTORY.create(name));
+        if (r == null) r = putIfAbsent(CACHE, name, FACTORY.create(name));
         return r;
+    }
+
+    private static final <K, V> V putIfAbsent(Map<K, V> m, K k, V v) {
+        final V r = m.putIfAbsent(k, v); return r != null ? r : v;
     }
 }

@@ -50,14 +50,14 @@ import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
 public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements EventListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ClusterRdbVisitor.class);
-    
+    private static final Monitor monitor = MonitorFactory.getMonitor("endpoint_statistics");
+
     private int db;
     private final RedisURI uri;
     private final boolean legacy;
     private volatile byte[] evalSha;
     private final Configuration conf;
     private ThreadLocal<Endpoint> endpoint = new ThreadLocal<>();
-    private Monitor monitor = MonitorFactory.getMonitor("endpoint_statistics");
     
     public SingleRdbVisitor(Replicator replicator,
                             Configure configure,
