@@ -16,6 +16,15 @@
 
 package com.moilioncircle.redis.rdb.cli.glossary;
 
+import static com.moilioncircle.redis.replicator.FileType.RDB;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.net.URI;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.CliRedisReplicator;
 import com.moilioncircle.redis.rdb.cli.ext.rdt.BackupRdbVisitor;
@@ -30,15 +39,6 @@ import com.moilioncircle.redis.replicator.io.CRCOutputStream;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.util.Tuples;
 import com.moilioncircle.redis.replicator.util.type.Tuple2;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.net.URI;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.moilioncircle.redis.replicator.FileType.RDB;
 
 /**
  * @author Baoyi Chen

@@ -16,15 +16,15 @@
 
 package com.moilioncircle.redis.rdb.cli.io;
 
-import com.moilioncircle.redis.rdb.cli.glossary.Guard;
-import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
-import com.moilioncircle.redis.replicator.util.ByteBuilder;
+import static com.moilioncircle.redis.rdb.cli.glossary.Guard.DRAIN;
+import static com.moilioncircle.redis.rdb.cli.glossary.Guard.SAVE;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
-import static com.moilioncircle.redis.rdb.cli.glossary.Guard.DRAIN;
-import static com.moilioncircle.redis.rdb.cli.glossary.Guard.SAVE;
+import com.moilioncircle.redis.rdb.cli.glossary.Guard;
+import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.replicator.util.ByteBuilder;
 
 /**
  * @author Baoyi Chen

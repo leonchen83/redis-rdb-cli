@@ -19,9 +19,9 @@ package com.moilioncircle.redis.rdb.cli.monitor.impl;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Counter;
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Gauge;
+import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
 
 /**
  * @author Jingqi Xu

@@ -16,10 +16,10 @@
 
 package com.moilioncircle.redis.rdb.cli.glossary;
 
+import static java.util.Collections.singletonList;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import static java.util.Collections.singletonList;
 
 /**
  * @author Baoyi Chen

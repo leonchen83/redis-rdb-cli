@@ -16,6 +16,10 @@
 
 package com.moilioncircle.redis.rdb.cli.ext;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Objects;
+
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.sentinel.RedisSentinelReplicator;
 import com.moilioncircle.redis.rdb.cli.sentinel.RedisSentinelURI;
@@ -39,10 +43,6 @@ import com.moilioncircle.redis.replicator.io.RawByteListener;
 import com.moilioncircle.redis.replicator.rdb.RdbVisitor;
 import com.moilioncircle.redis.replicator.rdb.datatype.Module;
 import com.moilioncircle.redis.replicator.rdb.module.ModuleParser;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Objects;
 
 /**
  * @author Baoyi Chen

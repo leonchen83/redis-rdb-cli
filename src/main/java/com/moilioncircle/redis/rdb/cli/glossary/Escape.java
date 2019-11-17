@@ -16,10 +16,10 @@
 
 package com.moilioncircle.redis.rdb.cli.glossary;
 
+import java.io.OutputStream;
+
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
-
-import java.io.OutputStream;
 
 /**
  * @author Baoyi Chen

@@ -16,11 +16,7 @@
 
 package com.moilioncircle.redis.rdb.cli.io;
 
-import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.conf.NodeConfParser;
-import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
-import com.moilioncircle.redis.replicator.io.CRCOutputStream;
-import com.moilioncircle.redis.replicator.util.type.Tuple3;
+import static java.nio.file.Paths.get;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -31,7 +27,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-import static java.nio.file.Paths.get;
+import com.moilioncircle.redis.rdb.cli.conf.Configure;
+import com.moilioncircle.redis.rdb.cli.conf.NodeConfParser;
+import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.replicator.io.CRCOutputStream;
+import com.moilioncircle.redis.replicator.util.type.Tuple3;
 
 /**
  * @author Baoyi Chen

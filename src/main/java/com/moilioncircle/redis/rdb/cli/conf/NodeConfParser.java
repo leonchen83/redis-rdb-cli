@@ -16,9 +16,7 @@
 
 package com.moilioncircle.redis.rdb.cli.conf;
 
-import com.moilioncircle.redis.rdb.cli.util.CRC16;
-import com.moilioncircle.redis.replicator.util.Tuples;
-import com.moilioncircle.redis.replicator.util.type.Tuple3;
+import static java.lang.Integer.parseInt;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,7 +25,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-import static java.lang.Integer.parseInt;
+import com.moilioncircle.redis.rdb.cli.util.CRC16;
+import com.moilioncircle.redis.replicator.util.Tuples;
+import com.moilioncircle.redis.replicator.util.type.Tuple3;
 
 /**
  * @author Baoyi Chen

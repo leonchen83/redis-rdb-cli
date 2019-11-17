@@ -16,6 +16,12 @@
 
 package com.moilioncircle.redis.rdb.cli.ext.rct;
 
+import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.DumpRawByteListener;
@@ -30,12 +36,6 @@ import com.moilioncircle.redis.replicator.rdb.BaseRdbParser;
 import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
 import com.moilioncircle.redis.replicator.util.Strings;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-
-import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
 
 /**
  * @author Baoyi Chen

@@ -16,33 +16,6 @@
 
 package com.moilioncircle.redis.rdb.cli.ext;
 
-import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
-import com.moilioncircle.redis.rdb.cli.glossary.DataType;
-import com.moilioncircle.redis.rdb.cli.glossary.Escape;
-import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
-import com.moilioncircle.redis.replicator.Replicator;
-import com.moilioncircle.redis.replicator.event.Event;
-import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
-import com.moilioncircle.redis.replicator.io.RedisInputStream;
-import com.moilioncircle.redis.replicator.rdb.BaseRdbParser;
-import com.moilioncircle.redis.replicator.rdb.DefaultRdbVisitor;
-import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
-import com.moilioncircle.redis.replicator.rdb.datatype.Module;
-import com.moilioncircle.redis.replicator.rdb.module.ModuleParser;
-import com.moilioncircle.redis.replicator.rdb.skip.SkipRdbParser;
-import com.moilioncircle.redis.replicator.util.Strings;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.HashSet;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Set;
-import java.util.function.Supplier;
-import java.util.regex.Pattern;
-
 import static com.moilioncircle.redis.rdb.cli.glossary.Guard.DRAIN;
 import static com.moilioncircle.redis.rdb.cli.glossary.Guard.PASS;
 import static com.moilioncircle.redis.rdb.cli.glossary.Guard.SAVE;
@@ -65,6 +38,33 @@ import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET_2;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET_ZIPLIST;
 import static com.moilioncircle.redis.replicator.Constants.STAR;
 import static java.util.stream.Collectors.toList;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.HashSet;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.function.Supplier;
+import java.util.regex.Pattern;
+
+import com.moilioncircle.redis.rdb.cli.conf.Configure;
+import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
+import com.moilioncircle.redis.rdb.cli.glossary.DataType;
+import com.moilioncircle.redis.rdb.cli.glossary.Escape;
+import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.replicator.Replicator;
+import com.moilioncircle.redis.replicator.event.Event;
+import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
+import com.moilioncircle.redis.replicator.io.RedisInputStream;
+import com.moilioncircle.redis.replicator.rdb.BaseRdbParser;
+import com.moilioncircle.redis.replicator.rdb.DefaultRdbVisitor;
+import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
+import com.moilioncircle.redis.replicator.rdb.datatype.Module;
+import com.moilioncircle.redis.replicator.rdb.module.ModuleParser;
+import com.moilioncircle.redis.replicator.rdb.skip.SkipRdbParser;
+import com.moilioncircle.redis.replicator.util.Strings;
 
 /**
  * @author Baoyi Chen

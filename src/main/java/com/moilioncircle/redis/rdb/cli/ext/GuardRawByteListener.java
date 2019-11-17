@@ -16,12 +16,12 @@
 
 package com.moilioncircle.redis.rdb.cli.ext;
 
+import java.io.OutputStream;
+
 import com.moilioncircle.redis.rdb.cli.glossary.Guard;
 import com.moilioncircle.redis.rdb.cli.io.GuardOutputStream;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.replicator.io.RawByteListener;
-
-import java.io.OutputStream;
 
 /**
  * @author Baoyi Chen

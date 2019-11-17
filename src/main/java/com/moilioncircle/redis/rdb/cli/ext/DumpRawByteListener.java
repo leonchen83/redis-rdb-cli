@@ -16,15 +16,15 @@
 
 package com.moilioncircle.redis.rdb.cli.ext;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.OutputStream;
+
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.glossary.Escape;
 import com.moilioncircle.redis.rdb.cli.io.CRCOutputStream;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.replicator.io.RawByteListener;
-
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.OutputStream;
 
 /**
  * @author Baoyi Chen

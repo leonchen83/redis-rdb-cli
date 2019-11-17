@@ -16,14 +16,14 @@
 
 package com.moilioncircle.redis.rdb.cli.io;
 
-import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.glossary.Escape;
+import static com.moilioncircle.redis.replicator.util.CRC64.crc64;
+import static com.moilioncircle.redis.replicator.util.CRC64.longToByteArray;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
-import static com.moilioncircle.redis.replicator.util.CRC64.crc64;
-import static com.moilioncircle.redis.replicator.util.CRC64.longToByteArray;
+import com.moilioncircle.redis.rdb.cli.conf.Configure;
+import com.moilioncircle.redis.rdb.cli.glossary.Escape;
 
 /**
  * @author Baoyi Chen

@@ -16,6 +16,9 @@
 
 package com.moilioncircle.redis.rdb.cli.glossary;
 
+import java.io.File;
+import java.util.List;
+
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.rct.CountRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rct.DiffRdbVisitor;
@@ -26,9 +29,6 @@ import com.moilioncircle.redis.rdb.cli.ext.rct.KeyValRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rct.MemRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rct.RespRdbVisitor;
 import com.moilioncircle.redis.replicator.Replicator;
-
-import java.io.File;
-import java.util.List;
 
 /**
  * @author Baoyi Chen

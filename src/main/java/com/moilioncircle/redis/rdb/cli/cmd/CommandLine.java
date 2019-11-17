@@ -16,12 +16,12 @@
 
 package com.moilioncircle.redis.rdb.cli.cmd;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.TypeHandler;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Baoyi Chen

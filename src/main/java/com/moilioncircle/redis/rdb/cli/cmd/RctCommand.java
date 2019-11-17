@@ -16,12 +16,17 @@
 
 package com.moilioncircle.redis.rdb.cli.cmd;
 
+import java.io.File;
+import java.util.List;
+
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.CliRedisReplicator;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.glossary.Escape;
 import com.moilioncircle.redis.rdb.cli.glossary.Format;
-import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
 import com.moilioncircle.redis.replicator.FileType;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -29,11 +34,6 @@ import com.moilioncircle.redis.replicator.Replicators;
 import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreCommandSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-
-import java.io.File;
-import java.util.List;
 
 /**
  * @author Baoyi Chen
