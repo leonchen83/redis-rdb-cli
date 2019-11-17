@@ -1,12 +1,12 @@
 {
   "__inputs": [
     {
-      "name": "DS_PROMETHEUS",
-      "label": "prometheus",
+      "name": "DS_INFLUXDB",
+      "label": "influxdb",
       "description": "",
       "type": "datasource",
-      "pluginId": "prometheus",
-      "pluginName": "Prometheus"
+      "pluginId": "influxdb",
+      "pluginName": "InfluxDB"
     }
   ],
   "__requires": [
@@ -24,14 +24,8 @@
     },
     {
       "type": "datasource",
-      "id": "prometheus",
-      "name": "Prometheus",
-      "version": "5.0.0"
-    },
-    {
-      "type": "panel",
-      "id": "singlestat",
-      "name": "Singlestat",
+      "id": "influxdb",
+      "name": "InfluxDB",
       "version": "5.0.0"
     }
   ],
@@ -39,7 +33,7 @@
     "list": [
       {
         "builtIn": 1,
-        "datasource": "${DS_PROMETHEUS}",
+        "datasource": "-- Grafana --",
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
@@ -52,115 +46,40 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1562574512950,
+  "iteration": 1573989154103,
   "links": [],
   "panels": [
     {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": false,
-      "colors": [
-        "#7eb26d",
-        "#cca300",
-        "#ea6460"
-      ],
-      "datasource": "${DS_PROMETHEUS}",
-      "format": "none",
-      "gauge": {
-        "maxValue": 0,
-        "minValue": 0,
-        "show": false,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_INFLUXDB}",
+      "decimals": null,
+      "fill": 1,
       "gridPos": {
-        "h": 6,
-        "w": 6,
+        "h": 7,
+        "w": 12,
         "x": 0,
         "y": 0
       },
-      "id": 10,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "expr": "sum({mtype=\"suc\", job=~\"$job\"}) + sum({mtype=\"err\", job=~\"$job\"})",
-          "format": "time_series",
-          "instant": true,
-          "intervalFactor": 1,
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "thresholds": "",
-      "title": "Total migrated",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "current"
-    },
-    {
-      "aliasColors": {},
-      "bars": true,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
-      "fill": 1,
-      "gridPos": {
-        "h": 6,
-        "w": 12,
-        "x": 6,
-        "y": 0
-      },
       "id": 2,
+      "interval": "15s",
       "legend": {
+        "alignAsTable": false,
         "avg": false,
         "current": false,
+        "hideEmpty": false,
+        "hideZero": false,
         "max": false,
         "min": false,
-        "show": false,
-        "total": false,
-        "values": false
+        "rightSide": false,
+        "show": true,
+        "sideWidth": null,
+        "total": true,
+        "values": true
       },
-      "lines": false,
+      "lines": true,
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
@@ -174,46 +93,104 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sort({mtype=\"suc\", job=~\"$job\"})",
-          "format": "time_series",
-          "instant": true,
-          "intervalFactor": 1,
-          "legendFormat": "{{address}}",
-          "refId": "A"
+          "alias": "$tag_facade",
+          "groupBy": [
+            {
+              "params": [
+                "5s"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "facade"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "endpoint_statistics",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "facade",
+              "operator": "=",
+              "value": "success_respond"
+            },
+            {
+              "condition": "AND",
+              "key": "instance",
+              "operator": "=~",
+              "value": "/^$instance$/"
+            },
+            {
+              "condition": "AND",
+              "key": "module",
+              "operator": "=",
+              "value": "endpoint"
+            },
+            {
+              "condition": "AND",
+              "key": "type",
+              "operator": "=",
+              "value": "COUNTER"
+            }
+          ]
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Success count per endpoint",
+      "title": "success mean count",
       "tooltip": {
-        "shared": false,
+        "shared": true,
         "sort": 0,
         "value_type": "individual"
       },
       "type": "graph",
       "xaxis": {
         "buckets": null,
-        "mode": "series",
+        "mode": "time",
         "name": null,
-        "show": false,
-        "values": [
-          "current"
-        ]
+        "show": true,
+        "values": []
       },
       "yaxes": [
         {
-          "decimals": 0,
+          "decimals": null,
           "format": "none",
-          "label": null,
+          "label": "",
           "logBase": 1,
           "max": null,
           "min": "0",
           "show": true
         },
         {
-          "format": "none",
-          "label": null,
+          "decimals": null,
+          "format": "short",
+          "label": "",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -226,191 +203,36 @@
       }
     },
     {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": false,
-      "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
-      ],
-      "datasource": "${DS_PROMETHEUS}",
-      "format": "none",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": false,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 3,
-        "x": 0,
-        "y": 6
-      },
-      "id": 12,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "expr": "sum({mtype=\"suc\", job=~\"$job\"})",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "thresholds": "",
-      "title": "Total successed",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "avg"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": false,
-      "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
-      ],
-      "datasource": "${DS_PROMETHEUS}",
-      "format": "none",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": false,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 3,
-        "x": 3,
-        "y": 6
-      },
-      "id": 14,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "expr": "sum({mtype=\"err\", job=~\"$job\"})",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "refId": "A"
-        }
-      ],
-      "thresholds": "",
-      "title": "Total failed",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "avg"
-    },
-    {
       "aliasColors": {},
-      "bars": true,
+      "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": "${DS_INFLUXDB}",
+      "decimals": null,
       "fill": 1,
       "gridPos": {
-        "h": 6,
+        "h": 7,
         "w": 12,
-        "x": 6,
-        "y": 6
+        "x": 12,
+        "y": 0
       },
-      "id": 4,
+      "id": 3,
+      "interval": "15s",
       "legend": {
         "alignAsTable": false,
         "avg": false,
         "current": false,
+        "hideEmpty": false,
+        "hideZero": false,
         "max": false,
         "min": false,
-        "show": false,
-        "total": false,
-        "values": false
+        "rightSide": false,
+        "show": true,
+        "sideWidth": null,
+        "total": true,
+        "values": true
       },
-      "lines": false,
+      "lines": true,
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
@@ -424,46 +246,410 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sort({mtype=\"err\", job=~\"$job\"})",
-          "format": "time_series",
-          "instant": true,
-          "intervalFactor": 1,
-          "legendFormat": "{{address}}",
-          "refId": "A"
+          "alias": "$tag_facade",
+          "groupBy": [
+            {
+              "params": [
+                "5s"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "facade"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "endpoint_statistics",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "facade",
+              "operator": "=~",
+              "value": "/^failure_*/"
+            },
+            {
+              "condition": "AND",
+              "key": "instance",
+              "operator": "=~",
+              "value": "/^$instance$/"
+            },
+            {
+              "condition": "AND",
+              "key": "module",
+              "operator": "=",
+              "value": "endpoint"
+            },
+            {
+              "condition": "AND",
+              "key": "type",
+              "operator": "=",
+              "value": "COUNTER"
+            }
+          ]
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Failed count per endpoint",
+      "title": "failure mean count",
       "tooltip": {
-        "shared": false,
+        "shared": true,
         "sort": 0,
         "value_type": "individual"
       },
       "type": "graph",
       "xaxis": {
         "buckets": null,
-        "mode": "series",
+        "mode": "time",
         "name": null,
-        "show": false,
-        "values": [
-          "current"
-        ]
+        "show": true,
+        "values": []
       },
       "yaxes": [
         {
-          "decimals": 0,
+          "decimals": null,
           "format": "none",
-          "label": null,
+          "label": "",
           "logBase": 1,
           "max": null,
           "min": "0",
           "show": true
         },
         {
+          "decimals": null,
+          "format": "short",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_INFLUXDB}",
+      "decimals": null,
+      "fill": 1,
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 7
+      },
+      "id": 4,
+      "interval": "15s",
+      "legend": {
+        "alignAsTable": false,
+        "avg": false,
+        "current": false,
+        "hideEmpty": false,
+        "hideZero": false,
+        "max": false,
+        "min": false,
+        "rightSide": false,
+        "show": true,
+        "sideWidth": null,
+        "total": true,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "$tag_facade",
+          "groupBy": [
+            {
+              "params": [
+                "5s"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "facade"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "endpoint_statistics",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "facade",
+              "operator": "=~",
+              "value": "/^send_*/"
+            },
+            {
+              "condition": "AND",
+              "key": "instance",
+              "operator": "=~",
+              "value": "/^$instance$/"
+            },
+            {
+              "condition": "AND",
+              "key": "module",
+              "operator": "=",
+              "value": "endpoint"
+            },
+            {
+              "condition": "AND",
+              "key": "type",
+              "operator": "=",
+              "value": "COUNTER"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "send mean count",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
           "format": "none",
-          "label": null,
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "decimals": null,
+          "format": "short",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_INFLUXDB}",
+      "decimals": null,
+      "fill": 1,
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 7
+      },
+      "id": 5,
+      "interval": "15s",
+      "legend": {
+        "alignAsTable": false,
+        "avg": false,
+        "current": false,
+        "hideEmpty": false,
+        "hideZero": false,
+        "max": false,
+        "min": false,
+        "rightSide": false,
+        "show": true,
+        "sideWidth": null,
+        "total": true,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "$tag_facade",
+          "groupBy": [
+            {
+              "params": [
+                "5s"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "facade"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "endpoint_statistics",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "facade",
+              "operator": "=~",
+              "value": "/^reconnect_*/"
+            },
+            {
+              "condition": "AND",
+              "key": "instance",
+              "operator": "=~",
+              "value": "/^$instance$/"
+            },
+            {
+              "condition": "AND",
+              "key": "module",
+              "operator": "=",
+              "value": "endpoint"
+            },
+            {
+              "condition": "AND",
+              "key": "type",
+              "operator": "=",
+              "value": "COUNTER"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "reconnect mean count",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "none",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "decimals": null,
+          "format": "short",
+          "label": "",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -476,7 +662,7 @@
       }
     }
   ],
-  "refresh": "10s",
+  "refresh": "5s",
   "schemaVersion": 16,
   "style": "dark",
   "tags": [],
@@ -485,14 +671,14 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_PROMETHEUS}",
+        "datasource": "${DS_INFLUXDB}",
         "hide": 0,
         "includeAll": false,
-        "label": "Instance",
+        "label": "instance",
         "multi": false,
-        "name": "job",
+        "name": "instance",
         "options": [],
-        "query": "label_values(push_time_seconds{type=\"endpoint\"}, job)",
+        "query": "show tag values from endpoint_statistics with key = \"instance\"",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -506,7 +692,7 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {
@@ -535,7 +721,7 @@
     ]
   },
   "timezone": "",
-  "title": "redis endpoint dashboard",
-  "uid": "QHnwnm5mz",
-  "version": 3
+  "title": "endpoint",
+  "uid": "-IGKt31Wz",
+  "version": 13
 }
