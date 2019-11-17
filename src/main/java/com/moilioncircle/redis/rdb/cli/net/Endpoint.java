@@ -105,16 +105,9 @@ public class Endpoint implements Closeable {
     
     public String address(Socket socket) {
         Objects.requireNonNull(socket);
-        InetSocketAddress la = (InetSocketAddress) socket.getLocalSocketAddress();
         InetSocketAddress ra = (InetSocketAddress) socket.getRemoteSocketAddress();
         StringBuilder builder = new StringBuilder();
-        builder.append("[la=");
-        if (la != null) {
-            builder.append(la.toString());
-        } else {
-            builder.append("N/A");
-        }
-        builder.append(",ra=");
+        builder.append("[ra=");
         if (ra != null) {
             builder.append(ra.toString());
         } else {
@@ -165,20 +158,18 @@ public class Endpoint implements Closeable {
     public void flush() {
         try {
             if (count > 0) {
-                int temp = count;
                 long mark = System.nanoTime();
                 OutputStreams.flush(out);
                 for (int i = 0; i < count; i++) {
                     RedisObject r = parse();
                     if (r != null && r.type.isError()) {
                         logger.error(r.getString());
-                        if (statistics) monitor.add("send_err_" + address, 1);
+                        if (statistics) monitor.add("send_err_" + address, 1, System.nanoTime() - mark);
                     } else {
-                        if (statistics) monitor.add("send_suc_" + address, 1);
+                        if (statistics) monitor.add("send_suc_" + address, 1, System.nanoTime() - mark);
                     }
                 }
                 count = 0;
-                if (statistics) monitor.add("send_" + address, temp, System.nanoTime() - mark);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -210,6 +201,7 @@ public class Endpoint implements Closeable {
     }
     
     public static Endpoint valueOf(Endpoint endpoint) {
+        if (endpoint.statistics) endpoint.monitor.add("retry_" + endpoint.address, 1);
         closeQuietly(endpoint);
         return new Endpoint(endpoint.host, endpoint.port, endpoint.db, endpoint.pipe, endpoint.statistics, endpoint.conf, endpoint.configure);
     }
