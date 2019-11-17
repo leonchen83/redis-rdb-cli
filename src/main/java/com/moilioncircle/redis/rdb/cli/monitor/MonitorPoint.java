@@ -90,16 +90,16 @@ public final class MonitorPoint {
 
     public static final MonitorPoint valueOf(Monitor m, String k, Gauge v) {
         long now = System.currentTimeMillis();
-        return valueOf(now, m, k, GAUGE, null, 0L, v.getGauge());
+        return valueOf(now, m, k, GAUGE, null, v.getGauge(), 0L);
     }
 
     public static final MonitorPoint valueOf(Monitor m, String k, Counter v) {
         long now = System.currentTimeMillis();
         Tuple2<Long, Long> p = v.getCounter();
-        return valueOf(now, m, k, COUNTER, null, p.getV2(), p.getV1());
+        return valueOf(now, m, k, COUNTER, null, p.getV1(), p.getV2());
     }
 
-    protected static MonitorPoint valueOf(long now, Monitor m, String k, MonitorType t, String p, long time, long value) {
+    protected static MonitorPoint valueOf(long now, Monitor m, String k, MonitorType t, String p, long value, long time) {
         final MonitorPoint r = new MonitorPoint();
         r.monitorName = m.getName();
         r.monitorType = t;

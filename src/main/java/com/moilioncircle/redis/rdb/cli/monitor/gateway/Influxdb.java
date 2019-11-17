@@ -31,7 +31,7 @@ import okhttp3.OkHttpClient;
  * @author Baoyi Chen
  */
 public class Influxdb implements Closeable {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Influxdb.class);
+    private static final Logger logger = LoggerFactory.getLogger(Influxdb.class);
 
     public static final String AVG = "avg";
     public static final String TYPE = "type";
@@ -86,7 +86,7 @@ public class Influxdb implements Closeable {
             for (Point p : toPoints(points)) influxdb.write(p);
             return true;
         } catch (Throwable t) {
-            LOGGER.error("failed to save points.", t);
+            logger.error("failed to save points.", t);
             return false;
         }
     }
@@ -114,7 +114,7 @@ public class Influxdb implements Closeable {
     public class ExceptionHandler implements BiConsumer<Iterable<Point>, Throwable> {
         @Override
         public void accept(final Iterable<Point> points, final Throwable t) {
-            LOGGER.warn("failed to save points.", t);
+            logger.warn("failed to save points.", t);
         }
     }
 

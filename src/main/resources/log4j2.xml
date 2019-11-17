@@ -20,8 +20,8 @@
         <Property name="pattern">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %p %c{1.}:%L - %m%n</Property>
     </Properties>
     <Appenders>
-        <RollingFile name="ROLLING" fileName="${sys:cli.log.path:-/var/log/redis-rdb-cli}/redis-rdb-cli.log"
-                     filePattern="${sys:cli.log.path:-/var/log/redis-rdb-cli}/$${date:yyyy-MM}/redis-rdb-cli-%d{yyyy-MM-dd}-%i.log.gz">
+        <RollingFile name="ROLLING" fileName="${sys:cli.log.path:-./log/redis-rdb-cli}/redis-rdb-cli.log"
+                     filePattern="${sys:cli.log.path:-./log/redis-rdb-cli}/$${date:yyyy-MM}/redis-rdb-cli-%d{yyyy-MM-dd}-%i.log.gz">
             <PatternLayout>
                 <Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
             </PatternLayout>
@@ -38,7 +38,7 @@
         </Console>
     </Appenders>
     <Loggers>
-        <Logger name="com.moilioncircle" level="info" additivity="false">
+        <Logger name="com.moilioncircle" level="debug" additivity="false">
             <AppenderRef ref="ROLLING"/>
         </Logger>
         <Root level="error">
