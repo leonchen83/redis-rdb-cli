@@ -46,7 +46,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1573989154103,
+  "iteration": 1573997980362,
   "links": [],
   "panels": [
     {
@@ -723,5 +723,5 @@
   "timezone": "",
   "title": "endpoint",
   "uid": "-IGKt31Wz",
-  "version": 13
+  "version": 14
 }

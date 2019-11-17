@@ -1,12 +1,12 @@
 {
   "__inputs": [
     {
-      "name": "DS_PROMETHEUS",
-      "label": "prometheus",
+      "name": "DS_INFLUXDB",
+      "label": "influxdb",
       "description": "",
       "type": "datasource",
-      "pluginId": "prometheus",
-      "pluginName": "Prometheus"
+      "pluginId": "influxdb",
+      "pluginName": "InfluxDB"
     }
   ],
   "__requires": [
@@ -24,8 +24,8 @@
     },
     {
       "type": "datasource",
-      "id": "prometheus",
-      "name": "Prometheus",
+      "id": "influxdb",
+      "name": "InfluxDB",
       "version": "5.0.0"
     },
     {
@@ -33,19 +33,13 @@
       "id": "singlestat",
       "name": "Singlestat",
       "version": "5.0.0"
-    },
-    {
-      "type": "panel",
-      "id": "table",
-      "name": "Table",
-      "version": "5.0.0"
     }
   ],
   "annotations": {
     "list": [
       {
         "builtIn": 1,
-        "datasource": "${DS_PROMETHEUS}",
+        "datasource": "-- Grafana --",
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
@@ -58,7 +52,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1562637363009,
+  "iteration": 1573997943078,
   "links": [],
   "panels": [
     {
@@ -70,7 +64,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": "${DS_INFLUXDB}",
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -81,11 +75,11 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 3,
+        "w": 4,
         "x": 0,
         "y": 0
       },
-      "id": 26,
+      "id": 2,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -122,15 +116,68 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum({job=~\"$job\", mtype=\"db_size\"})",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "refId": "A"
+          "groupBy": [
+            {
+              "params": [
+                "5s"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "memory_statistics",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "instance",
+              "operator": "=~",
+              "value": "/^$instance$/"
+            },
+            {
+              "condition": "AND",
+              "key": "module",
+              "operator": "=",
+              "value": "memory"
+            },
+            {
+              "condition": "AND",
+              "key": "type",
+              "operator": "=",
+              "value": "GAUGE"
+            },
+            {
+              "condition": "AND",
+              "key": "facade",
+              "operator": "=~",
+              "value": "/^dbnum_*/"
+            }
+          ]
         }
       ],
       "thresholds": "",
-      "title": "Total count",
-      "transparent": false,
+      "title": "total count",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -151,7 +198,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": "${DS_INFLUXDB}",
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -162,11 +209,11 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 3,
-        "x": 3,
+        "w": 4,
+        "x": 4,
         "y": 0
       },
-      "id": 28,
+      "id": 4,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -203,16 +250,68 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum({job=~\"$job\", mtype=\"db_expire\"})",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "",
-          "refId": "A"
+          "groupBy": [
+            {
+              "params": [
+                "5s"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "memory_statistics",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "instance",
+              "operator": "=~",
+              "value": "/^$instance$/"
+            },
+            {
+              "condition": "AND",
+              "key": "module",
+              "operator": "=",
+              "value": "memory"
+            },
+            {
+              "condition": "AND",
+              "key": "type",
+              "operator": "=",
+              "value": "GAUGE"
+            },
+            {
+              "condition": "AND",
+              "key": "facade",
+              "operator": "=~",
+              "value": "/^dbexp_*/"
+            }
+          ]
         }
       ],
       "thresholds": "",
-      "title": "Expired count",
-      "transparent": false,
+      "title": "expired count",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -225,34 +324,29 @@
       "valueName": "avg"
     },
     {
-      "aliasColors": {
-        "0.001": "#5195ce"
-      },
+      "aliasColors": {},
       "bars": true,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
-      "decimals": null,
+      "datasource": "${DS_INFLUXDB}",
       "fill": 1,
       "gridPos": {
-        "h": 9,
-        "w": 11,
-        "x": 6,
+        "h": 8,
+        "w": 8,
+        "x": 8,
         "y": 0
       },
-      "id": 10,
+      "id": 6,
       "legend": {
         "alignAsTable": false,
         "avg": false,
         "current": false,
-        "hideEmpty": false,
-        "hideZero": false,
         "max": false,
         "min": false,
         "rightSide": false,
         "show": true,
-        "total": false,
-        "values": false
+        "total": true,
+        "values": true
       },
       "lines": false,
       "linewidth": 1,
@@ -268,123 +362,82 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "mem_usage_histogram{job=~\"$job\"}",
-          "format": "time_series",
-          "instant": true,
-          "interval": "",
-          "intervalFactor": 1,
-          "legendFormat": "{{quantile}}",
-          "refId": "A"
+          "alias": "$tag_facade",
+          "groupBy": [
+            {
+              "params": [
+                "5s"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "facade"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "memory_statistics",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "instance",
+              "operator": "=~",
+              "value": "/^$instance$/"
+            },
+            {
+              "condition": "AND",
+              "key": "module",
+              "operator": "=",
+              "value": "memory"
+            },
+            {
+              "condition": "AND",
+              "key": "type",
+              "operator": "=",
+              "value": "GAUGE"
+            },
+            {
+              "condition": "AND",
+              "key": "facade",
+              "operator": "=~",
+              "value": "/^dbnum_*/"
+            }
+          ]
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Memory usage histogram",
+      "title": "count by db",
       "tooltip": {
         "shared": false,
         "sort": 0,
         "value_type": "individual"
       },
-      "transparent": false,
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "series",
-        "name": null,
-        "show": true,
-        "values": [
-          "current"
-        ]
-      },
-      "yaxes": [
-        {
-          "decimals": 0,
-          "format": "bytes",
-          "label": "",
-          "logBase": 1,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "decimals": 3,
-          "format": "none",
-          "label": "",
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {
-        "db0": "#5195ce"
-      },
-      "bars": true,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
-      "fill": 1,
-      "gridPos": {
-        "h": 9,
-        "w": 7,
-        "x": 17,
-        "y": 0
-      },
-      "id": 22,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": false,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [
-        {
-          "alias": "db0",
-          "yaxis": 1
-        }
-      ],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "{job=~\"$job\", mtype=\"db_size\"}",
-          "format": "time_series",
-          "instant": true,
-          "interval": "",
-          "intervalFactor": 1,
-          "legendFormat": "{{dbnum}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Count by db",
-      "tooltip": {
-        "shared": false,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "transparent": false,
       "type": "graph",
       "xaxis": {
         "buckets": null,
@@ -397,7 +450,7 @@
       },
       "yaxes": [
         {
-          "decimals": 0,
+          "decimals": null,
           "format": "none",
           "label": null,
           "logBase": 1,
@@ -406,7 +459,6 @@
           "show": true
         },
         {
-          "decimals": null,
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -417,7 +469,156 @@
       ],
       "yaxis": {
         "align": false,
-        "alignLevel": 1
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": true,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_INFLUXDB}",
+      "fill": 1,
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 0
+      },
+      "id": 7,
+      "legend": {
+        "alignAsTable": false,
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "rightSide": false,
+        "show": true,
+        "total": true,
+        "values": true
+      },
+      "lines": false,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "$tag_facade",
+          "groupBy": [
+            {
+              "params": [
+                "5s"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "facade"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "memory_statistics",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "instance",
+              "operator": "=~",
+              "value": "/^$instance$/"
+            },
+            {
+              "condition": "AND",
+              "key": "module",
+              "operator": "=",
+              "value": "memory"
+            },
+            {
+              "condition": "AND",
+              "key": "type",
+              "operator": "=",
+              "value": "GAUGE"
+            },
+            {
+              "condition": "AND",
+              "key": "facade",
+              "operator": "=~",
+              "value": "/^dbexp_*/"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "expired by db",
+      "tooltip": {
+        "shared": false,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "series",
+        "name": null,
+        "show": true,
+        "values": [
+          "total"
+        ]
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
       }
     },
     {
@@ -429,7 +630,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": "${DS_INFLUXDB}",
       "format": "decbytes",
       "gauge": {
         "maxValue": 100,
@@ -439,12 +640,12 @@
         "thresholdMarkers": true
       },
       "gridPos": {
-        "h": 5,
-        "w": 6,
+        "h": 4,
+        "w": 8,
         "x": 0,
         "y": 4
       },
-      "id": 30,
+      "id": 3,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -481,15 +682,68 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "key_mem_total{job=~\"$job\"}",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "refId": "A"
+          "groupBy": [
+            {
+              "params": [
+                "5s"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "memory_statistics",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "instance",
+              "operator": "=~",
+              "value": "/^$instance$/"
+            },
+            {
+              "condition": "AND",
+              "key": "module",
+              "operator": "=",
+              "value": "memory"
+            },
+            {
+              "condition": "AND",
+              "key": "type",
+              "operator": "=",
+              "value": "GAUGE"
+            },
+            {
+              "condition": "AND",
+              "key": "facade",
+              "operator": "=",
+              "value": "total_memory"
+            }
+          ]
         }
       ],
       "thresholds": "",
-      "title": "Total memory usage",
-      "transparent": false,
+      "title": "total memory usage",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -502,213 +756,29 @@
       "valueName": "avg"
     },
     {
-      "aliasColors": {
-        "module": "#5195ce"
-      },
+      "aliasColors": {},
       "bars": true,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": "${DS_INFLUXDB}",
       "fill": 1,
       "gridPos": {
-        "h": 9,
-        "w": 9,
+        "h": 7,
+        "w": 12,
         "x": 0,
-        "y": 9
+        "y": 8
       },
-      "id": 14,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": false,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sort({mtype=\"mem\", job=~\"$job\"})",
-          "format": "time_series",
-          "instant": true,
-          "intervalFactor": 1,
-          "legendFormat": "{{data_type}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Memory usage by type",
-      "tooltip": {
-        "shared": false,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "transparent": false,
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "series",
-        "name": null,
-        "show": true,
-        "values": [
-          "current"
-        ]
-      },
-      "yaxes": [
-        {
-          "decimals": 0,
-          "format": "bytes",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {
-        "module": "#5195ce"
-      },
-      "bars": true,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
-      "fill": 1,
-      "gridPos": {
-        "h": 9,
-        "w": 8,
-        "x": 9,
-        "y": 9
-      },
-      "id": 12,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": false,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sort({mtype=\"count\", job=~\"$job\"})",
-          "format": "time_series",
-          "instant": true,
-          "intervalFactor": 1,
-          "legendFormat": "{{data_type}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Count by type",
-      "tooltip": {
-        "shared": false,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "transparent": false,
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "series",
-        "name": null,
-        "show": true,
-        "values": [
-          "current"
-        ]
-      },
-      "yaxes": [
-        {
-          "decimals": 0,
-          "format": "none",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "format": "none",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {
-        "db0": "#5195ce"
-      },
-      "bars": true,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
-      "fill": 1,
-      "gridPos": {
-        "h": 9,
-        "w": 7,
-        "x": 17,
-        "y": 9
-      },
-      "id": 32,
+      "id": 8,
       "legend": {
         "alignAsTable": false,
         "avg": false,
         "current": false,
-        "hideZero": false,
         "max": false,
         "min": false,
+        "rightSide": false,
         "show": true,
-        "total": false,
-        "values": false
+        "total": true,
+        "values": true
       },
       "lines": false,
       "linewidth": 1,
@@ -724,24 +794,82 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "{job=~\"$job\", mtype=\"db_expire\"}",
-          "format": "time_series",
-          "instant": true,
-          "intervalFactor": 1,
-          "legendFormat": "{{dbnum}}",
-          "refId": "A"
+          "alias": "$tag_facade",
+          "groupBy": [
+            {
+              "params": [
+                "5s"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "facade"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "memory_statistics",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "instance",
+              "operator": "=~",
+              "value": "/^$instance$/"
+            },
+            {
+              "condition": "AND",
+              "key": "module",
+              "operator": "=",
+              "value": "memory"
+            },
+            {
+              "condition": "AND",
+              "key": "type",
+              "operator": "=",
+              "value": "COUNTER"
+            },
+            {
+              "condition": "AND",
+              "key": "facade",
+              "operator": "=~",
+              "value": "/^count_*/"
+            }
+          ]
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Expired by db",
+      "title": "count by type",
       "tooltip": {
         "shared": false,
         "sort": 0,
         "value_type": "individual"
       },
-      "transparent": false,
       "type": "graph",
       "xaxis": {
         "buckets": null,
@@ -754,9 +882,9 @@
       },
       "yaxes": [
         {
-          "decimals": 0,
-          "format": "short",
-          "label": "",
+          "decimals": null,
+          "format": "none",
+          "label": null,
           "logBase": 1,
           "max": null,
           "min": "0",
@@ -773,149 +901,157 @@
       ],
       "yaxis": {
         "align": false,
-        "alignLevel": 100
+        "alignLevel": null
       }
     },
     {
-      "columns": [],
-      "datasource": "${DS_PROMETHEUS}",
-      "fontSize": "100%",
+      "aliasColors": {},
+      "bars": true,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_INFLUXDB}",
+      "fill": 1,
       "gridPos": {
-        "h": 10,
-        "w": 24,
-        "x": 0,
-        "y": 18
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 8
       },
-      "id": 8,
+      "id": 9,
+      "legend": {
+        "alignAsTable": false,
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "rightSide": false,
+        "show": true,
+        "total": true,
+        "values": true
+      },
+      "lines": false,
+      "linewidth": 1,
       "links": [],
-      "pageSize": 100,
-      "scroll": true,
-      "showHeader": true,
-      "sort": {
-        "col": null,
-        "desc": false
-      },
-      "styles": [
-        {
-          "alias": "Time",
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "pattern": "Time",
-          "type": "hidden"
-        },
-        {
-          "alias": "Key",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "mappingType": 1,
-          "pattern": "__name__",
-          "rangeMaps": [],
-          "thresholds": [],
-          "type": "hidden",
-          "unit": "short"
-        },
-        {
-          "alias": "",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "mappingType": 1,
-          "pattern": "job",
-          "thresholds": [],
-          "type": "hidden",
-          "unit": "short"
-        },
-        {
-          "alias": "",
-          "colorMode": null,
-          "colors": [
-            "#7eb26d",
-            "#fce2de",
-            "#ea6460"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "mappingType": 1,
-          "pattern": "Value",
-          "thresholds": [
-            ""
-          ],
-          "type": "number",
-          "unit": "bytes"
-        },
-        {
-          "alias": "Type",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "#fce2de",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "mappingType": 1,
-          "pattern": "data_type",
-          "thresholds": [],
-          "type": "number",
-          "unit": "short"
-        },
-        {
-          "alias": "Key",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "mappingType": 1,
-          "pattern": "key",
-          "thresholds": [],
-          "type": "string",
-          "unit": "short"
-        },
-        {
-          "alias": "",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "mappingType": 1,
-          "pattern": "mtype",
-          "thresholds": [],
-          "type": "hidden",
-          "unit": "short"
-        }
-      ],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
       "targets": [
         {
-          "expr": "sort_desc({mtype=\"key\", job=~\"$job\"})",
-          "format": "table",
-          "instant": true,
-          "intervalFactor": 1,
-          "legendFormat": "",
-          "refId": "A"
+          "alias": "$tag_facade",
+          "groupBy": [
+            {
+              "params": [
+                "5s"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "facade"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "memory_statistics",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "instance",
+              "operator": "=~",
+              "value": "/^$instance$/"
+            },
+            {
+              "condition": "AND",
+              "key": "module",
+              "operator": "=",
+              "value": "memory"
+            },
+            {
+              "condition": "AND",
+              "key": "type",
+              "operator": "=",
+              "value": "COUNTER"
+            },
+            {
+              "condition": "AND",
+              "key": "facade",
+              "operator": "=~",
+              "value": "/^memory_*/"
+            }
+          ]
         }
       ],
-      "title": "Largest key table(desc)",
-      "transform": "table",
-      "transparent": false,
-      "type": "table"
+      "thresholds": [],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "memory usage by type",
+      "tooltip": {
+        "shared": false,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "series",
+        "name": null,
+        "show": true,
+        "values": [
+          "total"
+        ]
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "decbytes",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     }
   ],
   "refresh": "10s",
@@ -927,14 +1063,14 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_PROMETHEUS}",
+        "datasource": "${DS_INFLUXDB}",
         "hide": 0,
         "includeAll": false,
-        "label": "Instance",
+        "label": "instance",
         "multi": false,
-        "name": "job",
+        "name": "instance",
         "options": [],
-        "query": "label_values(push_time_seconds{type=\"memory\"}, job)",
+        "query": "show tag values from memory_statistics with key = \"instance\"",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -948,7 +1084,7 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {
@@ -977,7 +1113,7 @@
     ]
   },
   "timezone": "",
-  "title": "redis memory dashboard",
-  "uid": "HTpQ2Rcmz",
-  "version": 4
+  "title": "memory",
+  "uid": "GIuIveJZz",
+  "version": 14
 }
