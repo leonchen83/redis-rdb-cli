@@ -24,7 +24,8 @@ import org.slf4j.LoggerFactory;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractMigrateRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.AsyncEventListener;
-import com.moilioncircle.redis.rdb.cli.ext.cmd.GuardCommand;
+import com.moilioncircle.redis.rdb.cli.ext.cmd.ClosedCommand;
+import com.moilioncircle.redis.rdb.cli.ext.cmd.ClosingCommand;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorFactory;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
@@ -35,8 +36,6 @@ import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
-import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
-import com.moilioncircle.redis.replicator.event.PreCommandSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
 import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
@@ -78,10 +77,10 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
             this.endpoint.set(new Endpoint(uri.getHost(), uri.getPort(), 0, pipe, true, conf, configure));
         } else if (event instanceof DumpKeyValuePair) {
             retry((DumpKeyValuePair)event, configure.getMigrateRetries());
-        } else if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
+        } else if (event instanceof ClosingCommand) {
             this.endpoint.get().flushQuietly();
             Endpoint.closeQuietly(this.endpoint.get());
-        } else if (event instanceof GuardCommand) {
+        } else if (event instanceof ClosedCommand) {
             MonitorManager.closeQuietly(manager);
         }
     }

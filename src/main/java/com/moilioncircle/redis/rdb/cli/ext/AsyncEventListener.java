@@ -28,7 +28,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.cmd.ClosedCommand;
 import com.moilioncircle.redis.rdb.cli.ext.cmd.ClosingCommand;
-import com.moilioncircle.redis.rdb.cli.ext.cmd.GuardCommand;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.cmd.Command;
@@ -63,9 +62,7 @@ public class AsyncEventListener implements EventListener {
             }
             
             // 1
-            this.rdbBarrier = new CyclicBarrier(threads, () -> {
-                this.listener.onEvent(r, new GuardCommand());
-            });
+            this.rdbBarrier = new CyclicBarrier(threads);
             
             // 2
             this.closeBarrier = new CyclicBarrier(threads, () -> {
@@ -133,9 +130,6 @@ public class AsyncEventListener implements EventListener {
             //
             if (event instanceof PreRdbSyncEvent) {
                 manager.reset();
-            }
-            if (event instanceof PostRdbSyncEvent) {
-                this.listener.onEvent(replicator, new GuardCommand());
             }
         }
     }
