@@ -135,13 +135,10 @@ public class RdtCommand extends AbstractCommand {
             }
 
             Configure configure = Configure.bind();
-            MonitorManager manager = new MonitorManager(configure);
-            manager.open();
             try (ProgressBar bar = new ProgressBar(-1)) {
                 List<Tuple2<Replicator, String>> list = action.dress(configure, split, backup, merge, output, db, regexs, conf, DataType.parse(type));
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                     for (Tuple2<Replicator, String> tuple : list) Replicators.closeQuietly(tuple.getV1());
-                    MonitorManager.closeQuietly(manager);
                 }));
 
                 for (Tuple2<Replicator, String> tuple : list) {
@@ -156,9 +153,7 @@ public class RdtCommand extends AbstractCommand {
                     });
                     tuple.getV1().open();
                 }
-            } finally {
-                MonitorManager.closeQuietly(manager);
-            }
+            } 
         }
     }
 

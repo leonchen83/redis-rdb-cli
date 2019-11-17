@@ -29,8 +29,10 @@ import org.slf4j.LoggerFactory;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractMigrateRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.AsyncEventListener;
+import com.moilioncircle.redis.rdb.cli.ext.cmd.GuardCommand;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorFactory;
+import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
 import com.moilioncircle.redis.rdb.cli.net.Endpoints;
 import com.moilioncircle.redis.replicator.Configuration;
@@ -63,7 +65,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
         super(replicator, configure, singletonList(0L), regexs, types, replace);
         this.lines = lines;
         this.configuration = configure.merge(defaultSetting());
-        this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure));
+        this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure, manager));
     }
 
     @Override
@@ -77,6 +79,9 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
         } else if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
             this.endpoints.get().flushQuietly();
             Endpoints.closeQuietly(this.endpoints.get());
+            logger.debug("close endpoint {}", this.endpoints.get());
+        } else if (event instanceof GuardCommand) {
+            MonitorManager.closeQuietly(manager);
         }
     }
 

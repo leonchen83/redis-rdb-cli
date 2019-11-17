@@ -321,6 +321,11 @@ public class Endpoint implements Closeable {
         }
     }
     
+    @Override
+    public String toString() {
+        return address;
+    }
+    
     public static class RedisObject {
         public Type type;
         public Object object;

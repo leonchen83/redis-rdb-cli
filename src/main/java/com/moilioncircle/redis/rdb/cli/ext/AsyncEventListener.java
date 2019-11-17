@@ -25,8 +25,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.ext.rst.cmd.CloseCommand;
+import com.moilioncircle.redis.rdb.cli.ext.cmd.CloseCommand;
+import com.moilioncircle.redis.rdb.cli.ext.cmd.GuardCommand;
+import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.cmd.Command;
 import com.moilioncircle.redis.replicator.event.Event;
@@ -42,13 +47,17 @@ import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
  */
 public class AsyncEventListener implements EventListener {
 
+    private static final Logger logger = LoggerFactory.getLogger(MonitorManager.class);
+
     private int count;
     private final int threads; 
     private CyclicBarrier barrier;
+    private MonitorManager manager;
     private final EventListener listener;
     private ExecutorService[] executors;
 
-    public AsyncEventListener(EventListener listener, Replicator r, Configure c) {
+    public AsyncEventListener(EventListener listener, Replicator r, Configure c, MonitorManager manager) {
+        this.manager = manager;
         this.listener = listener;
         this.threads = c.getMigrateThreads();
         if (threads > 0) {
@@ -79,19 +88,20 @@ public class AsyncEventListener implements EventListener {
                 // 1
                 if (event instanceof PreRdbSyncEvent) {
                     reset();
+                    manager.reset();
                 }
                 
                 // 2
-                if (event instanceof PostRdbSyncEvent) {
-                    for (int i = 0; i < this.executors.length; i++) {
-                        final int thread = i;
-                        this.executors[i].submit(() -> await(thread));
-                    }
+                for (int i = 0; i < this.executors.length; i++) {
+                    this.executors[i].submit(() -> this.listener.onEvent(replicator, event));
                 }
                 
                 // 3
-                for (int i = 0; i < this.executors.length; i++) {
-                    this.executors[i].submit(() -> this.listener.onEvent(replicator, event));
+                if (event instanceof PostRdbSyncEvent) {
+                    for (int i = 0; i < this.executors.length; i++) {
+                        this.executors[i].submit(() -> await());
+                        this.executors[i].submit(() -> this.listener.onEvent(replicator, new GuardCommand()));
+                    }
                 }
             } else if (event instanceof DumpKeyValuePair) {
                 int i = count++ & (executors.length - 1);
@@ -102,17 +112,26 @@ public class AsyncEventListener implements EventListener {
                 this.executors[0].submit(() -> this.listener.onEvent(replicator, event));
             }
         } else {
+            if (event instanceof PreRdbSyncEvent) {
+                manager.reset();
+            }
             this.listener.onEvent(replicator, event);
         }
     }
     
     private void reset() {
-        if (barrier != null) barrier.reset();
+        if (barrier != null) {
+            barrier.reset();
+            logger.debug("barrier reset");
+        }
     }
 
-    private void await(int i) {
+    private void await() {
         try {
-            if (barrier != null) barrier.await();
+            if (barrier != null) {
+                barrier.await();
+                logger.debug("barrier await");
+            }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (BrokenBarrierException e) {

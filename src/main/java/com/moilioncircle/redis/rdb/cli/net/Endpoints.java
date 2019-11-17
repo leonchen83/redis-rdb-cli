@@ -96,4 +96,14 @@ public class Endpoints implements Closeable {
         set.add(v2);
         endpoints.put(slot, v2);
     }
+    
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        for (Endpoint endpoint : set) {
+            builder.append(endpoint.toString());
+            builder.append(",");
+        }
+        return builder.toString();
+    }
 }

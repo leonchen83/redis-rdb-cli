@@ -19,6 +19,7 @@ package com.moilioncircle.redis.rdb.cli.ext;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.glossary.Escape;
+import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
@@ -36,11 +37,13 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
 
     protected final boolean flush;
     protected final boolean replace;
+    protected MonitorManager manager;
 
     public AbstractMigrateRdbVisitor(Replicator replicator, Configure configure, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) {
         super(replicator, configure, db, regexs, types);
         this.replace = replace;
         this.flush = configure.isMigrateFlush();
+        this.manager = new MonitorManager(configure);
     }
     
     @Override

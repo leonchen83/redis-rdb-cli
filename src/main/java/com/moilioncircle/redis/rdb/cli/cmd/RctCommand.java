@@ -117,8 +117,6 @@ public class RctCommand extends AbstractCommand {
             source = normalize(source, FileType.RDB, "Invalid options: s, Try `rct -h` for more information.");
 
             Configure configure = Configure.bind();
-            MonitorManager manager = new MonitorManager(configure);
-            manager.open();
             try (ProgressBar bar = new ProgressBar(-1)) {
                 Replicator r = new CliRedisReplicator(source, configure);
                 r.addExceptionListener((rep, tx, e) -> {
@@ -127,7 +125,6 @@ public class RctCommand extends AbstractCommand {
                 Format.parse(format).dress(r, configure, output, db, regexs, largest, bytes, DataType.parse(type), Escape.parse(escape), replace);
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                     Replicators.closeQuietly(r);
-                    MonitorManager.closeQuietly(manager);
                 }));
                 r.addEventListener((rep, event) -> {
                     if (event instanceof PreRdbSyncEvent)
@@ -136,8 +133,6 @@ public class RctCommand extends AbstractCommand {
                         Replicators.closeQuietly(rep);
                 });
                 r.open();
-            } finally {
-                MonitorManager.closeQuietly(manager);
             }
         }
     }

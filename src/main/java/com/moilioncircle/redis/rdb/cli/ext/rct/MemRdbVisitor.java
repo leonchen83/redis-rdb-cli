@@ -35,6 +35,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
@@ -42,6 +43,7 @@ import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.glossary.Escape;
+import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorFactory;
 import com.moilioncircle.redis.rdb.cli.util.CmpHeap;
@@ -75,6 +77,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
 
     private final Long bytes;
     private MemCalculator size;
+    private MonitorManager manager;
     private final CmpHeap<Tuple2Ex> heap;
     private final CmpHeap<Tuple2Ex> metricHeap;
     
@@ -86,6 +89,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     public MemRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escape escape, Long largest, Long bytes) {
         super(replicator, configure, out, db, regexs, types, escape);
         this.bytes = bytes;
+        this.manager = new MonitorManager(configure);
         this.heap = new CmpHeap<>(largest == null ? -1 : largest.intValue());
         this.metricHeap = new CmpHeap<>(min(100, largest == null ? 100 : largest.intValue()));
         this.heap.setConsumer(this);
@@ -161,6 +165,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
                     monitor.set("dbexp_" + entry.getKey(), entry.getValue().getV2());
                 }
             }
+            MonitorManager.closeQuietly(manager);
         } else if (event instanceof PreRdbSyncEvent) {
             // header
             // database,type,key,size_in_bytes,encoding,num_elements,len_largest_element
@@ -180,6 +185,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             delimiter(out);
             OutputStreams.write("expiry".getBytes(), out);
             OutputStreams.write('\n', out);
+            
+            manager.reset();
         } else if (event instanceof AuxField) {
             AuxField aux = (AuxField) event;
             if (aux.getAuxKey().equals("used-mem")) {

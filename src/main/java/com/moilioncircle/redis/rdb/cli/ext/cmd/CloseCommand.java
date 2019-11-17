@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.ext.rst.cmd;
+package com.moilioncircle.redis.rdb.cli.ext.cmd;
 
 import com.moilioncircle.redis.replicator.cmd.impl.AbstractCommand;
 

@@ -47,16 +47,17 @@ public class MonitorManager implements Closeable {
     private static final Logger logger = LoggerFactory.getLogger(MonitorManager.class);
 
     private Gateway gateway;
-    private Influxdb influxdb;
     private Configure configure;
+    private Influxdb influxdb;
     private ScheduledExecutorService executor;
     private long timeout = SECONDS.toMillis(5);
 
     public MonitorManager(Configure configure) {
         this.configure = configure;
+        this.influxdb = new Influxdb(configure);
         this.gateway = this.configure.getMetricGateway();
-        if (gateway == INFLUXDB) influxdb = new Influxdb(configure);
         this.executor = Executors.newSingleThreadScheduledExecutor();
+        open();
     }
 
     public void setTimeout(long timeout) {
@@ -84,22 +85,29 @@ public class MonitorManager implements Closeable {
             logger.error("failed to report points {}.", points, e);
         }
     }
-
-    public void open() {
+    
+    public void reset() {
+        logger.debug("reset monitor manager");
         if (gateway == INFLUXDB) {
             influxdb.reset("memory_statistics");
             influxdb.reset("endpoint_statistics");
         }
+    }
+
+    private void open() {
+        logger.debug("open monitor manager");
+        reset();
         executor.scheduleWithFixedDelay(this::report, timeout, timeout, TimeUnit.MILLISECONDS);
     }
 
     @Override
     public void close() throws IOException {
+        logger.debug("close monitor manager");
+        terminateQuietly(executor, 0, TimeUnit.MILLISECONDS);
         if (gateway == INFLUXDB && influxdb != null) {
             report(); 
             influxdb.close();
         }
-        terminateQuietly(executor, 0, TimeUnit.MILLISECONDS);
     }
 
     public static void closeQuietly(MonitorManager manager) {

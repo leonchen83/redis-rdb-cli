@@ -26,9 +26,10 @@ import org.slf4j.LoggerFactory;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractMigrateRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.AsyncEventListener;
-import com.moilioncircle.redis.rdb.cli.ext.rst.cmd.CloseCommand;
-import com.moilioncircle.redis.rdb.cli.ext.rst.cmd.CombineCommand;
+import com.moilioncircle.redis.rdb.cli.ext.cmd.CloseCommand;
+import com.moilioncircle.redis.rdb.cli.ext.cmd.CombineCommand;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorFactory;
+import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
 import com.moilioncircle.redis.rdb.cli.net.Endpoint;
 import com.moilioncircle.redis.replicator.Configuration;
@@ -69,7 +70,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
         this.uri = uri;
         this.legacy = legacy;
         this.conf = configure.merge(this.uri);
-        this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure));
+        this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure, manager));
     }
 
     @Override
@@ -110,6 +111,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
         } else if (event instanceof CloseCommand) {
             this.endpoint.get().flushQuietly();
             Endpoint.closeQuietly(this.endpoint.get());
+            MonitorManager.closeQuietly(manager);
         }
     }
     
