@@ -127,7 +127,10 @@ public class RmtCommand extends AbstractCommand {
                     try (ProgressBar bar = new ProgressBar(-1)) {
                         Replicator r = new CliRedisReplicator(source, configure);
                         r.setRdbVisitor(getRdbVisitor(r, configure, uri, db, regexs, parse(type), replace, legacy));
-                        Runtime.getRuntime().addShutdownHook(new Thread(() -> Replicators.closeQuietly(r)));
+                        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                            Replicators.closeQuietly(r);
+                            MonitorManager.closeQuietly(manager);
+                        }));
                         r.addExceptionListener((rep, tx, e) -> {
                             throw new RuntimeException(tx.getMessage(), tx);
                         });
@@ -148,7 +151,10 @@ public class RmtCommand extends AbstractCommand {
                         Replicator r = new CliRedisReplicator(source, configure);
                         List<String> lines = Files.readAllLines(conf.toPath());
                         r.setRdbVisitor(new ClusterRdbVisitor(r, configure, lines, regexs, parse(type), replace));
-                        Runtime.getRuntime().addShutdownHook(new Thread(() -> Replicators.closeQuietly(r)));
+                        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                            Replicators.closeQuietly(r);
+                            MonitorManager.closeQuietly(manager);
+                        }));
                         r.addExceptionListener((rep, tx, e) -> {
                             throw new RuntimeException(tx.getMessage(), tx);
                         });
