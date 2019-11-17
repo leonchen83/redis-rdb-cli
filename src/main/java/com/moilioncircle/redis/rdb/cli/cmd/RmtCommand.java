@@ -60,7 +60,7 @@ public class RmtCommand extends AbstractCommand {
     private static final Option TYPE = Option.builder("t").longOpt("type").required(false).hasArgs().argName("type type...").valueSeparator(' ').type(String.class).desc("data type to export. possible values are string, hash, set, sortedset, list, module, stream. multiple types can be provided. if not specified, all data types will be returned.").build();
 
     private static final String HEADER = "rmt -s <source> [-m <uri> | -c <file>] [-d <num num...>] [-k <regex regex...>] [-t <type type...>] [-r] [-l]";
-    private static final String EXAMPLE = "\nexamples:\n rmt -s ./dump.rdb -c ./nodes.conf -t string -r\n rmt -s ./dump.rdb -m redis://127.0.0.1:6380 -t list -d 0\n rmt -s redis://120.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0\n";
+    private static final String EXAMPLE = "\nexamples:\n rmt -s ./dump.rdb -c ./nodes.conf -t string -r\n rmt -s ./dump.rdb -m redis://127.0.0.1:6380 -t list -d 0\n rmt -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0\n";
 
     private RmtCommand() {
         addOption(HELP);

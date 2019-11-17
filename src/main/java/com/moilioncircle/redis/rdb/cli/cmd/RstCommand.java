@@ -138,7 +138,7 @@ public class RstCommand extends AbstractCommand {
     private static final Option DB = Option.builder("d").longOpt("db").required(false).hasArg().argName("num num...").valueSeparator(' ').type(Number.class).desc("database number. multiple databases can be provided. if not specified, all databases will be included.").build();
 
     private static final String HEADER = "rst -s <source> [-m <uri> | -c <file>] [-d <num num...>] [-r] [-l]";
-    private static final String EXAMPLE = "\nexamples:\n rst -s redis://127.0.0.1:6379 -c ./nodes.conf -r\n rst -s redis://120.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0\n";
+    private static final String EXAMPLE = "\nexamples:\n rst -s redis://127.0.0.1:6379 -c ./nodes.conf -r\n rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0\n";
 
     private RstCommand() {
         addOption(HELP);

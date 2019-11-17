@@ -147,7 +147,7 @@ options:
 examples:
  rmt -s ./dump.rdb -c ./nodes.conf -t string -r
  rmt -s ./dump.rdb -m redis://127.0.0.1:6380 -t list -d 0
- rmt -s redis://120.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0
+ rmt -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0
 
 ```
 
@@ -222,7 +222,7 @@ options:
 
 examples:
  rst -s redis://127.0.0.1:6379 -c ./nodes.conf -r
- rst -s redis://120.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0
+ rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0
 
 ```
 
@@ -238,7 +238,7 @@ For example:
 rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -d 0
 rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -t string hash
 rmt -s /path/to/dump.rdb -m redis://192.168.1.105:6379 -r -d 0 1 -t list
-rst -s redis://120.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0
+rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0
 ```
 
 ### Redis mass insertion
