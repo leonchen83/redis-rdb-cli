@@ -66,7 +66,7 @@ public class DefaultSentinel implements Sentinel {
 
     @Override
     public void close() throws IOException {
-        terminateQuietly(schedule, configuration.getConnectionTimeout(), MILLISECONDS);
+        terminateQuietly(schedule, 0, MILLISECONDS);
         doCloseListener();
     }
 

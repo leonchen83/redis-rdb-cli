@@ -82,16 +82,16 @@ public class AsyncEventListener implements EventListener {
                 }
                 
                 // 2
-                for (int i = 0; i < this.executors.length; i++) {
-                    this.executors[i].submit(() -> this.listener.onEvent(replicator, event));
-                }
-                
-                // 3
                 if (event instanceof PostRdbSyncEvent) {
                     for (int i = 0; i < this.executors.length; i++) {
                         final int thread = i;
                         this.executors[i].submit(() -> await(thread));
                     }
+                }
+                
+                // 3
+                for (int i = 0; i < this.executors.length; i++) {
+                    this.executors[i].submit(() -> this.listener.onEvent(replicator, event));
                 }
             } else if (event instanceof DumpKeyValuePair) {
                 int i = count++ & (executors.length - 1);

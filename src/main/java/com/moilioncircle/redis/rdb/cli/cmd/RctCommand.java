@@ -125,7 +125,10 @@ public class RctCommand extends AbstractCommand {
                     throw new RuntimeException(tx.getMessage(), tx);
                 });
                 Format.parse(format).dress(r, configure, output, db, regexs, largest, bytes, DataType.parse(type), Escape.parse(escape), replace);
-                Runtime.getRuntime().addShutdownHook(new Thread(() -> Replicators.closeQuietly(r)));
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                    Replicators.closeQuietly(r);
+                    MonitorManager.closeQuietly(manager);
+                }));
                 r.addEventListener((rep, event) -> {
                     if (event instanceof PreRdbSyncEvent)
                         rep.addRawByteListener(b -> bar.react(b.length));

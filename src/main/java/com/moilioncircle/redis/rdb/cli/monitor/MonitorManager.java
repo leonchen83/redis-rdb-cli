@@ -99,7 +99,7 @@ public class MonitorManager implements Closeable {
             report(); 
             influxdb.close();
         }
-        terminateQuietly(executor, configure.getTimeout(), TimeUnit.MILLISECONDS);
+        terminateQuietly(executor, 0, TimeUnit.MILLISECONDS);
     }
 
     public static void closeQuietly(MonitorManager manager) {

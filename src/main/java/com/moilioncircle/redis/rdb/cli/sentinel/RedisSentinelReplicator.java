@@ -214,6 +214,6 @@ public class RedisSentinelReplicator implements Replicator, SentinelListener {
     @Override
     public void onClose(Sentinel sentinel) {
         Replicators.closeQuietly(replicator);
-        terminateQuietly(executors, getConfiguration().getConnectionTimeout(), MILLISECONDS);
+        terminateQuietly(executors, 0, MILLISECONDS);
     }
 }

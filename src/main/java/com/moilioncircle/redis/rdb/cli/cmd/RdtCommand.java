@@ -141,6 +141,7 @@ public class RdtCommand extends AbstractCommand {
                 List<Tuple2<Replicator, String>> list = action.dress(configure, split, backup, merge, output, db, regexs, conf, DataType.parse(type));
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                     for (Tuple2<Replicator, String> tuple : list) Replicators.closeQuietly(tuple.getV1());
+                    MonitorManager.closeQuietly(manager);
                 }));
 
                 for (Tuple2<Replicator, String> tuple : list) {
