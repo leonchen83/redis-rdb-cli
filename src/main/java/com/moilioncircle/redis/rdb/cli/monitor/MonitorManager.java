@@ -102,12 +102,12 @@ public class MonitorManager implements Closeable {
 
     @Override
     public void close() throws IOException {
-        logger.debug("close monitor manager");
         terminateQuietly(executor, 0, TimeUnit.MILLISECONDS);
         if (gateway == INFLUXDB && influxdb != null) {
             report(); 
             influxdb.close();
         }
+        logger.debug("close monitor manager");
     }
 
     public static void closeQuietly(MonitorManager manager) {

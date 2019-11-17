@@ -79,7 +79,6 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
         } else if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
             this.endpoints.get().flushQuietly();
             Endpoints.closeQuietly(this.endpoints.get());
-            logger.debug("close endpoint {}", this.endpoints.get());
         } else if (event instanceof GuardCommand) {
             MonitorManager.closeQuietly(manager);
         }

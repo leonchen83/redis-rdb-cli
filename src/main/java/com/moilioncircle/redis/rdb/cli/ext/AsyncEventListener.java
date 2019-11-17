@@ -25,9 +25,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.cmd.CloseCommand;
 import com.moilioncircle.redis.rdb.cli.ext.cmd.GuardCommand;
@@ -46,8 +43,6 @@ import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
  * @author Baoyi Chen
  */
 public class AsyncEventListener implements EventListener {
-
-    private static final Logger logger = LoggerFactory.getLogger(MonitorManager.class);
 
     private int count;
     private final int threads; 
@@ -74,7 +69,13 @@ public class AsyncEventListener implements EventListener {
                     terminateQuietly(this.executors[i], 0, MILLISECONDS);
                 }
             });
-            this.barrier = new CyclicBarrier(threads);
+            this.barrier = new CyclicBarrier(threads, () -> {
+                this.listener.onEvent(r, new GuardCommand());
+            });
+        } else {
+            r.addCloseListener(rep -> {
+                this.listener.onEvent(r, new CloseCommand());
+            });
         }
     }
 
@@ -100,7 +101,6 @@ public class AsyncEventListener implements EventListener {
                 if (event instanceof PostRdbSyncEvent) {
                     for (int i = 0; i < this.executors.length; i++) {
                         this.executors[i].submit(() -> await());
-                        this.executors[i].submit(() -> this.listener.onEvent(replicator, new GuardCommand()));
                     }
                 }
             } else if (event instanceof DumpKeyValuePair) {
@@ -112,17 +112,20 @@ public class AsyncEventListener implements EventListener {
                 this.executors[0].submit(() -> this.listener.onEvent(replicator, event));
             }
         } else {
+            this.listener.onEvent(replicator, event);
+            //
             if (event instanceof PreRdbSyncEvent) {
                 manager.reset();
             }
-            this.listener.onEvent(replicator, event);
+            if (event instanceof PostRdbSyncEvent) {
+                this.listener.onEvent(replicator, new GuardCommand());
+            }
         }
     }
     
     private void reset() {
         if (barrier != null) {
             barrier.reset();
-            logger.debug("barrier reset");
         }
     }
 
@@ -130,7 +133,6 @@ public class AsyncEventListener implements EventListener {
         try {
             if (barrier != null) {
                 barrier.await();
-                logger.debug("barrier await");
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

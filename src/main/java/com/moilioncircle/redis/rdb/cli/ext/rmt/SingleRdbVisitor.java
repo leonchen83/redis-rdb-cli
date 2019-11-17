@@ -81,7 +81,6 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
         } else if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
             this.endpoint.get().flushQuietly();
             Endpoint.closeQuietly(this.endpoint.get());
-            logger.debug("close endpoint {}", this.endpoint.get());
         } else if (event instanceof GuardCommand) {
             MonitorManager.closeQuietly(manager);
         }
