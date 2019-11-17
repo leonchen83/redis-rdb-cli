@@ -138,8 +138,12 @@ public class Endpoint implements Closeable {
     
     public void batch(boolean force, byte[] command, byte[]... args) {
         try {
+            long mark = System.nanoTime();
             emit(out, command, args);
-            if (force) out.flush();
+            if (force) {
+                out.flush();
+                if (statistics) monitor.add("send_" + address, 1, System.nanoTime() - mark);
+            }
             count++;
             if (count == pipe) flush();
         } catch (IOException e) {
@@ -158,15 +162,14 @@ public class Endpoint implements Closeable {
     public void flush() {
         try {
             if (count > 0) {
-                long mark = System.nanoTime();
                 OutputStreams.flush(out);
                 for (int i = 0; i < count; i++) {
                     RedisObject r = parse();
                     if (r != null && r.type.isError()) {
                         logger.error(r.getString());
-                        if (statistics) monitor.add("send_err_" + address, 1, System.nanoTime() - mark);
+                        if (statistics) monitor.add("err_respond_" + address, 1);
                     } else {
-                        if (statistics) monitor.add("send_suc_" + address, 1, System.nanoTime() - mark);
+                        if (statistics) monitor.add("suc_respond_" + address, 1);
                     }
                 }
                 count = 0;

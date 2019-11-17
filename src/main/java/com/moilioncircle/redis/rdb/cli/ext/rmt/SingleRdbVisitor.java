@@ -25,6 +25,8 @@ import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractMigrateRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.AsyncEventListener;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
+import com.moilioncircle.redis.rdb.cli.monitor.MonitorFactory;
+import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
 import com.moilioncircle.redis.rdb.cli.net.Endpoint;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.RedisURI;
@@ -49,6 +51,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
     private volatile byte[] evalSha;
     private final Configuration conf;
     private ThreadLocal<Endpoint> endpoint = new ThreadLocal<>();
+    private Monitor monitor = MonitorFactory.getMonitor("endpoint_statistics");
     
     public SingleRdbVisitor(Replicator replicator,
                             Configure configure,
@@ -92,6 +95,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
             if (dkv.getExpiredMs() != null) {
                 long ms = dkv.getExpiredMs() - System.currentTimeMillis();
                 if (ms <= 0) {
+                    monitor.add("expired", 1);
                     logger.debug("expired key {}.", new String(dkv.getKey()));
                     return;
                 }
@@ -111,6 +115,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
                 endpoint.set(Endpoint.valueOf(endpoint.get()));
                 retry(dkv, times);
             } else {
+                monitor.add("failed", 1);
                 logger.error("failed to sync rdb event, key:[{}], reason: {}", new String(dkv.getKey()), e.getMessage());
             }
         }
