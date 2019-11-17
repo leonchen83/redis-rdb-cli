@@ -21,5 +21,5 @@ import com.moilioncircle.redis.replicator.cmd.impl.AbstractCommand;
 /**
  * @author Baoyi Chen
  */
-public class CloseCommand extends AbstractCommand {
+public class ClosedCommand extends AbstractCommand {
 }

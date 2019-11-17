@@ -26,7 +26,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.ext.cmd.CloseCommand;
+import com.moilioncircle.redis.rdb.cli.ext.cmd.ClosedCommand;
+import com.moilioncircle.redis.rdb.cli.ext.cmd.ClosingCommand;
 import com.moilioncircle.redis.rdb.cli.ext.cmd.GuardCommand;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -46,7 +47,8 @@ public class AsyncEventListener implements EventListener {
 
     private int count;
     private final int threads; 
-    private CyclicBarrier barrier;
+    private CyclicBarrier rdbBarrier;
+    private CyclicBarrier closeBarrier;
     private MonitorManager manager;
     private final EventListener listener;
     private ExecutorService[] executors;
@@ -59,22 +61,37 @@ public class AsyncEventListener implements EventListener {
             if ((threads & (threads - 1)) != 0) {
                 throw new IllegalArgumentException("migrate_thread_size " + threads + " must power of 2");
             }
+            
+            // 1
+            this.rdbBarrier = new CyclicBarrier(threads, () -> {
+                this.listener.onEvent(r, new GuardCommand());
+            });
+            
+            // 2
+            this.closeBarrier = new CyclicBarrier(threads, () -> {
+                this.listener.onEvent(r, new ClosedCommand());
+            });
+            
+            // 3
             this.executors = new ScheduledExecutorService[threads];
             for (int i = 0; i < this.executors.length; i++) {
                 this.executors[i] = Executors.newSingleThreadScheduledExecutor();
             }
+            
             r.addCloseListener(rep -> {
                 for (int i = 0; i < this.executors.length; i++) {
-                    this.executors[i].submit(() -> this.listener.onEvent(r, new CloseCommand()));
+                    this.executors[i].submit(() -> {
+                        this.listener.onEvent(r, new ClosingCommand());
+                        await(closeBarrier);
+                    });
                     terminateQuietly(this.executors[i], 0, MILLISECONDS);
                 }
             });
-            this.barrier = new CyclicBarrier(threads, () -> {
-                this.listener.onEvent(r, new GuardCommand());
-            });
+            
         } else {
             r.addCloseListener(rep -> {
-                this.listener.onEvent(r, new CloseCommand());
+                this.listener.onEvent(r, new ClosingCommand());
+                this.listener.onEvent(r, new ClosedCommand());
             });
         }
     }
@@ -88,7 +105,7 @@ public class AsyncEventListener implements EventListener {
                     event instanceof PostCommandSyncEvent) {
                 // 1
                 if (event instanceof PreRdbSyncEvent) {
-                    reset();
+                    reset(rdbBarrier);
                     manager.reset();
                 }
                 
@@ -100,14 +117,14 @@ public class AsyncEventListener implements EventListener {
                 // 3
                 if (event instanceof PostRdbSyncEvent) {
                     for (int i = 0; i < this.executors.length; i++) {
-                        this.executors[i].submit(() -> await());
+                        this.executors[i].submit(() -> await(rdbBarrier));
                     }
                 }
             } else if (event instanceof DumpKeyValuePair) {
                 int i = count++ & (executors.length - 1);
                 this.executors[i].submit(() -> this.listener.onEvent(replicator, event));
             } else if (event instanceof Command) {
-                // at this point all rdb event process done controlled by barrier.
+                // at this point all rdb event process done controlled by rdbBarrier.
                 // so we can process aof event use thread 0 safely.
                 this.executors[0].submit(() -> this.listener.onEvent(replicator, event));
             }
@@ -123,13 +140,13 @@ public class AsyncEventListener implements EventListener {
         }
     }
     
-    private void reset() {
+    private void reset(CyclicBarrier barrier) {
         if (barrier != null) {
             barrier.reset();
         }
     }
 
-    private void await() {
+    private void await(CyclicBarrier barrier) {
         try {
             if (barrier != null) {
                 barrier.await();

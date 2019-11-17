@@ -26,7 +26,8 @@ import org.slf4j.LoggerFactory;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractMigrateRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.AsyncEventListener;
-import com.moilioncircle.redis.rdb.cli.ext.cmd.CloseCommand;
+import com.moilioncircle.redis.rdb.cli.ext.cmd.ClosedCommand;
+import com.moilioncircle.redis.rdb.cli.ext.cmd.ClosingCommand;
 import com.moilioncircle.redis.rdb.cli.ext.cmd.CombineCommand;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorFactory;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
@@ -108,9 +109,10 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
             if (containsDB(db)) {
                 retry(((CombineCommand)event).getDefaultCommand(), configure.getMigrateRetries());
             }
-        } else if (event instanceof CloseCommand) {
+        } else if (event instanceof ClosingCommand) {
             this.endpoint.get().flushQuietly();
             Endpoint.closeQuietly(this.endpoint.get());
+        } else if (event instanceof ClosedCommand) {
             MonitorManager.closeQuietly(manager);
         }
     }
