@@ -167,9 +167,9 @@ public class Endpoint implements Closeable {
                     RedisObject r = parse();
                     if (r != null && r.type.isError()) {
                         logger.error(r.getString());
-                        if (statistics) monitor.add("err_respond_" + address, 1);
+                        if (statistics) monitor.add("failure_respond", 1);
                     } else {
-                        if (statistics) monitor.add("suc_respond_" + address, 1);
+                        if (statistics) monitor.add("success_respond", 1);
                     }
                 }
                 count = 0;
@@ -204,7 +204,7 @@ public class Endpoint implements Closeable {
     }
     
     public static Endpoint valueOf(Endpoint endpoint) {
-        if (endpoint.statistics) endpoint.monitor.add("retry_" + endpoint.address, 1);
+        if (endpoint.statistics) endpoint.monitor.add("reconnect_" + endpoint.address, 1);
         closeQuietly(endpoint);
         return new Endpoint(endpoint.host, endpoint.port, endpoint.db, endpoint.pipe, endpoint.statistics, endpoint.conf, endpoint.configure);
     }

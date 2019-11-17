@@ -87,7 +87,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             if (dkv.getExpiredMs() != null) {
                 long ms = dkv.getExpiredMs() - System.currentTimeMillis();
                 if (ms <= 0) {
-                    monitor.add("expired", 1);
+                    monitor.add("failure_expired", 1);
                     logger.debug("expired key {}.", new String(dkv.getKey()));
                     return;
                 }
@@ -106,7 +106,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
                 this.endpoints.get().update(slot);
                 retry(dkv, times);
             } else {
-                monitor.add("failed", 1);
+                monitor.add("failure_failed", 1);
                 logger.error("failed to sync rdb event, key:[{}], reason: {}", new String(dkv.getKey()), e.getMessage());
             }
         }

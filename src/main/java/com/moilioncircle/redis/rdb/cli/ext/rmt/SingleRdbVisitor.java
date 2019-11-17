@@ -95,7 +95,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
             if (dkv.getExpiredMs() != null) {
                 long ms = dkv.getExpiredMs() - System.currentTimeMillis();
                 if (ms <= 0) {
-                    monitor.add("expired", 1);
+                    monitor.add("failure_expired", 1);
                     logger.debug("expired key {}.", new String(dkv.getKey()));
                     return;
                 }
@@ -115,7 +115,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
                 endpoint.set(Endpoint.valueOf(endpoint.get()));
                 retry(dkv, times);
             } else {
-                monitor.add("failed", 1);
+                monitor.add("failure_failed", 1);
                 logger.error("failed to sync rdb event, key:[{}], reason: {}", new String(dkv.getKey()), e.getMessage());
             }
         }
