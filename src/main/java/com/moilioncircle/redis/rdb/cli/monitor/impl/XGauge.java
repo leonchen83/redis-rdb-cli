@@ -17,6 +17,7 @@
 package com.moilioncircle.redis.rdb.cli.monitor.impl;
 
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.LongAdder;
 
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Gauge;
 
@@ -26,6 +27,7 @@ import com.moilioncircle.redis.rdb.cli.monitor.entity.Gauge;
 public final class XGauge implements Gauge {
 
     private final AtomicLong gauge = new AtomicLong(0);
+    private final LongAdder v1 = new LongAdder();
 
     @Override
     public long getGauge() {
@@ -34,7 +36,7 @@ public final class XGauge implements Gauge {
 
     @Override
     public Gauge reset() {
-        long v = gauge.get();
+        long v = gauge.getAndSet(0);
         if (v == 0) return null; else return new ImmutableXGauge(v);
     }
 

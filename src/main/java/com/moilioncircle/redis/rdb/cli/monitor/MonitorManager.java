@@ -95,7 +95,10 @@ public class MonitorManager implements Closeable {
 
     @Override
     public void close() throws IOException {
-        if (gateway == INFLUXDB && influxdb != null) influxdb.close();
+        if (gateway == INFLUXDB && influxdb != null) {
+            report(); 
+            influxdb.close();
+        }
         terminateQuietly(executor, configure.getTimeout(), TimeUnit.MILLISECONDS);
     }
 
