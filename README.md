@@ -347,7 +347,7 @@ More configurable parameter can be modified in `/path/to/redis-rdb-cli/conf/redi
 ## Difference between rmt and rst
 
 1. When `rmt` started. source redis first do `BGSAVE` and generate a snapshot rdb file. `rmt` command migrate this snapshot file to target redis. after this process done, `rmt` terminated.  
-2. `rst` not only migrate snapshot rdb file but also incremental data from source redis. so `rst` never terminated except type `CTRL+C`. `rst` only support `db` filter more details please refer to [Limitation of cluster migration](#limitation-of-cluster-migration) 
+2. `rst` not only migrate snapshot rdb file but also incremental data from source redis. so `rst` never terminated except type `CTRL+C`. `rst` only support `db` filter more details please refer to [Limitation of migration](#limitation-of-migration) 
 
 ## Dashboard
 
@@ -467,10 +467,11 @@ migrate_flush=yes
 +---------------+             +-------------------+                 +---------------+
 ```
 
-## Limitation of cluster migration
+## Limitation of migration
 
-1. We use cluster's `nodes.conf` to migrate data to cluster. because of we did't handle the `MOVED` `ASK` redirection. so the only limitation is that the cluster **MUST** in stable state during the migration. this means the cluster **MUST** have no `migrating`, `importing` slot and no switch slave to master. 
-  
+1. We use cluster's `nodes.conf` to migrate data to cluster. because of we did't handle the `MOVED` `ASK` redirection. so limitation of cluster migration is that the cluster **MUST** in stable state during the migration. this means the cluster **MUST** have no `migrating`, `importing` slot and no switch slave to master. 
+2. If use `rst` migrate date to cluster. the following command not supported `SWAPDB,MOVE,FLUSHALL,FLUSHDB,PUBLISH,MULTI,EXEC,SCRIPT FLUSH,SCRIPT LOAD,EVAL,EVALSHA`. the following command only support `RPOPLPUSH,SDIFFSTORE,SINTERSTORE,SMOVE,ZINTERSTORE,ZUNIONSTORE,DEL,UNLINK,RENAME,RENAMENX,PFMERGE,PFCOUNT,MSETNX,BRPOPLPUSH,BITOP,MSET` if the `keys` in these commands in the same slot(eg: `del {user}:1 {user}:2`)
+
 ## Contributors
   
 * [Baoyi Chen](https://github.com/leonchen83)

@@ -347,7 +347,7 @@ rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
 ## rmt命令与rst命令的区别
 
 1. 当 `rmt` 启动时. 源redis首先执行`BGSAVE`生成出一个rdb快照. `rmt` 把快照的数据迁移到目标redis. 迁移完成之后, `rmt` 命令成功结束并终止.  
-2. `rst` 不仅仅迁移rdb快照文件,后续的增量数据也会迁移到目标redis. 因此 `rst` 不会手动终止. 但是按 `CTRL+C` 键可以终止同步. `rst` 命令只支持 `db` 过滤, 更多细节请参照 [同步到集群的限制](#同步到集群的限制) 
+2. `rst` 不仅仅迁移rdb快照文件,后续的增量数据也会迁移到目标redis. 因此 `rst` 不会手动终止. 但是按 `CTRL+C` 键可以终止同步. `rst` 命令只支持 `db` 过滤, 更多细节请参照 [同步的限制](#同步的限制) 
 
 ## Dashboard
 
@@ -467,10 +467,11 @@ migrate_flush=yes
 +---------------+             +-------------------+                 +---------------+
 ```
 
-### 同步到集群的限制
+## 同步的限制
 
-我们通过集群的 `nodes.conf` 文件来同步数据到集群. 因为我们没有处理 `MOVED` `ASK` 重定向. 因此唯一的限制是集群在同步期间 **必须** 是稳定的状态. 这意味着集群 **必须** 不存在 `migrating`, `importing` 这样的slot. 而且没有主从切换. 
-  
+1. 我们通过集群的 `nodes.conf` 文件来同步数据到集群. 因为我们没有处理 `MOVED` `ASK` 重定向. 因此唯一的限制是集群在同步期间 **必须** 是稳定的状态. 这意味着集群 **必须** 不存在 `migrating`, `importing` 这样的slot. 而且没有主从切换. 
+2. 当使用 `rst` 命令迁移数据到集群的时候. 下面的命令不支持： `SWAPDB,MOVE,FLUSHALL,FLUSHDB,PUBLISH,MULTI,EXEC,SCRIPT FLUSH,SCRIPT LOAD,EVAL,EVALSHA`. 下面的命令有限支持 `RPOPLPUSH,SDIFFSTORE,SINTERSTORE,SMOVE,ZINTERSTORE,ZUNIONSTORE,DEL,UNLINK,RENAME,RENAMENX,PFMERGE,PFCOUNT,MSETNX,BRPOPLPUSH,BITOP,MSET`.只有这些命令里包含的 `keys` 在同一个slot的时候(eg: `del {user}:1 {user}:2`)才支持.
+
 ## 贡献者
   
 * [Baoyi Chen](https://github.com/leonchen83)
