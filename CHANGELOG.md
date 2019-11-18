@@ -1,3 +1,8 @@
+### 0.2.0
+
+Improve dashboard.  
+Add `rst` command.  
+
 ### 0.1.19
 
 Improve dashboard
