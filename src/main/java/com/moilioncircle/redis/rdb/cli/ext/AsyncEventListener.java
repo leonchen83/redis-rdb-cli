@@ -28,7 +28,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.cmd.ClosedCommand;
 import com.moilioncircle.redis.rdb.cli.ext.cmd.ClosingCommand;
-import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.cmd.Command;
 import com.moilioncircle.redis.replicator.event.Event;
