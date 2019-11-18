@@ -288,6 +288,16 @@ diff /path/to/dump1.diff /path/to/dump2.diff
 rct -f resp -s /path/to/dump.rdb -o /path/to/appendonly.aof
 ```
 
+### 2台redis之间数据同步
+```java  
+rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -r
+```
+
+### 同步单台redis的数据到集群
+```java  
+rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:30001 -r -d 0
+```
+
 ### 同步rdb到远端redis
 
 ```java  
@@ -333,6 +343,11 @@ rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
 ### 其他参数
 
 更多的可配置参数可以在 `/path/to/redis-rdb-cli/conf/redis-rdb-cli.conf` 这里配置
+
+## rmt命令与rst命令的区别
+
+1. 当 `rmt` 启动时. 源redis首先执行`BGSAVE`生成出一个rdb快照. `rmt` 把快照的数据迁移到目标redis. 迁移完成之后, `rmt` 命令成功结束并终止.  
+2. `rst` 不仅仅迁移rdb快照文件,后续的增量数据也会迁移到目标redis. 因此 `rst` 不会手动终止. 但是按 `CTRL+C` 键可以终止同步. `rst` 命令只支持 `db` 过滤, 更多细节请参照 [同步到集群的限制](#同步到集群的限制) 
 
 ## Dashboard
 

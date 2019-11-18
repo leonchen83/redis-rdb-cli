@@ -288,6 +288,16 @@ diff /path/to/dump1.diff /path/to/dump2.diff
 rct -f resp -s /path/to/dump.rdb -o /path/to/appendonly.aof
 ```
 
+### Sync with 2 redis
+```java  
+rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -r
+```
+
+### Sync single redis to redis cluster
+```java  
+rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:30001 -r -d 0
+```
+
 ### Migrate rdb to remote redis
 
 ```java  
@@ -333,6 +343,11 @@ rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
 ### Other parameter
 
 More configurable parameter can be modified in `/path/to/redis-rdb-cli/conf/redis-rdb-cli.conf`
+
+## Difference between rmt and rst
+
+1. When `rmt` started. source redis first do `BGSAVE` and generate a snapshot rdb file. `rmt` command migrate this snapshot file to target redis. after this process done, `rmt` terminated.  
+2. `rst` not only migrate snapshot rdb file but also incremental data from source redis. so `rst` never terminated except type `CTRL+C`. `rst` only support `db` filter more details please refer to [Limitation of cluster migration](#limitation-of-cluster-migration) 
 
 ## Dashboard
 
@@ -452,9 +467,9 @@ migrate_flush=yes
 +---------------+             +-------------------+                 +---------------+
 ```
 
-### limitation of cluster migration
+## Limitation of cluster migration
 
-We use cluster's `nodes.conf` to migrate data to cluster. because of we did't handle the `MOVED` `ASK` redirection. so the only limitation is that the cluster **MUST** in stable state during the migration. this means the cluster **MUST** have no `migrating`, `importing` slot and no switch slave to master. 
+1. We use cluster's `nodes.conf` to migrate data to cluster. because of we did't handle the `MOVED` `ASK` redirection. so the only limitation is that the cluster **MUST** in stable state during the migration. this means the cluster **MUST** have no `migrating`, `importing` slot and no switch slave to master. 
   
 ## Contributors
   
@@ -462,4 +477,4 @@ We use cluster's `nodes.conf` to migrate data to cluster. because of we did't ha
 * [TaoBeier](https://github.com/tao12345666333)
 * [Maz Ahmadi](https://github.com/cmdshepard)
 * [Anish Karandikar](https://github.com/anishkny)
-* Special thanks to[Kater Technologies](https://www.kater.com/)
+* Special thanks to [Kater Technologies](https://www.kater.com/)
