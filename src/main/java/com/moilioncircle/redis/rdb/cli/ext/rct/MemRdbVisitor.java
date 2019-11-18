@@ -89,6 +89,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         super(replicator, configure, out, db, regexs, types, escape);
         this.bytes = bytes;
         this.manager = new MonitorManager(configure);
+        this.manager.open();
         this.heap = new CmpHeap<>(largest == null ? -1 : largest.intValue());
         this.metricHeap = new CmpHeap<>(min(100, largest == null ? 100 : largest.intValue()));
         this.heap.setConsumer(this);
@@ -185,7 +186,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             OutputStreams.write("expiry".getBytes(), out);
             OutputStreams.write('\n', out);
             
-            manager.reset();
+            manager.reset("memory_statistics");
         } else if (event instanceof AuxField) {
             AuxField aux = (AuxField) event;
             if (aux.getAuxKey().equals("used-mem")) {
