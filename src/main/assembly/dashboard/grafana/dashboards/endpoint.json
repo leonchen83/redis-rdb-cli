@@ -612,7 +612,7 @@
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "reconnect mean count",
+      "title": "reconnect target mean count",
       "tooltip": {
         "shared": true,
         "sort": 0,
