@@ -92,8 +92,9 @@ public class MonitorManager implements Closeable {
         }
     }
 
-    public void open() {
+    public void open(String measurement) {
         logger.debug("open monitor manager");
+        reset(measurement);
         executor.scheduleWithFixedDelay(this::report, timeout, timeout, TimeUnit.MILLISECONDS);
     }
 

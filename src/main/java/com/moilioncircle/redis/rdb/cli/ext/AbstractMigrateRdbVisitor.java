@@ -44,8 +44,7 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
         this.replace = replace;
         this.flush = configure.isMigrateFlush();
         this.manager = new MonitorManager(configure);
-        this.manager.reset("endpoint_statistics");
-        this.manager.open();
+        this.manager.open("endpoint_statistics");
     }
     
     @Override
