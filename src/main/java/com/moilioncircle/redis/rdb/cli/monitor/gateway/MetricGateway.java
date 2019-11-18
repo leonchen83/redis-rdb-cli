@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Baoyi Chen
+ * Copyright 2016-2017 Leon Chen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,31 +14,17 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.glossary;
+package com.moilioncircle.redis.rdb.cli.monitor.gateway;
+
+import java.io.Closeable;
+import java.util.List;
+
+import com.moilioncircle.redis.rdb.cli.monitor.MonitorPoint;
 
 /**
  * @author Baoyi Chen
  */
-public enum Gateway {
-
-    LOG("log"),
-    NONE("none"),
-    INFLUXDB("influxdb");
-
-    private String value;
-
-    Gateway(String value) {
-        this.value = value;
-    }
-
-    public String getValue() {
-        return this.value;
-    }
-
-    public static Gateway parse(String value) {
-        if (value.equals("none")) return NONE;
-        else if (value.equals("log")) return LOG;
-        else if (value.equals("influxdb")) return INFLUXDB;
-        else throw new UnsupportedOperationException(value);
-    }
+public interface MetricGateway extends Closeable {
+    void reset(String measurement);
+    boolean save(List<MonitorPoint> points);
 }

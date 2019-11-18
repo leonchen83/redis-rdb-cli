@@ -1,10 +1,9 @@
-package com.moilioncircle.redis.rdb.cli.monitor.gateway;
+package com.moilioncircle.redis.rdb.cli.monitor.gateway.impl;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.influxdb.BatchOptions.DEFAULTS;
 import static org.influxdb.InfluxDB.ConsistencyLevel.ONE;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorPoint;
+import com.moilioncircle.redis.rdb.cli.monitor.gateway.MetricGateway;
 
 import okhttp3.ConnectionPool;
 import okhttp3.Dispatcher;
@@ -30,8 +30,8 @@ import okhttp3.OkHttpClient;
 /**
  * @author Baoyi Chen
  */
-public class Influxdb implements Closeable {
-    private static final Logger logger = LoggerFactory.getLogger(Influxdb.class);
+public class InfluxdbGateway implements MetricGateway {
+    private static final Logger logger = LoggerFactory.getLogger(InfluxdbGateway.class);
 
     public static final String AVG = "avg";
     public static final String TYPE = "type";
@@ -53,7 +53,7 @@ public class Influxdb implements Closeable {
     protected ConsistencyLevel consistency = ONE;
     protected String url, database, user, password;
 
-    public Influxdb(Configure configure) {
+    public InfluxdbGateway(Configure configure) {
         this.configure = configure;
         this.user = configure.getMetricUser();
         this.password = configure.getMetricPass();
@@ -64,6 +64,7 @@ public class Influxdb implements Closeable {
         this.influxdb = create();
     }
     
+    @Override
     public void reset(String measurement) {
         if (this.influxdb != null) {
             this.influxdb.query(new Query("drop series from \"" + measurement + "\" where instance = '" + instance + "'", database));
@@ -75,6 +76,7 @@ public class Influxdb implements Closeable {
         if (this.influxdb != null) this.influxdb.close();
     }
 
+    @Override
     public boolean save(List<MonitorPoint> points) {
         //
         if (points.isEmpty()) {

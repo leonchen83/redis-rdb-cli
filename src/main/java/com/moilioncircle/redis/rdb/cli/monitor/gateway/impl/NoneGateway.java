@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Baoyi Chen
+ * Copyright 2016-2017 Leon Chen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,31 +14,31 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.glossary;
+package com.moilioncircle.redis.rdb.cli.monitor.gateway.impl;
+
+import java.io.IOException;
+import java.util.List;
+
+import com.moilioncircle.redis.rdb.cli.monitor.MonitorPoint;
+import com.moilioncircle.redis.rdb.cli.monitor.gateway.MetricGateway;
 
 /**
  * @author Baoyi Chen
  */
-public enum Gateway {
+public class NoneGateway implements MetricGateway {
 
-    LOG("log"),
-    NONE("none"),
-    INFLUXDB("influxdb");
-
-    private String value;
-
-    Gateway(String value) {
-        this.value = value;
+    @Override
+    public void reset(String measurement) {
+        
     }
 
-    public String getValue() {
-        return this.value;
+    @Override
+    public boolean save(List<MonitorPoint> points) {
+        return true;
     }
 
-    public static Gateway parse(String value) {
-        if (value.equals("none")) return NONE;
-        else if (value.equals("log")) return LOG;
-        else if (value.equals("influxdb")) return INFLUXDB;
-        else throw new UnsupportedOperationException(value);
+    @Override
+    public void close() throws IOException {
+
     }
 }

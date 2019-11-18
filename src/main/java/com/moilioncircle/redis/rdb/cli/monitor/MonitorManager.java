@@ -16,7 +16,6 @@
 
 package com.moilioncircle.redis.rdb.cli.monitor;
 
-import static com.moilioncircle.redis.rdb.cli.glossary.Gateway.INFLUXDB;
 import static com.moilioncircle.redis.replicator.util.Concurrents.terminateQuietly;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -33,11 +32,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.glossary.Gateway;
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Counter;
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Gauge;
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
-import com.moilioncircle.redis.rdb.cli.monitor.gateway.Influxdb;
+import com.moilioncircle.redis.rdb.cli.monitor.gateway.MetricGateway;
+import com.moilioncircle.redis.rdb.cli.monitor.gateway.MetricGatewayFactory;
 
 /**
  * @author Baoyi Chen
@@ -46,16 +45,12 @@ public class MonitorManager implements Closeable {
     //
     private static final Logger logger = LoggerFactory.getLogger(MonitorManager.class);
 
-    private Gateway gateway;
-    private Configure configure;
-    private Influxdb influxdb;
+    private MetricGateway metricGateway;
     private ScheduledExecutorService executor;
     private long timeout = SECONDS.toMillis(5);
 
     public MonitorManager(Configure configure) {
-        this.configure = configure;
-        this.influxdb = new Influxdb(configure);
-        this.gateway = this.configure.getMetricGateway();
+        this.metricGateway = MetricGatewayFactory.create(configure);
         this.executor = Executors.newSingleThreadScheduledExecutor();
     }
 
@@ -79,7 +74,7 @@ public class MonitorManager implements Closeable {
                     points.add(MonitorPoint.valueOf(monitor, e.getKey(), counter));
                 }
             }
-            if (gateway == INFLUXDB) influxdb.save(points);
+            metricGateway.save(points);
         } catch (Throwable e) {
             logger.error("failed to report points {}.", points, e);
         }
@@ -87,9 +82,7 @@ public class MonitorManager implements Closeable {
     
     public void reset(String measurement) {
         logger.debug("reset measurement {}", measurement);
-        if (gateway == INFLUXDB) {
-            influxdb.reset(measurement);
-        }
+        metricGateway.reset(measurement);
     }
 
     public void open(String measurement) {
@@ -101,10 +94,8 @@ public class MonitorManager implements Closeable {
     @Override
     public void close() throws IOException {
         terminateQuietly(executor, 0, TimeUnit.MILLISECONDS);
-        if (gateway == INFLUXDB && influxdb != null) {
-            report(); 
-            influxdb.close();
-        }
+        report(); 
+        metricGateway.close();
         logger.debug("close monitor manager");
     }
 
