@@ -37,6 +37,7 @@ import com.moilioncircle.redis.rdb.cli.monitor.entity.Gauge;
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
 import com.moilioncircle.redis.rdb.cli.monitor.gateway.MetricGateway;
 import com.moilioncircle.redis.rdb.cli.monitor.gateway.MetricGatewayFactory;
+import com.moilioncircle.redis.rdb.cli.util.XThreadFactory;
 
 /**
  * @author Baoyi Chen
@@ -51,7 +52,7 @@ public class MonitorManager implements Closeable {
 
     public MonitorManager(Configure configure) {
         this.metricGateway = MetricGatewayFactory.create(configure);
-        this.executor = Executors.newSingleThreadScheduledExecutor();
+        this.executor = Executors.newSingleThreadScheduledExecutor(new XThreadFactory("monitor-scheduler"));
     }
 
     public void setTimeout(long timeout) {

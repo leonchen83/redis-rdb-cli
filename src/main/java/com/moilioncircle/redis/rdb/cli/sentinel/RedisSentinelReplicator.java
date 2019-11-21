@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.moilioncircle.redis.rdb.cli.util.Reflections;
+import com.moilioncircle.redis.rdb.cli.util.XThreadFactory;
 import com.moilioncircle.redis.replicator.CloseListener;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.ExceptionListener;
@@ -58,7 +59,7 @@ public class RedisSentinelReplicator implements Replicator, SentinelListener {
     private HostAndPort prev;
     private Sentinel sentinel;
     private RedisSocketReplicator replicator;
-    protected final ExecutorService executors = newSingleThreadExecutor();
+    protected final ExecutorService executors = newSingleThreadExecutor(new XThreadFactory("sentinel"));
 
     public RedisSentinelReplicator(RedisSentinelURI uri, Configuration configuration) {
         Objects.requireNonNull(uri);

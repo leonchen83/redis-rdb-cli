@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorPoint;
 import com.moilioncircle.redis.rdb.cli.monitor.gateway.MetricGateway;
+import com.moilioncircle.redis.rdb.cli.util.XThreadFactory;
 
 import okhttp3.ConnectionPool;
 import okhttp3.Dispatcher;
@@ -132,7 +133,7 @@ public class InfluxdbGateway implements MetricGateway {
         final InfluxDB r = InfluxDBFactory.connect(url, user, password, http);
         BatchOptions opt = DEFAULTS;
         opt = opt.consistency(consistency).jitterDuration(jitter);
-        opt = opt.actions(this.actions);
+        opt = opt.actions(this.actions).threadFactory(new XThreadFactory("influxdb"));
         opt = opt.exceptionHandler(new ExceptionHandler()).bufferLimit(capacity).flushDuration(interval);
         r.setDatabase(this.database).setRetentionPolicy(retention).enableBatch((opt)).enableGzip();
         return r;
