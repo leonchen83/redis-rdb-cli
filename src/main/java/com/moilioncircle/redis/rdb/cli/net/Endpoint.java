@@ -115,6 +115,10 @@ public class Endpoint implements Closeable, Slotable {
     public List<Short> getSlots() {
         return this.slots;
     }
+
+    public void setSlots(List<Short> slots) {
+        this.slots = slots;
+    }
     
     public String address(Socket socket) {
         Objects.requireNonNull(socket);
@@ -219,7 +223,9 @@ public class Endpoint implements Closeable, Slotable {
     public static Endpoint valueOf(Endpoint endpoint) {
         if (endpoint.statistics) endpoint.monitor.add("reconnect_" + endpoint.address, 1);
         closeQuietly(endpoint);
-        return new Endpoint(endpoint.host, endpoint.port, endpoint.db, endpoint.pipe, endpoint.statistics, endpoint.conf, endpoint.configure);
+        Endpoint v = new Endpoint(endpoint.host, endpoint.port, endpoint.db, endpoint.pipe, endpoint.statistics, endpoint.conf, endpoint.configure);
+        v.setSlots(new ArrayList<>(endpoint.slots));
+        return v;
     }
     
     private void emit(OutputStream out, byte[] command, byte[]... ary) throws IOException {
