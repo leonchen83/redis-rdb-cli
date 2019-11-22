@@ -112,6 +112,10 @@ public class Endpoint implements Closeable, Slotable {
         this.slots.add(slot);
     }
     
+    public List<Short> getSlots() {
+        return this.slots;
+    }
+    
     public String address(Socket socket) {
         Objects.requireNonNull(socket);
         InetSocketAddress ra = (InetSocketAddress) socket.getRemoteSocketAddress();

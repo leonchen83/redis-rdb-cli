@@ -71,7 +71,7 @@ public class Endpoints implements Closeable {
 
     public void update(short slot) {
         Endpoint v1 = endpoints.get(slot);
-        replace(slot, v1, Endpoint.valueOf(v1));
+        replace(v1.getSlots(), v1, Endpoint.valueOf(v1));
     }
 
     public static void close(Endpoints endpoints) {
@@ -91,10 +91,12 @@ public class Endpoints implements Closeable {
         }
     }
 
-    protected void replace(short slot, Endpoint v1, Endpoint v2) {
+    protected void replace(List<Short> slots, Endpoint v1, Endpoint v2) {
         set.remove(v1);
         set.add(v2);
-        endpoints.put(slot, v2);
+        for (short slot : slots) {
+            endpoints.put(slot, v2);
+        }
     }
     
     @Override
