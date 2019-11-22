@@ -27,12 +27,15 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
+import com.moilioncircle.redis.rdb.cli.glossary.Slotable;
 import com.moilioncircle.redis.rdb.cli.io.BufferedOutputStream;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorFactory;
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
@@ -46,7 +49,7 @@ import com.moilioncircle.redis.replicator.util.ByteBuilder;
 /**
  * @author Baoyi Chen
  */
-public class Endpoint implements Closeable {
+public class Endpoint implements Closeable, Slotable {
     
     private static final Logger logger = LoggerFactory.getLogger(Endpoint.class);
     
@@ -67,6 +70,7 @@ public class Endpoint implements Closeable {
     private final boolean statistics;
     private final Configure configure;
     private final RedisInputStream in;
+    private List<Short> slots = new ArrayList<>();
 
     private final Monitor monitor;
     
@@ -101,6 +105,11 @@ public class Endpoint implements Closeable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    @Override
+    public void addSlot(short slot) {
+        this.slots.add(slot);
     }
     
     public String address(Socket socket) {
@@ -325,7 +334,22 @@ public class Endpoint implements Closeable {
     public String toString() {
         return address;
     }
-    
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Endpoint endpoint = (Endpoint) o;
+        return port == endpoint.port &&
+                host.equals(endpoint.host) &&
+                slots.equals(endpoint.slots);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(port, host, slots);
+    }
+
     public static class RedisObject {
         public Type type;
         public Object object;

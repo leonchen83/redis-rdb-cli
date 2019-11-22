@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import com.moilioncircle.redis.rdb.cli.glossary.Slotable;
 import com.moilioncircle.redis.rdb.cli.util.CRC16;
 import com.moilioncircle.redis.replicator.util.Tuples;
 import com.moilioncircle.redis.replicator.util.type.Tuple3;
@@ -129,7 +130,11 @@ public class NodeConfParser<T> {
                         ed = parseInt(arg.substring(idx + 1));
                     } else st = ed = parseInt(arg);
                     for (; st <= ed; st++) {
-                        result.put((short) st, map.get(name));
+                        T v = map.get(name);
+                        result.put((short) st, v);
+                        if (v instanceof Slotable) {
+                            ((Slotable) v).addSlot((short)st);
+                        }
                     }
                 }
             }
