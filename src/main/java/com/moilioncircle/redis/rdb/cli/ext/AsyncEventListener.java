@@ -24,6 +24,7 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.cmd.ClosedCommand;
@@ -69,8 +70,9 @@ public class AsyncEventListener implements EventListener {
 
             // 3
             this.executors = new ScheduledExecutorService[threads];
+            ThreadFactory factory = new XThreadFactory("sync-worker");
             for (int i = 0; i < this.executors.length; i++) {
-                this.executors[i] = Executors.newSingleThreadScheduledExecutor(new XThreadFactory("sync-worker-" + i));
+                this.executors[i] = Executors.newSingleThreadScheduledExecutor(factory);
             }
 
             r.addCloseListener(rep -> {
