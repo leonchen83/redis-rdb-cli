@@ -205,6 +205,22 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
         } catch (Throwable e) {
         }
     }
+
+    public static XEndpoint valueOfQuietly(XEndpoint endpoint) {
+        try {
+            return valueOf(endpoint);
+        } catch (Throwable e) {
+            return null;
+        }
+    }
+
+    public static XEndpoint valueOfQuietly(String host, int port, XEndpoint endpoint) {
+        try {
+            return valueOf(host, port, endpoint);
+        } catch (Throwable e) {
+            return null;
+        }
+    }
     
     public static XEndpoint valueOf(XEndpoint endpoint) {
         return valueOf(endpoint.host, endpoint.port, endpoint);

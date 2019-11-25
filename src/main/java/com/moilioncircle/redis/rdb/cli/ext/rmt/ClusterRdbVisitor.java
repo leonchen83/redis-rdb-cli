@@ -72,7 +72,13 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
         if (event instanceof PreRdbSyncEvent) {
             XEndpoints.closeQuietly(this.endpoints.get());
             int pipe = configure.getMigrateBatchSize();
-            this.endpoints.set(new XEndpoints(lines, pipe, true, configuration, configure));
+            try {
+                this.endpoints.set(new XEndpoints(lines, pipe, true, configuration, configure));
+            } catch (Throwable e) {
+                // unrecoverable error
+                System.out.println("failed to connect cluster nodes, reason : " + e.getMessage());
+                System.exit(-1);
+            }
         } else if (event instanceof DumpKeyValuePair) {
             retry((DumpKeyValuePair)event, configure.getMigrateRetries());
         } else if (event instanceof ClosingCommand) {
@@ -106,7 +112,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
         } catch (Throwable e) {
             times--;
             if (times >= 0 && flush) {
-                this.endpoints.get().update(slot);
+                this.endpoints.get().updateQuietly(slot);
                 retry(dkv, times);
             } else {
                 monitor.add("failure_failed", 1);

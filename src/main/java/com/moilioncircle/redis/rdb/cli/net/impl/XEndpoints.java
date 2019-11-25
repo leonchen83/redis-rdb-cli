@@ -74,7 +74,14 @@ public class XEndpoints implements Closeable {
             endpoint.close();
         }
     }
-
+    
+    public void updateQuietly(short slot) {
+        try {
+            update(slot);
+        } catch (Throwable e) {
+        }
+    }
+    
     public void update(short slot) {
         try {
             XEndpoint prev = index2.get(slot);
@@ -114,9 +121,11 @@ public class XEndpoints implements Closeable {
                 }
             }
             
-            // 2 if all endpoints failed throw exception
+            // 2 if all endpoints failed exit.
             if (lines == null) {
-                throw new RuntimeException("can't connect to cluster.");
+                // unrecoverable error
+                System.out.println("can't connect to cluster nodes");
+                System.exit(-1);
             }
             
             // 3 parse nodes info
@@ -155,7 +164,9 @@ public class XEndpoints implements Closeable {
         }
         
         if (n2.size() != 16384) {
-            throw new RuntimeException("unsupported migrating importing slot");
+            // unrecoverable error
+            System.out.println("unsupported migrating importing slot");
+            System.exit(-1);
         }
         
         this.index1 = n1;

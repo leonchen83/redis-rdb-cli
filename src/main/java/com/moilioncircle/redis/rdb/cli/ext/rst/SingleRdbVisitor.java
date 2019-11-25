@@ -90,7 +90,13 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
         if (event instanceof PreRdbSyncEvent) {
             XEndpoint.closeQuietly(this.endpoint.get());
             int pipe = configure.getMigrateBatchSize();
-            this.endpoint.set(new XEndpoint(uri.getHost(), uri.getPort(), 0, pipe, true, conf, configure));
+            try {
+                this.endpoint.set(new XEndpoint(uri.getHost(), uri.getPort(), 0, pipe, true, conf, configure));
+            } catch (Throwable e) {
+                // unrecoverable error
+                System.out.println("failed to connect " + uri.getHost() + ":" + uri.getPort() + ", reason : " + e.getMessage());
+                System.exit(-1);
+            }
         } else if (event instanceof DumpKeyValuePair) {
             retry((DumpKeyValuePair)event, configure.getMigrateRetries());
         } else if (event instanceof PostRdbSyncEvent) {
@@ -124,7 +130,8 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
         } catch (Throwable e) {
             times--;
             if (times >= 0 && flush) {
-                endpoint.set(XEndpoint.valueOf(endpoint.get()));
+                XEndpoint next = XEndpoint.valueOfQuietly(endpoint.get());
+                if (next != null) endpoint.set(next);
                 retry(command, times);
             } else {
                 monitor.add("failure_failed", 1);
@@ -163,7 +170,8 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
         } catch (Throwable e) {
             times--;
             if (times >= 0 && flush) {
-                endpoint.set(XEndpoint.valueOf(endpoint.get()));
+                XEndpoint next = XEndpoint.valueOfQuietly(endpoint.get());
+                if (next != null) endpoint.set(next);
                 retry(dkv, times);
             } else {
                 monitor.add("failure_failed", 1);
@@ -182,7 +190,6 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
     
     protected void eval(byte[] key, byte[] value, byte[] expire) {
         if (evalSha == null) {
-            endpoint.get().flush(); // flush prev commands so that to read script.
             RedisObject r = endpoint.get().send(SCRIPT, LOAD, LUA_SCRIPT);
             byte[] evalSha = r.getBytes();
             if (evalSha == null) throw new RuntimeException(); // retry in the caller method.
