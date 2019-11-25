@@ -70,38 +70,30 @@ public class NodeConfParser<T> {
                 int port = parseInt(hostAndPort.substring(cIdx + 1, aIdx == -1 ? hostAndPort.length() : aIdx));
 
                 boolean master = false;
+                boolean serving = true;
                 for (String role : args.get(2).split(",")) {
                     switch (role) {
                         case "noflags":
-                            break;
                         case "fail":
-                            // pass
-                            break;
                         case "fail?":
-                            // pass
-                            break;
                         case "slave":
-                            // pass
-                            break;
                         case "noaddr":
-                            // pass
+                        case "handshake":
+                            serving = false;
                             break;
                         case "master":
                             master = true;
-                            break;
-                        case "handshake":
-                            // pass
                             break;
                         case "myself":
                             // pass
                             // pass
                             break;
                         default:
-                            // pass
+                            serving = false;
                     }
                 }
 
-                if (!map.containsKey(name) && master) {
+                if (!map.containsKey(name) && master && serving) {
                     T v = mapper.apply(Tuples.of(host, port, name));
                     map.put(name, v);
                     set.add(v);

@@ -53,7 +53,7 @@
         <Logger name="METRIC_LOGGER" level="info" additivity="false">
             <AppenderRef ref="METRIC"/>
         </Logger>
-        <Logger name="com.moilioncircle" level="info" additivity="false">
+        <Logger name="com.moilioncircle" level="debug" additivity="false">
             <AppenderRef ref="ROLLING"/>
         </Logger>
         <Root level="error">

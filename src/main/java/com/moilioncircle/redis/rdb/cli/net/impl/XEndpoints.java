@@ -159,8 +159,8 @@ public class XEndpoints implements Closeable {
             // 2 if all endpoints failed exit.
             if (lines == null) {
                 // unrecoverable error
-                System.out.println("can't connect to cluster nodes");
-                System.exit(-1);
+                logger.error("can't connect to any of cluster nodes");
+                return; // try again next loop
             }
             
             // 3 parse nodes info
@@ -172,7 +172,7 @@ public class XEndpoints implements Closeable {
             
             // 4 update all cluster nodes view
             merge(next1, next2, lines);
-            logger.debug("merged cluster view. next {}", next1);
+            logger.debug("merged cluster view. next {}", index1);
         }
     }
 
