@@ -245,6 +245,8 @@ public class RstCommand extends AbstractCommand {
                 List<String> lines = Arrays.asList(config.split("\n"));
                 return new ClusterRdbVisitor(replicator, configure, lines, replace);
             }
+        } catch (Throwable e) {
+            throw new RuntimeException("failed to connect to " + uri.getHost() + ":" + uri.getPort() + ", reason " + e.getMessage());
         }
     }
 

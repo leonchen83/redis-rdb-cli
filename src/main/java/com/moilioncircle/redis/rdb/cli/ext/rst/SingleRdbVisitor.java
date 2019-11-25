@@ -52,7 +52,7 @@ import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
  */
 public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements EventListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(ClusterRdbVisitor.class);
+    private static final Logger logger = LoggerFactory.getLogger(SingleRdbVisitor.class);
     private static final Monitor monitor = MonitorFactory.getMonitor("endpoint_statistics");
 
     private int db;
@@ -132,12 +132,13 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
     }
     
     public void retry(DefaultCommand command, int times) {
+        logger.debug("sync aof {}, times {}", CombineCommand.toString(command), times);
         try {
             endpoint.get().batch(flush, command.getCommand(), command.getArgs());
         } catch (Throwable e) {
             times--;
             if (times >= 0 && flush) {
-                XEndpoint next = XEndpoint.valueOfQuietly(endpoint.get());
+                XEndpoint next = XEndpoint.valueOfQuietly(endpoint.get(), db);
                 if (next != null) endpoint.set(next);
                 retry(command, times);
             } else {
@@ -148,6 +149,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
     }
     
     public void retry(DumpKeyValuePair dkv, int times) {
+        // logger.debug("sync rdb {}, times {}", new String(dkv.getKey()), times);
         try {
             DB db = dkv.getDb();
     
@@ -177,7 +179,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
         } catch (Throwable e) {
             times--;
             if (times >= 0 && flush) {
-                XEndpoint next = XEndpoint.valueOfQuietly(endpoint.get());
+                XEndpoint next = XEndpoint.valueOfQuietly(endpoint.get(), db);
                 if (next != null) endpoint.set(next);
                 retry(dkv, times);
             } else {

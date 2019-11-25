@@ -92,7 +92,7 @@ public class XEndpoints implements Closeable {
     public void update(short slot) {
         try {
             XEndpoint prev = index2.get(slot);
-            XEndpoint next = XEndpoint.valueOf(prev);
+            XEndpoint next = XEndpoint.valueOf(prev, 0);
             RedisObject r= next.send("role".getBytes());
             RedisObject[] array = r.getArray();
             if (array[0].getString().equals("master")) {
@@ -102,7 +102,7 @@ public class XEndpoints implements Closeable {
                 // slave
                 String host = array[1].getString();
                 int port = array[2].getNumber().intValue();
-                next = XEndpoint.valueOf(host, port, next);
+                next = XEndpoint.valueOf(host, port, 0, next);
                 replace(prev.getSlots(), prev, next);
             }
         } catch (Throwable e) {

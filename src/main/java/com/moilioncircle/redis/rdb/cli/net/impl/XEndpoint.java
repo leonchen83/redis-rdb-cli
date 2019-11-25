@@ -95,6 +95,7 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
             if (r != null && r.type.isError()) throw new RuntimeException(r.getString());
             this.db = db;
             this.address = address(socket).replaceAll("\\.", "_");
+            logger.debug("connected to {}:port/{}", host, port, db);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -206,30 +207,30 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
         }
     }
 
-    public static XEndpoint valueOfQuietly(XEndpoint endpoint) {
+    public static XEndpoint valueOfQuietly(XEndpoint endpoint, int db) {
         try {
-            return valueOf(endpoint);
+            return valueOf(endpoint, db);
         } catch (Throwable e) {
             return null;
         }
     }
 
-    public static XEndpoint valueOfQuietly(String host, int port, XEndpoint endpoint) {
+    public static XEndpoint valueOfQuietly(String host, int port, int db, XEndpoint endpoint) {
         try {
-            return valueOf(host, port, endpoint);
+            return valueOf(host, port, db, endpoint);
         } catch (Throwable e) {
             return null;
         }
     }
     
-    public static XEndpoint valueOf(XEndpoint endpoint) {
-        return valueOf(endpoint.host, endpoint.port, endpoint);
+    public static XEndpoint valueOf(XEndpoint endpoint, int db) {
+        return valueOf(endpoint.host, endpoint.port, db, endpoint);
     }
 
-    public static XEndpoint valueOf(String host, int port, XEndpoint endpoint) {
+    public static XEndpoint valueOf(String host, int port, int db, XEndpoint endpoint) {
         if (endpoint.statistics) endpoint.monitor.add("reconnect_" + endpoint.address, 1);
         closeQuietly(endpoint);
-        XEndpoint v = new XEndpoint(host, port, endpoint.db, endpoint.pipe, endpoint.statistics, endpoint.conf, endpoint.configure);
+        XEndpoint v = new XEndpoint(host, port, db, endpoint.pipe, endpoint.statistics, endpoint.conf, endpoint.configure);
         v.setSlots(new ArrayList<>(endpoint.slots));
         return v;
     }
