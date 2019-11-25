@@ -94,7 +94,7 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
             RedisObject r = send(SELECT, String.valueOf(db).getBytes());
             if (r != null && r.type.isError()) throw new RuntimeException(r.getString());
             this.db = db;
-            this.address = address(socket).replaceAll("\\.", "_");
+            this.address = this.toString().replaceAll("\\.", "_").replaceAll(":", "_");
             logger.debug("connected to {}:port/{}", host, port, db);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -196,7 +196,7 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
 
     @Override
     public String toString() {
-        return address;
+        return "<" + host + ":" + port + ">";
     }
     
     public static void closeQuietly(XEndpoint endpoint) {

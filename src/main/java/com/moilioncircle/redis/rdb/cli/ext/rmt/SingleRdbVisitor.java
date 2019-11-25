@@ -100,6 +100,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
     }
     
     public void retry(DumpKeyValuePair dkv, int times) {
+        logger.trace("sync rdb event [{}], times {}", new String(dkv.getKey()), times);
         try {
             DB db = dkv.getDb();
     
@@ -129,7 +130,8 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
         } catch (Throwable e) {
             times--;
             if (times >= 0 && flush) {
-                XEndpoint next = XEndpoint.valueOfQuietly(endpoint.get(), 0);
+                XEndpoint prev = endpoint.get();
+                XEndpoint next = XEndpoint.valueOfQuietly(prev, prev.getDB());
                 if (next != null) endpoint.set(next);
                 retry(dkv, times);
             } else {

@@ -49,6 +49,7 @@ import com.moilioncircle.redis.replicator.cmd.impl.MSetCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.MSetNxCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.PFCountCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.PFMergeCommand;
+import com.moilioncircle.redis.replicator.cmd.impl.PingCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.RPopLPushCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.RenameCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.RenameNxCommand;
@@ -143,6 +144,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
     }
 
     public void retry(DumpKeyValuePair dkv, int times) {
+        logger.trace("sync rdb event [{}], times {}", new String(dkv.getKey()), times);
         short slot = slot(dkv.getKey());
         try {
             byte[] expire = ZERO;
@@ -189,10 +191,20 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             }
         }
     }
+    
+    public void ping() {
+        try {
+            endpoints.get().ping(flush);
+        } catch (Throwable e) {
+        }
+    }
 
     public void retry(CombineCommand command, int times) {
+        logger.trace("sync aof event [{}], times {}", command.toString(), times);
         Command parsedCommand = command.getParsedCommand();
-        if (parsedCommand instanceof RenameCommand) {
+        if (parsedCommand instanceof PingCommand) {
+            ping(); // ping all cluster nodes
+        } else if (parsedCommand instanceof RenameCommand) {
             RenameCommand cmd = (RenameCommand) parsedCommand;
             short slot = slot1(cmd.getKey(), cmd.getNewKey());
             if (slot != -1) {

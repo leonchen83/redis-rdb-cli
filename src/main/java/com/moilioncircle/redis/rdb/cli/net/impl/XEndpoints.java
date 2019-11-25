@@ -29,6 +29,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.conf.NodeConfParser;
 import com.moilioncircle.redis.rdb.cli.net.protocol.RedisObject;
@@ -39,6 +42,8 @@ import com.moilioncircle.redis.replicator.util.type.Tuple3;
  * @author Baoyi Chen
  */
 public class XEndpoints implements Closeable {
+    
+    private static final Logger logger = LoggerFactory.getLogger(XEndpoints.class);
 
     private final Configure configure;
     private final Configuration configuration;
@@ -58,6 +63,17 @@ public class XEndpoints implements Closeable {
     
     public List<String> getClusterNodes() {
         return clusterNodes;
+    }
+    
+    public void ping(boolean force) {
+        for (XEndpoint prev : new HashSet<>(index1)) {
+            try {
+                prev.batch(force, "PING".getBytes());
+            } catch (Throwable e) {
+                updateQuietly(prev);
+                break;
+            }
+        }
     }
     
     public RedisObject send(byte[] command, byte[]... args) {
@@ -81,32 +97,44 @@ public class XEndpoints implements Closeable {
             endpoint.close();
         }
     }
-    
+
     public void updateQuietly(short slot) {
         try {
             update(slot);
         } catch (Throwable e) {
         }
     }
-    
+
     public void update(short slot) {
+        update(index2.get(slot));
+    }
+    
+    public void updateQuietly(XEndpoint endpoint) {
         try {
-            XEndpoint prev = index2.get(slot);
-            XEndpoint next = XEndpoint.valueOf(prev, 0);
+            update(endpoint);
+        } catch (Throwable e) {
+        }
+    }
+
+    public void update(XEndpoint endpoint) {
+        logger.debug("update cluster view. failed node {}:{}, prev {}", endpoint.getHost(), endpoint.getPort(), index1);
+        try {
+            XEndpoint next = XEndpoint.valueOf(endpoint, 0);
             RedisObject r= next.send("role".getBytes());
             RedisObject[] array = r.getArray();
             if (array[0].getString().equals("master")) {
                 // master
-                replace(prev.getSlots(), prev, next);
+                replace(endpoint.getSlots(), endpoint, next);
             } else {
                 // slave
                 String host = array[1].getString();
                 int port = array[2].getNumber().intValue();
                 next = XEndpoint.valueOf(host, port, 0, next);
-                replace(prev.getSlots(), prev, next);
+                replace(endpoint.getSlots(), endpoint, next);
             }
         } catch (Throwable e) {
             // FAILOVER PROCESS
+            logger.debug("FAILOVER PROCESS!");
             
             // when all above failover mechanism failed.
             // need update all cluster nodes view
@@ -144,6 +172,7 @@ public class XEndpoints implements Closeable {
             
             // 4 update all cluster nodes view
             merge(next1, next2, lines);
+            logger.debug("merged cluster view. next {}", next1);
         }
     }
 

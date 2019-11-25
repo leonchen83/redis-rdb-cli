@@ -99,6 +99,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
     }
 
     public void retry(DumpKeyValuePair dkv, int times) {
+        logger.trace("sync rdb event [{}], times {}", new String(dkv.getKey()), times);
         short slot = slot(dkv.getKey());
         try {
             byte[] expire = ZERO;

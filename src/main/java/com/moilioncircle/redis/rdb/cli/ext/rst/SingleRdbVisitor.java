@@ -132,7 +132,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
     }
     
     public void retry(DefaultCommand command, int times) {
-        logger.debug("sync aof {}, times {}", CombineCommand.toString(command), times);
+        logger.trace("sync aof event [{}], times {}", CombineCommand.toString(command), times);
         try {
             endpoint.get().batch(flush, command.getCommand(), command.getArgs());
         } catch (Throwable e) {
@@ -149,7 +149,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
     }
     
     public void retry(DumpKeyValuePair dkv, int times) {
-        // logger.debug("sync rdb {}, times {}", new String(dkv.getKey()), times);
+        logger.trace("sync rdb event [{}], times {}", new String(dkv.getKey()), times);
         try {
             DB db = dkv.getDb();
     

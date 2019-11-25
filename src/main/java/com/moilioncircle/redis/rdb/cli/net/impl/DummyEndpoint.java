@@ -34,10 +34,7 @@ public class DummyEndpoint extends AbstractEndpoint {
 
     @Override
     public String toString() {
-        return "DummyEndpoint{" +
-                "host='" + host + '\'' +
-                ", port=" + port +
-                '}';
+        return "<" + host + ":" + port + ">";
     }
     
     public static XEndpoint valueOf(DummyEndpoint dummy, Configuration conf, Configure configure) {

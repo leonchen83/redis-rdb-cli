@@ -251,10 +251,10 @@ public class RstCommand extends AbstractCommand {
     }
 
     private Replicator dress(Replicator replicator) {
-        replicator.addCommandParser(CommandName.name("PING"), new PingParser());
         replicator.addCommandParser(CommandName.name("SELECT"), new SelectParser());
         replicator.addCommandParser(CommandName.name("REPLCONF"), new ReplConfParser());
         //
+        replicator.addCommandParser(CommandName.name("PING"), new CombineCommandParser(new PingParser()));
         replicator.addCommandParser(CommandName.name("APPEND"), new CombineCommandParser(new AppendParser()));
         replicator.addCommandParser(CommandName.name("SET"), new CombineCommandParser(new SetParser()));
         replicator.addCommandParser(CommandName.name("SETEX"), new CombineCommandParser(new SetExParser()));
