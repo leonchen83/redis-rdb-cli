@@ -102,10 +102,12 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
     @Override
     public void onEvent(Replicator replicator, Event event) {
         if (event instanceof PreRdbSyncEvent) {
-            XEndpoints.closeQuietly(this.endpoints.get());
+            XEndpoints prev = this.endpoints.get();
+            XEndpoints.closeQuietly(prev);
+            List<String> nodes = prev != null ? prev.getClusterNodes() : lines;
             int pipe = configure.getMigrateBatchSize();
             try {
-                this.endpoints.set(new XEndpoints(lines, pipe, true, configuration, configure));
+                this.endpoints.set(new XEndpoints(nodes, pipe, true, configuration, configure));
             } catch (Throwable e) {
                 // unrecoverable error
                 System.out.println("failed to connect cluster nodes, reason : " + e.getMessage());

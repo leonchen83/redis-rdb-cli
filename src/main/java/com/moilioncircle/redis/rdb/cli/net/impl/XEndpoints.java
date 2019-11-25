@@ -20,6 +20,7 @@ import static com.moilioncircle.redis.rdb.cli.conf.NodeConfParser.slot;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,15 +43,21 @@ public class XEndpoints implements Closeable {
     private final Configure configure;
     private final Configuration configuration;
     private Set<XEndpoint> index1 = new HashSet<>();
+    private List<String> clusterNodes = new ArrayList<>();
     private Map<Short, XEndpoint> index2 = new HashMap<>(16384);
 
     public XEndpoints(List<String> lines, int pipe, boolean statistics, Configuration configuration, Configure configure) {
+        this.clusterNodes = lines;
         this.configure = configure;
         this.configuration = configuration;
         Function<Tuple3<String, Integer, String>, XEndpoint> mapper = t -> {
             return new XEndpoint(t.getV1(), t.getV2(), 0, pipe, statistics, configuration, configure);
         };
         new NodeConfParser<>(mapper).parse(lines, index1, index2);
+    }
+    
+    public List<String> getClusterNodes() {
+        return clusterNodes;
     }
     
     public RedisObject send(byte[] command, byte[]... args) {
@@ -136,11 +143,11 @@ public class XEndpoints implements Closeable {
             }).parse(lines, next1, next2);
             
             // 4 update all cluster nodes view
-            merge(next1, next2);
+            merge(next1, next2, lines);
         }
     }
 
-    private void merge(Set<DummyEndpoint> next1, Map<Short, DummyEndpoint> next2) {
+    private void merge(Set<DummyEndpoint> next1, Map<Short, DummyEndpoint> next2, List<String> lines) {
         Set<XEndpoint> n1 = new HashSet<>();
         Map<Short, XEndpoint> n2 = new HashMap<>(16384);
         
@@ -171,6 +178,7 @@ public class XEndpoints implements Closeable {
         
         this.index1 = n1;
         this.index2 = n2;
+        this.clusterNodes = lines;
     }
 
     public static void close(XEndpoints endpoints) {
