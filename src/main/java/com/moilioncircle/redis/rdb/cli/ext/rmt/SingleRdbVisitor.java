@@ -72,23 +72,30 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
     
     @Override
     public void onEvent(Replicator replicator, Event event) {
-        if (event instanceof PreRdbSyncEvent) {
-            XEndpoint.closeQuietly(this.endpoint.get());
-            int pipe = configure.getMigrateBatchSize();
-            try {
-                this.endpoint.set(new XEndpoint(uri.getHost(), uri.getPort(), 0, pipe, true, conf, configure));
-            } catch (Throwable e) {
-                // unrecoverable error
-                System.out.println("failed to connect " + uri.getHost() + ":" + uri.getPort() + ", reason : " + e.getMessage());
-                System.exit(-1);
+        try {
+            if (event instanceof PreRdbSyncEvent) {
+                XEndpoint.closeQuietly(this.endpoint.get());
+                int pipe = configure.getMigrateBatchSize();
+                try {
+                    this.endpoint.set(new XEndpoint(uri.getHost(), uri.getPort(), 0, pipe, true, conf, configure));
+                } catch (Throwable e) {
+                    // unrecoverable error
+                    System.out.println("failed to connect " + uri.getHost() + ":" + uri.getPort() + ", reason : " + e.getMessage());
+                    System.exit(-1);
+                }
+            } else if (event instanceof DumpKeyValuePair) {
+                retry((DumpKeyValuePair)event, configure.getMigrateRetries());
+            } else if (event instanceof ClosingCommand) {
+                this.endpoint.get().flushQuietly();
+                XEndpoint.closeQuietly(this.endpoint.get());
+            } else if (event instanceof ClosedCommand) {
+                MonitorManager.closeQuietly(manager);
             }
-        } else if (event instanceof DumpKeyValuePair) {
-            retry((DumpKeyValuePair)event, configure.getMigrateRetries());
-        } else if (event instanceof ClosingCommand) {
-            this.endpoint.get().flushQuietly();
-            XEndpoint.closeQuietly(this.endpoint.get());
-        } else if (event instanceof ClosedCommand) {
-            MonitorManager.closeQuietly(manager);
+        } catch (Throwable e) {
+            // should not reach here, but if reach here ,please report an issue
+            logger.error("report an issue with exception stack on https://github.com/leonchen83/redis-rdb-cli/issues", e);
+            System.out.println("fatal error, check log and report an issue with exception stack.");
+            System.exit(-1);
         }
     }
     

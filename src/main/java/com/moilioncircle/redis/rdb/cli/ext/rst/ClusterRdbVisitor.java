@@ -101,37 +101,44 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
 
     @Override
     public void onEvent(Replicator replicator, Event event) {
-        if (event instanceof PreRdbSyncEvent) {
-            XEndpoints prev = this.endpoints.get();
-            XEndpoints.closeQuietly(prev);
-            List<String> nodes = prev != null ? prev.getClusterNodes() : lines;
-            int pipe = configure.getMigrateBatchSize();
-            try {
-                this.endpoints.set(new XEndpoints(nodes, pipe, true, configuration, configure));
-            } catch (Throwable e) {
-                // unrecoverable error
-                System.out.println("failed to connect cluster nodes, reason : " + e.getMessage());
-                System.exit(-1);
+        try {
+            if (event instanceof PreRdbSyncEvent) {
+                XEndpoints prev = this.endpoints.get();
+                XEndpoints.closeQuietly(prev);
+                List<String> nodes = prev != null ? prev.getClusterNodes() : lines;
+                int pipe = configure.getMigrateBatchSize();
+                try {
+                    this.endpoints.set(new XEndpoints(nodes, pipe, true, configuration, configure));
+                } catch (Throwable e) {
+                    // unrecoverable error
+                    System.out.println("failed to connect cluster nodes, reason : " + e.getMessage());
+                    System.exit(-1);
+                }
+            } else if (event instanceof DumpKeyValuePair) {
+                retry((DumpKeyValuePair)event, configure.getMigrateRetries());
+            } else if (event instanceof PostRdbSyncEvent) {
+                this.endpoints.get().flushQuietly();
+            } else if (event instanceof PreCommandSyncEvent) {
+                this.endpoints.get().flushQuietly();
+            } else if (event instanceof SelectCommand) {
+                SelectCommand select = (SelectCommand)event;
+                this.db = select.getIndex();
+            } else if (event instanceof CombineCommand) {
+                if (containsDB(db)) {
+                    retry((CombineCommand)event, configure.getMigrateRetries());
+                }
+            } else if (event instanceof ClosingCommand) {
+                this.endpoints.get().flushQuietly();
+                XEndpoints.closeQuietly(this.endpoints.get());
+                MonitorManager.closeQuietly(manager);
+            } else if (event instanceof ClosedCommand) {
+                MonitorManager.closeQuietly(manager);
             }
-        } else if (event instanceof DumpKeyValuePair) {
-            retry((DumpKeyValuePair)event, configure.getMigrateRetries());
-        } else if (event instanceof PostRdbSyncEvent) {
-            this.endpoints.get().flushQuietly();
-        } else if (event instanceof PreCommandSyncEvent) {
-            this.endpoints.get().flushQuietly();
-        } else if (event instanceof SelectCommand) {
-            SelectCommand select = (SelectCommand)event;
-            this.db = select.getIndex();
-        } else if (event instanceof CombineCommand) {
-            if (containsDB(db)) {
-                retry((CombineCommand)event, configure.getMigrateRetries());
-            }
-        } else if (event instanceof ClosingCommand) {
-            this.endpoints.get().flushQuietly();
-            XEndpoints.closeQuietly(this.endpoints.get());
-            MonitorManager.closeQuietly(manager);
-        } else if (event instanceof ClosedCommand) {
-            MonitorManager.closeQuietly(manager);
+        } catch (Throwable e) {
+            // should not reach here, but if reach here ,please report an issue
+            logger.error("report an issue with exception stack on https://github.com/leonchen83/redis-rdb-cli/issues", e);
+            System.out.println("fatal error, check log and report an issue with exception stack.");
+            System.exit(-1);
         }
     }
 
