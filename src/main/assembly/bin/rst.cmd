@@ -52,7 +52,7 @@ set CON_DIR=%RCT_HOME%\conf
 set LOG_FILE=%CON_DIR%\log4j2.xml
 set CON_FILE=%CON_DIR%\redis-rdb-cli.conf
 set MAIN_CLASS=com.moilioncircle.redis.rdb.cli.Rst
-set RCT_OPS=-server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -Dlog4j.configurationFile="%LOG_FILE%" -Dcli.log.path="%LOG_DIR%" -Dconf="%CON_FILE%" -Drct.home="%RCT_HOME%"
+set RCT_OPS=-server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:+ExitOnOutOfMemoryError -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -Dlog4j.configurationFile="%LOG_FILE%" -Dcli.log.path="%LOG_DIR%" -Dconf="%CON_FILE%" -Drct.home="%RCT_HOME%"
 
 "%JAVACMD%" %RCT_OPS% -cp %CLASS_PATH% %MAIN_CLASS% %*
 if ERRORLEVEL 1 goto error
