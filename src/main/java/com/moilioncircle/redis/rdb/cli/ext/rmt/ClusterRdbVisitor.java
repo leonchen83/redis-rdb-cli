@@ -35,7 +35,7 @@ import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorFactory;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
-import com.moilioncircle.redis.rdb.cli.net.Endpoints;
+import com.moilioncircle.redis.rdb.cli.net.impl.XEndpoints;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
@@ -53,7 +53,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
 
     private final List<String> lines;
     private final Configuration configuration;
-    private ThreadLocal<Endpoints> endpoints = new ThreadLocal<>();
+    private ThreadLocal<XEndpoints> endpoints = new ThreadLocal<>();
     
     public ClusterRdbVisitor(Replicator replicator,
                              Configure configure,
@@ -70,14 +70,14 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
     @Override
     public void onEvent(Replicator replicator, Event event) {
         if (event instanceof PreRdbSyncEvent) {
-            Endpoints.closeQuietly(this.endpoints.get());
+            XEndpoints.closeQuietly(this.endpoints.get());
             int pipe = configure.getMigrateBatchSize();
-            this.endpoints.set(new Endpoints(lines, pipe, true, configuration, configure));
+            this.endpoints.set(new XEndpoints(lines, pipe, true, configuration, configure));
         } else if (event instanceof DumpKeyValuePair) {
             retry((DumpKeyValuePair)event, configure.getMigrateRetries());
         } else if (event instanceof ClosingCommand) {
             this.endpoints.get().flushQuietly();
-            Endpoints.closeQuietly(this.endpoints.get());
+            XEndpoints.closeQuietly(this.endpoints.get());
         } else if (event instanceof ClosedCommand) {
             MonitorManager.closeQuietly(manager);
         }

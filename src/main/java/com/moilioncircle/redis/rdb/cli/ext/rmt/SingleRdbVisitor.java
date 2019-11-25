@@ -30,7 +30,8 @@ import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorFactory;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
-import com.moilioncircle.redis.rdb.cli.net.Endpoint;
+import com.moilioncircle.redis.rdb.cli.net.impl.XEndpoint;
+import com.moilioncircle.redis.rdb.cli.net.protocol.RedisObject;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -52,7 +53,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
     private final boolean legacy;
     private volatile byte[] evalSha;
     private final Configuration conf;
-    private ThreadLocal<Endpoint> endpoint = new ThreadLocal<>();
+    private ThreadLocal<XEndpoint> endpoint = new ThreadLocal<>();
     
     public SingleRdbVisitor(Replicator replicator,
                             Configure configure,
@@ -72,14 +73,14 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
     @Override
     public void onEvent(Replicator replicator, Event event) {
         if (event instanceof PreRdbSyncEvent) {
-            Endpoint.closeQuietly(this.endpoint.get());
+            XEndpoint.closeQuietly(this.endpoint.get());
             int pipe = configure.getMigrateBatchSize();
-            this.endpoint.set(new Endpoint(uri.getHost(), uri.getPort(), 0, pipe, true, conf, configure));
+            this.endpoint.set(new XEndpoint(uri.getHost(), uri.getPort(), 0, pipe, true, conf, configure));
         } else if (event instanceof DumpKeyValuePair) {
             retry((DumpKeyValuePair)event, configure.getMigrateRetries());
         } else if (event instanceof ClosingCommand) {
             this.endpoint.get().flushQuietly();
-            Endpoint.closeQuietly(this.endpoint.get());
+            XEndpoint.closeQuietly(this.endpoint.get());
         } else if (event instanceof ClosedCommand) {
             MonitorManager.closeQuietly(manager);
         }
@@ -115,7 +116,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
         } catch (Throwable e) {
             times--;
             if (times >= 0 && flush) {
-                endpoint.set(Endpoint.valueOf(endpoint.get()));
+                endpoint.set(XEndpoint.valueOf(endpoint.get()));
                 retry(dkv, times);
             } else {
                 monitor.add("failure_failed", 1);
@@ -135,7 +136,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
     protected void eval(byte[] key, byte[] value, byte[] expire) {
         if (evalSha == null) {
             endpoint.get().flush(); // flush prev commands so that to read script.
-            Endpoint.RedisObject r = endpoint.get().send(SCRIPT, LOAD, LUA_SCRIPT);
+            RedisObject r = endpoint.get().send(SCRIPT, LOAD, LUA_SCRIPT);
             byte[] evalSha = r.getBytes();
             if (evalSha == null) throw new RuntimeException(); // retry in the caller method.
             this.evalSha = evalSha;
