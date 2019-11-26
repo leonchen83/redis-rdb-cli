@@ -76,6 +76,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
     private static final Monitor monitor = MonitorFactory.getMonitor("endpoint_statistics");
 
     private int db;
+    private long ping = 0;
     private final List<String> lines;
     private final Configuration configuration;
     private ThreadLocal<XEndpoints> endpoints = new ThreadLocal<>();
@@ -194,7 +195,14 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
     
     public void ping() {
         try {
-            endpoints.get().ping(flush);
+            if (ping == 0) {
+                ping = System.currentTimeMillis();
+            }
+            // ping every 10s
+            if (System.currentTimeMillis() - ping > 10000) {
+                endpoints.get().ping(flush);
+                ping = System.currentTimeMillis();
+            }
         } catch (Throwable e) {
         }
     }

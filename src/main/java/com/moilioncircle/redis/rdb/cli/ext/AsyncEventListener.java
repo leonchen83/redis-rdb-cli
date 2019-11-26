@@ -49,8 +49,8 @@ public class AsyncEventListener implements EventListener {
     private final int threads;
     private CyclicBarrier rdbBarrier;
     private CyclicBarrier closeBarrier;
-    private final EventListener listener;
     private ExecutorService[] executors;
+    private final EventListener listener;
 
     public AsyncEventListener(EventListener listener, Replicator r, Configure c) {
         this.listener = listener;

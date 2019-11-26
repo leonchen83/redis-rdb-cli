@@ -38,6 +38,7 @@ import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.cmd.impl.DefaultCommand;
+import com.moilioncircle.redis.replicator.cmd.impl.PingCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.SelectCommand;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
@@ -56,6 +57,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
     private static final Monitor monitor = MonitorFactory.getMonitor("endpoint_statistics");
 
     private int db;
+    private long ping = 0;
     private final RedisURI uri;
     private final boolean legacy;
     private volatile byte[] evalSha;
@@ -114,8 +116,19 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
                     retry(command, configure.getMigrateRetries());
                 }
             } else if (event instanceof CombineCommand) {
-                if (containsDB(db)) {
-                    retry(((CombineCommand)event).getDefaultCommand(), configure.getMigrateRetries());
+                CombineCommand command = (CombineCommand)event;
+                if (command.getParsedCommand() instanceof PingCommand) {
+                    
+                    if (ping == 0) {
+                        ping = System.currentTimeMillis();
+                    }
+                    // ping every 10s
+                    if (System.currentTimeMillis() - ping > 10000) {
+                        retry(command.getDefaultCommand(), configure.getMigrateRetries());
+                        ping = System.currentTimeMillis();
+                    }
+                } else if (containsDB(db)) {
+                    retry(command.getDefaultCommand(), configure.getMigrateRetries());
                 }
             } else if (event instanceof ClosingCommand) {
                 this.endpoint.get().flushQuietly();
