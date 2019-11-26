@@ -22,6 +22,8 @@ import java.util.ServiceLoader;
 
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.CliRedisReplicator;
@@ -37,6 +39,8 @@ import com.moilioncircle.redis.sink.api.listener.AsyncEventListener;
  * @author Baoyi Chen
  */
 public class RetCommand extends AbstractCommand {
+    
+    private static final Logger logger = LoggerFactory.getLogger(RetCommand.class);
 
     private static final Option HELP = Option.builder("h").longOpt("help").required(false).hasArg(false).desc("ret usage.").build();
     private static final Option VERSION = Option.builder("v").longOpt("version").required(false).hasArg(false).desc("ret version.").build();
@@ -99,7 +103,7 @@ public class RetCommand extends AbstractCommand {
                 writeError("Failed to load sink service. Try `ret -h` for more information.");
                 return;
             }
-
+            logger.info("loaded service {}", service.getClass());
             service.init(conf);
 
             Configure configure = Configure.bind();
