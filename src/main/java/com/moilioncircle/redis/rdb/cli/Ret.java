@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.ext.cmd;
+package com.moilioncircle.redis.rdb.cli;
 
-import com.moilioncircle.redis.replicator.cmd.impl.AbstractCommand;
+import com.moilioncircle.redis.rdb.cli.cmd.RetCommand;
 
 /**
  * @author Baoyi Chen
  */
-public class ClosedCommand extends AbstractCommand {
+public class Ret {
+    public static void main(String[] args) throws Exception {
+        RetCommand.run(args);
+    }
 }

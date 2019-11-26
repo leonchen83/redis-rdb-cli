@@ -23,15 +23,13 @@ import org.slf4j.LoggerFactory;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractMigrateRdbVisitor;
-import com.moilioncircle.redis.rdb.cli.ext.AsyncEventListener;
-import com.moilioncircle.redis.rdb.cli.ext.cmd.ClosedCommand;
-import com.moilioncircle.redis.rdb.cli.ext.cmd.ClosingCommand;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorFactory;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
 import com.moilioncircle.redis.rdb.cli.net.impl.XEndpoint;
 import com.moilioncircle.redis.rdb.cli.net.protocol.RedisObject;
+import com.moilioncircle.redis.rdb.cli.util.XThreadFactory;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -40,6 +38,9 @@ import com.moilioncircle.redis.replicator.event.EventListener;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
 import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
+import com.moilioncircle.redis.sink.api.cmd.ClosedCommand;
+import com.moilioncircle.redis.sink.api.cmd.ClosingCommand;
+import com.moilioncircle.redis.sink.api.listener.AsyncEventListener;
 
 /**
  * @author Baoyi Chen
@@ -67,7 +68,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
         this.uri = uri;
         this.legacy = legacy;
         this.conf = configure.merge(this.uri);
-        this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure));
+        this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure.getMigrateThreads(), new XThreadFactory("sync-worker")));
     }
     
     @Override
