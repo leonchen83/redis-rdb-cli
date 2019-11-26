@@ -42,7 +42,7 @@ public class RetCommand extends AbstractCommand {
     private static final Option VERSION = Option.builder("v").longOpt("version").required(false).hasArg(false).desc("ret version.").build();
     private static final Option SOURCE = Option.builder("s").longOpt("source").required(false).hasArg().argName("source").type(String.class).desc("<source> eg:\n redis://host:port?authPassword=foobar").build();
     private static final Option CONFIG = Option.builder("c").longOpt("config").required(false).hasArg().argName("file").type(File.class).desc("external config file").build();
-    private static final Option NAME = Option.builder("n").longOpt("name").required(false).hasArg().argName("name").type(File.class).desc("sink service name").build();
+    private static final Option NAME = Option.builder("n").longOpt("name").required(false).hasArg().argName("name").type(String.class).desc("sink service name").build();
     private static final String HEADER = "ret -s <source> [-c <file>] -n <name>";
     private static final String EXAMPLE = "\nexamples:\n ret -s redis://127.0.0.1:6379 -c ./config.conf -n example\n";
 
