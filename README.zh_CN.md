@@ -472,6 +472,193 @@ migrate_flush=yes
 1. 我们通过集群的 `nodes.conf` 文件来同步数据到集群. 因为我们没有处理 `MOVED` `ASK` 重定向. 因此唯一的限制是集群在同步期间 **必须** 是稳定的状态. 这意味着集群 **必须** 不存在 `migrating`, `importing` 这样的slot. 而且没有主从切换. 
 2. 当使用 `rst` 命令迁移数据到集群的时候. 下面的命令不支持： `SWAPDB,MOVE,FLUSHALL,FLUSHDB,PUBLISH,MULTI,EXEC,SCRIPT FLUSH,SCRIPT LOAD,EVAL,EVALSHA`. 下面的命令**有限支持** `RPOPLPUSH,SDIFFSTORE,SINTERSTORE,SMOVE,ZINTERSTORE,ZUNIONSTORE,DEL,UNLINK,RENAME,RENAMENX,PFMERGE,PFCOUNT,MSETNX,BRPOPLPUSH,BITOP,MSET`.**只有这些命令里包含的 keys 在同一个slot的时候**(eg: `del {user}:1 {user}:2`)才支持.
 
+## Hack ret
+
+### ret命令是做什么的
+
+1. `ret` 命令允许用户定义自己的同步服务 比如同步redis数据到 `mysql` 或 `mangodb`.
+2. `ret` 命令使用 Java SPI 来实现同步功能.
+
+### 如何实现一个同步服务
+
+用户遵循如下步骤来实现一个同步服务
+
+1. 使用如下maven pom.xml文件创建一个Java工程
+
+```java  
+
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.your.company</groupId>
+    <artifactId>your-sink-service</artifactId>
+    <version>1.0.0</version>
+    
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.moilioncircle</groupId>
+            <artifactId>redis-sink-api</artifactId>
+            <version>1.0.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.moilioncircle</groupId>
+            <artifactId>redis-replicator</artifactId>
+            <version>3.3.3</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.25</version>
+            <scope>provided</scope>
+        </dependency>
+        
+        <!-- 
+        <dependency>
+            other dependencies
+        </dependency>
+        -->
+        
+    </dependencies>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+
+```
+
+2. 实现 `SinkService` 接口
+
+```java  
+
+public class YourSinkService implements SinkService {
+
+    private static final Logger logger = LoggerFactory.getLogger(YourSinkService.class);
+
+    private AtomicLong rdb = new AtomicLong(0L);
+    private AtomicLong aof = new AtomicLong(0L);
+
+    @Override
+    public String sink() {
+        return "your-sink-service";
+    }
+
+    @Override
+    public void init(File config) throws IOException {
+
+    }
+
+    @Override
+    public void onEvent(Replicator replicator, Event event) {
+        if (event instanceof PreRdbSyncEvent) {
+            rdb.set(0);
+            aof.set(0);
+        }
+        if (event instanceof KeyValuePair) {
+            rdb.incrementAndGet();
+        }
+
+        if (event instanceof PostRdbSyncEvent ||
+                event instanceof PreCommandSyncEvent ||
+                event instanceof PostCommandSyncEvent ||
+                //
+                event instanceof PingCommand ||
+                event instanceof SelectCommand ||
+                event instanceof ReplConfCommand ||
+                event instanceof ClosingCommand ||
+                event instanceof ClosedCommand) {
+
+            if (event instanceof PreCommandSyncEvent) {
+                logger.info("rdb count {}", rdb.get());
+            }
+
+            if (event instanceof PingCommand) {
+                logger.info("aof count {}", aof.get());
+            }
+
+            if (event instanceof ClosedCommand) {
+                logger.info("rdb count {}, aof count {}", rdb.get(), aof.get());
+            }
+        } else if (event instanceof Command) {
+            aof.incrementAndGet();
+        }
+    }
+}
+
+```
+3. 使用Java SPI来注册这个实现类
+
+```java  
+# 在工程下的 src/main/resources/META-INF/services/ 目录创建 com.moilioncircle.redis.sink.api.SinkService 文件
+
+|-src
+|____main
+| |____resources
+| | |____META-INF
+| | | |____services
+| | | | |____com.moilioncircle.redis.sink.api.SinkService
+
+# 在com.moilioncircle.redis.sink.api.SinkService文件中加入如下内容
+
+your.package.ExampleSinkService
+
+```
+
+4. 打包与部署
+
+```java  
+
+mvn clean install
+
+cp ./target/your-sink-service-1.0.0-jar-with-dependencies.jar /path/to/redis-rdb-cli/lib
+```
+5. 运行你自己的同步服务
+
+```java  
+
+ret -s redis://127.0.0.1:6379 -c config.conf -n your-sink-service
+```
+
 ## 贡献者
   
 * [Baoyi Chen](https://github.com/leonchen83)

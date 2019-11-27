@@ -226,6 +226,25 @@ examples:
 
 ```
 
+```java  
+
+usage: ret -s <source> [-c <file>] [-p <parse>] -n <sink>
+
+options:
+ -c,--config <file>     external config file
+ -h,--help              ret usage.
+ -n,--name <sink>       sink service name
+ -p,--parse <parse>     parse service name
+ -s,--source <source>   <source> eg:
+                        redis://host:port?authPassword=foobar
+ -v,--version           ret version.
+
+examples:
+ ret -s redis://127.0.0.1:6379 -c ./config.conf -n example
+ ret -s redis://127.0.0.1:6379 -c ./config.conf -p dump -n example
+
+```
+
 ### Filter
 
 1. `rct`, `rdt` and `rmt` these 3 commands support data filter by `type`,`db` and `key` RegEx(Java style).  
@@ -471,6 +490,193 @@ migrate_flush=yes
 
 1. We use cluster's `nodes.conf` to migrate data to cluster. because of we did't handle the `MOVED` `ASK` redirection. so limitation of cluster migration is that the cluster **MUST** in stable state during the migration. this means the cluster **MUST** have no `migrating`, `importing` slot and no switch slave to master. 
 2. If use `rst` migrate date to cluster. the following command not supported `SWAPDB,MOVE,FLUSHALL,FLUSHDB,PUBLISH,MULTI,EXEC,SCRIPT FLUSH,SCRIPT LOAD,EVAL,EVALSHA`. the following command **ONLY SUPPORT** `RPOPLPUSH,SDIFFSTORE,SINTERSTORE,SMOVE,ZINTERSTORE,ZUNIONSTORE,DEL,UNLINK,RENAME,RENAMENX,PFMERGE,PFCOUNT,MSETNX,BRPOPLPUSH,BITOP,MSET` **IF THE KEYS IN THESE COMMANDS IN THE SAME SLOT**(eg: `del {user}:1 {user}:2`)
+
+## Hack ret
+
+### What ret command do
+
+1. `ret` command that allow user define there own sink service like sink redis data to `mysql` or `mangodb`.
+2. `ret` command using Java SPI extension to do this job.
+
+### How to implement a sink service
+
+User should follow the steps below to implement a sink service.  
+
+1. create a java project using maven pom.xml
+
+```java  
+
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.your.company</groupId>
+    <artifactId>your-sink-service</artifactId>
+    <version>1.0.0</version>
+    
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.moilioncircle</groupId>
+            <artifactId>redis-sink-api</artifactId>
+            <version>1.0.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.moilioncircle</groupId>
+            <artifactId>redis-replicator</artifactId>
+            <version>3.3.3</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.25</version>
+            <scope>provided</scope>
+        </dependency>
+        
+        <!-- 
+        <dependency>
+            other dependencies
+        </dependency>
+        -->
+        
+    </dependencies>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+
+```
+
+2. implement `SinkService` interface
+
+```java  
+
+public class YourSinkService implements SinkService {
+
+    private static final Logger logger = LoggerFactory.getLogger(YourSinkService.class);
+
+    private AtomicLong rdb = new AtomicLong(0L);
+    private AtomicLong aof = new AtomicLong(0L);
+
+    @Override
+    public String sink() {
+        return "your-sink-service";
+    }
+
+    @Override
+    public void init(File config) throws IOException {
+
+    }
+
+    @Override
+    public void onEvent(Replicator replicator, Event event) {
+        if (event instanceof PreRdbSyncEvent) {
+            rdb.set(0);
+            aof.set(0);
+        }
+        if (event instanceof KeyValuePair) {
+            rdb.incrementAndGet();
+        }
+
+        if (event instanceof PostRdbSyncEvent ||
+                event instanceof PreCommandSyncEvent ||
+                event instanceof PostCommandSyncEvent ||
+                //
+                event instanceof PingCommand ||
+                event instanceof SelectCommand ||
+                event instanceof ReplConfCommand ||
+                event instanceof ClosingCommand ||
+                event instanceof ClosedCommand) {
+
+            if (event instanceof PreCommandSyncEvent) {
+                logger.info("rdb count {}", rdb.get());
+            }
+
+            if (event instanceof PingCommand) {
+                logger.info("aof count {}", aof.get());
+            }
+
+            if (event instanceof ClosedCommand) {
+                logger.info("rdb count {}, aof count {}", rdb.get(), aof.get());
+            }
+        } else if (event instanceof Command) {
+            aof.incrementAndGet();
+        }
+    }
+}
+
+```
+3. register this service using Java SPI
+
+```java  
+# create com.moilioncircle.redis.sink.api.SinkService file in src/main/resources/META-INF/services/
+
+|-src
+|____main
+| |____resources
+| | |____META-INF
+| | | |____services
+| | | | |____com.moilioncircle.redis.sink.api.SinkService
+
+# add following content in com.moilioncircle.redis.sink.api.SinkService
+
+your.package.ExampleSinkService
+
+```
+
+4. package and deploy
+
+```java  
+
+mvn clean install
+
+cp ./target/your-sink-service-1.0.0-jar-with-dependencies.jar /path/to/redis-rdb-cli/lib
+```
+5. run your sink service
+
+```java  
+
+ret -s redis://127.0.0.1:6379 -c config.conf -n your-sink-service
+```
 
 ## Contributors
   
