@@ -26,7 +26,6 @@ import org.apache.commons.cli.Option;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.CliRedisReplicator;
-import com.moilioncircle.redis.rdb.cli.ext.cmd.CombineCommandParser;
 import com.moilioncircle.redis.rdb.cli.ext.rst.ClusterRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rst.SingleRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.net.impl.XEndpoint;
@@ -123,6 +122,7 @@ import com.moilioncircle.redis.replicator.cmd.parser.ZRemRangeByScoreParser;
 import com.moilioncircle.redis.replicator.cmd.parser.ZUnionStoreParser;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.rdb.RdbVisitor;
+import com.moilioncircle.redis.sink.api.cmd.CombineCommandParser;
 
 /**
  * @author Baoyi Chen

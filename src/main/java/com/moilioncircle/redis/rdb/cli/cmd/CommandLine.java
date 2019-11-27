@@ -54,6 +54,11 @@ public class CommandLine {
         }
         return list;
     }
+
+    public <T> T getOption(String opt, T value) throws ParseException {
+        T v = getOption(opt);
+        return v == null ? value : v;
+    }
     
     public <T> T getOption(String opt) throws ParseException {
         List<T> list = getOptions(opt);

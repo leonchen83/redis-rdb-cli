@@ -32,6 +32,7 @@ import com.moilioncircle.redis.rdb.cli.util.XThreadFactory;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.Replicators;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
+import com.moilioncircle.redis.sink.api.ParseService;
 import com.moilioncircle.redis.sink.api.SinkService;
 import com.moilioncircle.redis.sink.api.listener.AsyncEventListener;
 
@@ -47,7 +48,8 @@ public class RetCommand extends AbstractCommand {
     private static final Option SOURCE = Option.builder("s").longOpt("source").required(false).hasArg().argName("source").type(String.class).desc("<source> eg:\n redis://host:port?authPassword=foobar").build();
     private static final Option CONFIG = Option.builder("c").longOpt("config").required(false).hasArg().argName("file").type(File.class).desc("external config file").build();
     private static final Option NAME = Option.builder("n").longOpt("name").required(false).hasArg().argName("name").type(String.class).desc("sink service name").build();
-    private static final String HEADER = "ret -s <source> [-c <file>] -n <name>";
+    private static final Option PARSE = Option.builder("p").longOpt("parse").required(false).hasArg().argName("parse").type(String.class).desc("parse service name").build();
+    private static final String HEADER = "ret -s <source> [-c <file>] [-p <name>] -n <name>";
     private static final String EXAMPLE = "\nexamples:\n ret -s redis://127.0.0.1:6379 -c ./config.conf -n example\n";
 
     private RetCommand() {
@@ -56,6 +58,7 @@ public class RetCommand extends AbstractCommand {
         addOption(SOURCE);
         addOption(CONFIG);
         addOption(NAME);
+        addOption(PARSE);
     }
 
     @Override
@@ -83,32 +86,18 @@ public class RetCommand extends AbstractCommand {
             }
 
             File conf = line.getOption("config");
-            String name = line.getOption("name");
+            String sink = line.getOption("name");
             String source = line.getOption("source");
+            String parse = line.getOption("parse", "default");
             source = normalize(source, null, "Invalid options: s. Try `ret -h` for more information.");
-            
-            ServiceLoader<SinkService> loader = ServiceLoader.load(SinkService.class);
-            
-            SinkService service = null;
-            Iterator<SinkService> it = loader.iterator();
-            while (it.hasNext()) {
-                SinkService temp = it.next();
-                if (temp.name().equals(name)) {
-                    service = temp;
-                    break;
-                }
-            }
-            
-            if (service == null) {
-                writeError("Failed to load sink service. Try `ret -h` for more information.");
-                return;
-            }
-            logger.info("loaded service {}", service.getClass());
-            service.init(conf);
+
+            SinkService sinkService = loadSinkService(sink, conf);
+            ParseService parseService = loadParseService(parse, conf);
 
             Configure configure = Configure.bind();
             try (ProgressBar bar = new ProgressBar(-1)) {
                 Replicator r = new CliRedisReplicator(source, configure);
+                r.setRdbVisitor(parseService.getRdbVisitor(r));
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                     Replicators.closeQuietly(r);
                 }));
@@ -119,10 +108,54 @@ public class RetCommand extends AbstractCommand {
                     if (event instanceof PreRdbSyncEvent)
                         rep.addRawByteListener(b -> bar.react(b.length));
                 });
-                r.addEventListener(new AsyncEventListener(service, r, configure.getMigrateThreads(), new XThreadFactory("sync-worker")));
-                r.open();
+                r.addEventListener(new AsyncEventListener(sinkService, r, configure.getMigrateThreads(), new XThreadFactory("sync-worker")));
+                parseService.wrap(r).open();
             }
         }
+    }
+
+    private SinkService loadSinkService(String sink, File config) throws Exception {
+        ServiceLoader<SinkService> loader = ServiceLoader.load(SinkService.class);
+
+        SinkService service = null;
+        Iterator<SinkService> it = loader.iterator();
+        while (it.hasNext()) {
+            SinkService temp = it.next();
+            if (temp.sink().equals(sink)) {
+                service = temp;
+                break;
+            }
+        }
+
+        if (service == null) {
+            writeError("Failed to load sink service. Try `ret -h` for more information.");
+            return null;
+        }
+        logger.info("loaded sink service {}", service.getClass());
+        service.init(config);
+        return service;
+    }
+
+    private ParseService loadParseService(String parse, File config) throws Exception {
+        ServiceLoader<ParseService> loader = ServiceLoader.load(ParseService.class);
+
+        ParseService service = null;
+        Iterator<ParseService> it = loader.iterator();
+        while (it.hasNext()) {
+            ParseService temp = it.next();
+            if (temp.parse().equals(parse)) {
+                service = temp;
+                break;
+            }
+        }
+
+        if (service == null) {
+            writeError("Failed to load parse service. Try `ret -h` for more information.");
+            return null;
+        }
+        logger.info("loaded parse service {}", service.getClass());
+        service.init(config);
+        return service;
     }
 
     @Override
