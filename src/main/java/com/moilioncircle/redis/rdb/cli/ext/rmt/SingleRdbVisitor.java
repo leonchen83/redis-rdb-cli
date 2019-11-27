@@ -154,7 +154,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
         if (evalSha == null) {
             RedisObject r = endpoint.get().send(SCRIPT, LOAD, LUA_SCRIPT);
             byte[] evalSha = r.getBytes();
-            if (evalSha == null) throw new RuntimeException(); // retry in the caller method.
+            if (r.type.isError() || evalSha == null) throw new RuntimeException(); // retry in the caller method.
             this.evalSha = evalSha;
             eval(key, value, expire);
         } else {
