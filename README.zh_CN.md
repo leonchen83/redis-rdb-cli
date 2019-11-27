@@ -226,6 +226,25 @@ examples:
 
 ```
 
+```java  
+
+usage: ret -s <source> [-c <file>] [-p <parse>] -n <sink>
+
+options:
+ -c,--config <file>     external config file
+ -h,--help              ret usage.
+ -n,--name <sink>       sink service name
+ -p,--parse <parse>     parse service name
+ -s,--source <source>   <source> eg:
+                        redis://host:port?authPassword=foobar
+ -v,--version           ret version.
+
+examples:
+ ret -s redis://127.0.0.1:6379 -c ./config.conf -n example
+ ret -s redis://127.0.0.1:6379 -c ./config.conf -p dump -n example
+
+```
+
 ### 过滤
 
 1. `rct`, `rdt` 和 `rmt` 这3个命令支持`type`,`db` 和 `key`正则表达式(Java风格)数据过滤  
