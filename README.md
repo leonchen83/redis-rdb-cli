@@ -1,6 +1,6 @@
 # redis-rdb-cli
 
-## A tool that can parse, filter, split, merge rdb and analyze memory usage offline.
+## A tool that can parse, filter, split, merge rdb and analyze memory usage offline. It can also sync 2 redis data and allow user define there own sink service to migrate redis data to somewhere.
 
 [![Build Status](https://travis-ci.org/leonchen83/redis-rdb-cli.svg?branch=master)](https://travis-ci.org/leonchen83/redis-rdb-cli)
 [![Gitter](https://badges.gitter.im/leonchen83/redis-rdb-cli.svg)](https://gitter.im/leonchen83/redis-rdb-cli?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
@@ -491,7 +491,7 @@ migrate_flush=yes
 ## Limitation of migration
 
 1. We use cluster's `nodes.conf` to migrate data to cluster. because of we did't handle the `MOVED` `ASK` redirection. so limitation of cluster migration is that the cluster **MUST** in stable state during the migration. this means the cluster **MUST** have no `migrating`, `importing` slot and no switch slave to master. 
-2. If use `rst` migrate date to cluster. the following command not supported `SWAPDB,MOVE,FLUSHALL,FLUSHDB,PUBLISH,MULTI,EXEC,SCRIPT FLUSH,SCRIPT LOAD,EVAL,EVALSHA`. the following command **ONLY SUPPORT** `RPOPLPUSH,SDIFFSTORE,SINTERSTORE,SMOVE,ZINTERSTORE,ZUNIONSTORE,DEL,UNLINK,RENAME,RENAMENX,PFMERGE,PFCOUNT,MSETNX,BRPOPLPUSH,BITOP,MSET` **IF THE KEYS IN THESE COMMANDS IN THE SAME SLOT**(eg: `del {user}:1 {user}:2`)
+2. If use `rst` migrate data to cluster. the following command not supported `SWAPDB,MOVE,FLUSHALL,FLUSHDB,PUBLISH,MULTI,EXEC,SCRIPT FLUSH,SCRIPT LOAD,EVAL,EVALSHA`. the following command **ONLY SUPPORT** `RPOPLPUSH,SDIFFSTORE,SINTERSTORE,SMOVE,ZINTERSTORE,ZUNIONSTORE,DEL,UNLINK,RENAME,RENAMENX,PFMERGE,PFCOUNT,MSETNX,BRPOPLPUSH,BITOP,MSET` **IF THE KEYS IN THESE COMMANDS IN THE SAME SLOT**(eg: `del {user}:1 {user}:2`)
 
 ## Hack ret
 
