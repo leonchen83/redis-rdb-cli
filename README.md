@@ -389,11 +389,11 @@ docker-compose down
 ```
   
 `cd /path/to/redis-rdb-cli/conf/redis-rdb-cli.conf`  
-Then change parameter [metric_gateway](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L148) from `none` to `influxdb`.  
+Then change parameter [metric_gateway](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L154) from `none` to `influxdb`.  
   
 Open `http://localhost:3000` to check the `rct -f mem`'s result.  
   
-If you deployed this tool in multi instance, you need to change parameter [metric_instance](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L194) to make sure unique between instances.  
+If you deployed this tool in multi instance, you need to change parameter [metric_instance](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L200) to make sure unique between instances.  
   
 
 ## Hack rmt
