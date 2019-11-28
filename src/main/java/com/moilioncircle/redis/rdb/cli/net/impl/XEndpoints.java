@@ -158,17 +158,20 @@ public class XEndpoints implements Closeable {
             
             // 2 if all endpoints failed exit.
             if (lines == null) {
-                // unrecoverable error
                 logger.error("can't connect to any of cluster nodes");
-                return; // try again next loop
+                return;
             }
             
             // 3 parse nodes info
             Set<DummyEndpoint> next1 = new HashSet<>();
             Map<Short, DummyEndpoint> next2 = new HashMap<>(16384);
-            new NodeConfParser<DummyEndpoint>(tuple -> {
-                return new DummyEndpoint(tuple.getV1(), tuple.getV2());
-            }).parse(lines, next1, next2);
+            try {
+                new NodeConfParser<DummyEndpoint>(tuple -> {
+                    return new DummyEndpoint(tuple.getV1(), tuple.getV2());
+                }).parse(lines, next1, next2);
+            } catch (Throwable cause) {
+                return;
+            }
             
             // 4 update all cluster nodes view
             merge(next1, next2, lines);
