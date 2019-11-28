@@ -2,6 +2,7 @@
 
 Improve dashboard.  
 Add `rst` command.  
+Add `ret` command.  
 
 ### 0.1.19
 
