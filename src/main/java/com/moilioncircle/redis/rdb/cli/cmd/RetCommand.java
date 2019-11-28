@@ -47,8 +47,8 @@ public class RetCommand extends AbstractCommand {
     private static final Option VERSION = Option.builder("v").longOpt("version").required(false).hasArg(false).desc("ret version.").build();
     private static final Option SOURCE = Option.builder("s").longOpt("source").required(false).hasArg().argName("source").type(String.class).desc("<source> eg:\n redis://host:port?authPassword=foobar").build();
     private static final Option CONFIG = Option.builder("c").longOpt("config").required(false).hasArg().argName("file").type(File.class).desc("external config file").build();
-    private static final Option NAME = Option.builder("n").longOpt("name").required(false).hasArg().argName("sink").type(String.class).desc("sink service name").build();
-    private static final Option PARSE = Option.builder("p").longOpt("parse").required(false).hasArg().argName("parse").type(String.class).desc("parse service name").build();
+    private static final Option NAME = Option.builder("n").longOpt("name").required(false).hasArg().argName("sink").type(String.class).desc("sink service name, registered sink service: example").build();
+    private static final Option PARSE = Option.builder("p").longOpt("parse").required(false).hasArg().argName("parse").type(String.class).desc("parse service name, registered parse service: default, dump. by default use service default").build();
     private static final String HEADER = "ret -s <source> [-c <file>] [-p <parse>] -n <sink>";
     private static final String EXAMPLE = "\nexamples:\n ret -s redis://127.0.0.1:6379 -c ./config.conf -n example\n ret -s redis://127.0.0.1:6379 -c ./config.conf -p dump -n example\n";
 

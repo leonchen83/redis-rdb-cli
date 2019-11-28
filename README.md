@@ -233,8 +233,10 @@ usage: ret -s <source> [-c <file>] [-p <parse>] -n <sink>
 options:
  -c,--config <file>     external config file
  -h,--help              ret usage.
- -n,--name <sink>       sink service name
- -p,--parse <parse>     parse service name
+ -n,--name <sink>       sink service name, registered sink service:
+                        example
+ -p,--parse <parse>     parse service name, registered parse service:
+                        default, dump. by default use service default
  -s,--source <source>   <source> eg:
                         redis://host:port?authPassword=foobar
  -v,--version           ret version.
