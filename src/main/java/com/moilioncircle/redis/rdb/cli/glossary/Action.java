@@ -18,6 +18,7 @@ package com.moilioncircle.redis.rdb.cli.glossary;
 
 import static com.moilioncircle.redis.replicator.FileType.RDB;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URI;
@@ -66,6 +67,8 @@ public enum Action {
                     try (RedisInputStream in = new RedisInputStream(new FileInputStream(file))) {
                         in.skip(5); // skip REDIS
                         version = Math.max(version, Integer.parseInt(in.readString(4)));
+                    } catch (EOFException e) {
+                        continue;
                     }
                     Replicator r = new CliRedisReplicator(uri.toString(), configure);
                     r.setRdbVisitor(new MergeRdbVisitor(r, configure, db, regexs, types, () -> out));
