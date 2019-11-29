@@ -83,7 +83,10 @@ public class Protocol {
                     }
                     long len = Long.parseLong(builder.toString());
                     if (len == -1) return new RedisObject(RedisObject.Type.NULL, null);
-                    return new RedisObject(RedisObject.Type.BULK, in.readBytes(len).first());
+                    RedisObject r = new RedisObject(RedisObject.Type.BULK, in.readBytes(len).first());
+                    if ((c = in.read()) != '\r') throw new RuntimeException("expect '\\r' but :" + (char) c);
+                    if ((c = in.read()) != '\n') throw new RuntimeException("expect '\\n' but :" + (char) c);
+                    return r;
                 case COLON:
                     // RESP Integers
                     builder = ByteBuilder.allocate(128);
