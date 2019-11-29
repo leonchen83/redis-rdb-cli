@@ -38,6 +38,11 @@ public class CommandLine {
     public boolean hasOption(String opt) {
         return line.hasOption(opt);
     }
+
+    public <T> List<T> getOptions(String opt, List<T> value) throws ParseException {
+        List<T> v = getOption(opt);
+        return v == null || v.isEmpty() ? value : v;
+    }
     
     public <T> List<T> getOptions(String opt) throws ParseException {
         String[] res = line.getOptionValues(opt);

@@ -89,45 +89,45 @@ public class RdtCommand extends AbstractCommand {
             String output = line.getOption("out");
 
             if (output == null) {
-                writeError("Missing required options: o. Try `rdt -h` for more information.");
+                writeError("Missing required options: -o. Try `rdt -h` for more information.");
                 return;
             }
 
             if (split != null && backup != null && !merge.isEmpty()) {
-                writeError("Invalid options: s or b or m. Try `rdt -h` for more information.");
+                writeError("Invalid options: -s or -b or -m. Try `rdt -h` for more information.");
                 return;
             }
 
             if ((split != null && backup != null) || (backup != null && !merge.isEmpty()) || (split != null && !merge.isEmpty())) {
-                writeError("Invalid options: s or b or m. Try `rdt -h` for more information.");
+                writeError("Invalid options: -s or -b or -m. Try `rdt -h` for more information.");
                 return;
             }
 
             Action action = Action.NONE;
             if (split != null) {
-                split = normalize(split, FileType.RDB, "Invalid options: s. Try `rdt -h` for more information.");
+                split = normalize(split, FileType.RDB, "Invalid options: -s. Try `rdt -h` for more information.");
                 Path path = Paths.get(output);
                 if (Files.exists(path) && !Files.isDirectory(Paths.get(output))) {
-                    writeError("Invalid options: o. Try `rdt -h` for more information.");
+                    writeError("Invalid options: -o. Try `rdt -h` for more information.");
                     return;
                 }
                 if (conf == null) {
-                    writeError("Missing required options: c. Try `rdt -h` for more information.");
+                    writeError("Missing required options: -c. Try `rdt -h` for more information.");
                     return;
                 }
                 action = Action.SPLIT;
             } else if (backup != null) {
-                backup = normalize(backup, FileType.RDB, "Invalid options: b. Try `rdt -h` for more information.");
+                backup = normalize(backup, FileType.RDB, "Invalid options: -b. Try `rdt -h` for more information.");
                 Path path = Paths.get(output);
                 if (Files.exists(path) && !Files.isRegularFile(path)) {
-                    writeError("Invalid options: o. Try `rdt -h` for more information.");
+                    writeError("Invalid options: -o. Try `rdt -h` for more information.");
                     return;
                 }
                 action = Action.BACKUP;
             } else if (merge != null) {
                 Path path = Paths.get(output);
                 if (Files.exists(path) && !Files.isRegularFile(path)) {
-                    writeError("Invalid options: o. Try `rdt -h` for more information.");
+                    writeError("Invalid options: -o. Try `rdt -h` for more information.");
                     return;
                 }
                 action = Action.MERGE;

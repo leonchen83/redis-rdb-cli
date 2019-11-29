@@ -88,13 +88,13 @@ public class RmtCommand extends AbstractCommand {
             StringBuilder sb = new StringBuilder();
 
             if (!line.hasOption("source")) {
-                sb.append("s ");
+                sb.append("-s ");
             }
 
             if (line.hasOption("migrate") && line.hasOption("config")) {
-                sb.append("m or c ");
+                sb.append("-m or -c ");
             } else if (!line.hasOption("migrate") && !line.hasOption("config")) {
-                sb.append("m or c ");
+                sb.append("-m or -c ");
             }
 
             if (sb.length() > 0) {
@@ -112,13 +112,13 @@ public class RmtCommand extends AbstractCommand {
             boolean legacy = line.hasOption("legacy");
             List<String> regexs = line.getOptions("key");
 
-            source = normalize(source, FileType.RDB, "Invalid options: s. Try `rmt -h` for more information.");
+            source = normalize(source, FileType.RDB, "Invalid options: -s. Try `rmt -h` for more information.");
 
             Configure configure = Configure.bind();
             if (migrate != null) {
                 RedisURI uri = new RedisURI(migrate);
                 if (uri.getFileType() != null) {
-                    writeError("Invalid options: m. Try `rmt -h` for more information.");
+                    writeError("Invalid options: -m. Try `rmt -h` for more information.");
                     return;
                 }
                 try (ProgressBar bar = new ProgressBar(-1)) {
@@ -140,7 +140,7 @@ public class RmtCommand extends AbstractCommand {
                 }
             } else {
                 if (conf == null || !Files.exists(conf.toPath())) {
-                    writeError("Invalid options: c. Try `rmt -h` for more information.");
+                    writeError("Invalid options: -c. Try `rmt -h` for more information.");
                     return;
                 }
                 try (ProgressBar bar = new ProgressBar(-1)) {

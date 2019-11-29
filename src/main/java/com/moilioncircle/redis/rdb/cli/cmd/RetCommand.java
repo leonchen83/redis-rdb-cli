@@ -73,11 +73,11 @@ public class RetCommand extends AbstractCommand {
             StringBuilder sb = new StringBuilder();
 
             if (!line.hasOption("source")) {
-                sb.append("s ");
+                sb.append("-s ");
             }
 
             if (!line.hasOption("name")) {
-                sb.append("n ");
+                sb.append("-n ");
             }
 
             if (sb.length() > 0) {
@@ -89,7 +89,7 @@ public class RetCommand extends AbstractCommand {
             String sink = line.getOption("name");
             String source = line.getOption("source");
             String parser = line.getOption("parser", "default");
-            source = normalize(source, null, "Invalid options: s. Try `ret -h` for more information.");
+            source = normalize(source, null, "Invalid options: -s. Try `ret -h` for more information.");
 
             SinkService sinkService = loadSinkService(sink, conf);
             ParserService parserService = loadParseService(parser, conf);

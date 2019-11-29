@@ -86,15 +86,15 @@ public class RctCommand extends AbstractCommand {
         } else {
             StringBuilder sb = new StringBuilder();
             if (!line.hasOption("format")) {
-                sb.append("f ");
+                sb.append("-f ");
             }
 
             if (!line.hasOption("source")) {
-                sb.append("s ");
+                sb.append("-s ");
             }
 
             if (!line.hasOption("out")) {
-                sb.append("o ");
+                sb.append("-o ");
             }
 
             if (sb.length() > 0) {
@@ -114,7 +114,7 @@ public class RctCommand extends AbstractCommand {
             boolean replace = line.hasOption("replace");
             List<String> regexs = line.getOptions("key");
 
-            source = normalize(source, FileType.RDB, "Invalid options: s, Try `rct -h` for more information.");
+            source = normalize(source, FileType.RDB, "Invalid options: -s, Try `rct -h` for more information.");
 
             Configure configure = Configure.bind();
             try (ProgressBar bar = new ProgressBar(-1)) {

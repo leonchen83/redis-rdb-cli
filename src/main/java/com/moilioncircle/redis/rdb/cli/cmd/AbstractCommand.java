@@ -109,7 +109,7 @@ public abstract class AbstractCommand implements Command {
         }
         builder.append("\n");
         if (!Strings.isEmpty(INSTANCE.home())) {
-            builder.append("rct home: ").append(INSTANCE.home()).append("\n");
+            builder.append(name()).append(" home: ").append(INSTANCE.home()).append("\n");
         }
         builder.append("java version: ").append(System.getProperty("java.version")).append(", ");
         builder.append("vendor: ").append(System.getProperty("java.vendor")).append("\n");
