@@ -228,14 +228,14 @@ examples:
 
 ```java  
 
-usage: ret -s <source> [-c <file>] [-p <parse>] -n <sink>
+usage: ret -s <source> [-c <file>] [-p <parser>] -n <sink>
 
 options:
  -c,--config <file>     external config file
  -h,--help              ret usage.
  -n,--name <sink>       sink service name, registered sink service:
                         example
- -p,--parse <parse>     parse service name, registered parse service:
+ -p,--parser <parser>   parser service name, registered parser service:
                         default, dump. by default use service default
  -s,--source <source>   <source> eg:
                         redis://host:port?authPassword=foobar
