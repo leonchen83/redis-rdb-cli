@@ -22,7 +22,6 @@ import static com.moilioncircle.redis.replicator.Constants.STREAM_ITEM_FLAG_DELE
 import static com.moilioncircle.redis.replicator.Constants.STREAM_ITEM_FLAG_SAMEFIELDS;
 import static com.moilioncircle.redis.replicator.rdb.BaseRdbParser.StringHelper.listPackEntry;
 import static com.moilioncircle.redis.replicator.rdb.datatype.ExpiredType.NONE;
-import static java.lang.Integer.min;
 import static java.lang.System.currentTimeMillis;
 import static java.time.Instant.ofEpochMilli;
 import static java.time.ZoneId.systemDefault;
@@ -78,7 +77,6 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     private MemCalculator size;
     private MonitorManager manager;
     private final CmpHeap<Tuple2Ex> heap;
-    private final CmpHeap<Tuple2Ex> metricHeap;
     
     //
     private long totalMem = 0;
@@ -91,7 +89,6 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         this.manager = new MonitorManager(configure);
         this.manager.open("memory_statistics");
         this.heap = new CmpHeap<>(largest == null ? -1 : largest.intValue());
-        this.metricHeap = new CmpHeap<>(min(100, largest == null ? 100 : largest.intValue()));
         this.heap.setConsumer(this);
         this.replicator.addEventListener(this);
     }
@@ -147,15 +144,10 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             if (bytes == null || dkv.getValue() >= bytes) {
                 Tuple2Ex tuple = new Tuple2Ex(dkv.getValue(), dkv);
                 heap.add(tuple);
-                metricHeap.add(tuple);
             }
         } else if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
             for (Tuple2Ex tuple : heap.get(true)) {
                 accept(tuple);
-            }
-            for (Tuple2Ex tuple : metricHeap.get(true)) {
-                String key = Strings.toString(tuple.getV2().getKey());
-                //TODO 
             }
     
             if (rdb6) {
