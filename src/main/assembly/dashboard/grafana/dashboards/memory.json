@@ -641,6 +641,8 @@
           "measurement": "memory_statistics",
           "orderByTime": "ASC",
           "policy": "30days",
+          "query": "SELECT last(\"value\") FROM \"30days\".\"memory_statistics\" WHERE (\"instance\" =~ /^$instance$/ AND \"module\" = 'memory' AND \"type\" = 'GAUGE' AND \"facade\" = 'total_memory') AND $timeFilter fill(null)",
+          "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
