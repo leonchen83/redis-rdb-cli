@@ -1,30 +1,4 @@
 {
-  "__requires": [
-    {
-      "type": "grafana",
-      "id": "grafana",
-      "name": "Grafana",
-      "version": "5.3.2"
-    },
-    {
-      "type": "panel",
-      "id": "graph",
-      "name": "Graph",
-      "version": "5.0.0"
-    },
-    {
-      "type": "datasource",
-      "id": "influxdb",
-      "name": "InfluxDB",
-      "version": "5.0.0"
-    },
-    {
-      "type": "panel",
-      "id": "singlestat",
-      "name": "Singlestat",
-      "version": "5.0.0"
-    }
-  ],
   "annotations": {
     "list": [
       {
@@ -109,12 +83,6 @@
           "groupBy": [
             {
               "params": [
-                "5s"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
                 "null"
               ],
               "type": "fill"
@@ -123,6 +91,8 @@
           "measurement": "memory_statistics",
           "orderByTime": "ASC",
           "policy": "30days",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"memory_statistics\" WHERE (\"instance\" =~ /^$instance$/ AND \"module\" = 'memory' AND \"type\" = 'GAUGE' AND \"facade\" =~ /^dbnum_*/) AND $timeFilter fill(null)",
+          "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -135,7 +105,7 @@
               },
               {
                 "params": [],
-                "type": "last"
+                "type": "sum"
               }
             ]
           ],
@@ -243,12 +213,6 @@
           "groupBy": [
             {
               "params": [
-                "5s"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
                 "null"
               ],
               "type": "fill"
@@ -257,6 +221,8 @@
           "measurement": "memory_statistics",
           "orderByTime": "ASC",
           "policy": "30days",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"memory_statistics\" WHERE (\"instance\" =~ /^$instance$/ AND \"module\" = 'memory' AND \"type\" = 'GAUGE' AND \"facade\" =~ /^dbexp_*/) AND $timeFilter fill(null)",
+          "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -356,12 +322,6 @@
           "groupBy": [
             {
               "params": [
-                "5s"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
                 "facade"
               ],
               "type": "tag"
@@ -376,6 +336,8 @@
           "measurement": "memory_statistics",
           "orderByTime": "ASC",
           "policy": "30days",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"memory_statistics\" WHERE (\"instance\" =~ /^$instance$/ AND \"module\" = 'memory' AND \"type\" = 'GAUGE' AND \"facade\" =~ /^dbnum_*/) AND $timeFilter GROUP BY \"facade\" fill(null)",
+          "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -505,12 +467,6 @@
           "groupBy": [
             {
               "params": [
-                "5s"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
                 "facade"
               ],
               "type": "tag"
@@ -525,6 +481,8 @@
           "measurement": "memory_statistics",
           "orderByTime": "ASC",
           "policy": "30days",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"memory_statistics\" WHERE (\"instance\" =~ /^$instance$/ AND \"module\" = 'memory' AND \"type\" = 'GAUGE' AND \"facade\" =~ /^dbexp_*/) AND $timeFilter GROUP BY \"facade\" fill(null)",
+          "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -675,12 +633,6 @@
           "groupBy": [
             {
               "params": [
-                "5s"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
                 "null"
               ],
               "type": "fill"
@@ -788,12 +740,6 @@
           "groupBy": [
             {
               "params": [
-                "5s"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
                 "facade"
               ],
               "type": "tag"
@@ -808,6 +754,8 @@
           "measurement": "memory_statistics",
           "orderByTime": "ASC",
           "policy": "30days",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"memory_statistics\" WHERE (\"instance\" =~ /^$instance$/ AND \"module\" = 'memory' AND \"type\" = 'COUNTER' AND \"facade\" =~ /^count_*/) AND $timeFilter GROUP BY \"facade\" fill(null)",
+          "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -937,12 +885,6 @@
           "groupBy": [
             {
               "params": [
-                "5s"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
                 "facade"
               ],
               "type": "tag"
@@ -957,6 +899,8 @@
           "measurement": "memory_statistics",
           "orderByTime": "ASC",
           "policy": "30days",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"memory_statistics\" WHERE (\"instance\" =~ /^$instance$/ AND \"module\" = 'memory' AND \"type\" = 'COUNTER' AND \"facade\" =~ /^memory_*/) AND $timeFilter GROUP BY \"facade\" fill(null)",
+          "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -1105,5 +1049,5 @@
   "timezone": "",
   "title": "memory",
   "uid": "GIuIveJZz",
-  "version": 14
+  "version": 1
 }
