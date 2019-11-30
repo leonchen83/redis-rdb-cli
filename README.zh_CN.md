@@ -499,7 +499,7 @@ migrate_flush=yes
 
 ### ret命令是做什么的
 
-1. `ret` 命令允许用户定义自己的同步服务 比如同步redis数据到 `mysql` 或 `mangodb`.
+1. `ret` 命令允许用户定义自己的同步服务 比如同步redis数据到 `mysql` 或 `mongodb`.
 2. `ret` 命令使用 Java SPI 来实现同步功能.
 
 ### 如何实现一个同步服务

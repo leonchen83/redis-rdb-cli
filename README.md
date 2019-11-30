@@ -499,7 +499,7 @@ migrate_flush=yes
 
 ### What ret command do
 
-1. `ret` command that allow user define there own sink service like sink redis data to `mysql` or `mangodb`.
+1. `ret` command that allow user define there own sink service like sink redis data to `mysql` or `mongodb`.
 2. `ret` command using Java SPI extension to do this job.
 
 ### How to implement a sink service
