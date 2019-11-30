@@ -596,11 +596,6 @@ User should follow the steps below to implement a sink service.
 
 public class YourSinkService implements SinkService {
 
-    private static final Logger logger = LoggerFactory.getLogger(YourSinkService.class);
-
-    private AtomicLong rdb = new AtomicLong(0L);
-    private AtomicLong aof = new AtomicLong(0L);
-
     @Override
     public String sink() {
         return "your-sink-service";
@@ -608,43 +603,12 @@ public class YourSinkService implements SinkService {
 
     @Override
     public void init(File config) throws IOException {
-
+        // parse your external sink config
     }
 
     @Override
     public void onEvent(Replicator replicator, Event event) {
-        if (event instanceof PreRdbSyncEvent) {
-            rdb.set(0);
-            aof.set(0);
-        }
-        if (event instanceof KeyValuePair) {
-            rdb.incrementAndGet();
-        }
-
-        if (event instanceof PostRdbSyncEvent ||
-                event instanceof PreCommandSyncEvent ||
-                event instanceof PostCommandSyncEvent ||
-                //
-                event instanceof PingCommand ||
-                event instanceof SelectCommand ||
-                event instanceof ReplConfCommand ||
-                event instanceof ClosingCommand ||
-                event instanceof ClosedCommand) {
-
-            if (event instanceof PreCommandSyncEvent) {
-                logger.info("rdb count {}", rdb.get());
-            }
-
-            if (event instanceof PingCommand) {
-                logger.info("aof count {}", aof.get());
-            }
-
-            if (event instanceof ClosedCommand) {
-                logger.info("rdb count {}, aof count {}", rdb.get(), aof.get());
-            }
-        } else if (event instanceof Command) {
-            aof.incrementAndGet();
-        }
+        // your sink business
     }
 }
 
