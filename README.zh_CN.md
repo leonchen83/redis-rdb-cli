@@ -231,12 +231,14 @@ examples:
 usage: ret -s <source> [-c <file>] [-p <parser>] -n <sink>
 
 options:
- -c,--config <file>     external config file
+ -c,--config <file>     external config file, if not specified, default
+                        value is null
  -h,--help              ret usage.
  -n,--name <sink>       sink service name, registered sink service:
                         example
  -p,--parser <parser>   parser service name, registered parser service:
-                        default, dump. by default use service default
+                        default, dump. if not specified, default value is
+                        default
  -s,--source <source>   <source> eg:
                         redis://host:port?authPassword=foobar
  -v,--version           ret version.
