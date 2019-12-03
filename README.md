@@ -627,7 +627,7 @@ public class YourSinkService implements SinkService {
 
 # add following content in com.moilioncircle.redis.sink.api.SinkService
 
-your.package.ExampleSinkService
+your.package.YourSinkService
 
 ```
 
@@ -644,6 +644,26 @@ cp ./target/your-sink-service-1.0.0-jar-with-dependencies.jar /path/to/redis-rdb
 ```java  
 
 ret -s redis://127.0.0.1:6379 -c config.conf -n your-sink-service
+```
+
+6. debug your sink service
+
+```java  
+
+    public static void main(String[] args) throws Exception {
+        Replicator replicator = new RedisReplicator("redis://127.0.0.1:6379");
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            Replicators.closeQuietly(replicator);
+        }));
+        replicator.addExceptionListener((rep, tx, e) -> {
+            throw new RuntimeException(tx.getMessage(), tx);
+        });
+        SinkService sink = new YourSinkService();
+        sink.init(new File("/path/to/your-sink.conf"));
+        replicator.addEventListener(new AsyncEventListener(sink, replicator, 4, Executors.defaultThreadFactory()));
+        replicator.open();
+    }
+
 ```
 
 ## Contributors
