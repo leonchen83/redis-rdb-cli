@@ -397,6 +397,37 @@ Open `http://localhost:3000` to check the `rct -f mem`'s result.
   
 If you deployed this tool in multi instance, you need to change parameter [metric_instance](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L200) to make sure unique between instances.  
   
+## Redis 6
+
+### Redis 6 SSL
+
+1. use openssl and java keytool to generate keystore
+
+```java  
+
+$cd /path/to/redis-6.0-rc1
+$./utils/gen-test-certs.sh
+$cd tests/tls
+$openssl pkcs12 -export -in redis.crt -inkey redis.key -out redis.p12
+$keytool -import -file ca.crt -alias redis -keystore redis.p12
+
+```
+
+2. If source redis and target redis use the same keystore. then config following parameters  
+[source_keystore_path](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L216) and [target_keystore_path](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L245) to point to `/path/to/redis-6.0-rc1/tests/tls/redis.p12`  
+[source_keystore_pass](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L224) and [target_keystore_pass](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L253)  
+
+3. after config ssl parameters use `rediss://host:port` in your command to open ssl, for example: `rst -s rediss://127.0.0.1:6379 -m rediss://127.0.0.1:30001 -r -d 0`
+
+### Redis 6 ACL
+
+1. use following URI to open redis ACL support  
+
+```java  
+rst -s redis://user:pass@127.0.0.1:6379 -m redis://user:pass@127.0.0.1:6380 -r -d 0
+```
+
+2. `user` **MUST** have `+@all` permission to handle commands
 
 ## Hack rmt
 

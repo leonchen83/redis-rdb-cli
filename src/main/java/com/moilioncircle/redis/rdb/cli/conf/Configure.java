@@ -565,12 +565,12 @@ public class Configure {
         conf.sourceKeystorePath = getString(conf, "source_keystore_path", null, true);
         conf.sourceKeystorePass = getString(conf, "source_keystore_pass", null, true);
         conf.sourceKeystoreType = getString(conf, "source_keystore_type", "pkcs12", true);
-        conf.sourceDefaultTruststore = getBool(conf, "source_default_truststore", true, true);
+        conf.sourceDefaultTruststore = getBool(conf, "source_default_truststore", false, true);
 
         conf.targetKeystorePath = getString(conf, "target_keystore_path", null, true);
         conf.targetKeystorePass = getString(conf, "target_keystore_pass", null, true);
         conf.targetKeystoreType = getString(conf, "target_keystore_type", "pkcs12", true);
-        conf.targetDefaultTruststore = getBool(conf, "target_default_truststore", true, true);
+        conf.targetDefaultTruststore = getBool(conf, "target_default_truststore", false, true);
         return conf;
     }
     
