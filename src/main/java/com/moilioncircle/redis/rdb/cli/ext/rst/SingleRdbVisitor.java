@@ -74,7 +74,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
         super(replicator, configure, db, new ArrayList<>(), new ArrayList<>(), replace);
         this.uri = uri;
         this.legacy = legacy;
-        this.conf = configure.merge(this.uri);
+        this.conf = configure.merge(this.uri, false);
         this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure.getMigrateThreads(), new XThreadFactory("sync-worker")));
     }
 

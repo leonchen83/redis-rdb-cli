@@ -49,14 +49,18 @@ public class RedisSentinelURI implements Comparable<RedisSentinelURI>, Serializa
     //
     private static final char[] HEX = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
     private static final int DEFAULT_PORT = 26379;
+    
     /**
-     *
+     * 
      */
     private String uri;
+    private transient String user;
+    private transient boolean ssl;
     private transient String path;
     private transient String query;
     private transient String scheme;
     private transient String userInfo;
+    private transient String password;
     private transient String fragment;
     private transient List<URI> uris = new ArrayList<>();
     private transient List<HostAndPort> hosts = new ArrayList<>();
@@ -70,8 +74,16 @@ public class RedisSentinelURI implements Comparable<RedisSentinelURI>, Serializa
         this.uri = uri;
     }
 
+    public boolean isSsl() {
+        return ssl;
+    }
+
     public String getPath() {
         return this.path;
+    }
+
+    public String getUser() {
+        return user;
     }
 
     public String getQuery() {
@@ -92,6 +104,10 @@ public class RedisSentinelURI implements Comparable<RedisSentinelURI>, Serializa
 
     public String getFragment() {
         return this.fragment;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public List<HostAndPort> getHosts() {
@@ -228,10 +244,17 @@ public class RedisSentinelURI implements Comparable<RedisSentinelURI>, Serializa
      *
      */
     private void uri(URI uri) throws URISyntaxException {
-        if (uri.getScheme() != null && uri.getScheme().equalsIgnoreCase("redis-sentinel")) {
-            this.scheme = "redis-sentinel";
+        if (uri.getScheme() != null) {
+            if (uri.getScheme().equalsIgnoreCase("redis-sentinel")) {
+                this.scheme = "redis-sentinel";
+            } else if (uri.getScheme().equalsIgnoreCase("redis-sentinels")) {
+                this.scheme = "redis-sentinels";
+                this.ssl = true;
+            } else {
+                throw new URISyntaxException(uri.toString(), "scheme must be [redis-sentinel] or [redis-sentinels].");
+            }
         } else {
-            throw new URISyntaxException(uri.toString(), "scheme must be [redis-sentinel].");
+            throw new URISyntaxException(uri.toString(), "scheme must be [redis-sentinel] or [redis-sentinels].");
         }
         this.uris.add(uri);
         this.path = uri.getPath();
@@ -240,6 +263,20 @@ public class RedisSentinelURI implements Comparable<RedisSentinelURI>, Serializa
         this.hosts.add(new HostAndPort(uri.getHost(), uri.getPort() == -1 ? DEFAULT_PORT : uri.getPort()));
         this.scheme = uri.getScheme();
         this.fragment = uri.getFragment();
+
+        if (this.userInfo != null) {
+            String[] ary = this.userInfo.split(":");
+            String user = ary[0];
+            if (user != null && user.length() != 0) {
+                this.user = user;
+            }
+            if (ary.length == 2) {
+                String password = ary[1];
+                if (password != null && password.length() != 0) {
+                    this.password = password;
+                }
+            }
+        }
 
         String rawQuery = uri.getRawQuery();
         if (rawQuery == null)

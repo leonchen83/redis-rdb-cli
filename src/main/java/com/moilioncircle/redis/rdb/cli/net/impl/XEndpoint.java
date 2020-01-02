@@ -85,7 +85,13 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
             this.out = new BufferedOutputStream(this.socket.getOutputStream(), BUFFER);
             this.protocol = new Protocol(in, out);
             if (conf.getAuthPassword() != null) {
-                RedisObject r = send(AUTH, conf.getAuthPassword().getBytes());
+                RedisObject r = null;
+                if (conf.getAuthUser() != null) {
+                    // redis6 acl
+                    r = send(AUTH, conf.getAuthUser().getBytes(), conf.getAuthPassword().getBytes());
+                } else {
+                    r = send(AUTH, conf.getAuthPassword().getBytes());
+                }
                 if (r != null && r.type.isError()) throw new RuntimeException(r.getString());
             } else {
                 RedisObject r = send(PING);

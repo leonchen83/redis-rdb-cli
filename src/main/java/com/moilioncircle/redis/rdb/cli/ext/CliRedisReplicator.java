@@ -65,7 +65,7 @@ public class CliRedisReplicator implements Replicator {
     private void initialize(RedisURI uri, Configure configure) throws IOException {
         Objects.requireNonNull(uri);
         Objects.requireNonNull(configure);
-        Configuration configuration = configure.merge(uri);
+        Configuration configuration = configure.merge(uri, true);
         if (uri.getFileType() != null) {
             PeekableInputStream in = new PeekableInputStream(uri.toURL().openStream());
             switch (uri.getFileType()) {
@@ -93,7 +93,7 @@ public class CliRedisReplicator implements Replicator {
     private void initialize(RedisSentinelURI uri, Configure configure) throws IOException {
         Objects.requireNonNull(uri);
         Objects.requireNonNull(configure);
-        Configuration configuration = configure.merge(uri);
+        Configuration configuration = configure.merge(uri, true);
         this.replicator = new RedisSentinelReplicator(uri, configuration);
     }
 

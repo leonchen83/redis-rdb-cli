@@ -31,6 +31,7 @@ import com.moilioncircle.redis.rdb.cli.glossary.Gateway;
 import com.moilioncircle.redis.rdb.cli.sentinel.RedisSentinelURI;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.RedisURI;
+import com.moilioncircle.redis.replicator.net.RedisSslContextFactory;
 
 /**
  * @author Baoyi Chen
@@ -183,6 +184,46 @@ public class Configure {
      * metric instance
      */
     private String metricInstance;
+
+    /**
+     * ssl parameter
+     */
+    private boolean sourceDefaultTruststore = true;
+    
+    /**
+     * ssl parameter
+     */
+    private String sourceKeystorePath;
+    
+    /**
+     * ssl parameter
+     */
+    private String sourceKeystorePass;
+    
+    /**
+     * ssl parameter
+     */
+    private String sourceKeystoreType;
+
+    /**
+     * ssl parameter
+     */
+    private boolean targetDefaultTruststore = true;
+    
+    /**
+     * ssl parameter
+     */
+    private String targetKeystorePath;
+
+    /**
+     * ssl parameter
+     */
+    private String targetKeystorePass;
+
+    /**
+     * ssl parameter
+     */
+    private String targetKeystoreType;
     
     public int getBatchSize() {
         return batchSize;
@@ -375,16 +416,81 @@ public class Configure {
     public void setMetricInstance(String metricInstance) {
         this.metricInstance = metricInstance;
     }
-    
-    public Configuration merge(RedisURI uri) {
-        return merge(Configuration.valueOf(uri));
+
+    public String getSourceKeystorePath() {
+        return sourceKeystorePath;
     }
 
-    public Configuration merge(RedisSentinelURI uri) {
-        return merge(valueOf(uri));
+    public void setSourceKeystorePath(String sourceKeystorePath) {
+        this.sourceKeystorePath = sourceKeystorePath;
+    }
+
+    public String getSourceKeystorePass() {
+        return sourceKeystorePass;
+    }
+
+    public void setSourceKeystorePass(String sourceKeystorePass) {
+        this.sourceKeystorePass = sourceKeystorePass;
+    }
+
+    public String getSourceKeystoreType() {
+        return sourceKeystoreType;
+    }
+
+    public void setSourceKeystoreType(String sourceKeystoreType) {
+        this.sourceKeystoreType = sourceKeystoreType;
+    }
+
+    public String getTargetKeystorePath() {
+        return targetKeystorePath;
+    }
+
+    public void setTargetKeystorePath(String targetKeystorePath) {
+        this.targetKeystorePath = targetKeystorePath;
+    }
+
+    public String getTargetKeystorePass() {
+        return targetKeystorePass;
+    }
+
+    public void setTargetKeystorePass(String targetKeystorePass) {
+        this.targetKeystorePass = targetKeystorePass;
+    }
+
+    public String getTargetKeystoreType() {
+        return targetKeystoreType;
+    }
+
+    public void setTargetKeystoreType(String targetKeystoreType) {
+        this.targetKeystoreType = targetKeystoreType;
+    }
+
+    public boolean isSourceDefaultTruststore() {
+        return sourceDefaultTruststore;
+    }
+
+    public void setSourceDefaultTruststore(boolean sourceDefaultTruststore) {
+        this.sourceDefaultTruststore = sourceDefaultTruststore;
+    }
+
+    public boolean isTargetDefaultTruststore() {
+        return targetDefaultTruststore;
+    }
+
+    public void setTargetDefaultTruststore(boolean targetDefaultTruststore) {
+        this.targetDefaultTruststore = targetDefaultTruststore;
+    }
+
+    public Configuration merge(RedisURI uri, boolean source) {
+        Configuration v = merge(Configuration.valueOf(uri), source);
+        return v;
+    }
+
+    public Configuration merge(RedisSentinelURI uri, boolean source) {
+        return merge(valueOf(uri), source);
     }
     
-    public Configuration merge(Configuration conf) {
+    public Configuration merge(Configuration conf, boolean source) {
         conf.setRetries(this.retries);
         conf.setRetryTimeInterval(this.retryInterval);
         conf.setConnectionTimeout(this.timeout);
@@ -395,6 +501,32 @@ public class Configure {
         conf.setAsyncCachedBytes(this.asyncCacheSize);
         conf.setVerbose(this.verbose);
         conf.setHeartbeatPeriod(this.heartbeat);
+
+        if (conf.isSsl()) {
+            if (source) {
+                RedisSslContextFactory factory = new RedisSslContextFactory();
+                factory.setKeyStorePath(sourceKeystorePath);
+                factory.setKeyStorePassword(sourceKeystorePass);
+                factory.setKeyStoreType(sourceKeystoreType);
+                if (!sourceDefaultTruststore) {
+                    factory.setTrustStorePath(sourceKeystorePath);
+                    factory.setTrustStorePassword(sourceKeystorePass);
+                    factory.setTrustStoreType(sourceKeystoreType);
+                }
+                conf.setRedisSslContextFactory(factory);
+            } else {
+                RedisSslContextFactory factory = new RedisSslContextFactory();
+                factory.setKeyStorePath(targetKeystorePath);
+                factory.setKeyStorePassword(targetKeystorePass);
+                factory.setKeyStoreType(targetKeystoreType);
+                if (!targetDefaultTruststore) {
+                    factory.setTrustStorePath(targetKeystorePath);
+                    factory.setTrustStorePassword(targetKeystorePass);
+                    factory.setTrustStoreType(targetKeystoreType);
+                }
+                conf.setRedisSslContextFactory(factory);
+            }
+        }
         return conf;
     }
     
@@ -428,6 +560,17 @@ public class Configure {
         conf.metricDatabase = getString(conf, "metric_database", "redis_rdb_cli", true);
         conf.metricRetentionPolicy = getString(conf, "metric_retention_policy", "30days", true);
         conf.metricInstance = getString(conf, "metric_instance", "instance0", true);
+        
+        // ssl
+        conf.sourceKeystorePath = getString(conf, "source_keystore_path", null, true);
+        conf.sourceKeystorePass = getString(conf, "source_keystore_pass", null, true);
+        conf.sourceKeystoreType = getString(conf, "source_keystore_type", "pkcs12", true);
+        conf.sourceDefaultTruststore = getBool(conf, "source_default_truststore", true, true);
+
+        conf.targetKeystorePath = getString(conf, "target_keystore_path", null, true);
+        conf.targetKeystorePass = getString(conf, "target_keystore_pass", null, true);
+        conf.targetKeystoreType = getString(conf, "target_keystore_type", "pkcs12", true);
+        conf.targetDefaultTruststore = getBool(conf, "target_default_truststore", true, true);
         return conf;
     }
     
@@ -487,6 +630,16 @@ public class Configure {
         }
         if (parameters.containsKey("replOffset")) {
             configuration.setReplOffset(getLong(parameters.get("replOffset"), -1L));
+        }
+        // redis 6
+        if (uri.isSsl()) {
+            configuration.setSsl(true);
+        }
+        if (uri.getUser() != null) {
+            configuration.setAuthUser(uri.getUser());
+        }
+        if (uri.getPassword() != null) {
+            configuration.setAuthPassword(uri.getPassword());
         }
         return configuration;
     }
@@ -586,7 +739,7 @@ public class Configure {
             return null;
         return Arrays.stream(v.split(",")).map(e -> e.trim()).collect(Collectors.toList());
     }
-    
+
     @Override
     public String toString() {
         return "Configure{" +
@@ -614,6 +767,14 @@ public class Configure {
                 ", metricDatabase='" + metricDatabase + '\'' +
                 ", metricRetentionPolicy='" + metricRetentionPolicy + '\'' +
                 ", metricInstance='" + metricInstance + '\'' +
+                ", sourceDefaultTruststore=" + sourceDefaultTruststore +
+                ", sourceKeystorePath='" + sourceKeystorePath + '\'' +
+                ", sourceKeystorePass='" + sourceKeystorePass + '\'' +
+                ", sourceKeystoreType='" + sourceKeystoreType + '\'' +
+                ", targetDefaultTruststore=" + targetDefaultTruststore +
+                ", targetKeystorePath='" + targetKeystorePath + '\'' +
+                ", targetKeystorePass='" + targetKeystorePass + '\'' +
+                ", targetKeystoreType='" + targetKeystoreType + '\'' +
                 '}';
     }
 }

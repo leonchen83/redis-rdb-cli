@@ -64,7 +64,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
                              boolean replace) throws IOException {
         super(replicator, configure, singletonList(0L), regexs, types, replace);
         this.lines = lines;
-        this.configuration = configure.merge(defaultSetting());
+        this.configuration = configure.merge(defaultSetting(), false);
         this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure.getMigrateThreads(), new XThreadFactory("sync-worker")));
     }
 
