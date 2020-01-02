@@ -34,7 +34,6 @@ import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.net.impl.XEndpoint;
 import com.moilioncircle.redis.rdb.cli.net.protocol.RedisObject;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
-import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.FileType;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -166,7 +165,7 @@ public class RmtCommand extends AbstractCommand {
     }
 
     private RdbVisitor getRdbVisitor(Replicator replicator, Configure configure, RedisURI uri, List<Long> db, List<String> regexs, List<DataType> types, boolean replace, boolean legacy) throws Exception {
-        try (XEndpoint endpoint = new XEndpoint(uri.getHost(), uri.getPort(), Configuration.valueOf(uri), configure)) {
+        try (XEndpoint endpoint = new XEndpoint(uri.getHost(), uri.getPort(), configure.merge(uri, false), configure)) {
             RedisObject r = endpoint.send("cluster".getBytes(), "nodes".getBytes());
             if (r.type.isError()) {
                 return new SingleRdbVisitor(replicator, configure, uri, db, regexs, types, replace, legacy);
