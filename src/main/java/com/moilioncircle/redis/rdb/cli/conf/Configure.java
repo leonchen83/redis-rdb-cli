@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 
 import com.moilioncircle.redis.rdb.cli.glossary.Gateway;
 import com.moilioncircle.redis.rdb.cli.sentinel.RedisSentinelURI;
+import com.moilioncircle.redis.rdb.cli.util.Strings;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.net.RedisSslContextFactory;
@@ -705,7 +706,7 @@ public class Configure {
     
     public static String getString(Configure conf, String key, String value, boolean optional) {
         String v = System.getProperty(key);
-        if (v == null && (v = conf.properties.getProperty(key)) == null)
+        if (Strings.isEmpty(v) && Strings.isEmpty(v = conf.properties.getProperty(key)))
             v = value;
         if (v == null && !optional) {
             throw new IllegalArgumentException("not found the config[key=" + key + "]");

@@ -397,6 +397,37 @@ docker-compose down
   
 如果你把这个工具部署在多个实例上, 需要更改如下参数 [metric_instance](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L200) 并保证在每个实例上参数名唯一  
   
+## Redis 6
+  
+### Redis 6 SSL
+  
+1. 用 openssl 和 java keytool 生成 keystore
+  
+```xslt  
+
+$cd /path/to/redis-6.0-rc1
+$./utils/gen-test-certs.sh
+$cd tests/tls
+$openssl pkcs12 -export -in redis.crt -inkey redis.key -out redis.p12
+$keytool -import -file ca.crt -alias redis -keystore redis.p12
+
+```
+  
+2. 如果源 redis 和目标 redis 使用同样的 keystore. 那么配置如下参数  
+[source_keystore_path](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L216) 和 [target_keystore_path](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L245) 指向 `/path/to/redis-6.0-rc1/tests/tls/redis.p12`  
+[source_keystore_pass](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L224) 和 [target_keystore_pass](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L253)  
+  
+3. 在配置完 ssl 参数之后, 在你的命令中使用 `rediss://host:port` 这样的URI来开启ssl, 比如: `rst -s rediss://127.0.0.1:6379 -m rediss://127.0.0.1:30001 -r -d 0`
+  
+### Redis 6 ACL
+  
+1. 使用如下的 URI 来开启 redis ACL 支持  
+  
+```java  
+rst -s redis://user:pass@127.0.0.1:6379 -m redis://user:pass@127.0.0.1:6380 -r -d 0
+```
+  
+2. `user` **必须** 拥有 `+@all` 权限来处理同步命令
   
 ## Hack rmt
 
