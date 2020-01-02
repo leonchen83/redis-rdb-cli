@@ -189,7 +189,7 @@ public class Configure {
     /**
      * ssl parameter
      */
-    private boolean sourceDefaultTruststore = true;
+    private boolean sourceDefaultTruststore;
     
     /**
      * ssl parameter
@@ -209,7 +209,7 @@ public class Configure {
     /**
      * ssl parameter
      */
-    private boolean targetDefaultTruststore = true;
+    private boolean targetDefaultTruststore;
     
     /**
      * ssl parameter
