@@ -265,13 +265,14 @@ public class RedisSentinelURI implements Comparable<RedisSentinelURI>, Serializa
         this.fragment = uri.getFragment();
 
         if (this.userInfo != null) {
-            String[] ary = this.userInfo.split(":");
-            String user = ary[0];
-            if (user != null && user.length() != 0) {
-                this.user = user;
-            }
-            if (ary.length == 2) {
-                String password = ary[1];
+            int idx = this.userInfo.indexOf(':');
+            if (idx < 0) {
+                this.user = this.userInfo;
+            } else if (idx == 0) {
+                this.password = this.userInfo.substring(idx + 1);
+            } else /*（idx > 0）*/{
+                this.user = this.userInfo.substring(0, idx);
+                String password = this.userInfo.substring(idx + 1);
                 if (password != null && password.length() != 0) {
                     this.password = password;
                 }
