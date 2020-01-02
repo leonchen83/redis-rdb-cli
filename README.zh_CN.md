@@ -414,8 +414,8 @@ $keytool -import -file ca.crt -alias redis -keystore redis.p12
 ```
   
 2. 如果源 redis 和目标 redis 使用同样的 keystore. 那么配置如下参数  
-[source_keystore_path](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L216) 和 [target_keystore_path](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L245) 指向 `/path/to/redis-6.0-rc1/tests/tls/redis.p12`  
-[source_keystore_pass](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L224) 和 [target_keystore_pass](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L253)  
+将 [source_keystore_path](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L216) 和 [target_keystore_path](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L245) 指向 `/path/to/redis-6.0-rc1/tests/tls/redis.p12`  
+设置 [source_keystore_pass](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L224) 和 [target_keystore_pass](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L253)  
   
 3. 在配置完 ssl 参数之后, 在你的命令中使用 `rediss://host:port` 这样的URI来开启ssl, 比如: `rst -s rediss://127.0.0.1:6379 -m rediss://127.0.0.1:30001 -r -d 0`
   
