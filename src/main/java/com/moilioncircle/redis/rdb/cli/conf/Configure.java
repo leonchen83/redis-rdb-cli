@@ -505,27 +505,31 @@ public class Configure {
 
         if (conf.isSsl()) {
             if (source) {
-                RedisSslContextFactory factory = new RedisSslContextFactory();
-                factory.setKeyStorePath(sourceKeystorePath);
-                factory.setKeyStorePassword(sourceKeystorePass);
-                factory.setKeyStoreType(sourceKeystoreType);
-                if (!sourceDefaultTruststore) {
-                    factory.setTrustStorePath(sourceKeystorePath);
-                    factory.setTrustStorePassword(sourceKeystorePass);
-                    factory.setTrustStoreType(sourceKeystoreType);
+                if (sourceKeystorePath != null) {
+                    RedisSslContextFactory factory = new RedisSslContextFactory();
+                    factory.setKeyStorePath(sourceKeystorePath);
+                    factory.setKeyStorePassword(sourceKeystorePass);
+                    factory.setKeyStoreType(sourceKeystoreType);
+                    if (!sourceDefaultTruststore) {
+                        factory.setTrustStorePath(sourceKeystorePath);
+                        factory.setTrustStorePassword(sourceKeystorePass);
+                        factory.setTrustStoreType(sourceKeystoreType);
+                    }
+                    conf.setRedisSslContextFactory(factory);
                 }
-                conf.setRedisSslContextFactory(factory);
             } else {
-                RedisSslContextFactory factory = new RedisSslContextFactory();
-                factory.setKeyStorePath(targetKeystorePath);
-                factory.setKeyStorePassword(targetKeystorePass);
-                factory.setKeyStoreType(targetKeystoreType);
-                if (!targetDefaultTruststore) {
-                    factory.setTrustStorePath(targetKeystorePath);
-                    factory.setTrustStorePassword(targetKeystorePass);
-                    factory.setTrustStoreType(targetKeystoreType);
+                if (targetKeystorePath != null) {
+                    RedisSslContextFactory factory = new RedisSslContextFactory();
+                    factory.setKeyStorePath(targetKeystorePath);
+                    factory.setKeyStorePassword(targetKeystorePass);
+                    factory.setKeyStoreType(targetKeystoreType);
+                    if (!targetDefaultTruststore) {
+                        factory.setTrustStorePath(targetKeystorePath);
+                        factory.setTrustStorePassword(targetKeystorePass);
+                        factory.setTrustStoreType(targetKeystoreType);
+                    }
+                    conf.setRedisSslContextFactory(factory);
                 }
-                conf.setRedisSslContextFactory(factory);
             }
         }
         return conf;
