@@ -401,15 +401,14 @@ docker-compose down
   
 ### Redis 6 SSL
   
-1. 用 openssl 和 java keytool 生成 keystore
+1. 用 openssl 生成 keystore
   
 ```xslt  
 
 $cd /path/to/redis-6.0-rc1
 $./utils/gen-test-certs.sh
 $cd tests/tls
-$openssl pkcs12 -export -in redis.crt -inkey redis.key -out redis.p12
-$keytool -import -file ca.crt -alias redis -keystore redis.p12
+$openssl pkcs12 -export -CAfile ca.crt -in redis.crt -inkey redis.key -out redis.p12
 
 ```
   

@@ -401,15 +401,14 @@ If you deployed this tool in multi instance, you need to change parameter [metri
   
 ### Redis 6 SSL
   
-1. use openssl and java keytool to generate keystore
+1. use openssl to generate keystore
   
 ```xslt  
 
 $cd /path/to/redis-6.0-rc1
 $./utils/gen-test-certs.sh
 $cd tests/tls
-$openssl pkcs12 -export -in redis.crt -inkey redis.key -out redis.p12
-$keytool -import -file ca.crt -alias redis -keystore redis.p12
+$openssl pkcs12 -export -CAfile ca.crt -in redis.crt -inkey redis.key -out redis.p12
 
 ```
   
