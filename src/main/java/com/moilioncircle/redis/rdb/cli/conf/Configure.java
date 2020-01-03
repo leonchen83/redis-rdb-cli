@@ -504,9 +504,9 @@ public class Configure {
         conf.setHeartbeatPeriod(this.heartbeat);
 
         if (conf.isSsl()) {
+            RedisSslContextFactory factory = new RedisSslContextFactory();
             if (source) {
                 if (sourceKeystorePath != null) {
-                    RedisSslContextFactory factory = new RedisSslContextFactory();
                     factory.setKeyStorePath(sourceKeystorePath);
                     factory.setKeyStorePassword(sourceKeystorePass);
                     factory.setKeyStoreType(sourceKeystoreType);
@@ -515,11 +515,10 @@ public class Configure {
                         factory.setTrustStorePassword(sourceKeystorePass);
                         factory.setTrustStoreType(sourceKeystoreType);
                     }
-                    conf.setRedisSslContextFactory(factory);
+                    
                 }
             } else {
                 if (targetKeystorePath != null) {
-                    RedisSslContextFactory factory = new RedisSslContextFactory();
                     factory.setKeyStorePath(targetKeystorePath);
                     factory.setKeyStorePassword(targetKeystorePass);
                     factory.setKeyStoreType(targetKeystoreType);
@@ -528,9 +527,9 @@ public class Configure {
                         factory.setTrustStorePassword(targetKeystorePass);
                         factory.setTrustStoreType(targetKeystoreType);
                     }
-                    conf.setRedisSslContextFactory(factory);
                 }
             }
+            conf.setRedisSslContextFactory(factory);
         }
         return conf;
     }
