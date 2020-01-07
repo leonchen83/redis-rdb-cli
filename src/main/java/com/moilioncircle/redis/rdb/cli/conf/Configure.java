@@ -529,7 +529,7 @@ public class Configure {
                     }
                 }
             }
-            conf.setRedisSslContextFactory(factory);
+            conf.setSslContextFactory(factory);
         }
         return conf;
     }
