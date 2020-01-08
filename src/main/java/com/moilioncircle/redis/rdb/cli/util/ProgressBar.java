@@ -41,7 +41,7 @@ public class ProgressBar implements Closeable {
     public ProgressBar(long total) throws IOException {
         this.total = total;
         this.ctime = System.currentTimeMillis();
-        this.terminal = TerminalBuilder.terminal();
+        this.terminal = TerminalBuilder.builder().dumb(true).build();
     }
 
     public void react(long num) {
