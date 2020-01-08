@@ -101,7 +101,7 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
             if (r != null && r.type.isError()) throw new RuntimeException(r.getString());
             this.db = db;
             this.address = this.toString().replaceAll("\\.", "_").replaceAll(":", "_");
-            logger.debug("connected to {}:port/{}", host, port, db);
+            logger.debug("connected to {}:{}", host, port, db);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

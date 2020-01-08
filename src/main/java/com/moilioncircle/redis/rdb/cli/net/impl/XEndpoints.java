@@ -152,7 +152,6 @@ public class XEndpoints implements Closeable {
                     lines = Arrays.asList(config.split("\n"));
                     break;
                 } catch (Throwable error) {
-                    continue;
                 }
             }
             
