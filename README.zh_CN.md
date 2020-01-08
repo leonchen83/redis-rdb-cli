@@ -560,13 +560,13 @@ migrate_flush=yes
         <dependency>
             <groupId>com.moilioncircle</groupId>
             <artifactId>redis-sink-api</artifactId>
-            <version>1.2.0</version>
+            <version>1.2.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.moilioncircle</groupId>
             <artifactId>redis-replicator</artifactId>
-            <version>3.3.3</version>
+            <version>3.4.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
