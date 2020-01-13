@@ -1,3 +1,8 @@
+### 0.3.0
+
+Support redis 6 ACL.  
+Support redis 6 SSL.  
+
 ### 0.2.0
 
 Improve dashboard.  
