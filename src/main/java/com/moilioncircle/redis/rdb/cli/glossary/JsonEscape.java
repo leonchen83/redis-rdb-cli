@@ -23,6 +23,7 @@ import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 
 /**
  * @author Baoyi Chen
+ * @see <a href="https://www.json.org/json-en.html">json</a>
  */
 public class JsonEscape implements Escaper {
     
