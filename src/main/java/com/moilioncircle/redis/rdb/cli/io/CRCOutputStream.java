@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.glossary.Escape;
+import com.moilioncircle.redis.rdb.cli.glossary.Escaper;
 
 /**
  * @author Baoyi Chen
@@ -31,13 +31,13 @@ import com.moilioncircle.redis.rdb.cli.glossary.Escape;
 public class CRCOutputStream extends OutputStream {
     
     private long checksum = 0L;
-    private final Escape escape;
+    private final Escaper escaper;
     private final OutputStream out;
     private final Configure configure;
     
-    public CRCOutputStream(OutputStream out, Escape escape, Configure configure) {
+    public CRCOutputStream(OutputStream out, Escaper escaper, Configure configure) {
         this.out = out;
-        this.escape = escape;
+        this.escaper = escaper;
         this.configure = configure;
     }
     
@@ -47,7 +47,7 @@ public class CRCOutputStream extends OutputStream {
     
     @Override
     public void write(int b) throws IOException {
-        escape.encode(b, out, configure);
+        escaper.encode(b, out, configure);
         checksum = crc64(new byte[]{(byte) b}, checksum);
     }
     
@@ -56,7 +56,7 @@ public class CRCOutputStream extends OutputStream {
     }
     
     public void write(byte[] b, int off, int len) throws IOException {
-        escape.encode(b, off, len, out, configure);
+        escaper.encode(b, off, len, out, configure);
         checksum = crc64(b, off, len, checksum);
     }
     

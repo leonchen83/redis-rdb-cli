@@ -1,3 +1,7 @@
+### 0.3.1
+
+Fix invalid json issue.   
+
 ### 0.3.0
 
 Support redis 6 ACL.  

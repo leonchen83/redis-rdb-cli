@@ -28,6 +28,7 @@ import com.moilioncircle.redis.rdb.cli.ext.DumpRawByteListener;
 import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.glossary.Escape;
+import com.moilioncircle.redis.rdb.cli.glossary.JsonEscape;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
@@ -44,16 +45,18 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
     
     private boolean first = true;
     private boolean hasdb = false;
+    private JsonEscape jsonEscape;
     private boolean firstkey = true;
     
     public JsonRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escape escape) {
         super(replicator, configure, out, db, regexs, types, escape);
+        this.jsonEscape = new JsonEscape(escape);
     }
 
     private void emitZSet(byte[] field, double value) {
         emitString(field);
         OutputStreams.write(':', out);
-        escape.encode(value, out, configure);
+        jsonEscape.encode(value, out, configure);
     }
 
     private void emitField(byte[] field, byte[] value) {
@@ -64,7 +67,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
 
     private void emitString(byte[] str) {
         OutputStreams.write('"', out);
-        escape.encode(str, out, configure);
+        jsonEscape.encode(str, out, configure);
         OutputStreams.write('"', out);
     }
     
@@ -458,7 +461,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         OutputStreams.write(':', out);
         OutputStreams.write('"', out);
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
+        try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, jsonEscape, configure)) {
             replicator.addRawByteListener(listener);
             super.doApplyModule(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
@@ -478,7 +481,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         OutputStreams.write(':', out);
         OutputStreams.write('"', out);
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
+        try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, jsonEscape, configure)) {
             replicator.addRawByteListener(listener);
             super.doApplyModule2(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
@@ -498,7 +501,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         OutputStreams.write(':', out);
         OutputStreams.write('"', out);
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
+        try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, jsonEscape, configure)) {
             replicator.addRawByteListener(listener);
             super.doApplyStreamListPacks(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);

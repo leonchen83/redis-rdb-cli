@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.glossary.Escape;
+import com.moilioncircle.redis.rdb.cli.glossary.Escaper;
 import com.moilioncircle.redis.rdb.cli.io.CRCOutputStream;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.replicator.io.RawByteListener;
@@ -33,9 +33,9 @@ public class DumpRawByteListener implements RawByteListener, Closeable {
     private final int version;
     private final CRCOutputStream out;
     
-    public DumpRawByteListener(byte type, int version, OutputStream out, Escape escape, Configure conf) throws IOException {
+    public DumpRawByteListener(byte type, int version, OutputStream out, Escaper escaper, Configure conf) throws IOException {
         this.version = version;
-        this.out = new CRCOutputStream(out, escape, conf);
+        this.out = new CRCOutputStream(out, escaper, conf);
         this.out.write(type);
     }
     

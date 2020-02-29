@@ -24,7 +24,7 @@ import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 /**
  * @author Baoyi Chen
  */
-public enum Escape {
+public enum Escape implements Escaper {
     RAW("raw"),
     REDIS("redis");
 
@@ -52,6 +52,7 @@ public enum Escape {
         }
     }
 
+    @Override
     public void encode(int b, OutputStream out, Configure configure) {
         b = b & 0xFF;
         switch (this) {
@@ -90,19 +91,23 @@ public enum Escape {
         }
     }
 
+    @Override
     public void encode(long value, OutputStream out, Configure configure) {
         encode(String.valueOf(value).getBytes(), out, configure);
     }
 
+    @Override
     public void encode(double value, OutputStream out, Configure configure) {
         encode(String.valueOf(value).getBytes(), out, configure);
     }
 
+    @Override
     public void encode(byte[] bytes, OutputStream out, Configure configure) {
         if (bytes == null) return;
         encode(bytes, 0, bytes.length, out, configure);
     }
 
+    @Override
     public void encode(byte[] bytes, int off, int len, OutputStream out, Configure configure) {
         if (bytes == null) return;
         switch (this) {
