@@ -154,7 +154,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
                 long ms = dkv.getExpiredMs() - System.currentTimeMillis();
                 if (ms <= 0) {
                     monitor.add("failure_expired", 1);
-                    logger.debug("failure[expired] [{}]", new String(dkv.getKey()));
+                    logger.error("failure[expired] [{}]", new String(dkv.getKey()));
                     return;
                 }
                 expire = String.valueOf(ms).getBytes();

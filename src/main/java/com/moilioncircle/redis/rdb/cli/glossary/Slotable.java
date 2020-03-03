@@ -20,5 +20,5 @@ package com.moilioncircle.redis.rdb.cli.glossary;
  * @author Baoyi Chen
  */
 public interface Slotable {
-	void addSlot(short slot);
+    void addSlot(short slot);
 }
