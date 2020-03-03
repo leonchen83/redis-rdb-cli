@@ -462,7 +462,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         OutputStreams.write(':', out);
         OutputStreams.write('"', out);
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escaper, configure)) {
+        try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
             replicator.addRawByteListener(listener);
             super.doApplyModule(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
@@ -482,7 +482,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         OutputStreams.write(':', out);
         OutputStreams.write('"', out);
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escaper, configure)) {
+        try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
             replicator.addRawByteListener(listener);
             super.doApplyModule2(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
@@ -502,7 +502,7 @@ public class JsonRdbVisitor extends AbstractRdbVisitor {
         OutputStreams.write(':', out);
         OutputStreams.write('"', out);
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escaper, configure)) {
+        try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
             replicator.addRawByteListener(listener);
             super.doApplyStreamListPacks(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);

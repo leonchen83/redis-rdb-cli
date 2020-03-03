@@ -92,22 +92,6 @@ public enum Escape implements Escaper {
     }
 
     @Override
-    public void encode(long value, OutputStream out, Configure configure) {
-        encode(String.valueOf(value).getBytes(), out, configure);
-    }
-
-    @Override
-    public void encode(double value, OutputStream out, Configure configure) {
-        encode(String.valueOf(value).getBytes(), out, configure);
-    }
-
-    @Override
-    public void encode(byte[] bytes, OutputStream out, Configure configure) {
-        if (bytes == null) return;
-        encode(bytes, 0, bytes.length, out, configure);
-    }
-
-    @Override
     public void encode(byte[] bytes, int off, int len, OutputStream out, Configure configure) {
         if (bytes == null) return;
         switch (this) {

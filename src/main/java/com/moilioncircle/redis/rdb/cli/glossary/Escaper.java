@@ -24,14 +24,21 @@ import com.moilioncircle.redis.rdb.cli.conf.Configure;
  * @author Baoyi Chen
  */
 public interface Escaper {
-    
+
+    default void encode(byte[] bytes, OutputStream out, Configure configure) {
+        encode(bytes, 0, bytes.length, out, configure);
+    }
+
+    default void encode(long value, OutputStream out, Configure configure) {
+        encode(String.valueOf(value).getBytes(), out, configure);
+    }
+
+    default void encode(double value, OutputStream out, Configure configure) {
+        encode(String.valueOf(value).getBytes(), out, configure);
+    }
+
+    //
     void encode(int b, OutputStream out, Configure configure);
-
-    void encode(long value, OutputStream out, Configure configure);
-
-    void encode(byte[] bytes, OutputStream out, Configure configure);
-
-    void encode(double value, OutputStream out, Configure configure);
 
     void encode(byte[] bytes, int off, int len, OutputStream out, Configure configure);
 }
