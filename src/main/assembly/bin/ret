@@ -10,8 +10,10 @@ fi
 
 if [[ "$_java" ]]; then
     version=$("$_java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
-    if [[ "$version" < "1.8" ]]; then
-        echo "java -version is less than 1.8"
+    version1=$(echo "$version" | awk -F. '{printf("%03d%03d",$1,$2);}')
+    if [ $version1 -lt 001008 ]; then
+        echo "Java version is lower than 1.8 - Please install Java 8"
+        exit
     fi
 fi
 
