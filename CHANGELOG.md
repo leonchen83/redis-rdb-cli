@@ -1,6 +1,10 @@
+### 0.3.2
+
+Fix invalid json issue[#12](https://github.com/leonchen83/redis-rdb-cli/issues/12).   
+
 ### 0.3.1
 
-Fix invalid json issue.   
+Fix invalid json issue[#11](https://github.com/leonchen83/redis-rdb-cli/issues/11).   
 
 ### 0.3.0
 

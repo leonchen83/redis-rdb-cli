@@ -35,6 +35,7 @@ public class JsonEscape implements Escaper {
             table[i] = -1;
         }
         table['"'] = '"';
+        table['/'] = '/';
         table['\\'] = '\\';
         table[0x08] = 'b';
         table[0x09] = 't';
@@ -60,18 +61,24 @@ public class JsonEscape implements Escaper {
 
     @Override
     public void encode(int b, OutputStream out, Configure configure) {
-        escape.encode(b, out, configure);
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void encode(byte[] bytes, int off, int len, OutputStream out, Configure configure) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void encode(byte[] bytes, OutputStream out, Configure configure) {
         if (bytes == null) return;
         switch (escape) {
             case REDIS:
-                escape.encode(bytes, off, len, out, configure);
+                escape.encode(bytes, 0, bytes.length, out, configure);
                 break;
             case RAW:
-                encode(new String(bytes), off, len, out, configure);
+                String str = new String(bytes);
+                encode(str, 0, str.length(), out, configure);
                 break;
         }
     }
