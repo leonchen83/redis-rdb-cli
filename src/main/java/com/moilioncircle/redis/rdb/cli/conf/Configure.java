@@ -82,6 +82,11 @@ public class Configure {
     private byte delimiter = ',';
     
     /**
+     * rct export meta
+     */
+    private boolean exportMeta = true;
+    
+    /**
      * rmt --migrate
      */
     private int migrateBatchSize = 4096;
@@ -249,7 +254,15 @@ public class Configure {
     public void setDelimiter(byte delimiter) {
         this.delimiter = delimiter;
     }
-    
+
+    public boolean isExportMeta() {
+        return exportMeta;
+    }
+
+    public void setExportMeta(boolean exportMeta) {
+        this.exportMeta = exportMeta;
+    }
+
     public int getTimeout() {
         return timeout;
     }
@@ -548,6 +561,7 @@ public class Configure {
         conf.dumpRdbVersion = getInt(conf, "dump_rdb_version", -1, true);
         conf.quote = (byte) getString(conf, "quote", "\"", true).charAt(0);
         conf.delimiter = (byte) getString(conf, "delimiter", ",", true).charAt(0);
+        conf.exportMeta = getBool(conf, "export_meta", true, true);
         conf.retries = getInt(conf, "retries", 5, true);
         conf.retryInterval = getInt(conf, "retry_interval", 1000, true);
         conf.timeout = getInt(conf, "timeout", 30000, true);
@@ -753,6 +767,7 @@ public class Configure {
                 "batchSize=" + batchSize +
                 ", quote=" + quote +
                 ", delimiter=" + delimiter +
+                ", exportMeta=" + exportMeta +
                 ", migrateBatchSize=" + migrateBatchSize +
                 ", migrateThreads=" + migrateThreads +
                 ", migrateRetries=" + migrateRetries +

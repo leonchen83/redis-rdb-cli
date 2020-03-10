@@ -17,7 +17,6 @@
 package com.moilioncircle.redis.rdb.cli.ext.rct;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
@@ -26,35 +25,18 @@ import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.glossary.Escape;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Replicator;
-import com.moilioncircle.redis.replicator.io.RedisInputStream;
 
 /**
  * @author Baoyi Chen
  */
-public class JsonRdbVisitor extends AbstractJsonRdbVisitor {
+public class JsonlRdbVisitor extends AbstractJsonRdbVisitor {
     
-    public JsonRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escape escape) {
+    public JsonlRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escape escape) {
         super(replicator, configure, out, db, regexs, types, escape);
     }
 
     @Override
-    public String applyMagic(RedisInputStream in) throws IOException {
-        OutputStreams.write('[', out);
-        return super.applyMagic(in);
-    }
-
-    @Override
-    public long applyEof(RedisInputStream in, int version) throws IOException {
-        OutputStreams.write(']', out);
-        return super.applyEof(in, version);
-    }
-
-    /**
-     *
-     */
     protected void separator() {
-        OutputStreams.write(',', out);
         OutputStreams.write('\n', out);
     }
-    
 }

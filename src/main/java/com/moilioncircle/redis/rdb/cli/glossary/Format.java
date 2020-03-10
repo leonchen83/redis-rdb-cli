@@ -24,6 +24,7 @@ import com.moilioncircle.redis.rdb.cli.ext.rct.CountRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rct.DiffRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rct.DumpRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rct.JsonRdbVisitor;
+import com.moilioncircle.redis.rdb.cli.ext.rct.JsonlRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rct.KeyRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rct.KeyValRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rct.MemRdbVisitor;
@@ -40,6 +41,7 @@ public enum Format {
     DIFF("diff"),
     JSON("json"),
     RESP("resp"),
+    JSONL("jsonl"),
     COUNT("count"),
     KEYVAL("keyval");
 
@@ -67,6 +69,8 @@ public enum Format {
                 return JSON;
             case "resp":
                 return RESP;
+            case "jsonl":
+                return JSONL;
             case "count":
                 return COUNT;
             case "keyval":
@@ -89,6 +93,9 @@ public enum Format {
                 break;
             case JSON:
                 r.setRdbVisitor(new JsonRdbVisitor(r, conf, output, db, regexs, types, escape));
+                break;
+            case JSONL:
+                r.setRdbVisitor(new JsonlRdbVisitor(r, conf, output, db, regexs, types, escape));
                 break;
             case DUMP:
                 r.setRdbVisitor(new DumpRdbVisitor(r, conf, output, db, regexs, types, replace));
