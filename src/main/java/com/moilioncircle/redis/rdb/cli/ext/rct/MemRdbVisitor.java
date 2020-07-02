@@ -845,7 +845,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             }
             for (; i < array.length; i++) {
                 if (array[i] >= '0' && array[i] <= '9') {
-                    t = t * (long) Math.pow(10, i) + array[i] - 48;
+                    int x = array[i] - 48;
+                    t = t * 10 + x;
                     if (t < 0) return err;
                 } else {
                     return err;
