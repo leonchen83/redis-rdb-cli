@@ -826,7 +826,11 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         }
         
         public long element(byte[] element) {
-            return element.length;
+            if (parseLong(element)[1] != -1) {
+                return 8;
+            } else {
+                return element.length;
+            }
         }
 
         public long[] parseLong(byte[] array) {
