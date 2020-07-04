@@ -85,6 +85,11 @@ public class Configure {
      * rct export meta
      */
     private boolean exportMeta = true;
+
+    /**
+     * rct export meta
+     */
+    private boolean exportUnit = true;
     
     /**
      * rmt --migrate
@@ -261,6 +266,14 @@ public class Configure {
 
     public void setExportMeta(boolean exportMeta) {
         this.exportMeta = exportMeta;
+    }
+
+    public boolean isExportUnit() {
+        return exportUnit;
+    }
+
+    public void setExportUnit(boolean exportUnit) {
+        this.exportUnit = exportUnit;
     }
 
     public int getTimeout() {
@@ -562,6 +575,7 @@ public class Configure {
         conf.quote = (byte) getString(conf, "quote", "\"", true).charAt(0);
         conf.delimiter = (byte) getString(conf, "delimiter", ",", true).charAt(0);
         conf.exportMeta = getBool(conf, "export_meta", true, true);
+        conf.exportUnit = getBool(conf, "export_unit", true, true);
         conf.retries = getInt(conf, "retries", 5, true);
         conf.retryInterval = getInt(conf, "retry_interval", 1000, true);
         conf.timeout = getInt(conf, "timeout", 30000, true);
@@ -768,6 +782,7 @@ public class Configure {
                 ", quote=" + quote +
                 ", delimiter=" + delimiter +
                 ", exportMeta=" + exportMeta +
+                ", exportUnit=" + exportUnit +
                 ", migrateBatchSize=" + migrateBatchSize +
                 ", migrateThreads=" + migrateThreads +
                 ", migrateRetries=" + migrateRetries +

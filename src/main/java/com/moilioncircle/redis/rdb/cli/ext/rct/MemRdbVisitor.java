@@ -102,13 +102,13 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         delimiter(out);
         quote(kv.getKey(), out);
         delimiter(out);
-        quote(com.moilioncircle.redis.rdb.cli.util.Strings.pretty(tuple.getV1()).getBytes(), out, false);
+        quote(pretty(tuple.getV1()).getBytes(), out, false);
         delimiter(out);
         OutputStreams.write(DataType.type(kv.getValueRdbType()).getBytes(), out);
         delimiter(out);
         OutputStreams.write(String.valueOf(kv.getLength()).getBytes(), out);
         delimiter(out);
-        quote(com.moilioncircle.redis.rdb.cli.util.Strings.pretty(kv.getMax()).getBytes(), out, false);
+        quote(pretty(kv.getMax()).getBytes(), out, false);
         delimiter(out);
         if (kv.getExpiredType() != NONE) {
             quote(FORMATTER.format(ofEpochMilli(kv.getExpiredValue()).atZone(systemDefault())).getBytes(), out, false);
@@ -116,6 +116,11 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             quote("".getBytes(), out, false);
         }
         OutputStreams.write('\n', out);
+    }
+    
+    private String pretty(long value) {
+        if (!configure.isExportUnit()) return String.valueOf(value);
+        return com.moilioncircle.redis.rdb.cli.util.Strings.pretty(value);
     }
     
     @Override

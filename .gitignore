@@ -38,3 +38,6 @@ hs_err_pid*
 # Vscode
 /.vscode
 .factorypath
+
+# log
+/log/

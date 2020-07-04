@@ -1,3 +1,8 @@
+### 0.4.1
+
+export unit support. [issue#16](https://github.com/leonchen83/redis-rdb-cli/issues/16).   
+
+
 ### 0.4.0
 
 Jsonl support. [issue#13](https://github.com/leonchen83/redis-rdb-cli/issues/13).   
