@@ -561,7 +561,7 @@ User should follow the steps below to implement a sink service.
         <dependency>
             <groupId>com.moilioncircle</groupId>
             <artifactId>redis-sink-api</artifactId>
-            <version>1.2.1</version>
+            <version>1.2.2</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

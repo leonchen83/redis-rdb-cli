@@ -1,3 +1,9 @@
+### 0.4.2
+
+fix critical bug from 0.3.0 - 0.4.1.  
+affect `rmt` , `rst` , `ret` command.  
+when these command 's target is cluster, migrate data failed.  
+
 ### 0.4.1
 
 export unit support. [issue#16](https://github.com/leonchen83/redis-rdb-cli/issues/16).   

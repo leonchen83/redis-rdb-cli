@@ -561,7 +561,7 @@ migrate_flush=yes
         <dependency>
             <groupId>com.moilioncircle</groupId>
             <artifactId>redis-sink-api</artifactId>
-            <version>1.2.1</version>
+            <version>1.2.2</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
