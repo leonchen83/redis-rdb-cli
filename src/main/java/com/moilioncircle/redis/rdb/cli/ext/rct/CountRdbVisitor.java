@@ -25,8 +25,8 @@ import java.util.Map;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
+import com.moilioncircle.redis.rdb.cli.ext.escape.RedisEscaper;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
-import com.moilioncircle.redis.rdb.cli.glossary.Escape;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
@@ -44,7 +44,7 @@ public class CountRdbVisitor extends AbstractRdbVisitor implements EventListener
     private Map<String, Long> counter = new HashMap<>();
 
     public CountRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types) {
-        super(replicator, configure, out, db, regexs, types, Escape.REDIS);
+        super(replicator, configure, out, db, regexs, types, new RedisEscaper(configure.getDelimiter(), configure.getQuote()));
         replicator.addEventListener(this);
     }
 

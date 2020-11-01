@@ -14,29 +14,27 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.ext.rct;
+package com.moilioncircle.redis.rdb.cli.ext.escape;
 
-import java.io.File;
-import java.util.List;
+import java.io.OutputStream;
 
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
-import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.ext.AbstractJsonRdbVisitor;
-import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
-import com.moilioncircle.redis.replicator.Replicator;
+
 
 /**
  * @author Baoyi Chen
  */
-public class JsonlRdbVisitor extends AbstractJsonRdbVisitor {
-    
-    public JsonlRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escaper escaper) {
-        super(replicator, configure, out, db, regexs, types, escaper);
-    }
+public class RawEscaper implements Escaper {
 
     @Override
-    protected void separator() {
-        OutputStreams.write('\n', out);
+    public void encode(int b, OutputStream out) {
+        OutputStreams.write(b & 0xFF, out);
+    }
+    
+    @Override
+    public void encode(byte[] bytes, int off, int len, OutputStream out) {
+        if (bytes == null) return;
+        OutputStreams.write(bytes, off, len, out);
     }
 }

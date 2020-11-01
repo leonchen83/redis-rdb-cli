@@ -49,10 +49,10 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
+import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
-import com.moilioncircle.redis.rdb.cli.glossary.Escape;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
@@ -95,7 +95,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
     protected List<DataType> types;
     protected List<Pattern> regexs;
     //rct
-    protected Escape escape;
+    protected Escaper escaper;
     protected OutputStream out;
     //rdt
     protected GuardRawByteListener listener;
@@ -115,9 +115,9 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
     /**
      * rct
      */
-    public AbstractRdbVisitor(Replicator replicator, Configure configure, File output, List<Long> db, List<String> regexs, List<DataType> types, Escape escape) {
+    public AbstractRdbVisitor(Replicator replicator, Configure configure, File output, List<Long> db, List<String> regexs, List<DataType> types, Escaper escaper) {
         this(replicator, configure, db, regexs, types);
-        this.escape = escape;
+        this.escaper = escaper;
         replicator.addEventListener((rep, event) -> {
             if (event instanceof PreRdbSyncEvent) {
                 OutputStreams.closeQuietly(this.out);
@@ -167,7 +167,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
     protected void quote(byte[] bytes, OutputStream out, boolean escape) {
         OutputStreams.write(configure.getQuote(), out);
         if (escape) {
-            this.escape.encode(bytes, out, configure);
+            this.escaper.encode(bytes, out);
         } else {
             OutputStreams.write(bytes, out);
         }

@@ -65,6 +65,10 @@ public class Configure {
         if (properties != null)
             this.properties.putAll(properties);
     }
+    
+    public Properties properties() {
+        return this.properties;
+    }
 
     /**
      * rct --format resp batch size

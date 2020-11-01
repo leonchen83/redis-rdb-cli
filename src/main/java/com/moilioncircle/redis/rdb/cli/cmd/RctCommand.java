@@ -25,7 +25,6 @@ import org.apache.commons.cli.Option;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.CliRedisReplicator;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
-import com.moilioncircle.redis.rdb.cli.glossary.Escape;
 import com.moilioncircle.redis.rdb.cli.glossary.Format;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
 import com.moilioncircle.redis.replicator.FileType;
@@ -50,7 +49,7 @@ public class RctCommand extends AbstractCommand {
     private static final Option TYPE = Option.builder("t").longOpt("type").required(false).hasArgs().argName("type type...").valueSeparator(' ').type(String.class).desc("data type to export. possible values are string, hash, set, sortedset, list, module, stream. multiple types can be provided. if not specified, all data types will be returned.").build();
     private static final Option BYTES = Option.builder("b").longOpt("bytes").required(false).hasArgs().argName("bytes").type(Number.class).desc("limit memory output(--format mem) to keys greater to or equal to this value (in bytes)").build();
     private static final Option LARGEST = Option.builder("l").longOpt("largest").required(false).hasArg().argName("n").type(Number.class).desc("limit memory output(--format mem) to only the top n keys (by size).").build();
-    private static final Option ESCAPE = Option.builder("e").longOpt("escape").required(false).hasArg().argName("escape").type(String.class).desc("escape strings to encoding: raw (default), redis.").build();
+    private static final Option ESCAPE = Option.builder("e").longOpt("escape").required(false).hasArg().argName("escape").type(String.class).desc("escape strings to encoding: raw (default), redis, json.").build();
     private static final Option REPLACE = Option.builder("r").longOpt("replace").required(false).desc("whether the generated aof with <replace> parameter(--format dump). if not specified, default value is false.").build();
 
     private static final String HEADER = "rct -f <format> -s <source> -o <file> [-d <num num...>] [-e <escape>] [-k <regex regex...>] [-t <type type...>] [-b <bytes>] [-l <n>] [-r]";
@@ -122,7 +121,8 @@ public class RctCommand extends AbstractCommand {
                 r.addExceptionListener((rep, tx, e) -> {
                     throw new RuntimeException(tx.getMessage(), tx);
                 });
-                Format.parse(format).dress(r, configure, output, db, regexs, largest, bytes, DataType.parse(type), Escape.parse(escape), replace);
+                
+                new Format(format, configure).dress(r, output, db, regexs, largest, bytes, DataType.parse(type), escape, replace);
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                     Replicators.closeQuietly(r);
                 }));

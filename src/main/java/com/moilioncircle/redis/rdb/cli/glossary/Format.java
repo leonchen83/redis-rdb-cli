@@ -16,13 +16,24 @@
 
 package com.moilioncircle.redis.rdb.cli.glossary;
 
-import java.io.File;
-import java.util.List;
+import static java.util.ServiceLoader.load;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.function.Supplier;
+
+import com.moilioncircle.redis.rdb.cli.api.format.FormatterService;
+import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
+import com.moilioncircle.redis.rdb.cli.ext.escape.Escapers;
+import com.moilioncircle.redis.rdb.cli.ext.escape.JsonEscaper;
+import com.moilioncircle.redis.rdb.cli.ext.escape.RawEscaper;
 import com.moilioncircle.redis.rdb.cli.ext.rct.CountRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rct.DiffRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rct.DumpRdbVisitor;
+import com.moilioncircle.redis.rdb.cli.ext.rct.FormatterRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rct.JsonRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rct.JsonlRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rct.KeyRdbVisitor;
@@ -34,83 +45,69 @@ import com.moilioncircle.redis.replicator.Replicator;
 /**
  * @author Baoyi Chen
  */
-public enum Format {
-    KEY("key"),
-    MEM("mem"),
-    DUMP("dump"),
-    DIFF("diff"),
-    JSON("json"),
-    RESP("resp"),
-    JSONL("jsonl"),
-    COUNT("count"),
-    KEYVAL("keyval");
+public class Format {
 
     private String value;
+    private Configure configure;
+    private List<FormatterService> formatters = new ArrayList<>();
 
-    Format(String value) {
+    public Format(String value, Configure configure) {
         this.value = value;
+        this.configure = configure;
+        Iterator<FormatterService> it = load(FormatterService.class).iterator();
+        while (it.hasNext()) this.formatters.add(it.next());
     }
 
-    public String getValue() {
-        return this.value;
-    }
-
-    public static Format parse(String format) {
-        switch (format) {
-            case "key":
-                return KEY;
-            case "mem":
-                return MEM;
-            case "dump":
-                return DUMP;
+    public void dress(Replicator r, File output, List<Long> db, List<String> regexs, Long largest, Long bytes, List<DataType> types, String escaper, boolean replace) {
+        // self define formatter has highest priority
+        boolean found = false;
+        for (FormatterService formatter : formatters) {
+            if (formatter.format() == null) continue;
+            if (!formatter.format().equals(value)) continue;
+            r.setRdbVisitor(new FormatterRdbVisitor(r, configure, output, db, regexs, types, getEscaper(escaper), formatter));
+            found = true;
+            break;
+        }
+        if (found) return;
+        
+        switch (value) {
             case "diff":
-                return DIFF;
-            case "json":
-                return JSON;
-            case "resp":
-                return RESP;
-            case "jsonl":
-                return JSONL;
+                r.setRdbVisitor(new DiffRdbVisitor(r, configure, output, db, regexs, types));
+                break;
             case "count":
-                return COUNT;
+                r.setRdbVisitor(new CountRdbVisitor(r, configure, output, db, regexs, types));
+                break;
+            case "dump":
+                r.setRdbVisitor(new DumpRdbVisitor(r, configure, output, db, regexs, types, replace));
+                break;
+            case "resp":
+                r.setRdbVisitor(new RespRdbVisitor(r, configure, output, db, regexs, types, replace));
+                break;
+            case "key":
+                r.setRdbVisitor(new KeyRdbVisitor(r, configure, output, db, regexs, types, getEscaper(escaper)));
+                break;
             case "keyval":
-                return KEYVAL;
+                r.setRdbVisitor(new KeyValRdbVisitor(r, configure, output, db, regexs, types, getEscaper(escaper)));
+                break;
+            case "mem":
+                r.setRdbVisitor(new MemRdbVisitor(r, configure, output, db, regexs, types, getEscaper(escaper), largest, bytes));
+                break;
+            case "json":
+                r.setRdbVisitor(new JsonRdbVisitor(r, configure, output, db, regexs, types, getEscaper(escaper, () -> new JsonEscaper())));
+                break;
+            case "jsonl":
+                r.setRdbVisitor(new JsonlRdbVisitor(r, configure, output, db, regexs, types, getEscaper(escaper, () -> new JsonEscaper())));
+                break;
             default:
-                throw new AssertionError("Unsupported format '" + format + "'");
+                throw new AssertionError("Unsupported format '" + value + "'");
         }
     }
 
-    public void dress(Replicator r, Configure conf, File output, List<Long> db, List<String> regexs, Long largest, Long bytes, List<DataType> types, Escape escape, boolean replace) {
-        switch (this) {
-            case DIFF:
-                r.setRdbVisitor(new DiffRdbVisitor(r, conf, output, db, regexs, types));
-                break;
-            case COUNT:
-                r.setRdbVisitor(new CountRdbVisitor(r, conf, output, db, regexs, types));
-                break;
-            case KEY:
-                r.setRdbVisitor(new KeyRdbVisitor(r, conf, output, db, regexs, types, escape));
-                break;
-            case JSON:
-                r.setRdbVisitor(new JsonRdbVisitor(r, conf, output, db, regexs, types, escape));
-                break;
-            case JSONL:
-                r.setRdbVisitor(new JsonlRdbVisitor(r, conf, output, db, regexs, types, escape));
-                break;
-            case DUMP:
-                r.setRdbVisitor(new DumpRdbVisitor(r, conf, output, db, regexs, types, replace));
-                break;
-            case RESP:
-                r.setRdbVisitor(new RespRdbVisitor(r, conf, output, db, regexs, types, replace));
-                break;
-            case KEYVAL:
-                r.setRdbVisitor(new KeyValRdbVisitor(r, conf, output, db, regexs, types, escape));
-                break;
-            case MEM:
-                r.setRdbVisitor(new MemRdbVisitor(r, conf, output, db, regexs, types, escape, largest, bytes));
-                break;
-            default:
-                throw new AssertionError("Unsupported format '" + this + "'");
-        }
+    public Escaper getEscaper(String escaper, Supplier<Escaper> defaultValue) {
+        return Escapers.parse(escaper, defaultValue, configure.getDelimiter(), configure.getQuote());
+    }
+
+    public Escaper getEscaper(String escaper) {
+        return Escapers.parse(escaper, () -> new RawEscaper(), configure.getDelimiter(), configure.getQuote());
     }
 }

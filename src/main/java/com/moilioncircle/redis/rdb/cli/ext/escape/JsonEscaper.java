@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.glossary;
+package com.moilioncircle.redis.rdb.cli.ext.escape;
 
 import java.io.OutputStream;
 
-import com.moilioncircle.redis.rdb.cli.conf.Configure;
+import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+
 
 /**
  * @author Baoyi Chen
  * @see <a href="https://www.json.org/json-en.html">json</a>
  */
-public class JsonEscape implements Escaper {
+public class JsonEscaper implements Escaper {
 
     public final static int[] ESCAPES;
 
@@ -52,38 +53,26 @@ public class JsonEscape implements Escaper {
     public final static int SURR1_LAST = 0xDBFF;
     public final static int SURR2_LAST = 0xDFFF;
 
-
-    private Escape escape;
-
-    public JsonEscape(Escape escape) {
-        this.escape = escape;
+    @Override
+    public void encode(int b, OutputStream out) {
+        OutputStreams.write(b & 0xFF, out);
     }
 
     @Override
-    public void encode(int b, OutputStream out, Configure configure) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void encode(byte[] bytes, int off, int len, OutputStream out, Configure configure) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void encode(byte[] bytes, OutputStream out, Configure configure) {
+    public void encode(byte[] bytes, int off, int len, OutputStream out) {
         if (bytes == null) return;
-        switch (escape) {
-            case REDIS:
-                escape.encode(bytes, 0, bytes.length, out, configure);
-                break;
-            case RAW:
-                String str = new String(bytes);
-                encode(str, 0, str.length(), out, configure);
-                break;
-        }
+        final String str = new String(bytes, off, len);
+        encode(str, 0, str.length(), out);
     }
 
-    public void encode(String value, int off, int len, OutputStream out, Configure configure) {
+    @Override
+    public void encode(byte[] bytes, OutputStream out) {
+        if (bytes == null) return;
+        final String str = new String(bytes);
+        encode(str, 0, str.length(), out);
+    }
+
+    public void encode(String value, int off, int len, OutputStream out) {
         while (off < len) {
             int ch = value.charAt(off++);
             if (ch <= 0x7F) {

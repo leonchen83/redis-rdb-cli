@@ -21,6 +21,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.moilioncircle.redis.rdb.cli.api.sink.cmd.ClosedCommand;
+import com.moilioncircle.redis.rdb.cli.api.sink.cmd.ClosingCommand;
+import com.moilioncircle.redis.rdb.cli.api.sink.listener.AsyncEventListener;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractMigrateRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
@@ -38,9 +41,6 @@ import com.moilioncircle.redis.replicator.event.EventListener;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
 import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
-import com.moilioncircle.redis.sink.api.cmd.ClosedCommand;
-import com.moilioncircle.redis.sink.api.cmd.ClosingCommand;
-import com.moilioncircle.redis.sink.api.listener.AsyncEventListener;
 
 /**
  * @author Baoyi Chen

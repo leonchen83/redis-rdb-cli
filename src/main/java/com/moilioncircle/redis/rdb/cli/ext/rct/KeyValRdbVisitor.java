@@ -22,12 +22,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.DumpRawByteListener;
 import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
-import com.moilioncircle.redis.rdb.cli.glossary.Escape;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
@@ -43,8 +43,8 @@ import com.moilioncircle.redis.replicator.util.Strings;
  */
 public class KeyValRdbVisitor extends AbstractRdbVisitor {
     
-    public KeyValRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escape escape) {
-        super(replicator, configure, out, db, regexs, types, escape);
+    public KeyValRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escaper escaper) {
+        super(replicator, configure, out, db, regexs, types, escaper);
     }
     
     @Override
@@ -101,7 +101,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
             double score = parser.rdbLoadDoubleValue();
             quote(element, out);
             delimiter(out);
-            escape.encode(score, out, configure);
+            escaper.encode(score, out);
             if (len - 1 > 0) delimiter(out);
             else OutputStreams.write('\n', out);
             len--;
@@ -120,7 +120,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
             double score = parser.rdbLoadBinaryDoubleValue();
             quote(element, out);
             delimiter(out);
-            escape.encode(score, out, configure);
+            escaper.encode(score, out);
             if (len - 1 > 0) delimiter(out);
             else OutputStreams.write('\n', out);
             len--;
@@ -250,7 +250,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
             zllen--;
             quote(element, out);
             delimiter(out);
-            escape.encode(score, out, configure);
+            escaper.encode(score, out);
             if (zllen - 1 > 0) delimiter(out);
             else OutputStreams.write('\n', out);
         }
@@ -320,7 +320,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         delimiter(out);
         out.write(configure.getQuote());
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
+        try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escaper)) {
             replicator.addRawByteListener(listener);
             super.doApplyModule(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
@@ -336,7 +336,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         delimiter(out);
         out.write(configure.getQuote());
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
+        try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escaper)) {
             replicator.addRawByteListener(listener);
             super.doApplyModule2(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);
@@ -356,7 +356,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         delimiter(out);
         out.write(configure.getQuote());
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escape, configure)) {
+        try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escaper)) {
             replicator.addRawByteListener(listener);
             super.doApplyStreamListPacks(in, version, key, contains, type, context);
             replicator.removeRawByteListener(listener);

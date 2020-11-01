@@ -78,7 +78,7 @@ options:
                              provided. if not specified, all databases
                              will be included.
  -e,--escape <escape>        escape strings to encoding: raw (default),
-                             redis.
+                             redis, json.
  -f,--format <format>        format to export. valid formats are json,
                              jsonl, dump, diff, key, keyval, count, mem
                              and resp
@@ -560,8 +560,8 @@ User should follow the steps below to implement a sink service.
     <dependencies>
         <dependency>
             <groupId>com.moilioncircle</groupId>
-            <artifactId>redis-sink-api</artifactId>
-            <version>1.2.2</version>
+            <artifactId>redis-rdb-cli-api</artifactId>
+            <version>1.4.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -647,16 +647,16 @@ public class YourSinkService implements SinkService {
 3. register this service using Java SPI
 
 ```java  
-# create com.moilioncircle.redis.sink.api.SinkService file in src/main/resources/META-INF/services/
+# create com.moilioncircle.redis.rdb.cli.api.sink.SinkService file in src/main/resources/META-INF/services/
 
 |-src
 |____main
 | |____resources
 | | |____META-INF
 | | | |____services
-| | | | |____com.moilioncircle.redis.sink.api.SinkService
+| | | | |____com.moilioncircle.redis.rdb.cli.api.sink.SinkService
 
-# add following content in com.moilioncircle.redis.sink.api.SinkService
+# add following content in com.moilioncircle.redis.rdb.cli.api.sink.SinkService
 
 your.package.YourSinkService
 
@@ -695,6 +695,65 @@ ret -s redis://127.0.0.1:6379 -c config.conf -n your-sink-service
         replicator.open();
     }
 
+```
+
+### How to implement a formatter service
+
+1. create `YourFormatterService` extend `AbstractFormatterService`  
+
+```java  
+
+public class YourFormatterService extends AbstractFormatterService {
+
+    @Override
+    public String format() {
+        return "test";
+    }
+
+    @Override
+    public Event applyString(Replicator replicator, RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        byte[] val = new DefaultRdbValueVisitor(replicator).applyString(in, version);
+        getEscaper().encode(key, getOutputStream());
+        getEscaper().encode(val, getOutputStream());
+        getOutputStream().write('\n');
+        return context;
+    }
+}
+
+```
+
+2. register this formatter using Java SPI  
+
+```java  
+# create com.moilioncircle.redis.rdb.cli.api.format.FormatterService file in src/main/resources/META-INF/services/
+
+|-src
+|____main
+| |____resources
+| | |____META-INF
+| | | |____services
+| | | | |____com.moilioncircle.redis.rdb.cli.api.format.FormatterService
+
+# add following content in com.moilioncircle.redis.rdb.cli.api.format.FormatterService
+
+your.package.YourFormatterService
+
+```
+
+3. package and deploy
+
+```java  
+
+mvn clean install
+
+cp ./target/your-service-1.0.0-jar-with-dependencies.jar /path/to/redis-rdb-cli/lib
+```
+
+4. run your formatter service
+
+```java  
+
+rct -f test -s redis://127.0.0.1:6379 -o ./out.csv -t string -d 0 -e json
 ```
 
 ## Contributors

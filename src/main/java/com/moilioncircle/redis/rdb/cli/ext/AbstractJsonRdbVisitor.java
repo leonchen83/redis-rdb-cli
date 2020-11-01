@@ -22,12 +22,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
+import com.moilioncircle.redis.rdb.cli.ext.escape.RedisEscaper;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
-import com.moilioncircle.redis.rdb.cli.glossary.Escape;
-import com.moilioncircle.redis.rdb.cli.glossary.Escaper;
-import com.moilioncircle.redis.rdb.cli.glossary.JsonEscape;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
@@ -42,17 +41,17 @@ import com.moilioncircle.redis.replicator.util.Strings;
  */
 public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
 
-    private Escaper escaper;
     private boolean firstkey = true;
+    private Escaper redis;
     
-    public AbstractJsonRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escape escape) {
-        super(replicator, configure, out, db, regexs, types, escape);
-        this.escaper = new JsonEscape(escape);
+    public AbstractJsonRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escaper escaper) {
+        super(replicator, configure, out, db, regexs, types, escaper);
+        this.redis = new RedisEscaper(configure.getDelimiter(), configure.getQuote());
     }
 
     private void emitString(byte[] str) {
         OutputStreams.write('"', out);
-        escaper.encode(str, out, configure);
+        escaper.encode(str, out);
         OutputStreams.write('"', out);
     }
 
@@ -73,25 +72,25 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     private void emitNull(byte[] field) {
         emitString(field);
         OutputStreams.write(':', out);
-        escaper.encode("null".getBytes(), out, configure);
+        escaper.encode("null".getBytes(), out);
     }
 
     private void emitZSet(byte[] field, double value) {
         emitString(field);
         OutputStreams.write(':', out);
-        escaper.encode(value, out, configure);
+        escaper.encode(value, out);
     }
 
     private void emitField(String field, int value) {
         emitString(field.getBytes());
         OutputStreams.write(':', out);
-        escaper.encode(String.valueOf(value).getBytes(), out, configure);
+        escaper.encode(String.valueOf(value).getBytes(), out);
     }
 
     private void emitField(String field, long value) {
         emitString(field.getBytes());
         OutputStreams.write(':', out);
-        escaper.encode(String.valueOf(value).getBytes(), out, configure);
+        escaper.encode(String.valueOf(value).getBytes(), out);
     }
     
     /**
@@ -443,7 +442,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
         json(context, key, type, () -> {
             OutputStreams.write('"', out);
             int v = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, redis)) {
                 replicator.addRawByteListener(listener);
                 super.doApplyModule(in, v, key, contains, type, context);
                 replicator.removeRawByteListener(listener);
@@ -458,7 +457,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
         json(context, key, type, () -> {
             OutputStreams.write('"', out);
             int v = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, redis)) {
                 replicator.addRawByteListener(listener);
                 super.doApplyModule2(in, v, key, contains, type, context);
                 replicator.removeRawByteListener(listener);
@@ -473,7 +472,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
         json(context, key, type, () -> {
             OutputStreams.write('"', out);
             int v = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, Escape.REDIS, configure)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, redis)) {
                 replicator.addRawByteListener(listener);
                 super.doApplyStreamListPacks(in, v, key, contains, type, context);
                 replicator.removeRawByteListener(listener);

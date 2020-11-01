@@ -36,11 +36,11 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 
+import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
-import com.moilioncircle.redis.rdb.cli.glossary.Escape;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorFactory;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
@@ -83,8 +83,8 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     private boolean rdb6 = true;
     private Map<Long, Tuple2<Long, Long>> dbInfo = new LinkedHashMap<>();
     
-    public MemRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escape escape, Long largest, Long bytes) {
-        super(replicator, configure, out, db, regexs, types, escape);
+    public MemRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escaper escaper, Long largest, Long bytes) {
+        super(replicator, configure, out, db, regexs, types, escaper);
         this.bytes = bytes;
         this.manager = new MonitorManager(configure);
         this.manager.open("memory_statistics");

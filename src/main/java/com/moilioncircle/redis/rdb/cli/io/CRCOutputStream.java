@@ -22,8 +22,7 @@ import static com.moilioncircle.redis.replicator.util.CRC64.longToByteArray;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.glossary.Escaper;
+import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 
 /**
  * @author Baoyi Chen
@@ -33,12 +32,10 @@ public class CRCOutputStream extends OutputStream {
     private long checksum = 0L;
     private final Escaper escaper;
     private final OutputStream out;
-    private final Configure configure;
     
-    public CRCOutputStream(OutputStream out, Escaper escaper, Configure configure) {
+    public CRCOutputStream(OutputStream out, Escaper escaper) {
         this.out = out;
         this.escaper = escaper;
-        this.configure = configure;
     }
     
     public byte[] getCRC64() {
@@ -47,7 +44,7 @@ public class CRCOutputStream extends OutputStream {
     
     @Override
     public void write(int b) throws IOException {
-        escaper.encode(b, out, configure);
+        escaper.encode(b, out);
         checksum = crc64(new byte[]{(byte) b}, checksum);
     }
     
@@ -56,7 +53,7 @@ public class CRCOutputStream extends OutputStream {
     }
     
     public void write(byte[] b, int off, int len) throws IOException {
-        escaper.encode(b, off, len, out, configure);
+        escaper.encode(b, off, len, out);
         checksum = crc64(b, off, len, checksum);
     }
     

@@ -78,7 +78,7 @@ options:
                              provided. if not specified, all databases
                              will be included.
  -e,--escape <escape>        escape strings to encoding: raw (default),
-                             redis.
+                             redis, json.
  -f,--format <format>        format to export. valid formats are json,
                              jsonl, dump, diff, key, keyval, count, mem
                              and resp
@@ -560,8 +560,8 @@ migrate_flush=yes
     <dependencies>
         <dependency>
             <groupId>com.moilioncircle</groupId>
-            <artifactId>redis-sink-api</artifactId>
-            <version>1.2.2</version>
+            <artifactId>redis-rdb-cli-api</artifactId>
+            <version>1.4.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -647,16 +647,16 @@ public class YourSinkService implements SinkService {
 3. 使用Java SPI来注册这个实现类
 
 ```java  
-# 在工程下的 src/main/resources/META-INF/services/ 目录创建 com.moilioncircle.redis.sink.api.SinkService 文件
+# 在工程下的 src/main/resources/META-INF/services/ 目录创建 com.moilioncircle.redis.rdb.cli.api.sink.SinkService 文件
 
 |-src
 |____main
 | |____resources
 | | |____META-INF
 | | | |____services
-| | | | |____com.moilioncircle.redis.sink.api.SinkService
+| | | | |____com.moilioncircle.redis.rdb.cli.api.sink.SinkService
 
-# 在com.moilioncircle.redis.sink.api.SinkService文件中加入如下内容
+# 在com.moilioncircle.redis.rdb.cli.api.sink.SinkService文件中加入如下内容
 
 your.package.YourSinkService
 
@@ -695,6 +695,65 @@ ret -s redis://127.0.0.1:6379 -c config.conf -n your-sink-service
         replicator.open();
     }
 
+```
+
+### 如何实现一个formatter服务
+
+1. 创建class `YourFormatterService` 继承 `AbstractFormatterService`  
+
+```java  
+
+public class YourFormatterService extends AbstractFormatterService {
+
+    @Override
+    public String format() {
+        return "test";
+    }
+
+    @Override
+    public Event applyString(Replicator replicator, RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        byte[] val = new DefaultRdbValueVisitor(replicator).applyString(in, version);
+        getEscaper().encode(key, getOutputStream());
+        getEscaper().encode(val, getOutputStream());
+        getOutputStream().write('\n');
+        return context;
+    }
+}
+
+```
+
+2. 使用Java SPI来注册这个实现类  
+
+```java  
+# create com.moilioncircle.redis.rdb.cli.api.format.FormatterService file in src/main/resources/META-INF/services/
+
+|-src
+|____main
+| |____resources
+| | |____META-INF
+| | | |____services
+| | | | |____com.moilioncircle.redis.rdb.cli.api.format.FormatterService
+
+# add following content in com.moilioncircle.redis.rdb.cli.api.format.FormatterService
+
+your.package.YourFormatterService
+
+```
+
+3. 打包与部署
+
+```java  
+
+mvn clean install
+
+cp ./target/your-service-1.0.0-jar-with-dependencies.jar /path/to/redis-rdb-cli/lib
+```
+
+4. 运行formatter服务
+
+```java  
+
+rct -f test -s redis://127.0.0.1:6379 -o ./out.csv -t string -d 0 -e json
 ```
 
 ## 贡献者

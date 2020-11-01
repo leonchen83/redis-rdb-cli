@@ -25,6 +25,9 @@ import org.apache.commons.cli.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.moilioncircle.redis.rdb.cli.api.sink.ParserService;
+import com.moilioncircle.redis.rdb.cli.api.sink.SinkService;
+import com.moilioncircle.redis.rdb.cli.api.sink.listener.AsyncEventListener;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.CliRedisReplicator;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
@@ -32,9 +35,6 @@ import com.moilioncircle.redis.rdb.cli.util.XThreadFactory;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.Replicators;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
-import com.moilioncircle.redis.sink.api.ParserService;
-import com.moilioncircle.redis.sink.api.SinkService;
-import com.moilioncircle.redis.sink.api.listener.AsyncEventListener;
 
 /**
  * @author Baoyi Chen

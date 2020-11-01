@@ -1,0 +1,16 @@
+key2,there
+key1,Hello
+mset1,hello
+set,value
+bitfield,\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000
+bitopdest,`bc\u0000\u0000\u0000
+append,value
+esss,value
+bitop2,abcdef
+decrby,5
+mset2,world
+exxx,value
+getset,0
+mykey3,Hello
+incrby,16
+bitop1,foo
