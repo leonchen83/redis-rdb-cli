@@ -1,3 +1,7 @@
+### 0.5.0
+
+add self define `FormatterService` that allow user define their own format.  
+
 ### 0.4.2
 
 fix critical bug from 0.3.0 - 0.4.1.  
