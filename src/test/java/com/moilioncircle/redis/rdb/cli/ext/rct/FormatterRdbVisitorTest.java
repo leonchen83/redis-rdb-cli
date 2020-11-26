@@ -34,10 +34,29 @@ public class FormatterRdbVisitorTest {
     public void test() throws Exception {
         String source = path("dumpV8.rdb");
         String target = path("dumpV8-result.txt");
-        String expect = path("dumpV8-expect.txt");
         
         // rct -f test -s ./dumpV8.rdb -o dumpV8-result.txt -e json
         RctCommand.run(new String[]{"-f", "test", "-s", source, "-o", target, "-e", "json"});
-        assertArrayEquals(Files.readAllBytes(new File(expect).toPath()), Files.readAllBytes(new File(target).toPath()));
+        assertArrayEquals(expect(), Files.readAllBytes(new File(target).toPath()));
+    }
+    
+    private byte[] expect() {
+        String v = "key2,there\n" +
+                "key1,Hello\n" +
+                "mset1,hello\n" +
+                "set,value\n" +
+                "bitfield,\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0001\\u0000\n" +
+                "bitopdest,`bc\\u0000\\u0000\\u0000\n" +
+                "append,value\n" +
+                "esss,value\n" +
+                "bitop2,abcdef\n" +
+                "decrby,5\n" +
+                "mset2,world\n" +
+                "exxx,value\n" +
+                "getset,0\n" +
+                "mykey3,Hello\n" +
+                "incrby,16\n" +
+                "bitop1,foo\n";
+        return v.getBytes();
     }
 }
