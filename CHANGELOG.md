@@ -1,3 +1,8 @@
+### 0.5.1
+
+Fix `RedisURI` `setAuthUser` bug.  
+Change default `readTimeout`, `connectionTimeout`, `timeout` from `30` seconds to `60` seconds.  
+
 ### 0.5.0
 
 add self define `FormatterService` that allow user define their own format.  

@@ -118,7 +118,7 @@ public class Configure {
     /**
      * timeout
      */
-    private int timeout = 30000;
+    private int timeout = 60000;
     
     /**
      * socket receive buffer size
@@ -582,7 +582,7 @@ public class Configure {
         conf.exportUnit = getBool(conf, "export_unit", true, true);
         conf.retries = getInt(conf, "retries", 5, true);
         conf.retryInterval = getInt(conf, "retry_interval", 1000, true);
-        conf.timeout = getInt(conf, "timeout", 30000, true);
+        conf.timeout = getInt(conf, "timeout", 60000, true);
         conf.sndBuf = getInt(conf, "snd_buf", 0, true);
         conf.rcvBuf = getInt(conf, "rcv_buf", 0, true);
         conf.bufferSize = getInt(conf, "buffer_size", 8 * 1024, true);
@@ -614,10 +614,10 @@ public class Configure {
         Configuration configuration = Configuration.defaultSetting();
         Map<String, String> parameters = uri.getParameters();
         if (parameters.containsKey("connectionTimeout")) {
-            configuration.setConnectionTimeout(getInt(parameters.get("connectionTimeout"), 30000));
+            configuration.setConnectionTimeout(getInt(parameters.get("connectionTimeout"), 60000));
         }
         if (parameters.containsKey("readTimeout")) {
-            configuration.setReadTimeout(getInt(parameters.get("readTimeout"), 30000));
+            configuration.setReadTimeout(getInt(parameters.get("readTimeout"), 60000));
         }
         if (parameters.containsKey("receiveBufferSize")) {
             configuration.setReceiveBufferSize(getInt(parameters.get("receiveBufferSize"), 0));
