@@ -41,11 +41,15 @@ import com.moilioncircle.redis.rdb.cli.util.XThreadFactory;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.cmd.Command;
+import com.moilioncircle.redis.replicator.cmd.impl.BLMoveCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.BRPopLPushCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.BitOpCommand;
+import com.moilioncircle.redis.replicator.cmd.impl.CopyCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.DefaultCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.DelCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.GenericKeyCommand;
+import com.moilioncircle.redis.replicator.cmd.impl.GeoSearchStoreCommand;
+import com.moilioncircle.redis.replicator.cmd.impl.LMoveCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.MSetCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.MSetNxCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.PFCountCommand;
@@ -59,6 +63,7 @@ import com.moilioncircle.redis.replicator.cmd.impl.SInterStoreCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.SMoveCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.SelectCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.UnLinkCommand;
+import com.moilioncircle.redis.replicator.cmd.impl.ZDiffStoreCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.ZInterStoreCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.ZUnionStoreCommand;
 import com.moilioncircle.redis.replicator.event.Event;
@@ -352,6 +357,51 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             }
         } else if (parsedCommand instanceof RPopLPushCommand) {
             RPopLPushCommand cmd = (RPopLPushCommand) parsedCommand;
+            short slot = slot1(cmd.getDestination(), cmd.getSource());
+            if (slot != -1) {
+                retry(command, slot, times);
+            } else {
+                monitor.add("failure_slot", 1);
+                logger.error("failure[slot] [{}]", command);
+            }
+        } else if (parsedCommand instanceof CopyCommand) {
+            CopyCommand cmd = (CopyCommand) parsedCommand;
+            short slot = slot1(cmd.getDestination(), cmd.getSource());
+            if (slot != -1) {
+                retry(command, slot, times);
+            } else {
+                monitor.add("failure_slot", 1);
+                logger.error("failure[slot] [{}]", command);
+            }
+        } else if (parsedCommand instanceof BLMoveCommand) {
+            BLMoveCommand cmd = (BLMoveCommand) parsedCommand;
+            short slot = slot1(cmd.getDestination(), cmd.getSource());
+            if (slot != -1) {
+                retry(command, slot, times);
+            } else {
+                monitor.add("failure_slot", 1);
+                logger.error("failure[slot] [{}]", command);
+            }
+        } else if (parsedCommand instanceof LMoveCommand) {
+            LMoveCommand cmd = (LMoveCommand) parsedCommand;
+            short slot = slot1(cmd.getDestination(), cmd.getSource());
+            if (slot != -1) {
+                retry(command, slot, times);
+            } else {
+                monitor.add("failure_slot", 1);
+                logger.error("failure[slot] [{}]", command);
+            }
+        } else if (parsedCommand instanceof ZDiffStoreCommand) {
+            ZDiffStoreCommand cmd = (ZDiffStoreCommand) parsedCommand;
+            short slot = slot1(cmd.getDestination(), cmd.getKeys());
+            if (slot != -1) {
+                retry(command, slot, times);
+            } else {
+                monitor.add("failure_slot", 1);
+                logger.error("failure[slot] [{}]", command);
+            }
+        } else if (parsedCommand instanceof GeoSearchStoreCommand) {
+            GeoSearchStoreCommand cmd = (GeoSearchStoreCommand) parsedCommand;
             short slot = slot1(cmd.getDestination(), cmd.getSource());
             if (slot != -1) {
                 retry(command, slot, times);

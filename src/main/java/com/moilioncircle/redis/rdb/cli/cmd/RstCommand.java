@@ -37,9 +37,11 @@ import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.Replicators;
 import com.moilioncircle.redis.replicator.cmd.CommandName;
 import com.moilioncircle.redis.replicator.cmd.parser.AppendParser;
+import com.moilioncircle.redis.replicator.cmd.parser.BLMoveParser;
 import com.moilioncircle.redis.replicator.cmd.parser.BRPopLPushParser;
 import com.moilioncircle.redis.replicator.cmd.parser.BitFieldParser;
 import com.moilioncircle.redis.replicator.cmd.parser.BitOpParser;
+import com.moilioncircle.redis.replicator.cmd.parser.CopyParser;
 import com.moilioncircle.redis.replicator.cmd.parser.DecrByParser;
 import com.moilioncircle.redis.replicator.cmd.parser.DecrParser;
 import com.moilioncircle.redis.replicator.cmd.parser.DelParser;
@@ -51,6 +53,7 @@ import com.moilioncircle.redis.replicator.cmd.parser.ExpireParser;
 import com.moilioncircle.redis.replicator.cmd.parser.FlushAllParser;
 import com.moilioncircle.redis.replicator.cmd.parser.FlushDBParser;
 import com.moilioncircle.redis.replicator.cmd.parser.GeoAddParser;
+import com.moilioncircle.redis.replicator.cmd.parser.GeoSearchStoreParser;
 import com.moilioncircle.redis.replicator.cmd.parser.GetSetParser;
 import com.moilioncircle.redis.replicator.cmd.parser.HDelParser;
 import com.moilioncircle.redis.replicator.cmd.parser.HIncrByParser;
@@ -60,6 +63,7 @@ import com.moilioncircle.redis.replicator.cmd.parser.HSetParser;
 import com.moilioncircle.redis.replicator.cmd.parser.IncrByParser;
 import com.moilioncircle.redis.replicator.cmd.parser.IncrParser;
 import com.moilioncircle.redis.replicator.cmd.parser.LInsertParser;
+import com.moilioncircle.redis.replicator.cmd.parser.LMoveParser;
 import com.moilioncircle.redis.replicator.cmd.parser.LPopParser;
 import com.moilioncircle.redis.replicator.cmd.parser.LPushParser;
 import com.moilioncircle.redis.replicator.cmd.parser.LPushXParser;
@@ -111,6 +115,7 @@ import com.moilioncircle.redis.replicator.cmd.parser.XGroupParser;
 import com.moilioncircle.redis.replicator.cmd.parser.XSetIdParser;
 import com.moilioncircle.redis.replicator.cmd.parser.XTrimParser;
 import com.moilioncircle.redis.replicator.cmd.parser.ZAddParser;
+import com.moilioncircle.redis.replicator.cmd.parser.ZDiffStoreParser;
 import com.moilioncircle.redis.replicator.cmd.parser.ZIncrByParser;
 import com.moilioncircle.redis.replicator.cmd.parser.ZInterStoreParser;
 import com.moilioncircle.redis.replicator.cmd.parser.ZPopMaxParser;
@@ -335,6 +340,12 @@ public class RstCommand extends AbstractCommand {
         replicator.addCommandParser(CommandName.name("XGROUP"), new CombineCommandParser(new XGroupParser()));
         replicator.addCommandParser(CommandName.name("XTRIM"), new CombineCommandParser(new XTrimParser()));
         replicator.addCommandParser(CommandName.name("XSETID"), new CombineCommandParser(new XSetIdParser()));
+        // since redis 6.2
+        replicator.addCommandParser(CommandName.name("COPY"), new CombineCommandParser(new CopyParser()));
+        replicator.addCommandParser(CommandName.name("LMOVE"), new CombineCommandParser(new LMoveParser()));
+        replicator.addCommandParser(CommandName.name("BLMOVE"), new CombineCommandParser(new BLMoveParser()));
+        replicator.addCommandParser(CommandName.name("ZDIFFSTORE"), new CombineCommandParser(new ZDiffStoreParser()));
+        replicator.addCommandParser(CommandName.name("GEOSEARCHSTORE"), new CombineCommandParser(new GeoSearchStoreParser()));
         return replicator;
     }
 

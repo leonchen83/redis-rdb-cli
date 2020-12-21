@@ -524,7 +524,7 @@ migrate_flush=yes
 ## Limitation of migration
 
 1. We use cluster's `nodes.conf` to migrate data to cluster. because of we did't handle the `MOVED` `ASK` redirection. so limitation of cluster migration is that the cluster **MUST** in stable state during the migration. this means the cluster **MUST** have no `migrating`, `importing` slot and no switch slave to master. 
-2. If use `rst` migrate data to cluster. the following commands not supported `SWAPDB,MOVE,FLUSHALL,FLUSHDB,PUBLISH,MULTI,EXEC,SCRIPT FLUSH,SCRIPT LOAD,EVAL,EVALSHA`. and the following commands `RPOPLPUSH,SDIFFSTORE,SINTERSTORE,SMOVE,ZINTERSTORE,ZUNIONSTORE,DEL,UNLINK,RENAME,RENAMENX,PFMERGE,PFCOUNT,MSETNX,BRPOPLPUSH,BITOP,MSET` **ONLY SUPPORT WHEN THESE COMMAND KEYS IN THE SAME SLOT**(eg: `del {user}:1 {user}:2`)
+2. If use `rst` migrate data to cluster. the following commands not supported `SWAPDB,MOVE,FLUSHALL,FLUSHDB,PUBLISH,MULTI,EXEC,SCRIPT FLUSH,SCRIPT LOAD,EVAL,EVALSHA`. and the following commands `RPOPLPUSH,SDIFFSTORE,SINTERSTORE,SMOVE,ZINTERSTORE,ZUNIONSTORE,DEL,UNLINK,RENAME,RENAMENX,PFMERGE,PFCOUNT,MSETNX,BRPOPLPUSH,BITOP,MSET,COPY,BLMOVE,LMOVE,ZDIFFSTORE,GEOSEARCHSTORE` **ONLY SUPPORT WHEN THESE COMMAND KEYS IN THE SAME SLOT**(eg: `del {user}:1 {user}:2`)
 
 ## Hack ret
 
@@ -561,13 +561,13 @@ User should follow the steps below to implement a sink service.
         <dependency>
             <groupId>com.moilioncircle</groupId>
             <artifactId>redis-rdb-cli-api</artifactId>
-            <version>1.4.1</version>
+            <version>1.5.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.moilioncircle</groupId>
             <artifactId>redis-replicator</artifactId>
-            <version>3.4.0</version>
+            <version>[3.4.0, )</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

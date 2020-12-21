@@ -1,3 +1,9 @@
+### 0.6.0
+
+Redis 6.2 support.  
+
+`rst` command support `COPY,BLMOVE,LMOVE,ZDIFFSTORE,GEOSEARCHSTORE` commands.  
+
 ### 0.5.1
 
 Fix `RedisURI` `setAuthUser` bug.  
