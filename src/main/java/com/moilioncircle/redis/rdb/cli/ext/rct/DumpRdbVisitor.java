@@ -67,10 +67,8 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escaper)) {
-                replicator.addRawByteListener(listener);
+            try (DumpRawByteListener ignored = new DumpRawByteListener(replicator, (byte) type, version, out, escaper)) {
                 super.doApplyString(in, version, key, contains, type, context);
-                replicator.removeRawByteListener(listener);
             }
             if (replace) {
                 emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
@@ -94,10 +92,8 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escaper)) {
-                replicator.addRawByteListener(listener);
+            try (DumpRawByteListener ignored = new DumpRawByteListener(replicator, (byte) type, version, out, escaper)) {
                 super.doApplyList(in, version, key, contains, type, context);
-                replicator.removeRawByteListener(listener);
             }
             if (replace) {
                 emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
@@ -121,10 +117,8 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escaper)) {
-                replicator.addRawByteListener(listener);
+            try (DumpRawByteListener ignored = new DumpRawByteListener(replicator, (byte) type, version, out, escaper)) {
                 super.doApplySet(in, version, key, contains, type, context);
-                replicator.removeRawByteListener(listener);
             }
             if (replace) {
                 emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
@@ -148,10 +142,8 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escaper)) {
-                replicator.addRawByteListener(listener);
+            try (DumpRawByteListener ignored = new DumpRawByteListener(replicator, (byte) type, version, out, escaper)) {
                 super.doApplyZSet(in, version, key, contains, type, context);
-                replicator.removeRawByteListener(listener);
             }
             if (replace) {
                 emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
@@ -175,10 +167,8 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escaper)) {
-                replicator.addRawByteListener(listener);
+            try (DumpRawByteListener ignored = new DumpRawByteListener(replicator, (byte) type, version, out, escaper)) {
                 super.doApplyZSet2(in, version, key, contains, type, context);
-                replicator.removeRawByteListener(listener);
             }
             if (replace) {
                 emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
@@ -202,10 +192,8 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escaper)) {
-                replicator.addRawByteListener(listener);
+            try (DumpRawByteListener ignored = new DumpRawByteListener(replicator, (byte) type, version, out, escaper)) {
                 super.doApplyHash(in, version, key, contains, type, context);
-                replicator.removeRawByteListener(listener);
             }
             if (replace) {
                 emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
@@ -229,10 +217,8 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escaper)) {
-                replicator.addRawByteListener(listener);
+            try (DumpRawByteListener ignored = new DumpRawByteListener(replicator, (byte) type, version, out, escaper)) {
                 super.doApplyHashZipMap(in, version, key, contains, type, context);
-                replicator.removeRawByteListener(listener);
             }
             if (replace) {
                 emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
@@ -256,10 +242,8 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escaper)) {
-                replicator.addRawByteListener(listener);
+            try (DumpRawByteListener ignored = new DumpRawByteListener(replicator, (byte) type, version, out, escaper)) {
                 super.doApplyListZipList(in, version, key, contains, type, context);
-                replicator.removeRawByteListener(listener);
             }
             if (replace) {
                 emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
@@ -283,10 +267,8 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escaper)) {
-                replicator.addRawByteListener(listener);
+            try (DumpRawByteListener ignored = new DumpRawByteListener(replicator, (byte) type, version, out, escaper)) {
                 super.doApplySetIntSet(in, version, key, contains, type, context);
-                replicator.removeRawByteListener(listener);
             }
             if (replace) {
                 emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
@@ -310,10 +292,8 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escaper)) {
-                replicator.addRawByteListener(listener);
+            try (DumpRawByteListener ignored = new DumpRawByteListener(replicator, (byte) type, version, out, escaper)) {
                 super.doApplyZSetZipList(in, version, key, contains, type, context);
-                replicator.removeRawByteListener(listener);
             }
             if (replace) {
                 emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
@@ -337,10 +317,8 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escaper)) {
-                replicator.addRawByteListener(listener);
+            try (DumpRawByteListener ignored = new DumpRawByteListener(replicator, (byte) type, version, out, escaper)) {
                 super.doApplyHashZipList(in, version, key, contains, type, context);
-                replicator.removeRawByteListener(listener);
             }
             if (replace) {
                 emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
@@ -364,10 +342,8 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escaper)) {
-                replicator.addRawByteListener(listener);
+            try (DumpRawByteListener ignored = new DumpRawByteListener(replicator, (byte) type, version, out, escaper)) {
                 super.doApplyListQuickList(in, version, key, contains, type, context);
-                replicator.removeRawByteListener(listener);
             }
             if (replace) {
                 emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
@@ -391,10 +367,8 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escaper)) {
-                replicator.addRawByteListener(listener);
+            try (DumpRawByteListener ignored = new DumpRawByteListener(replicator, (byte) type, version, out, escaper)) {
                 super.doApplyModule(in, version, key, contains, type, context);
-                replicator.removeRawByteListener(listener);
             }
             if (replace) {
                 emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
@@ -418,10 +392,8 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escaper)) {
-                replicator.addRawByteListener(listener);
+            try (DumpRawByteListener ignored = new DumpRawByteListener(replicator, (byte) type, version, out, escaper)) {
                 super.doApplyModule2(in, version, key, contains, type, context);
-                replicator.removeRawByteListener(listener);
             }
             if (replace) {
                 emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
@@ -445,10 +417,8 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
-            try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escaper)) {
-                replicator.addRawByteListener(listener);
+            try (DumpRawByteListener ignored = new DumpRawByteListener(replicator, (byte) type, version, out, escaper)) {
                 super.doApplyStreamListPacks(in, version, key, contains, type, context);
-                replicator.removeRawByteListener(listener);
             }
             if (replace) {
                 emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);

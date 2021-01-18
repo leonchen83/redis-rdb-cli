@@ -320,10 +320,8 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         delimiter(out);
         out.write(configure.getQuote());
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escaper)) {
-            replicator.addRawByteListener(listener);
+        try (DumpRawByteListener ignored = new DumpRawByteListener(replicator, (byte) type, version, out, escaper)) {
             super.doApplyModule(in, version, key, contains, type, context);
-            replicator.removeRawByteListener(listener);
         }
         OutputStreams.write('\n', out);
         out.write(configure.getQuote());
@@ -336,10 +334,8 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         delimiter(out);
         out.write(configure.getQuote());
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escaper)) {
-            replicator.addRawByteListener(listener);
+        try (DumpRawByteListener ignored = new DumpRawByteListener(replicator, (byte) type, version, out, escaper)) {
             super.doApplyModule2(in, version, key, contains, type, context);
-            replicator.removeRawByteListener(listener);
         }
         out.write(configure.getQuote());
         OutputStreams.write('\n', out);
@@ -356,10 +352,8 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         delimiter(out);
         out.write(configure.getQuote());
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (DumpRawByteListener listener = new DumpRawByteListener((byte) type, version, out, escaper)) {
-            replicator.addRawByteListener(listener);
+        try (DumpRawByteListener ignored = new DumpRawByteListener(replicator, (byte) type, version, out, escaper)) {
             super.doApplyStreamListPacks(in, version, key, contains, type, context);
-            replicator.removeRawByteListener(listener);
         }
         out.write(configure.getQuote());
         OutputStreams.write('\n', out);

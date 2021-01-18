@@ -1,3 +1,7 @@
+### 0.6.1
+
+Fix OOM bug when use `RawByteListener`.  
+
 ### 0.6.0
 
 Redis 6.2 support.  
