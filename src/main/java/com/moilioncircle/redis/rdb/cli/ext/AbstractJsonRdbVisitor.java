@@ -442,7 +442,8 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
         json(context, key, type, () -> {
             OutputStreams.write('"', out);
             int v = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-            try (DumpRawByteListener ignored = new DumpRawByteListener(replicator, (byte) type, version, out, redis)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, redis)) {
+                listener.write((byte) type);
                 super.doApplyModule(in, v, key, contains, type, context);
             }
             OutputStreams.write('"', out);
@@ -455,7 +456,8 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
         json(context, key, type, () -> {
             OutputStreams.write('"', out);
             int v = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-            try (DumpRawByteListener ignored = new DumpRawByteListener(replicator, (byte) type, version, out, redis)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, redis)) {
+                listener.write((byte) type);
                 super.doApplyModule2(in, v, key, contains, type, context);
             }
             OutputStreams.write('"', out);
@@ -468,7 +470,8 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
         json(context, key, type, () -> {
             OutputStreams.write('"', out);
             int v = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-            try (DumpRawByteListener ignored = new DumpRawByteListener(replicator, (byte) type, version, out, redis)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, redis)) {
+                listener.write((byte) type);
                 super.doApplyStreamListPacks(in, v, key, contains, type, context);
             }
             OutputStreams.write('"', out);

@@ -422,7 +422,8 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
-            try (DumpRawByteListener ignored = new DumpRawByteListener(replicator, (byte) type, version, out, escaper)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
+                listener.write((byte) type);
                 super.doApplyModule(in, version, key, contains, type, context);
             }
             if (replace) {
@@ -447,7 +448,8 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
-            try (DumpRawByteListener ignored = new DumpRawByteListener(replicator, (byte) type, version, out, escaper)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
+                listener.write((byte) type);
                 super.doApplyModule2(in, version, key, contains, type, context);
             }
             if (replace) {
@@ -472,7 +474,8 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
-            try (DumpRawByteListener ignored = new DumpRawByteListener(replicator, (byte) type, version, out, escaper)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
+                listener.write((byte) type);
                 super.doApplyStreamListPacks(in, version, key, contains, type, context);
             }
             if (replace) {

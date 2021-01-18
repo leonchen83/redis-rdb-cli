@@ -34,11 +34,14 @@ public class DumpRawByteListener implements RawByteListener, Closeable {
     private final CRCOutputStream out;
     private final Replicator replicator;
     
-    public DumpRawByteListener(Replicator replicator, byte type, int version, OutputStream out, Escaper escaper) throws IOException {
+    public DumpRawByteListener(Replicator replicator, int version, OutputStream out, Escaper escaper) {
+        this.version = version;
         this.replicator = replicator;
         this.replicator.addRawByteListener(this);
-        this.version = version;
         this.out = new CRCOutputStream(out, escaper);
+    }
+    
+    public void write(byte type) throws IOException {
         this.out.write(type);
     }
     
