@@ -561,7 +561,7 @@ migrate_flush=yes
         <dependency>
             <groupId>com.moilioncircle</groupId>
             <artifactId>redis-rdb-cli-api</artifactId>
-            <version>1.5.0</version>
+            <version>1.5.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
