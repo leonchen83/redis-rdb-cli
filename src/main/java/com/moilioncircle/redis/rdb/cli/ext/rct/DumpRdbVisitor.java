@@ -16,6 +16,10 @@
 
 package com.moilioncircle.redis.rdb.cli.ext.rct;
 
+import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
+import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_LIST;
+import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -30,8 +34,11 @@ import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
+import com.moilioncircle.redis.replicator.rdb.BaseRdbEncoder;
+import com.moilioncircle.redis.replicator.rdb.BaseRdbParser;
 import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
+import com.moilioncircle.redis.replicator.util.ByteArray;
 
 /**
  * @author Baoyi Chen
@@ -171,9 +178,30 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
-            try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
-                listener.write((byte) type);
-                super.doApplyZSet2(in, version, key, contains, type, context);
+            if (version < 8 /* since redis rdb version 8 */) {
+                // downgrade to RDB_TYPE_LIST
+                BaseRdbParser parser = new BaseRdbParser(in);
+                BaseRdbEncoder encoder = new BaseRdbEncoder();
+                ByteArrayOutputStream out1 = new ByteArrayOutputStream(configure.getBufferSize());
+                long len = parser.rdbLoadLen().len;
+                long temp = len;
+                while (len > 0) {
+                    ByteArray element = parser.rdbLoadEncodedStringObject();
+                    encoder.rdbGenericSaveStringObject(element, out1);
+                    double score = parser.rdbLoadBinaryDoubleValue();
+                    encoder.rdbSaveDoubleValue(score, out1);
+                    len--;
+                }
+                try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper, false)) {
+                    listener.write((byte) RDB_TYPE_ZSET);
+                    listener.handle(encoder.rdbSaveLen(temp));
+                    listener.handle(out1.toByteArray());
+                }
+            } else {
+                try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
+                    listener.write((byte) type);
+                    super.doApplyZSet2(in, version, key, contains, type, context);
+                }
             }
             if (replace) {
                 emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
@@ -353,10 +381,40 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
-            try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
-                listener.write((byte) type);
-                super.doApplyListQuickList(in, version, key, contains, type, context);
+            if (version < 7 /* since redis rdb version 7 */) {
+                BaseRdbParser parser = new BaseRdbParser(in);
+                BaseRdbEncoder encoder = new BaseRdbEncoder();
+                ByteArrayOutputStream out1 = new ByteArrayOutputStream(configure.getBufferSize());
+                int total = 0;
+                long len = parser.rdbLoadLen().len;
+                for (long i = 0; i < len; i++) {
+                    RedisInputStream stream = new RedisInputStream(parser.rdbGenericLoadStringObject(RDB_LOAD_NONE));
+        
+                    BaseRdbParser.LenHelper.zlbytes(stream); // zlbytes
+                    BaseRdbParser.LenHelper.zltail(stream); // zltail
+                    int zllen = BaseRdbParser.LenHelper.zllen(stream);
+                    for (int j = 0; j < zllen; j++) {
+                        byte[] e = BaseRdbParser.StringHelper.zipListEntry(stream);
+                        encoder.rdbGenericSaveStringObject(new ByteArray(e), out1);
+                        total++;
+                    }
+                    int zlend = BaseRdbParser.LenHelper.zlend(stream);
+                    if (zlend != 255) {
+                        throw new AssertionError("zlend expect 255 but " + zlend);
+                    }
+                }
+                try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper, false)) {
+                    listener.write((byte) RDB_TYPE_LIST);
+                    listener.handle(encoder.rdbSaveLen(total));
+                    listener.handle(out1.toByteArray());
+                }
+            } else {
+                try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
+                    listener.write((byte) type);
+                    super.doApplyListQuickList(in, version, key, contains, type, context);
+                }
             }
+            
             if (replace) {
                 emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
             } else {

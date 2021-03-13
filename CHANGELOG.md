@@ -1,3 +1,7 @@
+### 0.6.2
+
+support downgrade migration from redis 6.2 to 2.8.  
+
 ### 0.6.1
 
 Fix OOM bug when use `RawByteListener`.  
