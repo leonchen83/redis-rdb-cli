@@ -1,3 +1,7 @@
+### 0.6.4
+
+Fix lzf compress bug.  
+
 ### 0.6.3
 
 fix windows cmd running failed bug.  
