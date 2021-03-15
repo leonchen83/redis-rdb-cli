@@ -43,16 +43,19 @@ goto error
 @REM ==== END VALIDATION ====
 
 :init
-for %%i in ("%RCT_HOME%\lib\*") do (
-	call :concat "%%i"
+setLocal EnableDelayedExpansion
+set CLASS_PATH="
+for %%i in ("%RCT_HOME%\lib\*.jar") do (
+    set CLASS_PATH=!CLASS_PATH!;%%i
 )
+set CLASS_PATH=!CLASS_PATH!"
 
 set LOG_DIR=%RCT_HOME%\log
 set CON_DIR=%RCT_HOME%\conf
 set LOG_FILE=%CON_DIR%\log4j2.xml
 set CON_FILE=%CON_DIR%\redis-rdb-cli.conf
 set MAIN_CLASS=com.moilioncircle.redis.rdb.cli.Rmt
-set RCT_OPS=-server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:+ExitOnOutOfMemoryError -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -Dlog4j.configurationFile="%LOG_FILE%" -Dcli.log.path="%LOG_DIR%" -Dconf="%CON_FILE%" -Drct.home="%RCT_HOME%"
+set RCT_OPS=-server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:+ExitOnOutOfMemoryError -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -Dlog4j.configurationFile="%LOG_FILE%" -Dcli.log.path="%LOG_DIR%" -Dconf="%CON_FILE%" -Drct.home="%RCT_HOME%" -Dsun.stdout.encoding=UTF-8 -Dsun.err.encoding=UTF-8 -Dfile.encoding=UTF-8
 
 "%JAVACMD%" %RCT_OPS% -cp %CLASS_PATH% %MAIN_CLASS% %*
 if ERRORLEVEL 1 goto error
@@ -65,10 +68,3 @@ set ERROR_CODE=1
 @endlocal & set ERROR_CODE=%ERROR_CODE%
 
 cmd /C exit /B %ERROR_CODE%
-
-:concat
-if not defined CLASS_PATH (
-  set CLASS_PATH="%~1"
-) else (
-  set CLASS_PATH=%CLASS_PATH%;"%~1"
-)

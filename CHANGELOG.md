@@ -1,3 +1,7 @@
+### 0.6.3
+
+fix windows cmd running failed bug.  
+
 ### 0.6.2
 
 support downgrade migration from redis 6.2 to 2.8.  
