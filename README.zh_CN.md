@@ -1,5 +1,7 @@
 # redis-rdb-cli
 
+<a href="https://www.buymeacoffee.com/leonchen83" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
+
 一个可以解析, 过滤, 分割, 合并 rdb 离线内存分析的工具. 也可以在两个redis之前同步数据并允许用户自定义同步服务来把redis数据同步到其他地方.
 
 [![Build Status](https://travis-ci.org/leonchen83/redis-rdb-cli.svg?branch=master)](https://travis-ci.org/leonchen83/redis-rdb-cli)
