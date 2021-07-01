@@ -761,7 +761,7 @@ rct -f test -s redis://127.0.0.1:6379 -o ./out.csv -t string -d 0 -e json
 ## Contributors
   
 * [Baoyi Chen](https://github.com/leonchen83)
-* [TaoBeier](https://github.com/tao12345666333)
+* [Jintao Zhang](https://github.com/tao12345666333)
 * [Maz Ahmadi](https://github.com/cmdshepard)
 * [Anish Karandikar](https://github.com/anishkny)
 * Special thanks to [Kater Technologies](https://www.kater.com/)
