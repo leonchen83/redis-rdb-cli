@@ -42,6 +42,7 @@ import static java.util.stream.Collectors.toList;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -71,23 +72,6 @@ import com.moilioncircle.redis.replicator.util.Strings;
  */
 public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
     
-    protected static final byte[] ONE = "1".getBytes();
-    protected static final byte[] ZERO = "0".getBytes();
-    protected static final byte[] DEL = "del".getBytes();
-    protected static final byte[] SET = "set".getBytes();
-    protected static final byte[] SADD = "sadd".getBytes();
-    protected static final byte[] ZADD = "zadd".getBytes();
-    protected static final byte[] LOAD = "load".getBytes();
-    protected static final byte[] RPUSH = "rpush".getBytes();
-    protected static final byte[] HMSET = "hmset".getBytes();
-    protected static final byte[] SELECT = "select".getBytes();
-    protected static final byte[] SCRIPT = "script".getBytes();
-    protected static final byte[] EVALSHA = "evalsha".getBytes();
-    protected static final byte[] REPLACE = "replace".getBytes();
-    protected static final byte[] RESTORE = "restore".getBytes();
-    protected static final byte[] EXPIREAT = "expireat".getBytes();
-    protected static final byte[] RESTORE_ASKING = "restore-asking".getBytes();
-
     // common
     protected Set<Long> db;
     protected Set<String> keys;
@@ -121,7 +105,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         replicator.addEventListener((rep, event) -> {
             if (event instanceof PreRdbSyncEvent) {
                 OutputStreams.closeQuietly(this.out);
-                this.out = OutputStreams.newBufferedOutputStream(output, configure.getBufferSize());
+                this.out = OutputStreams.newBufferedOutputStream(output, configure.getOutputBufferSize());
             }
         });
         replicator.addCloseListener(rep -> OutputStreams.closeQuietly(out));
@@ -132,7 +116,7 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
      */
     public AbstractRdbVisitor(Replicator replicator, Configure configure, List<Long> db, List<String> regexs, List<DataType> types, Supplier<OutputStream> supplier) {
         this(replicator, configure, db, regexs, types);
-        this.listener = new GuardRawByteListener(configure.getBufferSize(), supplier.get());
+        this.listener = new GuardRawByteListener(configure.getOutputBufferSize(), supplier.get());
         this.replicator.addRawByteListener(listener);
     }
 
@@ -172,6 +156,29 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             OutputStreams.write(bytes, out);
         }
         OutputStreams.write(configure.getQuote(), out);
+    }
+    
+    protected void emit(OutputStream out, ByteBuffer command, ByteBuffer... ary) {
+        OutputStreams.write(STAR, out);
+        OutputStreams.write(String.valueOf(ary.length + 1).getBytes(), out);
+        OutputStreams.write('\r', out);
+        OutputStreams.write('\n', out);
+        OutputStreams.write(DOLLAR, out);
+        OutputStreams.write(String.valueOf(command.remaining()).getBytes(), out);
+        OutputStreams.write('\r', out);
+        OutputStreams.write('\n', out);
+        OutputStreams.write(command.array(), command.position(), command.limit(), out);
+        OutputStreams.write('\r', out);
+        OutputStreams.write('\n', out);
+        for (final ByteBuffer arg : ary) {
+            OutputStreams.write(DOLLAR, out);
+            OutputStreams.write(String.valueOf(arg.remaining()).getBytes(), out);
+            OutputStreams.write('\r', out);
+            OutputStreams.write('\n', out);
+            OutputStreams.write(arg.array(), arg.position(), arg.limit(), out);
+            OutputStreams.write('\r', out);
+            OutputStreams.write('\n', out);
+        }
     }
 
     protected void emit(OutputStream out, byte[] command, byte[]... ary) {

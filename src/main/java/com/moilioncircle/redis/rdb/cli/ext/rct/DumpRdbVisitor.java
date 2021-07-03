@@ -16,13 +16,21 @@
 
 package com.moilioncircle.redis.rdb.cli.ext.rct;
 
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.REPLACE_BUF;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.RESTORE_BUF;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.SELECT;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.ZERO_BUF;
+import static com.moilioncircle.redis.replicator.Constants.DOLLAR;
 import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_LIST;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET;
+import static com.moilioncircle.redis.replicator.Constants.STAR;
+import static java.nio.ByteBuffer.wrap;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
@@ -31,8 +39,12 @@ import com.moilioncircle.redis.rdb.cli.ext.DumpRawByteListener;
 import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.rdb.cli.ext.escape.RawEscaper;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
+import com.moilioncircle.redis.rdb.cli.io.LayeredOutputStream;
+import com.moilioncircle.redis.rdb.cli.util.ByteBuffers;
+import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
+import com.moilioncircle.redis.replicator.io.ByteBufferOutputStream;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.BaseRdbEncoder;
 import com.moilioncircle.redis.replicator.rdb.BaseRdbParser;
@@ -63,126 +75,110 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     protected Event doApplyString(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        byte[] ex = ZERO;
+        ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
                 return super.doApplyString(in, version, key, contains, type, context);
             } else {
-                ex = String.valueOf(ms).getBytes();
+                ex = wrap(String.valueOf(ms).getBytes());
             }
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
+        try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplyString(in, version, key, contains, type, context);
             }
-            if (replace) {
-                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
-            } else {
-                emit(this.out, RESTORE, key, ex, out.toByteArray());
-            }
+            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
     
     @Override
     protected Event doApplyList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        byte[] ex = ZERO;
+        ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
                 return super.doApplyList(in, version, key, contains, type, context);
             } else {
-                ex = String.valueOf(ms).getBytes();
+                ex = wrap(String.valueOf(ms).getBytes());
             }
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
+        try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplyList(in, version, key, contains, type, context);
             }
-            if (replace) {
-                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
-            } else {
-                emit(this.out, RESTORE, key, ex, out.toByteArray());
-            }
+            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
     
     @Override
     protected Event doApplySet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        byte[] ex = ZERO;
+        ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
                 return super.doApplySet(in, version, key, contains, type, context);
             } else {
-                ex = String.valueOf(ms).getBytes();
+                ex = wrap(String.valueOf(ms).getBytes());
             }
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
+        try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplySet(in, version, key, contains, type, context);
             }
-            if (replace) {
-                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
-            } else {
-                emit(this.out, RESTORE, key, ex, out.toByteArray());
-            }
+            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
     
     @Override
     protected Event doApplyZSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        byte[] ex = ZERO;
+        ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
                 return super.doApplyZSet(in, version, key, contains, type, context);
             } else {
-                ex = String.valueOf(ms).getBytes();
+                ex = wrap(String.valueOf(ms).getBytes());
             }
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
+        try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplyZSet(in, version, key, contains, type, context);
             }
-            if (replace) {
-                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
-            } else {
-                emit(this.out, RESTORE, key, ex, out.toByteArray());
-            }
+            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
     
     @Override
     protected Event doApplyZSet2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        byte[] ex = ZERO;
+        ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
                 return super.doApplyZSet2(in, version, key, contains, type, context);
             } else {
-                ex = String.valueOf(ms).getBytes();
+                ex = wrap(String.valueOf(ms).getBytes());
             }
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
+        try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             if (version < 8 /* since redis rdb version 8 */) {
                 // downgrade to RDB_TYPE_LIST
                 BaseRdbParser parser = new BaseRdbParser(in);
                 BaseRdbEncoder encoder = new BaseRdbEncoder();
-                ByteArrayOutputStream out1 = new ByteArrayOutputStream(configure.getBufferSize());
+                ByteBufferOutputStream out1 = new ByteBufferOutputStream(configure.getOutputBufferSize());
                 long len = parser.rdbLoadLen().len;
                 long temp = len;
                 while (len > 0) {
@@ -195,7 +191,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper, false)) {
                     listener.write((byte) RDB_TYPE_ZSET);
                     listener.handle(encoder.rdbSaveLen(temp));
-                    listener.handle(out1.toByteArray());
+                    listener.handle(out1.toByteBuffer());
                 }
             } else {
                 try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
@@ -203,188 +199,160 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                     super.doApplyZSet2(in, version, key, contains, type, context);
                 }
             }
-            if (replace) {
-                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
-            } else {
-                emit(this.out, RESTORE, key, ex, out.toByteArray());
-            }
+            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
     
     @Override
     protected Event doApplyHash(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        byte[] ex = ZERO;
+        ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
                 return super.doApplyHash(in, version, key, contains, type, context);
             } else {
-                ex = String.valueOf(ms).getBytes();
+                ex = wrap(String.valueOf(ms).getBytes());
             }
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
+        try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplyHash(in, version, key, contains, type, context);
             }
-            if (replace) {
-                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
-            } else {
-                emit(this.out, RESTORE, key, ex, out.toByteArray());
-            }
+            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
     
     @Override
     protected Event doApplyHashZipMap(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        byte[] ex = ZERO;
+        ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
                 return super.doApplyHashZipMap(in, version, key, contains, type, context);
             } else {
-                ex = String.valueOf(ms).getBytes();
+                ex = wrap(String.valueOf(ms).getBytes());
             }
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
+        try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplyHashZipMap(in, version, key, contains, type, context);
             }
-            if (replace) {
-                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
-            } else {
-                emit(this.out, RESTORE, key, ex, out.toByteArray());
-            }
+            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
     
     @Override
     protected Event doApplyListZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        byte[] ex = ZERO;
+        ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
                 return super.doApplyListZipList(in, version, key, contains, type, context);
             } else {
-                ex = String.valueOf(ms).getBytes();
+                ex = wrap(String.valueOf(ms).getBytes());
             }
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
+        try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplyListZipList(in, version, key, contains, type, context);
             }
-            if (replace) {
-                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
-            } else {
-                emit(this.out, RESTORE, key, ex, out.toByteArray());
-            }
+            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
     
     @Override
     protected Event doApplySetIntSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        byte[] ex = ZERO;
+        ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
                 return super.doApplySetIntSet(in, version, key, contains, type, context);
             } else {
-                ex = String.valueOf(ms).getBytes();
+                ex = wrap(String.valueOf(ms).getBytes());
             }
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
+        try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplySetIntSet(in, version, key, contains, type, context);
             }
-            if (replace) {
-                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
-            } else {
-                emit(this.out, RESTORE, key, ex, out.toByteArray());
-            }
+            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
     
     @Override
     protected Event doApplyZSetZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        byte[] ex = ZERO;
+        ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
                 return super.doApplyZSetZipList(in, version, key, contains, type, context);
             } else {
-                ex = String.valueOf(ms).getBytes();
+                ex = wrap(String.valueOf(ms).getBytes());
             }
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
+        try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplyZSetZipList(in, version, key, contains, type, context);
             }
-            if (replace) {
-                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
-            } else {
-                emit(this.out, RESTORE, key, ex, out.toByteArray());
-            }
+            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
     
     @Override
     protected Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        byte[] ex = ZERO;
+        ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
                 return super.doApplyHashZipList(in, version, key, contains, type, context);
             } else {
-                ex = String.valueOf(ms).getBytes();
+                ex = wrap(String.valueOf(ms).getBytes());
             }
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
+        try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplyHashZipList(in, version, key, contains, type, context);
             }
-            if (replace) {
-                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
-            } else {
-                emit(this.out, RESTORE, key, ex, out.toByteArray());
-            }
+            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
     
     @Override
     protected Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        byte[] ex = ZERO;
+        ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
                 return super.doApplyListQuickList(in, version, key, contains, type, context);
             } else {
-                ex = String.valueOf(ms).getBytes();
+                ex = wrap(String.valueOf(ms).getBytes());
             }
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
+        try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             if (version < 7 /* since redis rdb version 7 */) {
                 BaseRdbParser parser = new BaseRdbParser(in);
                 BaseRdbEncoder encoder = new BaseRdbEncoder();
-                ByteArrayOutputStream out1 = new ByteArrayOutputStream(configure.getBufferSize());
+                ByteBufferOutputStream out1 = new ByteBufferOutputStream(configure.getOutputBufferSize());
                 int total = 0;
                 long len = parser.rdbLoadLen().len;
                 for (long i = 0; i < len; i++) {
@@ -406,7 +374,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper, false)) {
                     listener.write((byte) RDB_TYPE_LIST);
                     listener.handle(encoder.rdbSaveLen(total));
-                    listener.handle(out1.toByteArray());
+                    listener.handle(out1.toByteBuffer());
                 }
             } else {
                 try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
@@ -414,91 +382,117 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                     super.doApplyListQuickList(in, version, key, contains, type, context);
                 }
             }
-            
-            if (replace) {
-                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
-            } else {
-                emit(this.out, RESTORE, key, ex, out.toByteArray());
-            }
+            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
     
     @Override
     protected Event doApplyModule(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        byte[] ex = ZERO;
+        ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
                 return super.doApplyModule(in, version, key, contains, type, context);
             } else {
-                ex = String.valueOf(ms).getBytes();
+                ex = wrap(String.valueOf(ms).getBytes());
             }
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
+        try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplyModule(in, version, key, contains, type, context);
             }
-            if (replace) {
-                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
-            } else {
-                emit(this.out, RESTORE, key, ex, out.toByteArray());
-            }
+            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
     
     @Override
     protected Event doApplyModule2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        byte[] ex = ZERO;
+        ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
                 return super.doApplyModule2(in, version, key, contains, type, context);
             } else {
-                ex = String.valueOf(ms).getBytes();
+                ex = wrap(String.valueOf(ms).getBytes());
             }
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
+        try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplyModule2(in, version, key, contains, type, context);
             }
-            if (replace) {
-                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
-            } else {
-                emit(this.out, RESTORE, key, ex, out.toByteArray());
-            }
+            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
     
     @Override
     protected Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        byte[] ex = ZERO;
+        ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
                 return super.doApplyStreamListPacks(in, version, key, contains, type, context);
             } else {
-                ex = String.valueOf(ms).getBytes();
+                ex = wrap(String.valueOf(ms).getBytes());
             }
         }
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream(configure.getBufferSize())) {
+        try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplyStreamListPacks(in, version, key, contains, type, context);
             }
-            if (replace) {
-                emit(this.out, RESTORE, key, ex, out.toByteArray(), REPLACE);
-            } else {
-                emit(this.out, RESTORE, key, ex, out.toByteArray());
-            }
+            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
+    }
+    
+    protected void emit(OutputStream out, ByteBuffer command, ByteBuffer key, ByteBuffer ex, ByteBuffers value, boolean replace) {
+        OutputStreams.write(STAR, out);
+        if (replace) {
+            OutputStreams.write("5".getBytes(), out);
+        } else {
+            OutputStreams.write("4".getBytes(), out);
+        }
+        
+        OutputStreams.write('\r', out);
+        OutputStreams.write('\n', out);
+        
+        emitArg(command);
+        emitArg(key);
+        emitArg(ex);
+        emitArg(value);
+        if (replace) {
+            emitArg(REPLACE_BUF);
+        }
+    }
+    
+    protected void emitArg(ByteBuffer arg) {
+        OutputStreams.write(DOLLAR, out);
+        OutputStreams.write(String.valueOf(arg.remaining()).getBytes(), out);
+        OutputStreams.write('\r', out);
+        OutputStreams.write('\n', out);
+        OutputStreams.write(arg.array(), arg.position(), arg.limit(), out);
+        OutputStreams.write('\r', out);
+        OutputStreams.write('\n', out);
+    }
+    
+    protected void emitArg(ByteBuffers value) {
+        OutputStreams.write(DOLLAR, out);
+        OutputStreams.write(String.valueOf(value.getSize()).getBytes(), out);
+        OutputStreams.write('\r', out);
+        OutputStreams.write('\n', out);
+        while (value.getBuffers().hasNext()) {
+            ByteBuffer buf = value.getBuffers().next();
+            OutputStreams.write(buf.array(), buf.position(), buf.limit(), out);
+        }
+        OutputStreams.write('\r', out);
+        OutputStreams.write('\n', out);
     }
 }

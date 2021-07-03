@@ -24,7 +24,10 @@ import static com.moilioncircle.redis.replicator.Constants.STAR;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.util.Iterator;
 
+import com.moilioncircle.redis.rdb.cli.util.ByteBuffers;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.util.ByteBuilder;
 
@@ -59,6 +62,38 @@ public class Protocol {
             out.write('\r');
             out.write('\n');
             out.write(arg);
+            out.write('\r');
+            out.write('\n');
+        }
+    }
+    
+    public void emit(ByteBuffers command, ByteBuffers... ary) throws IOException {
+        out.write(STAR);
+        out.write(String.valueOf(ary.length + 1).getBytes());
+        out.write('\r');
+        out.write('\n');
+        out.write(DOLLAR);
+        out.write(String.valueOf(command.getSize()).getBytes());
+        out.write('\r');
+        out.write('\n');
+        Iterator<ByteBuffer> cit = command.getBuffers();
+        while (cit.hasNext()) {
+            ByteBuffer tmp = cit.next();
+            out.write(tmp.array(), tmp.position(), tmp.limit());
+        }
+        
+        out.write('\r');
+        out.write('\n');
+        for (final ByteBuffers arg : ary) {
+            out.write(DOLLAR);
+            out.write(String.valueOf(arg.getSize()).getBytes());
+            out.write('\r');
+            out.write('\n');
+            Iterator<ByteBuffer> ait = arg.getBuffers();
+            while (ait.hasNext()) {
+                ByteBuffer tmp = ait.next();
+                out.write(tmp.array(), tmp.position(), tmp.limit());
+            }
             out.write('\r');
             out.write('\n');
         }

@@ -16,6 +16,10 @@
 
 package com.moilioncircle.redis.rdb.cli.net.impl;
 
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.AUTH;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.PING;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.SELECT;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -34,6 +38,7 @@ import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
 import com.moilioncircle.redis.rdb.cli.net.AbstractEndpoint;
 import com.moilioncircle.redis.rdb.cli.net.protocol.Protocol;
 import com.moilioncircle.redis.rdb.cli.net.protocol.RedisObject;
+import com.moilioncircle.redis.rdb.cli.util.ByteBuffers;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.rdb.cli.util.Sockets;
 import com.moilioncircle.redis.replicator.Configuration;
@@ -48,9 +53,6 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
     private static final Logger logger = LoggerFactory.getLogger(XEndpoint.class);
     
     private static final int BUFFER = 64 * 1024;
-    private static final byte[] AUTH = "auth".getBytes();
-    private static final byte[] PING = "ping".getBytes();
-    private static final byte[] SELECT = "select".getBytes();
     
     private int db;
     private int count = 0;
@@ -142,6 +144,21 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
     }
     
     public void batch(boolean force, byte[] command, byte[]... args) {
+        try {
+            long mark = System.nanoTime();
+            protocol.emit(command, args);
+            if (force) {
+                out.flush();
+                if (statistics) monitor.add("send_" + address, 1, System.nanoTime() - mark);
+            }
+            count++;
+            if (count == pipe) flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public void batch(boolean force, ByteBuffers command, ByteBuffers... args) {
         try {
             long mark = System.nanoTime();
             protocol.emit(command, args);

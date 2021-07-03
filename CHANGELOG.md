@@ -1,3 +1,7 @@
+### 0.6.5
+
+Optimize `rct -f dump` memory usage.  
+
 ### 0.6.4
 
 Fix lzf compress bug.  
