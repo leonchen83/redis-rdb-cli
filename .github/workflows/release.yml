@@ -1,0 +1,50 @@
+name: Upload Release Asset
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Upload Release Asset
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml -Dmaven.test.skip=true
+    - name: Create Tag
+      run: |
+        echo "RELEASE_TAG=`cat ./src/main/resources/.version`" >> $GITHUB_ENV
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${RELEASE_TAG}
+        release_name: ${RELEASE_TAG}
+        draft: false
+        prerelease: false
+    - name: Upload Gzip Asset
+      id: upload-gzip-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} 
+        asset_path: ./target/redis-rdb-cli-release.tar.gz
+        asset_name: redis-rdb-cli-release.tar.gz
+        asset_content_type: application/gzip
+    - name: Upload Zip Asset
+      id: upload-zip-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} 
+        asset_path: ./target/redis-rdb-cli-release.zip
+        asset_name: redis-rdb-cli-release.zip
+        asset_content_type: application/zip
