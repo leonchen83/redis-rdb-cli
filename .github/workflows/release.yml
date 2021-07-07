@@ -24,8 +24,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${RELEASE_TAG}
-        release_name: ${RELEASE_TAG}
+        tag_name: ${{ env.RELEASE_TAG }}
+        release_name: ${{ env.RELEASE_TAG }}
         draft: false
         prerelease: false
     - name: Upload Gzip Asset
