@@ -48,23 +48,29 @@ jobs:
         asset_path: ./target/redis-rdb-cli-release.zip
         asset_name: redis-rdb-cli-release.zip
         asset_content_type: application/zip
-    - name: Docker Push
-      env:
-        DOCKER_USER: ${{secrets.DOCKER_USER}}
-        DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
-        TAG0: latest
-        TAG1: ${{ env.RELEASE_TAG }}
-        run: |
-          docker login -u $DOCKER_USER -p $DOCKER_PASSWORD 
-    - name: Build Tag latest
-      run:
-        docker build -t $REPO:$TAG0 .
-    - name: Build Tag ${{env.RELEASE_TAG}}
-      run:
-        docker build -t $REPO:$TAG1 .
-    - name: Push Tag latest
-      run:
-        docker push $REPO:$TAG0
-    - name: Push Tag ${{env.RELEASE_TAG}}
-      run:
-        docker push $REPO:$TAG1
+    - name: Login to Docker Hub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: docker/setup-buildx-action@v1
+    - name: Build and Push latest
+      id: docker_build
+      uses: docker/build-push-action@v2
+      with:
+        context: ./
+        file: ./Dockerfile
+        push: true
+        tags: ${{ secrets.DOCKER_USER }}/REPO:latest
+    - name: Build and Push ${{ env.RELEASE_TAG }}
+      id: docker_build
+      uses: docker/build-push-action@v2
+      with:
+        context: ./
+        file: ./Dockerfile
+        push: true
+        tags: ${{ secrets.DOCKER_USER }}/REPO:${{ env.RELEASE_TAG }}
+    - name: Image digest
+      run: echo ${{ steps.docker_build.outputs.digest }}
