@@ -143,7 +143,27 @@ public class Configure {
     /**
      * redis input stream buffer size
      */
-    private int bufferSize = 8 * 1024;
+    private int inputBufferSize = 8 * 1024;
+    
+    /**
+     * redis output stream buffer size
+     */
+    private int outputBufferSize = 8 * 1024;
+    
+    /**
+     * redis max output stream buffer size
+     */
+    private int maxOutputBufferSize = 512 * 1024 * 1024;
+    
+    /**
+     * temp file path
+     */
+    private String tempFilePath = null;
+    
+    /**
+     * temp file prefix
+     */
+    private String tempFilePrefix = "rct";
     
     /**
      * async buffer size
@@ -352,12 +372,44 @@ public class Configure {
         this.retryInterval = retryInterval;
     }
     
-    public int getBufferSize() {
-        return bufferSize;
+    public int getInputBufferSize() {
+        return inputBufferSize;
     }
     
-    public void setBufferSize(int bufferSize) {
-        this.bufferSize = bufferSize;
+    public void setInputBufferSize(int inputBufferSize) {
+        this.inputBufferSize = inputBufferSize;
+    }
+    
+    public int getOutputBufferSize() {
+        return outputBufferSize;
+    }
+    
+    public void setOutputBufferSize(int outputBufferSize) {
+        this.outputBufferSize = outputBufferSize;
+    }
+    
+    public int getMaxOutputBufferSize() {
+        return maxOutputBufferSize;
+    }
+    
+    public void setMaxOutputBufferSize(int maxOutputBufferSize) {
+        this.maxOutputBufferSize = maxOutputBufferSize;
+    }
+    
+    public String getTempFilePath() {
+        return tempFilePath;
+    }
+    
+    public void setTempFilePath(String tempFilePath) {
+        this.tempFilePath = tempFilePath;
+    }
+    
+    public String getTempFilePrefix() {
+        return tempFilePrefix;
+    }
+    
+    public void setTempFilePrefix(String tempFilePrefix) {
+        this.tempFilePrefix = tempFilePrefix;
     }
     
     public int getAsyncCacheSize() {
@@ -528,7 +580,7 @@ public class Configure {
         conf.setReadTimeout(this.timeout);
         conf.setSendBufferSize(this.sndBuf);
         conf.setReceiveBufferSize(this.rcvBuf);
-        conf.setBufferSize(this.bufferSize);
+        conf.setBufferSize(this.inputBufferSize);
         conf.setAsyncCachedBytes(this.asyncCacheSize);
         conf.setVerbose(this.verbose);
         conf.setHeartbeatPeriod(this.heartbeat);
@@ -585,7 +637,11 @@ public class Configure {
         conf.timeout = getInt(conf, "timeout", 60000, true);
         conf.sndBuf = getInt(conf, "snd_buf", 0, true);
         conf.rcvBuf = getInt(conf, "rcv_buf", 0, true);
-        conf.bufferSize = getInt(conf, "buffer_size", 8 * 1024, true);
+        conf.inputBufferSize = getInt(conf, "input_buffer_size", 8 * 1024, true);
+        conf.outputBufferSize = getInt(conf, "output_buffer_size", 8 * 1024, true);
+        conf.maxOutputBufferSize = getInt(conf, "max_output_buffer_size", 512 * 1024 * 1024, true);
+        conf.tempFilePath = getString(conf, "temp_file_path", null, true);
+        conf.tempFilePrefix = getString(conf, "temp_file_prefix", "rct", true);
         conf.asyncCacheSize = getInt(conf, "async_cache_size", 512 * 1024, true);
         conf.verbose = getBool(conf, "verbose", false, true);
         conf.heartbeat = getInt(conf, "heartbeat", 1000, true);
@@ -796,7 +852,11 @@ public class Configure {
                 ", sndBuf=" + sndBuf +
                 ", retries=" + retries +
                 ", retryInterval=" + retryInterval +
-                ", bufferSize=" + bufferSize +
+                ", inputBufferSize=" + inputBufferSize +
+                ", outputBufferSize=" + outputBufferSize +
+                ", maxOutputBufferSize=" + maxOutputBufferSize +
+                ", tempFilePath='" + tempFilePath + '\'' +
+                ", tempFilePrefix='" + tempFilePrefix + '\'' +
                 ", asyncCacheSize=" + asyncCacheSize +
                 ", dumpRdbVersion=" + dumpRdbVersion +
                 ", verbose=" + verbose +

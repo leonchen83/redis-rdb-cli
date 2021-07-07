@@ -49,7 +49,7 @@ public class FormatterRdbVisitor extends AbstractRdbVisitor {
         replicator.addEventListener((rep, event) -> {
             if (event instanceof PreRdbSyncEvent) {
                 OutputStreams.closeQuietly(this.formatter.getOutputStream());
-                this.formatter.setOutputStream(OutputStreams.newBufferedOutputStream(output, configure.getBufferSize()));
+                this.formatter.setOutputStream(OutputStreams.newBufferedOutputStream(output, configure.getOutputBufferSize()));
             }
             this.formatter.onEvent(rep, event);
         });

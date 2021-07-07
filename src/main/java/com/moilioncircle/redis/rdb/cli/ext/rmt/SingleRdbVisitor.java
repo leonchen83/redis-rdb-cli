@@ -16,6 +16,14 @@
 
 package com.moilioncircle.redis.rdb.cli.ext.rmt;
 
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.EVALSHA;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.LOAD;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.ONE;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.REPLACE;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.RESTORE;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.SCRIPT;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.ZERO;
+
 import java.util.List;
 
 import org.slf4j.Logger;

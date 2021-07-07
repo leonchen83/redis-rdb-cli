@@ -56,7 +56,7 @@ public enum Action {
         switch (this) {
             case MERGE:
                 if (merge.isEmpty()) return list;
-                CRCOutputStream out = OutputStreams.newCRCOutputStream(output, configure.getBufferSize());
+                CRCOutputStream out = OutputStreams.newCRCOutputStream(output, configure.getOutputBufferSize());
                 int version = 0;
                 for (File file : merge) {
                     URI u = file.toURI();
@@ -91,7 +91,7 @@ public enum Action {
                 return list;
             case BACKUP:
                 r = new CliRedisReplicator(backup, configure);
-                r.setRdbVisitor(new BackupRdbVisitor(r, configure, db, regexs, types, () -> OutputStreams.newCRCOutputStream(output, configure.getBufferSize())));
+                r.setRdbVisitor(new BackupRdbVisitor(r, configure, db, regexs, types, () -> OutputStreams.newCRCOutputStream(output, configure.getOutputBufferSize())));
                 list.add(Tuples.of(r, null));
                 return list;
             case NONE:

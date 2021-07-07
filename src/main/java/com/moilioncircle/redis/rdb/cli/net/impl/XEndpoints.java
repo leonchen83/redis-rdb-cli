@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.conf.NodeConfParser;
 import com.moilioncircle.redis.rdb.cli.net.protocol.RedisObject;
+import com.moilioncircle.redis.rdb.cli.util.ByteBuffers;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.util.type.Tuple3;
 
@@ -82,6 +83,10 @@ public class XEndpoints implements Closeable {
     }
 
     public void batch(boolean force, short slot, byte[] command, byte[]... args) {
+        index2.get(slot).batch(force, command, args);
+    }
+    
+    public void batch(boolean force, short slot, ByteBuffers command, ByteBuffers... args) {
         index2.get(slot).batch(force, command, args);
     }
 

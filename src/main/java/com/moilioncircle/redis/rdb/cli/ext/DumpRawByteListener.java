@@ -19,9 +19,12 @@ package com.moilioncircle.redis.rdb.cli.ext;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.util.Iterator;
 
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.io.CRCOutputStream;
+import com.moilioncircle.redis.rdb.cli.util.ByteBuffers;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.io.RawByteListener;
@@ -54,6 +57,18 @@ public class DumpRawByteListener implements RawByteListener, Closeable {
     @Override
     public void handle(byte... rawBytes) {
         OutputStreams.write(rawBytes, out);
+    }
+    
+    public void handle(ByteBuffer buf) {
+        OutputStreams.write(buf.array(), buf.position(), buf.limit(), out);
+    }
+    
+    public void handle(ByteBuffers bufs) {
+        Iterator<ByteBuffer> it = bufs.getBuffers();
+        while (it.hasNext()) {
+            ByteBuffer buf = it.next();
+            OutputStreams.write(buf.array(), buf.position(), buf.limit(), out);
+        }
     }
     
     @Override

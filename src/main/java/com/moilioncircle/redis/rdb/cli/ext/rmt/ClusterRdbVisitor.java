@@ -17,6 +17,9 @@
 package com.moilioncircle.redis.rdb.cli.ext.rmt;
 
 import static com.moilioncircle.redis.rdb.cli.conf.NodeConfParser.slot;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.REPLACE;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.RESTORE_ASKING;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.ZERO;
 import static com.moilioncircle.redis.replicator.Configuration.defaultSetting;
 import static java.util.Collections.singletonList;
 
