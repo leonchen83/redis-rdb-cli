@@ -1,4 +1,4 @@
-name: Upload Release Asset
+name: Release
 
 on:
   workflow_dispatch:
@@ -64,7 +64,7 @@ jobs:
         file: ./Dockerfile
         push: true
         tags: ${{ secrets.DOCKER_USER }}/${{ secrets.REPO }}:latest
-    - name: Build and Push ${{ env.RELEASE_TAG }}
+    - name: Build and Push tag
       id: tag
       uses: docker/build-push-action@v2
       with:
