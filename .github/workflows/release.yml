@@ -65,7 +65,7 @@ jobs:
         push: true
         tags: ${{ secrets.DOCKER_USER }}/REPO:latest
     - name: Build and Push ${{ env.RELEASE_TAG }}
-      id: ${{ env.RELEASE_TAG }}
+      id: tag
       uses: docker/build-push-action@v2
       with:
         context: ./
