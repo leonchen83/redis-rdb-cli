@@ -48,3 +48,19 @@ jobs:
         asset_path: ./target/redis-rdb-cli-release.zip
         asset_name: redis-rdb-cli-release.zip
         asset_content_type: application/zip
+    - name: Docker Push
+      env:
+        DOCKER_USER: ${{secrets.DOCKER_USER}}
+        DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+        TAG0: latest
+        TAG1: ${{ env.RELEASE_TAG }}
+        run: |
+          docker login -u $DOCKER_USER -p $DOCKER_PASSWORD 
+        run:
+          docker build -t $REPO:$TAG0 .
+        run:
+          docker build -t $REPO:$TAG1 .
+        run:
+          docker push $REPO:$TAG0
+        run:
+          docker push $REPO:$TAG1
