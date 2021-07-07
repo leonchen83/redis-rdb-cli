@@ -56,11 +56,15 @@ jobs:
         TAG1: ${{ env.RELEASE_TAG }}
         run: |
           docker login -u $DOCKER_USER -p $DOCKER_PASSWORD 
-        run:
-          docker build -t $REPO:$TAG0 .
-        run:
-          docker build -t $REPO:$TAG1 .
-        run:
-          docker push $REPO:$TAG0
-        run:
-          docker push $REPO:$TAG1
+    - name: Build Tag latest
+      run:
+        docker build -t $REPO:$TAG0 .
+    - name: Build Tag ${{env.RELEASE_TAG}}
+      run:
+        docker build -t $REPO:$TAG1 .
+    - name: Push Tag latest
+      run:
+        docker push $REPO:$TAG0
+    - name: Push Tag ${{env.RELEASE_TAG}}
+      run:
+        docker push $REPO:$TAG1
