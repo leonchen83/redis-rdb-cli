@@ -16,13 +16,16 @@
 
 package com.moilioncircle.redis.rdb.cli;
 
-import com.moilioncircle.redis.rdb.cli.cmd.RmtCommand;
+import com.moilioncircle.redis.rdb.cli.cmd.XRmt;
+
+import picocli.CommandLine;
 
 /**
  * @author Baoyi Chen
  */
 public class Rmt {
-    public static void main(String[] args) throws Exception {
-        RmtCommand.run(args);
+    public static void main(String[] args) {
+        int r = new CommandLine(new XRmt()).execute(args);
+        if (r != 0) System.exit(r);
     }
 }

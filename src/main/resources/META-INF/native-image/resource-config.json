@@ -1,0 +1,21 @@
+{
+  "resources":{
+  "includes":[
+    {"pattern":"\\Q.version\\E"}, 
+    {"pattern":"\\QMETA-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins.dat\\E"}, 
+    {"pattern":"\\QMETA-INF/services/com.moilioncircle.redis.rdb.cli.api.sink.ParserService\\E"}, 
+    {"pattern":"\\QMETA-INF/services/com.moilioncircle.redis.rdb.cli.api.sink.SinkService\\E"}, 
+    {"pattern":"\\QMETA-INF/services/org.apache.logging.log4j.core.util.ContextDataProvider\\E"}, 
+    {"pattern":"\\QMETA-INF/services/org.apache.logging.log4j.spi.Provider\\E"}, 
+    {"pattern":"\\QMETA-INF/services/org.apache.logging.log4j.util.PropertySource\\E"}, 
+    {"pattern":"\\QMETA-INF/services/org.jline.terminal.spi.JansiSupport\\E"}, 
+    {"pattern":"\\QMETA-INF/services/org.jline.terminal.spi.JnaSupport\\E"}, 
+    {"pattern":"\\Qgit.properties\\E"}, 
+    {"pattern":"\\Qlog4j2.xml\\E"}, 
+    {"pattern":"\\Qorg/jline/utils/capabilities.txt\\E"}, 
+    {"pattern":"\\Qorg/jline/utils/dumb-color.caps\\E"}, 
+    {"pattern":"\\Qorg/slf4j/impl/StaticLoggerBinder.class\\E"}, 
+    {"pattern":"\\Qredis-rdb-cli.conf\\E"}
+  ]},
+  "bundles":[]
+}

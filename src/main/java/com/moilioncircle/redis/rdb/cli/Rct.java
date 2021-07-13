@@ -16,13 +16,16 @@
 
 package com.moilioncircle.redis.rdb.cli;
 
-import com.moilioncircle.redis.rdb.cli.cmd.RctCommand;
+import com.moilioncircle.redis.rdb.cli.cmd.XRct;
+
+import picocli.CommandLine;
 
 /**
  * @author Baoyi Chen
  */
 public class Rct {
-    public static void main(String[] args) throws Exception {
-        RctCommand.run(args);
+    public static void main(String[] args) {
+        int r = new CommandLine(new XRct()).execute(args);
+        if (r != 0) System.exit(r);
     }
 }

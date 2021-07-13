@@ -1,0 +1,19 @@
+name: Native Image
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Native Image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ayltai/setup-graalvm@v1
+        with:
+          java-version: 11
+          graalvm-version: 21.1.0
+          native-image: true
+      - name: Maven Build
+        run:
+          mvn clean package -Pnative-image

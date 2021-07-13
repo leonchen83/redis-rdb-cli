@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.cmd;
+package com.moilioncircle.redis.rdb.cli.cmd.support;
 
 import java.io.BufferedReader;
 import java.io.IOException;

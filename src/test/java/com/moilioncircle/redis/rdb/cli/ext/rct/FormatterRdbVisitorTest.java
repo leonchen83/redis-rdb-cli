@@ -8,7 +8,9 @@ import java.nio.file.Files;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.moilioncircle.redis.rdb.cli.cmd.RctCommand;
+import com.moilioncircle.redis.rdb.cli.cmd.XRct;
+
+import picocli.CommandLine;
 
 /**
  * @author Baoyi Chen
@@ -36,7 +38,7 @@ public class FormatterRdbVisitorTest {
         String target = path("dumpV8-result.txt");
         
         // rct -f test -s ./dumpV8.rdb -o dumpV8-result.txt -e json
-        RctCommand.run(new String[]{"-f", "test", "-s", source, "-o", target, "-e", "json"});
+        new CommandLine(new XRct()).execute(new String[]{"-f", "test", "-s", source, "-o", target, "-e", "json"});
         assertArrayEquals(expect(), Files.readAllBytes(new File(target).toPath()));
     }
     

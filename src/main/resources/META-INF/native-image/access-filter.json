@@ -1,0 +1,4 @@
+{ "rules":  [
+  {"excludeClasses": "apple.**"},
+  {"excludeClasses": "com.intellij.**"}
+]}

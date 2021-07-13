@@ -32,14 +32,11 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.OpenOption;
-import java.security.AccessController;
 import java.util.Iterator;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.util.ByteBuffers;
 import com.moilioncircle.redis.replicator.io.ByteBufferOutputStream;
-
-import sun.security.action.GetPropertyAction;
 
 /**
  * @author Baoyi Chen
@@ -47,7 +44,7 @@ import sun.security.action.GetPropertyAction;
 public class LayeredOutputStream extends OutputStream {
     
     protected static final ByteBuffer EMPTY = allocate(0);
-    protected static final File TEMP_DIR = new File(AccessController.doPrivileged(new GetPropertyAction("java.io.tmpdir")));
+    protected static final File TEMP_DIR = new File(System.getProperty("java.io.tmpdir"));
     protected static final OpenOption[] OPTIONS = new OpenOption[]{READ, WRITE, TRUNCATE_EXISTING, CREATE, DELETE_ON_CLOSE};
     
     protected long size;
@@ -193,42 +190,5 @@ public class LayeredOutputStream extends OutputStream {
                 return EMPTY;
             }
         }
-    }
-    
-    public static void main(String[] args) throws IOException {
-        System.out.println(System.getProperty("java.io.tmpdir"));
-        LayeredOutputStream out = new LayeredOutputStream(8, 16);
-        String s = "0123456789abcdefghijklmnopqrstuvwxzy";
-        out.write(s.getBytes());
-        ByteBuffers buffers = out.toByteBuffers();
-        {
-            Iterator<ByteBuffer> it = buffers.getBuffers();
-            ByteBuffer x = allocate(100);
-            while (it.hasNext()) {
-                ByteBuffer buf = it.next();
-                while (buf.hasRemaining()) {
-                    x.put(buf.get());
-                }
-            }
-            
-            x.flip();
-            System.out.println(new String(x.array(), x.position(), x.limit()));
-        }
-        
-        buffers.reset();
-        {
-            Iterator<ByteBuffer> it = buffers.getBuffers();
-            ByteBuffer x = allocate(100);
-            while (it.hasNext()) {
-                ByteBuffer buf = it.next();
-                while (buf.hasRemaining()) {
-                    x.put(buf.get());
-                }
-            }
-            
-            x.flip();
-            System.out.println(new String(x.array(), x.position(), x.limit()));
-        }
-        buffers.close();
     }
 }

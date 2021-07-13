@@ -16,13 +16,16 @@
 
 package com.moilioncircle.redis.rdb.cli;
 
-import com.moilioncircle.redis.rdb.cli.cmd.RdtCommand;
+import com.moilioncircle.redis.rdb.cli.cmd.XRdt;
+
+import picocli.CommandLine;
 
 /**
  * @author Baoyi Chen
  */
 public class Rdt {
-    public static void main(String[] args) throws Exception {
-        RdtCommand.run(args);
+    public static void main(String[] args) {
+        int r = new CommandLine(new XRdt()).execute(args);
+        if (r != 0) System.exit(r);
     }
 }

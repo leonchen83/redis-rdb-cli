@@ -16,13 +16,16 @@
 
 package com.moilioncircle.redis.rdb.cli;
 
-import com.moilioncircle.redis.rdb.cli.cmd.RetCommand;
+import com.moilioncircle.redis.rdb.cli.cmd.XRet;
+
+import picocli.CommandLine;
 
 /**
  * @author Baoyi Chen
  */
 public class Ret {
-    public static void main(String[] args) throws Exception {
-        RetCommand.run(args);
+    public static void main(String[] args) {
+        int r = new CommandLine(new XRet()).execute(args);
+        if (r != 0) System.exit(r);
     }
 }

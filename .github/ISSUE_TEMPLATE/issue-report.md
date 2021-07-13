@@ -19,7 +19,7 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**Version(run `rct -v` and paste the information):**  
+**Version(run `rct --version` or `rct -V` and paste the information):**  
 
 **Additional context**
 Add any other context about the problem here.

@@ -16,16 +16,31 @@
 
 package com.moilioncircle.redis.rdb.cli;
 
-import com.moilioncircle.redis.rdb.cli.cmd.XRst;
-
-import picocli.CommandLine;
+import java.util.Arrays;
 
 /**
  * @author Baoyi Chen
  */
-public class Rst {
-    public static void main(String[] args) {
-        int r = new CommandLine(new XRst()).execute(args);
-        if (r != 0) System.exit(r);
-    }
+public class Main {
+	public static void main(String[] args) {
+		if (args.length == 0) {
+			return;
+		}
+		String command = args[0];
+		if (command == null) {
+			return;
+		}
+		String[] ary = Arrays.copyOfRange(args, 1, args.length);
+		if (command.equals("rct")) {
+			Rct.main(ary);
+		} else if (command.equals("rdt")) {
+			Rdt.main(ary);
+		} else if (command.equals("ret")) {
+			Ret.main(ary);
+		} else if (command.equals("rmt")) {
+			Rmt.main(ary);
+		} else if (command.equals("rst")) {
+			Rst.main(ary);
+		}
+	}
 }
