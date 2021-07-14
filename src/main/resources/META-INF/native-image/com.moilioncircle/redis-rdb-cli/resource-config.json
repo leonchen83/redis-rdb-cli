@@ -14,6 +14,7 @@
     {"pattern":"\\Qlog4j2.xml\\E"}, 
     {"pattern":"\\Qorg/jline/utils/capabilities.txt\\E"}, 
     {"pattern":"\\Qorg/jline/utils/dumb-color.caps\\E"}, 
+    {"pattern":"\\Qorg/jline/utils/xterm-256color.caps\\E"}, 
     {"pattern":"\\Qorg/slf4j/impl/StaticLoggerBinder.class\\E"}, 
     {"pattern":"\\Qredis-rdb-cli.conf\\E"}
   ]},

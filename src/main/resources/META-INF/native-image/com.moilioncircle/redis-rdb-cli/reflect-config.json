@@ -47,6 +47,17 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
+  "name":"com.moilioncircle.redis.rdb.cli.cmd.XRst",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true
+},
+{
+  "name":"com.moilioncircle.redis.rdb.cli.cmd.XRst$RstExclusive",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"com.moilioncircle.redis.rdb.cli.cmd.support.XVersionProvider",
   "allDeclaredFields":true,
   "allDeclaredMethods":true,
