@@ -40,7 +40,7 @@ public class XVersionProvider implements CommandLine.IVersionProvider {
 		}
 		builder.append("\n");
 		if (!Strings.isEmpty(INSTANCE.home())) {
-			builder.append(" home: ").append(INSTANCE.home()).append("\n");
+			builder.append("home: ").append(INSTANCE.home()).append("\n");
 		}
 		builder.append("java version: ").append(System.getProperty("java.version")).append(", ");
 		builder.append("vendor: ").append(System.getProperty("java.vendor")).append("\n");

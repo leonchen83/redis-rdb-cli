@@ -11,6 +11,7 @@ esac
 
 lib_dir="$base_dir"/lib
 log_dir="$base_dir"/log
+bin_dir="$base_dir"/bin
 con_dir="$base_dir"/conf
 
 log_file="$con_dir"/log4j2.xml
@@ -18,4 +19,4 @@ con_file="$con_dir"/redis-rdb-cli.conf
 
 (ulimit -n 65535 || true) 2>/dev/null
 
-"$base_dir"/redis-rdb-cli -Dlog4j.configurationFile=${log_file} -Dcli.log.path=${log_dir} -Dconf=${con_file} -Drct.home=${base_dir} ret $@
+${bin_dir}/redis-rdb-cli -Dlog4j.configurationFile=${log_file} -Dcli.log.path=${log_dir} -Dconf=${con_file} -Drct.home=${base_dir} ret $@
