@@ -62,7 +62,7 @@ public enum Action {
                     URI u = file.toURI();
                     RedisURI uri = new RedisURI(new URI("redis", u.getRawAuthority(), u.getRawPath(), u.getRawQuery(), u.getRawFragment()).toString());
                     if (uri.getFileType() == null || uri.getFileType() != RDB) {
-                        throw new UnsupportedOperationException("Invalid options: '--merge <file file...>' must be rdb file.");
+                        throw new UnsupportedOperationException("Invalid options: '--merge <file>...' must be rdb file.");
                     }
                     try (RedisInputStream in = new RedisInputStream(new FileInputStream(file))) {
                         in.skip(5); // skip REDIS

@@ -115,20 +115,20 @@ public class XRdt implements Callable<Integer> {
 			config = exclusive.split.config;
 			Path path = Paths.get(output);
 			if (Files.exists(path) && !Files.isDirectory(Paths.get(output))) {
-				throw new ParameterException(spec.commandLine(), "Invalid options: '--output=<output>'");
+				throw new ParameterException(spec.commandLine(), "Invalid options: '--out=<file>'");
 			}
 			action = Action.SPLIT;
 		} else if (exclusive.backup != null) {
 			exclusive.backup = normalize(exclusive.backup, FileType.RDB, spec, "Invalid options: '--backup=<backup>'");
 			Path path = Paths.get(output);
 			if (Files.exists(path) && !Files.isRegularFile(path)) {
-				throw new ParameterException(spec.commandLine(), "Invalid options: '--output=<output>'");
+				throw new ParameterException(spec.commandLine(), "Invalid options: '--out=<file>'");
 			}
 			action = Action.BACKUP;
 		} else if (exclusive.merge != null) {
 			Path path = Paths.get(output);
 			if (Files.exists(path) && !Files.isRegularFile(path)) {
-				throw new ParameterException(spec.commandLine(), "Invalid options: '--output=<output>'");
+				throw new ParameterException(spec.commandLine(), "Invalid options: '--out=<file>'");
 			}
 			action = Action.MERGE;
 		}

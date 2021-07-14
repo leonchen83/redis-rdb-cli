@@ -184,13 +184,13 @@ public class XRst implements Callable<Integer> {
 	
 	@Override
 	public Integer call() throws Exception {
-		source = normalize(source, null, spec, "Invalid options: '--source=<source>'");
+		source = normalize(source, null, spec, "Invalid options: '--source=<uri>'");
 		
 		Configure configure = Configure.bind();
 		if (exclusive.migrate != null) {
 			RedisURI uri = new RedisURI(exclusive.migrate);
 			if (uri.getFileType() != null) {
-				throw new ParameterException(spec.commandLine(), "Invalid options: '--migrate=<migrate>'");
+				throw new ParameterException(spec.commandLine(), "Invalid options: '--migrate=<uri>'");
 			}
 			try (ProgressBar bar = new ProgressBar(-1)) {
 				Replicator r = new CliRedisReplicator(source, configure);
