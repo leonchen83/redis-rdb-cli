@@ -182,7 +182,6 @@
                         <configuration>
                             <imageName>${project.artifactId}</imageName>
                             <mainClass>com.moilioncircle.redis.rdb.cli.Main</mainClass>
-                            <buildArgs>--enable-http --enable-https --no-server --no-fallback --allow-incomplete-classpath --features=org.graalvm.home.HomeFinderFeature -H:+ReportExceptionStackTraces -H:+TraceSecurityServices</buildArgs>
                         </configuration>
                         <executions>
                             <execution>
