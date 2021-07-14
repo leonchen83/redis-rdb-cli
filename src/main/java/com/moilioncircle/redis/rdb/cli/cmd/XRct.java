@@ -114,7 +114,7 @@ public class XRct implements Callable<Integer> {
 				if (event instanceof PreRdbSyncEvent)
 					rep.addRawByteListener(b -> bar.react(b.length));
 				if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent)
-					Replicators.closeQuietly(rep);
+					Replicators.closeQuietly(r);
 			});
 			r.open();
 		}

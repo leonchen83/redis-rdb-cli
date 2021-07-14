@@ -148,7 +148,7 @@ public class XRdt implements Callable<Integer> {
 					if (event instanceof PreRdbSyncEvent)
 						rep.addRawByteListener(b -> bar.react(b.length, tuple.getV2()));
 					if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent)
-						Replicators.closeQuietly(rep);
+						Replicators.closeQuietly(tuple.getV1());
 				});
 				tuple.getV1().open();
 			}
