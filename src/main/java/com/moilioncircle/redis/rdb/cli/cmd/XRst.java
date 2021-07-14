@@ -151,8 +151,8 @@ import picocli.CommandLine.Spec;
 				"Usage: rst [-hV] -s <uri> (-m <uri> | -c <config>) [-d <db>...] [-r] [-l]"
 		},
 		footer = {"%nExamples:",
-				"rst -s redis://127.0.0.1:6379 -c ./nodes.conf -r",
-				"rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0"})
+				"  rst -s redis://127.0.0.1:6379 -c ./nodes.conf -r",
+				"  rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0"})
 public class XRst implements Callable<Integer> {
 	
 	@Spec

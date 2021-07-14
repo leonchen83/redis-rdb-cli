@@ -58,8 +58,8 @@ import picocli.CommandLine.Spec;
 				"Usage: ret [-hV] -s <uri> [-c <config>] [-p <parser>] -n <sink>"
 		},
 		footer = {"%nExamples:",
-				"ret -s redis://127.0.0.1:6379 -c ./config.conf -n example",
-				"ret -s redis://127.0.0.1:6379 -c ./config.conf -p dump -n example"})
+				"  ret -s redis://127.0.0.1:6379 -c ./config.conf -n example",
+				"  ret -s redis://127.0.0.1:6379 -c ./config.conf -p dump -n example"})
 public class XRet implements Callable<Integer> {
 	
 	private static final Logger logger = LoggerFactory.getLogger(XRet.class);

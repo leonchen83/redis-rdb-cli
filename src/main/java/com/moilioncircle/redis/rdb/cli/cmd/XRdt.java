@@ -61,11 +61,11 @@ import picocli.CommandLine.Spec;
 				"       -o <file> [-d <db>...] [-k <regex>...] [-t <type>...]"
 		},
 		footer = {"%nExamples:",
-				"rdt -b ./dump.rdb -o ./dump.rdb1 -d 0 1",
-				"rdt -b redis://127.0.0.1:6379 -o ./dump.rdb -k user.*",
-				"rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash",
-				"rdt -s ./dump.rdb -c ./nodes.conf -o /path/to/folder -t hash -d 0",
-				"rdt -s redis://127.0.0.1:6379 -c ./nodes.conf -o /path/to/folder -d 0"})
+				"  rdt -b ./dump.rdb -o ./dump.rdb1 -d 0 1",
+				"  rdt -b redis://127.0.0.1:6379 -o ./dump.rdb -k user.*",
+				"  rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash",
+				"  rdt -s ./dump.rdb -c ./nodes.conf -o /path/to/folder -t hash -d 0",
+				"  rdt -s redis://127.0.0.1:6379 -c ./nodes.conf -o /path/to/folder -d 0"})
 public class XRdt implements Callable<Integer> {
 	
 	@Spec

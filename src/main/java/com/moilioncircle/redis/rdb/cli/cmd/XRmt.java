@@ -66,9 +66,9 @@ import picocli.CommandLine.Spec;
 				"       [-k <regex>...] [-t <type>...] [-r] [-l]"
 		},
 		footer = {"%nExamples:",
-				"rmt -s ./dump.rdb -c ./nodes.conf -t string -r",
-				"rmt -s ./dump.rdb -m redis://127.0.0.1:6380 -t list -d 0",
-				"rmt -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0"})
+				"  rmt -s ./dump.rdb -c ./nodes.conf -t string -r",
+				"  rmt -s ./dump.rdb -m redis://127.0.0.1:6380 -t list -d 0",
+				"  rmt -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0"})
 public class XRmt implements Callable<Integer> {
 	
 	@Spec

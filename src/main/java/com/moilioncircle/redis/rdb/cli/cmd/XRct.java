@@ -57,10 +57,10 @@ import picocli.CommandLine.Spec;
 				"       [-l <n>] [-r]"
 		},
 		footer = {"%nExamples:",
-				"rct -f dump -s ./dump.rdb -o ./appendonly.aof -r",
-				"rct -f resp -s redis://127.0.0.1:6379 -o ./target.aof -d 0 1",
-				"rct -f json -s ./dump.rdb -o ./target.json -k user.* product.*",
-				"rct -f mem -s ./dump.rdb -o ./target.aof -e redis -t list -l 10 -b 1024"})
+				"  rct -f dump -s ./dump.rdb -o ./appendonly.aof -r",
+				"  rct -f resp -s redis://127.0.0.1:6379 -o ./target.aof -d 0 1",
+				"  rct -f json -s ./dump.rdb -o ./target.json -k user.* product.*",
+				"  rct -f mem -s ./dump.rdb -o ./target.aof -e redis -t list -l 10 -b 1024"})
 public class XRct implements Callable<Integer> {
 	
 	@Spec
