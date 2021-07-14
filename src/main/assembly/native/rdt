@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+base_dir="$( cd "$( dirname "$(readlink "$0")" )" >/dev/null 2>&1 && pwd )"/..
+
+case "$(uname -s)" in
+  Darwin) base_dir="$( cd "$( dirname "$(readlink "$0")" )" >/dev/null 2>&1 && pwd )"/..;;
+  Linux) base_dir="$( cd "$( dirname "$(readlink -f "$0")" )" >/dev/null 2>&1 && pwd )"/..;;
+  *CYGWIN*) base_dir=`cygpath -w "$base_dir"`;;
+  *MSYS*) base_dir=`cygpath -w "$base_dir"`;;
+esac
+
+lib_dir="$base_dir"/lib
+log_dir="$base_dir"/log
+con_dir="$base_dir"/conf
+
+log_file="$con_dir"/log4j2.xml
+con_file="$con_dir"/redis-rdb-cli.conf
+
+(ulimit -n 65535 || true) 2>/dev/null
+
+"$base_dir"/redis-rdb-cli -Dlog4j.configurationFile=${log_file} -Dcli.log.path=${log_dir} -Dconf=${con_file} -Drct.home=${base_dir} rdt $@

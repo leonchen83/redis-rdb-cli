@@ -17,3 +17,6 @@ jobs:
       - name: Maven Build
         run:
           mvn clean package -Pnative-image
+      - name: Show Native Image
+        run:
+          ls -lht ./target

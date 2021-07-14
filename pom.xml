@@ -200,6 +200,25 @@
                             <argLine>-Dfile.encoding=UTF-8</argLine>
                         </configuration>
                     </plugin>
+                    <plugin>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <version>3.3.0</version>
+                        <configuration>
+                            <finalName>redis-rdb-cli-native</finalName>
+                            <descriptors>
+                                <descriptor>src/main/assembly/assembly-native.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>make-assembly</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
