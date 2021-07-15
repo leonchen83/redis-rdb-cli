@@ -86,7 +86,6 @@ public class RedisSentinelReplicator implements Replicator, SentinelListener {
     @Override
     public void close() throws IOException {
         this.sentinel.close();
-        Replicators.closeQuietly(replicator);
     }
 
     @Override
