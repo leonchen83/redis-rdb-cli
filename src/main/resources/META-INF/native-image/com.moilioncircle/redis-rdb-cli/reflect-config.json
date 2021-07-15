@@ -66,8 +66,8 @@
 {
   "name":"com.moilioncircle.redis.replicator.RedisSocketReplicator",
   "fields":[
-    {"name":"host", "allowWrite" : true}, 
-    {"name":"port", "allowWrite" : true}
+    {"name":"host", "allowWrite":true}, 
+    {"name":"port", "allowWrite":true}
   ]
 },
 {
