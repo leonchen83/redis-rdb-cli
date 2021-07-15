@@ -180,7 +180,7 @@
                         <artifactId>native-image-maven-plugin</artifactId>
                         <version>21.1.0</version>
                         <configuration>
-                            <imageName>${project.artifactId}</imageName>
+                            <imageName>misc</imageName>
                             <mainClass>com.moilioncircle.redis.rdb.cli.Main</mainClass>
                         </configuration>
                         <executions>
@@ -204,7 +204,7 @@
                         <artifactId>maven-assembly-plugin</artifactId>
                         <version>3.3.0</version>
                         <configuration>
-                            <finalName>redis-rdb-cli-native</finalName>
+                            <finalName>${project.artifactId}</finalName>
                             <descriptors>
                                 <descriptor>src/main/assembly/assembly-native.xml</descriptor>
                             </descriptors>
@@ -272,7 +272,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.3.0</version>
                 <configuration>
-                    <finalName>redis-rdb-cli</finalName>
+                    <finalName>${project.artifactId}</finalName>
                     <descriptors>
                         <descriptor>src/main/assembly/assembly.xml</descriptor>
                     </descriptors>

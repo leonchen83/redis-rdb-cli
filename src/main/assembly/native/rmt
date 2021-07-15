@@ -19,4 +19,4 @@ con_file="$con_dir"/redis-rdb-cli.conf
 
 (ulimit -n 65535 || true) 2>/dev/null
 
-${bin_dir}/redis-rdb-cli -Dlog4j.configurationFile=${log_file} -Dcli.log.path=${log_dir} -Dconf=${con_file} -Drct.home=${base_dir} rmt $@
+${bin_dir}/misc -Dlog4j.configurationFile=${log_file} -Dcli.log.path=${log_dir} -Dconf=${con_file} -Drct.home=${base_dir} rmt $@

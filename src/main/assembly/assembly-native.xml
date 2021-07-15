@@ -36,7 +36,7 @@
             <directory>target</directory>
             <outputDirectory>bin</outputDirectory>
             <includes>
-                <include>redis-rdb-cli</include>
+                <include>misc</include>
             </includes>
             <fileMode>0755</fileMode>
             <directoryMode>0755</directoryMode>
