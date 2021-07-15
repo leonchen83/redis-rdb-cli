@@ -78,7 +78,6 @@ public class DefaultSentinel implements Sentinel {
     public void close() throws IOException {
         unsubscribe(channel);
         terminateQuietly(schedule, 0, MILLISECONDS);
-        doCloseListener();
     }
     
     @Override
@@ -130,6 +129,7 @@ public class DefaultSentinel implements Sentinel {
         @Override
         public void onUnsubscribe(String channel, int channels) {
             running.set(false);
+            doCloseListener();
         }
         
         @Override
