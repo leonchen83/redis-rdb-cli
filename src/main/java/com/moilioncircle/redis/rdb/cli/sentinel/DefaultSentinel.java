@@ -26,8 +26,14 @@ import static redis.clients.jedis.Protocol.Command.UNSUBSCRIBE;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
@@ -65,17 +71,12 @@ public class DefaultSentinel implements Sentinel {
     
     @Override
     public void open() throws IOException {
-        schedule.scheduleWithFixedDelay(this::pulse, 0, 10, SECONDS);
+        await(schedule.scheduleWithFixedDelay(this::pulse, 0, 10, SECONDS));
     }
     
     @Override
     public void close() throws IOException {
-        if (jedis != null) {
-            try {
-                jedis.sendCommand(UNSUBSCRIBE, channel);
-            } catch (Throwable e) {
-            }
-        }
+        unsubscribe(channel);
         terminateQuietly(schedule, 0, MILLISECONDS);
         doCloseListener();
     }
@@ -106,6 +107,7 @@ public class DefaultSentinel implements Sentinel {
     
     protected void pulse() {
         for (HostAndPort sentinel : hosts) {
+            if (!this.running.get()) continue;
             try (final Jedis jedis = new Jedis(sentinel)) {
                 List<String> list = jedis.sentinelGetMasterAddrByName(masterName);
                 if (list == null || list.size() != 2) {
@@ -114,11 +116,9 @@ public class DefaultSentinel implements Sentinel {
                 String host = list.get(0);
                 int port = Integer.parseInt(list.get(1));
                 doSwitchListener(new HostAndPort(host, port));
-                if (running.get()) {
-                    this.jedis = jedis;
-                    logger.info("subscribe sentinel {}", sentinel);
-                    jedis.subscribe(new PubSub(), this.channel);
-                }
+                this.jedis = jedis;
+                logger.info("subscribe sentinel {}", sentinel);
+                jedis.subscribe(new PubSub(), this.channel);
             } catch (Throwable cause) {
                 logger.warn("suspend sentinel {}, cause: {}", sentinel, cause);
             }
@@ -152,6 +152,55 @@ public class DefaultSentinel implements Sentinel {
             } catch (Throwable cause) {
                 logger.error("failed to subscribe: {}, cause: {}", response, cause);
             }
+        }
+    }
+    
+    protected void unsubscribe(String channel) {
+        for (int retry = 0; retry < 5; retry++) {
+            if (!running.get()) break;
+            if (jedis == null) continue;
+            run(() -> jedis.sendCommand(UNSUBSCRIBE, channel));
+            sleep(1, SECONDS);
+        }
+    }
+    
+    protected <T> T run(Callable<T> callable) {
+        try {
+            return callable.call();
+        } catch (Exception ignore) {
+            return null;
+        }
+    } 
+    
+    protected void sleep(long time, TimeUnit unit) {
+        try {
+            unit.sleep(time);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+    
+    protected void await(Future<?> future) {
+        try {
+            future.get();
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        } catch (CancellationException e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+    
+    protected void await(Future<?> future, long timeout, TimeUnit unit) {
+        try {
+            future.get(timeout, unit);
+        } catch (TimeoutException e) {
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        } catch (CancellationException e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 }

@@ -44,8 +44,19 @@ public class XVersionProvider implements CommandLine.IVersionProvider {
 		}
 		builder.append("java version: ").append(System.getProperty("java.version")).append(", ");
 		builder.append("vendor: ").append(System.getProperty("java.vendor")).append("\n");
-		builder.append("java home: ").append(System.getProperty("java.home")).append("\n");
-		builder.append("default locale: ").append(System.getProperty("user.language")).append(", ");
+		String home = System.getProperty("java.home");
+		
+		// native image
+		if (home != null) {
+			builder.append("java home: ").append(System.getProperty("java.home")).append("\n");
+		}
+		
+		// native image
+		String locale = System.getProperty("user.language");
+		if (locale != null) {
+			builder.append("default locale: ").append(System.getProperty("user.language")).append(", ");
+		}
+		
 		builder.append("platform encoding: ").append(System.getProperty("file.encoding")).append("\n");
 		builder.append("os name: ").append(System.getProperty("os.name")).append(", ");
 		builder.append("version: ").append(System.getProperty("os.version")).append(", ");
