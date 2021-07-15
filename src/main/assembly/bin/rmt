@@ -15,6 +15,9 @@ if [[ "$_java" ]]; then
         echo "Java version is lower than 1.8 - Please install Java 8"
         exit
     fi
+    if [ $version1 -ge 009000 ]; then
+        opts="--add-opens=java.base/java.lang.invoke=ALL-UNNAMED"
+    fi
 fi
 
 base_dir="$( cd "$( dirname "$(readlink "$0")" )" >/dev/null 2>&1 && pwd )"/..
@@ -42,4 +45,4 @@ done
 
 export CLASSPATH
 
-$_java -server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:+ExitOnOutOfMemoryError -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -Dlog4j.configurationFile=${log_file} -Dcli.log.path=${log_dir} -Dconf=${con_file} -Drct.home=${base_dir} com.moilioncircle.redis.rdb.cli.Rmt $@
+$_java ${opts} -server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:+ExitOnOutOfMemoryError -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -Dlog4j.configurationFile=${log_file} -Dcli.log.path=${log_dir} -Dconf=${con_file} -Drct.home=${base_dir} com.moilioncircle.redis.rdb.cli.Rmt $@

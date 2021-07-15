@@ -10,13 +10,13 @@
 {
   "name":"com.moilioncircle.redis.rdb.cli.Rdt",
   "methods":[{"name":"main","parameterTypes":["java.lang.String[]"] }]
-}, 
+},
 {
   "name":"com.moilioncircle.redis.rdb.cli.Ret",
   "methods":[{"name":"main","parameterTypes":["java.lang.String[]"] }]
 },
 {
-  "name":"com.moilioncircle.redis.rdb.cli.Rmt", 
+  "name":"com.moilioncircle.redis.rdb.cli.Rmt",
   "methods":[{"name":"main","parameterTypes":["java.lang.String[]"] }]
 },
 {

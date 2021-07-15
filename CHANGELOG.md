@@ -1,3 +1,16 @@
+### 0.7.0
+
+1. build native image supported.  
+2. Fix `sentinel` bug.  
+3. CLI show version incompatible changes:  
+```
+# use upper case -V instead of -v to show version.
+# redis-rdb-cli<=0.6.5 show the CLI version
+rct -v
+# redis-rdb-cli>=0.7.0 show the CLI version
+rct -V
+``` 
+
 ### 0.6.5
 
 Optimize `rct -f dump` memory usage.  
