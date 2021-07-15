@@ -157,8 +157,8 @@ public class DefaultSentinel implements Sentinel {
     
     protected void unsubscribe(String channel) {
         for (int retry = 0; retry < 5; retry++) {
-            if (!running.get()) break;
-            if (jedis == null) continue;
+            if(!running.get()) break;
+            if(jedis == null || !jedis.isConnected()) continue;
             run(() -> jedis.sendCommand(UNSUBSCRIBE, channel));
             sleep(1, SECONDS);
         }
