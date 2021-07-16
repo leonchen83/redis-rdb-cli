@@ -1,7 +1,7 @@
 ### 0.7.0
 
 1. build native image supported.  
-2. Fix `sentinel` bug.  
+2. Fix connect `sentinel` bug.  
 3. CLI show version incompatible changes:  
 ```
 # use upper case -V instead of -v to show version.
