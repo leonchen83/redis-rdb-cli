@@ -16,14 +16,15 @@
 
 package com.moilioncircle.redis.rdb.cli.ext.rdt;
 
+import static com.moilioncircle.redis.replicator.Constants.RDB_OPCODE_SELECTDB;
+
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.List;
 import java.util.function.Supplier;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
-import com.moilioncircle.redis.rdb.cli.glossary.DataType;
+import com.moilioncircle.redis.rdb.cli.glossary.Action;
 import com.moilioncircle.redis.rdb.cli.glossary.Guard;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -33,6 +34,7 @@ import com.moilioncircle.redis.replicator.event.PreCommandSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.io.CRCOutputStream;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
+import com.moilioncircle.redis.replicator.rdb.BaseRdbEncoder;
 import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
 
@@ -40,9 +42,12 @@ import com.moilioncircle.redis.replicator.rdb.datatype.DB;
  * @author Baoyi Chen
  */
 public class BackupRdbVisitor extends AbstractRdbVisitor {
+    
+    private Long goal;
 
-    public BackupRdbVisitor(Replicator replicator, Configure configure, List<Long> db, List<String> regexs, List<DataType> types, Supplier<OutputStream> supplier) {
-        super(replicator, configure, db, regexs, types, supplier);
+    public BackupRdbVisitor(Replicator replicator, Configure configure, Action.Arg arg, Supplier<OutputStream> supplier) {
+        super(replicator, configure, arg.db, arg.regexs, arg.types, supplier);
+        this.goal = arg.goal;
         this.replicator.addEventListener((rep, event) -> {
             if (event instanceof PreRdbSyncEvent) {
                 listener.reset(supplier.get());
@@ -91,11 +96,36 @@ public class BackupRdbVisitor extends AbstractRdbVisitor {
 
     @Override
     public DB applySelectDB(RedisInputStream in, int version) throws IOException {
-        listener.setGuard(Guard.DRAIN);
-        try {
-            return super.applySelectDB(in, version);
-        } finally {
-            listener.setGuard(Guard.SAVE);
+        if (goal == null) {
+            // save
+            listener.setGuard(Guard.DRAIN);
+            try {
+                return super.applySelectDB(in, version);
+            } finally {
+                listener.setGuard(Guard.SAVE);
+            }
+        } else {
+            // skip
+            listener.setGuard(Guard.PASS);
+            try {
+                super.applySelectDB(in, version);
+            } finally {
+                listener.setGuard(Guard.SAVE);
+            }
+            
+            // convert
+            listener.setGuard(Guard.DRAIN);
+            try {
+                BaseRdbEncoder encoder = new BaseRdbEncoder();
+                byte[] db = encoder.rdbSaveLen(goal);
+                // type
+                listener.handle((byte) RDB_OPCODE_SELECTDB);
+                // db
+                listener.handle(db);
+                return new DB(goal);
+            } finally {
+                listener.setGuard(Guard.SAVE);
+            }
         }
     }
 

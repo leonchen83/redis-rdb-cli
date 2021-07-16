@@ -18,12 +18,11 @@ package com.moilioncircle.redis.rdb.cli.ext.rdt;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.List;
 import java.util.function.Supplier;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
-import com.moilioncircle.redis.rdb.cli.glossary.DataType;
+import com.moilioncircle.redis.rdb.cli.glossary.Action;
 import com.moilioncircle.redis.rdb.cli.glossary.Guard;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
@@ -36,8 +35,8 @@ import com.moilioncircle.redis.replicator.rdb.datatype.DB;
  */
 public class MergeRdbVisitor extends AbstractRdbVisitor {
     
-    public MergeRdbVisitor(Replicator replicator, Configure configure, List<Long> db, List<String> regexs, List<DataType> types, Supplier<OutputStream> supplier) {
-        super(replicator, configure, db, regexs, types, supplier);
+    public MergeRdbVisitor(Replicator replicator, Configure configure, Action.Arg arg, Supplier<OutputStream> supplier) {
+        super(replicator, configure, arg.db, arg.regexs, arg.types, supplier);
     }
     
     @Override

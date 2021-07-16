@@ -50,15 +50,31 @@ public enum Action {
     MERGE,
     BACKUP;
     
+    public static class Arg {
+        public String split;
+        public File conf;
+    
+        public String backup;
+        public Long goal;
+    
+        public List<File> merge;
+    
+        public String output;
+    
+        public List<Long> db;
+        public List<String> regexs;
+        public List<DataType> types;
+    }
+    
     @SuppressWarnings("all")
-    public List<Tuple2<Replicator, String>> dress(Configure configure, String split, String backup, List<File> merge, String output, List<Long> db, List<String> regexs, File conf, List<DataType> types) throws Exception {
+    public List<Tuple2<Replicator, String>> dress(Configure configure, Arg arg) throws Exception {
         List<Tuple2<Replicator, String>> list = new ArrayList<>();
         switch (this) {
             case MERGE:
-                if (merge.isEmpty()) return list;
-                CRCOutputStream out = OutputStreams.newCRCOutputStream(output, configure.getOutputBufferSize());
+                if (arg.merge.isEmpty()) return list;
+                CRCOutputStream out = OutputStreams.newCRCOutputStream(arg.output, configure.getOutputBufferSize());
                 int version = 0;
-                for (File file : merge) {
+                for (File file : arg.merge) {
                     URI u = file.toURI();
                     RedisURI uri = new RedisURI(new URI("redis", u.getRawAuthority(), u.getRawPath(), u.getRawQuery(), u.getRawFragment()).toString());
                     if (uri.getFileType() == null || uri.getFileType() != RDB) {
@@ -71,7 +87,7 @@ public enum Action {
                         continue;
                     }
                     Replicator r = new CliRedisReplicator(uri.toString(), configure);
-                    r.setRdbVisitor(new MergeRdbVisitor(r, configure, db, regexs, types, () -> out));
+                    r.setRdbVisitor(new MergeRdbVisitor(r, configure, arg, () -> out));
                     list.add(Tuples.of(r, file.getName()));
                 }
                 list.get(list.size() - 1).getV1().addCloseListener(r -> {
@@ -84,14 +100,14 @@ public enum Action {
                 out.write(Strings.lappend(version, 4, '0').getBytes());
                 return list;
             case SPLIT:
-                Replicator r = new CliRedisReplicator(split, configure);
-                List<String> lines = Files.readAllLines(conf.toPath());
-                r.setRdbVisitor(new SplitRdbVisitor(r, configure, db, regexs, types, () -> new ShardableFileOutputStream(output, lines, configure)));
+                Replicator r = new CliRedisReplicator(arg.split, configure);
+                List<String> lines = Files.readAllLines(arg.conf.toPath());
+                r.setRdbVisitor(new SplitRdbVisitor(r, configure, arg, () -> new ShardableFileOutputStream(arg.output, lines, configure)));
                 list.add(Tuples.of(r, null));
                 return list;
             case BACKUP:
-                r = new CliRedisReplicator(backup, configure);
-                r.setRdbVisitor(new BackupRdbVisitor(r, configure, db, regexs, types, () -> OutputStreams.newCRCOutputStream(output, configure.getOutputBufferSize())));
+                r = new CliRedisReplicator(arg.backup, configure);
+                r.setRdbVisitor(new BackupRdbVisitor(r, configure, arg, () -> OutputStreams.newCRCOutputStream(arg.output, configure.getOutputBufferSize())));
                 list.add(Tuples.of(r, null));
                 return list;
             case NONE:

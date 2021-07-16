@@ -31,7 +31,6 @@ import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.CliRedisReplicator;
 import com.moilioncircle.redis.rdb.cli.ext.rmt.ClusterRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rmt.SingleRdbVisitor;
-import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.net.impl.XEndpoint;
 import com.moilioncircle.redis.rdb.cli.net.protocol.RedisObject;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
@@ -114,7 +113,7 @@ public class XRmt implements Callable<Integer> {
 			}
 			try (ProgressBar bar = new ProgressBar(-1)) {
 				Replicator r = new CliRedisReplicator(source, configure);
-				r.setRdbVisitor(getRdbVisitor(r, configure, uri, db, regexs, parse(type), replace, legacy));
+				r.setRdbVisitor(getRdbVisitor(r, configure, uri));
 				Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 					Replicators.closeQuietly(r);
 				}));
@@ -155,15 +154,15 @@ public class XRmt implements Callable<Integer> {
 		return 0;
 	}
 	
-	private RdbVisitor getRdbVisitor(Replicator replicator, Configure configure, RedisURI uri, List<Long> db, List<String> regexs, List<DataType> types, boolean replace, boolean legacy) throws Exception {
+	private RdbVisitor getRdbVisitor(Replicator replicator, Configure configure, RedisURI uri) throws Exception {
 		try (XEndpoint endpoint = new XEndpoint(uri.getHost(), uri.getPort(), configure.merge(uri, false), configure)) {
 			RedisObject r = endpoint.send("cluster".getBytes(), "nodes".getBytes());
 			if (r.type.isError()) {
-				return new SingleRdbVisitor(replicator, configure, uri, db, regexs, types, replace, legacy);
+				return new SingleRdbVisitor(replicator, configure, uri, db, regexs, parse(type), replace, legacy);
 			} else {
 				String config = r.getString();
 				List<String> lines = Arrays.asList(config.split("\n"));
-				return new ClusterRdbVisitor(replicator, configure, lines, regexs, types, replace);
+				return new ClusterRdbVisitor(replicator, configure, lines, regexs, parse(type), replace);
 			}
 		} catch (Throwable e) {
 			throw new RuntimeException("failed to connect to " + uri.getHost() + ":" + uri.getPort() + ", reason " + e.getMessage());

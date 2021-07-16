@@ -57,11 +57,13 @@ import picocli.CommandLine.Spec;
 		optionListHeading = "%nOptions:%n",
 		versionProvider = XVersionProvider.class,
 		customSynopsis = {
-				"Usage: rdt [-hV] (-b <source> | -s <source> -c <config> | -m <file>...)",
-				"       -o <file> [-d <db>...] [-k <regex>...] [-t <type>...]"
+				"Usage: rdt [-hV] (-b <source> [-g <db>] | -s <source> -c <config>",
+				"       | -m <file>...) -o <file> [-d <db>...] [-k <regex>...]",
+				"       [-t <type>...]"
 		},
 		footer = {"%nExamples:",
 				"  rdt -b ./dump.rdb -o ./dump.rdb1 -d 0 1",
+				"  rdt -b ./dump.rdb -o ./dump.rdb1 -d 0 1 -g 3",
 				"  rdt -b redis://127.0.0.1:6379 -o ./dump.rdb -k user.*",
 				"  rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash",
 				"  rdt -s ./dump.rdb -c ./nodes.conf -o /path/to/folder -t hash -d 0",
@@ -78,16 +80,24 @@ public class XRdt implements Callable<Integer> {
 		@ArgGroup(exclusive = false)
 		public Split split;
 		
-		@Option(names = {"-b", "--backup"}, required = true, paramLabel = "<source>", description = {"Backup <source> to local rdb file. eg:", "/path/to/dump.rdb", "redis://host:port?authPassword=foobar", "redis:///path/to/dump.rdb"})
-		public String backup;
+		@ArgGroup(exclusive = false)
+		public Backup backup;
 		
 		@Option(names = {"-m", "--merge"}, arity = "1..*", required = true, paramLabel = "<file>", description = "Merge multi rdb files to one rdb file.", type = File.class)
 		public List<File> merge;
 	}
 	
+	public static class Backup {
+		@Option(names = {"-b", "--backup"}, required = true, paramLabel = "<source>", description = {"Backup <source> to local rdb file. eg:", "/path/to/dump.rdb", "redis://host:port?authPassword=foobar", "redis:///path/to/dump.rdb"})
+		public String backup;
+		
+		@Option(names = {"-g", "--goal"}, paramLabel = "<db>", description = {"Convert db from <source> and save to rdb", "file as <db>."}, type = Long.class)
+		public Long goal;
+	}
+	
 	public static class Split {
-		@Option(names = {"-s", "--split"}, required = true, description = {"Split rdb to multi rdb files via cluster's", "<nodes.conf>. eg:", "/path/to/dump.rdb", "redis://host:port?authPassword=foobar", "redis:///path/to/dump"})
-		public String source;
+		@Option(names = {"-s", "--split"}, required = true, paramLabel = "<source>", description = {"Split rdb to multi rdb files via cluster's", "<nodes.conf>. eg:", "/path/to/dump.rdb", "redis://host:port?authPassword=foobar", "redis:///path/to/dump"})
+		public String split;
 		
 		@Option(names = {"-c", "--config"}, required = true, description = {"Redis cluster's <nodes.conf> file(--split", "<source>)."}, type = File.class)
 		public File config;
@@ -108,18 +118,25 @@ public class XRdt implements Callable<Integer> {
 	@Override
 	public Integer call() throws Exception {
 		Action action = Action.NONE;
-		String source = null;
+		// split
 		File config = null;
-		if (exclusive.split != null && exclusive.split.source != null) {
-			source = normalize(exclusive.split.source, FileType.RDB, spec, "Invalid options: '--split=<source>'");
+		String split = null;
+		
+		// backup
+		Long goal = null;
+		String backup = null;
+		
+		if (exclusive.split != null && exclusive.split.split != null) {
+			split = normalize(exclusive.split.split, FileType.RDB, spec, "Invalid options: '--split=<source>'");
 			config = exclusive.split.config;
 			Path path = Paths.get(output);
 			if (Files.exists(path) && !Files.isDirectory(Paths.get(output))) {
 				throw new ParameterException(spec.commandLine(), "Invalid options: '--out=<file>'");
 			}
 			action = Action.SPLIT;
-		} else if (exclusive.backup != null) {
-			exclusive.backup = normalize(exclusive.backup, FileType.RDB, spec, "Invalid options: '--backup=<backup>'");
+		} else if (exclusive.backup != null && exclusive.backup.backup!= null) {
+			backup = normalize(exclusive.backup.backup, FileType.RDB, spec, "Invalid options: '--backup=<backup>'");
+			goal = exclusive.backup.goal;
 			Path path = Paths.get(output);
 			if (Files.exists(path) && !Files.isRegularFile(path)) {
 				throw new ParameterException(spec.commandLine(), "Invalid options: '--out=<file>'");
@@ -135,7 +152,18 @@ public class XRdt implements Callable<Integer> {
 		
 		Configure configure = Configure.bind();
 		try (ProgressBar bar = new ProgressBar(-1)) {
-			List<Tuple2<Replicator, String>> list = action.dress(configure, source, exclusive.backup, exclusive.merge, output, db, regexs, config, DataType.parse(type));
+			Action.Arg arg = new Action.Arg();
+			arg.split = split;
+			arg.conf = config;
+			arg.backup = backup;
+			arg.goal = goal;
+			arg.merge = exclusive.merge;
+			arg.output = output;
+			arg.db = db;
+			arg.regexs = regexs;
+			arg.types = DataType.parse(type);
+			
+			List<Tuple2<Replicator, String>> list = action.dress(configure, arg);
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 				for (Tuple2<Replicator, String> tuple : list) Replicators.closeQuietly(tuple.getV1());
 			}));
