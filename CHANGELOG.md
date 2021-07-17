@@ -2,7 +2,8 @@
 
 1. build native image supported.  
 2. Fix connect `sentinel` bug.  
-3. CLI show version incompatible changes:  
+3. `rdt -b` add optional `-g` option to convert source db to `<goal>` db.  
+4. CLI show version incompatible changes:  
 ```
 # use upper case -V instead of -v to show version.
 # redis-rdb-cli<=0.6.5 show the CLI version

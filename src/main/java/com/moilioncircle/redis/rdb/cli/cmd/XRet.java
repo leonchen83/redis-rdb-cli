@@ -55,7 +55,7 @@ import picocli.CommandLine.Spec;
 		optionListHeading = "%nOptions:%n",
 		versionProvider = XVersionProvider.class,
 		customSynopsis = {
-				"Usage: ret [-hV] -s <uri> [-c <config>] [-p <parser>] -n <sink>"
+				"Usage: ret [-hV] -s <uri> [-c <conf>] [-p <parser>] -n <sink>"
 		},
 		footer = {"%nExamples:",
 				"  ret -s redis://127.0.0.1:6379 -c ./config.conf -n example",
@@ -70,7 +70,7 @@ public class XRet implements Callable<Integer> {
 	@Option(names = {"-s", "--source"}, required = true, paramLabel = "<uri>", description = {"Redis uri. eg:", "redis://host:port?authPassword=foobar"})
 	private String source;
 	
-	@Option(names = {"-c", "--config"}, required = false, description = {"External config file, if not specified,", "default value is null."}, type = File.class)
+	@Option(names = {"-c", "--config"}, required = false, paramLabel = "<conf>", description = {"External config file, if not specified,", "default value is null."}, type = File.class)
 	private File config;
 	
 	@Option(names = {"-n", "--name"}, required = true, description = {"Sink service name, registered sink service:", "example."})

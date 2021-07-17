@@ -19,6 +19,12 @@
   "allDeclaredMethods":true
 },
 {
+  "name":"com.moilioncircle.redis.rdb.cli.cmd.XRdt$Backup",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"com.moilioncircle.redis.rdb.cli.cmd.XRdt$RdtExclusive",
   "allDeclaredFields":true,
   "allDeclaredMethods":true,
@@ -26,12 +32,6 @@
 },
 {
   "name":"com.moilioncircle.redis.rdb.cli.cmd.XRdt$Split",
-  "allDeclaredFields":true,
-  "allDeclaredMethods":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-}, 
-{
-  "name":"com.moilioncircle.redis.rdb.cli.cmd.XRdt$Backup",
   "allDeclaredFields":true,
   "allDeclaredMethods":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]

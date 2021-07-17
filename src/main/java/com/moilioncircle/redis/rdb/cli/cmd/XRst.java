@@ -148,7 +148,7 @@ import picocli.CommandLine.Spec;
 		optionListHeading = "%nOptions:%n",
 		versionProvider = XVersionProvider.class,
 		customSynopsis = {
-				"Usage: rst [-hV] -s <uri> (-m <uri> | -c <config>) [-d <db>...] [-r] [-l]"
+				"Usage: rst [-hV] -s <uri> (-m <uri> | -c <conf>) [-d <db>...] [-rl]"
 		},
 		footer = {"%nExamples:",
 				"  rst -s redis://127.0.0.1:6379 -c ./nodes.conf -r",
@@ -165,7 +165,7 @@ public class XRst implements Callable<Integer> {
 		@Option(names = {"-m", "--migrate"}, required = true, paramLabel = "<uri>", description = {"Migrate to uri. eg:", "redis://host:port?authPassword=foobar."})
 		private String migrate;
 		
-		@Option(names = {"-c", "--config"}, required = true, description = {"Migrate data to cluster via redis cluster's", "<nodes.conf> file, if specified, no need to", "specify --migrate."}, type = File.class)
+		@Option(names = {"-c", "--config"}, required = true, paramLabel = "<conf>", description = {"Migrate data to cluster via redis cluster's", "<nodes.conf> file, if specified, no need to", "specify --migrate."}, type = File.class)
 		private File config;
 	}
 	

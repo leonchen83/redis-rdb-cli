@@ -57,7 +57,7 @@ import picocli.CommandLine.Spec;
 		optionListHeading = "%nOptions:%n",
 		versionProvider = XVersionProvider.class,
 		customSynopsis = {
-				"Usage: rdt [-hV] (-b <source> [-g <db>] | -s <source> -c <config>",
+				"Usage: rdt [-hV] (-b <source> [-g <db>] | -s <source> -c <conf>",
 				"       | -m <file>...) -o <file> [-d <db>...] [-k <regex>...]",
 				"       [-t <type>...]"
 		},
@@ -99,7 +99,7 @@ public class XRdt implements Callable<Integer> {
 		@Option(names = {"-s", "--split"}, required = true, paramLabel = "<source>", description = {"Split rdb to multi rdb files via cluster's", "<nodes.conf>. eg:", "/path/to/dump.rdb", "redis://host:port?authPassword=foobar", "redis:///path/to/dump"})
 		public String split;
 		
-		@Option(names = {"-c", "--config"}, required = true, description = {"Redis cluster's <nodes.conf> file(--split", "<source>)."}, type = File.class)
+		@Option(names = {"-c", "--config"}, required = true, paramLabel = "<conf>", description = {"Redis cluster's <nodes.conf> file(--split", "<source>)."}, type = File.class)
 		public File config;
 	}
 	
