@@ -16,7 +16,7 @@ jobs:
           native-image: true
       - name: Maven Build
         run:
-          mvn clean install -Pnative-image
+          mvn clean install -Pnative
       - name: Show Native Image
         run:
           ls -lht ./target/redis-rdb-cli-release/redis-rdb-cli/bin
