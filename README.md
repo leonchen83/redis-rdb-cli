@@ -58,7 +58,14 @@ cd target/redis-rdb-cli-release/redis-rdb-cli/bin
 
 ```java  
 docker run -it --rm redisrdbcli/redis-rdb-cli
-rct -v
+rct -V
+```
+
+## Build native image via graalvm in docker
+```
+docker build -m 8g -f DockerfileNative -t redisrdbcli:redis-rdb-cli .
+docker run -it redisrdbcli:redis-rdb-cli bash
+bash-5.1# rct -V
 ```
 
 ## Windows Environment Variables
