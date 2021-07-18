@@ -58,7 +58,8 @@ public class ProgressBar implements Closeable {
         else
             this.num.set(num);
         if (total <= 0) {
-            show(-1, -1, this.num.get(), file);
+            // set 0,1 so that show 1th bar.
+            show(0, 1, this.num.get(), file);
             return;
         }
         double percentage = this.num.get() / (double) total * 100;
@@ -73,9 +74,14 @@ public class ProgressBar implements Closeable {
         long elapsed = now - atime;
 
         if (elapsed < 1000 && prev == next &&
-                (file == null || file.equals(this.file))) return;
-        int speed = (int) ((double) num / (now - ctime) * 1000);
-        String strSpeed = Strings.lappend(Strings.pretty(speed), 7, ' ');
+                (file == null || file.equals(this.file))) {
+            return;
+        }
+        
+        // avoid divide 0
+        elapsed = Math.max(now - ctime, 1);
+        int rawSpeed = (int) ((double) num / elapsed * 1000);
+        String speed = Strings.lappend(Strings.pretty(rawSpeed), 7, ' ');
         this.file = file;
         this.atime = now;
         this.max = Math.max(Strings.length(file), max);
@@ -104,8 +110,8 @@ public class ProgressBar implements Closeable {
             }
             builder.append(']');
             int used = builder.length();
-            if (len - used >= 30 + 5 + strSpeed.length()) {
-                int ret = len - used - 5 - strSpeed.length();
+            if (len - used >= 30 + 5 + speed.length()) {
+                int ret = len - used - 5 - speed.length();
                 int n = (int) (next * (ret / 100d));
                 builder.append('[');
                 for (int i = 0; i < ret; i++) {
@@ -118,7 +124,7 @@ public class ProgressBar implements Closeable {
             }
         }
         builder.append('|');
-        builder.append(strSpeed).append("/s");
+        builder.append(speed).append("/s");
         builder.append(']');
         System.out.print('\r');
         System.out.print(builder.toString());
