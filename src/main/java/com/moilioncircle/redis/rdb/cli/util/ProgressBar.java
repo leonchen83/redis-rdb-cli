@@ -16,12 +16,13 @@
 
 package com.moilioncircle.redis.rdb.cli.util;
 
+import static org.jline.terminal.TerminalBuilder.builder;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.jline.terminal.Terminal;
-import org.jline.terminal.TerminalBuilder;
 
 /**
  * @author Baoyi Chen
@@ -30,18 +31,21 @@ public class ProgressBar implements Closeable {
 
     private final long ctime;
     private final long total;
+    private Terminal terminal;
     private volatile int max = 0;
     private volatile boolean bit;
     private volatile String file;
-    private final Terminal terminal;
     private volatile double percentage;
+    private volatile boolean first = true;
     private AtomicLong num = new AtomicLong();
     private volatile long atime = System.currentTimeMillis();
 
     public ProgressBar(long total) throws IOException {
         this.total = total;
         this.ctime = System.currentTimeMillis();
-        this.terminal = TerminalBuilder.builder().dumb(true).build();
+        if (total > 0) {
+            this.terminal = builder().dumb(true).build();
+        }
     }
 
     public void react(long num) {
@@ -58,8 +62,7 @@ public class ProgressBar implements Closeable {
         else
             this.num.set(num);
         if (total <= 0) {
-            // set 0,1 so that show 1th bar.
-            show(0, 1, this.num.get(), file);
+            show(-1, -1, this.num.get(), file);
             return;
         }
         double percentage = this.num.get() / (double) total * 100;
@@ -72,10 +75,14 @@ public class ProgressBar implements Closeable {
     private void show(int prev, int next, long num, String file) {
         long now = System.currentTimeMillis();
         long elapsed = now - atime;
-
-        if (elapsed < 1000 && prev == next &&
-                (file == null || file.equals(this.file))) {
-            return;
+        
+        if (first) {
+            first = false;
+        } else {
+            if (elapsed < 1000 && prev == next &&
+                    (file == null || file.equals(this.file))) {
+                return;
+            }
         }
         
         // avoid divide 0
@@ -85,7 +92,6 @@ public class ProgressBar implements Closeable {
         this.file = file;
         this.atime = now;
         this.max = Math.max(Strings.length(file), max);
-        int len = Math.max(terminal.getWidth(), 120);
 
         StringBuilder builder = new StringBuilder();
         if (bit) {
@@ -102,6 +108,7 @@ public class ProgressBar implements Closeable {
                 builder.append(Strings.lappend(file, max, ' '));
             }
         } else {
+            int len = Math.max(terminal.getWidth(), 120);
             builder.append('/').append(Strings.lappend(Strings.pretty(total), 7, ' ')).append('|');
             builder.append(Strings.lappend(next, 3, ' ')).append('%');
             if (file != null) {
