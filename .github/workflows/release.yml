@@ -73,20 +73,20 @@ jobs:
         push: true
         tags: ${{ secrets.DOCKER_USER }}/${{ secrets.REPO }}:${{ env.RELEASE_TAG }}
     - name: Build and Push latest-native
-        id: latest-native
-        uses: docker/build-push-action@v2
-        with:
-          context: ./
-          file: ./DockerfileNative
-          push: true
-          tags: ${{ secrets.DOCKER_USER }}/${{ secrets.REPO }}:latest-native
+      id: latest-native
+      uses: docker/build-push-action@v2
+      with:
+        context: ./
+        file: ./DockerfileNative
+        push: true
+        tags: ${{ secrets.DOCKER_USER }}/${{ secrets.REPO }}:latest-native
     - name: Build and Push ${{ env.RELEASE_TAG }}-native
-        id: tag-native
-        uses: docker/build-push-action@v2
-        with:
-          context: ./
-          file: ./DockerfileNative
-          push: true
-          tags: ${{ secrets.DOCKER_USER }}/${{ secrets.REPO }}:${{ env.RELEASE_TAG }}-native
+      id: tag-native
+      uses: docker/build-push-action@v2
+      with:
+        context: ./
+        file: ./DockerfileNative
+        push: true
+        tags: ${{ secrets.DOCKER_USER }}/${{ secrets.REPO }}:${{ env.RELEASE_TAG }}-native
     - name: Image digest
       run: echo ${{ steps.docker_build.outputs.digest }}
