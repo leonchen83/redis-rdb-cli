@@ -14,7 +14,7 @@ RUN mkdir -p /usr/share/maven /usr/share/maven/ref \
  && rm -f /tmp/apache-maven.tar.gz \
  && ln -s /usr/share/maven/bin/mvn /usr/bin/mvn
  
-RUN mvn clean install -Pnative -DskipTests
+RUN mvn clean install -Pstatic -DskipTests
 
 FROM frolvlad/alpine-glibc:alpine-3.14_glibc-2.33
 COPY --from=builder /app/target/redis-rdb-cli-release.zip /tmp/redis-rdb-cli-release.zip

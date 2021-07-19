@@ -16,4 +16,4 @@ jobs:
           native-image: true
       - name: Maven Build
         run:
-          mvn clean install -Pnative -DskipTests
+          mvn clean install -Pstatic -DskipTests
