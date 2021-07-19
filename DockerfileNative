@@ -16,7 +16,7 @@ RUN mkdir -p /usr/share/maven /usr/share/maven/ref \
  
 RUN mvn clean install -Pnative -DskipTests
 
-FROM frolvlad/alpine-glibc:alpine-3.14_glibc-2.33
+FROM alpine:3.14
 COPY --from=builder /app/target/redis-rdb-cli-release.zip /tmp/redis-rdb-cli-release.zip
 WORKDIR /app
 # because of the cli has set shebang
