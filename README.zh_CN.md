@@ -355,7 +355,7 @@ rmt -s /path/to/dump.rdb -m redis://127.0.0.1:30001 -r
 rdt -b redis://192.168.1.105:6379 -o /path/to/dump.rdb
 ```
 
-### 备份远端redis的rdb并把源端的db转换成<goal>
+### 备份远端redis的rdb并把源端的db转换成目标db
 
 ```java  
 rdt -b redis://192.168.1.105:6379 -o /path/to/dump.rdb --goal 3

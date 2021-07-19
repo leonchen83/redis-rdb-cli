@@ -355,7 +355,7 @@ rmt -s /path/to/dump.rdb -m redis://127.0.0.1:30001 -r
 rdt -b redis://192.168.1.105:6379 -o /path/to/dump.rdb
 ```
 
-### Backup remote rdb and convert db to <goal>
+### Backup remote rdb and convert db to dest db
 
 ```java  
 rdt -b redis://192.168.1.105:6379 -o /path/to/dump.rdb --goal 3
