@@ -19,4 +19,6 @@ con_file="$con_dir"/redis-rdb-cli.conf
 
 (ulimit -n 65535 || true) 2>/dev/null
 
-${bin_dir}/misc -Dlog4j.configurationFile=${log_file} -Dcli.log.path=${log_dir} -Dconf=${con_file} -Drct.home=${base_dir} rct $@
+encoding="-Dsun.stdout.encoding=UTF-8 -Dsun.err.encoding=UTF-8 -Dfile.encoding=UTF-8"
+
+${bin_dir}/misc ${encoding} -Dlog4j.configurationFile=${log_file} -Dcli.log.path=${log_dir} -Dconf=${con_file} -Drct.home=${base_dir} rct $@
