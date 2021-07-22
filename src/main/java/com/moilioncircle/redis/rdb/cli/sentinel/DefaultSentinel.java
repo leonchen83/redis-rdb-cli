@@ -51,7 +51,7 @@ import redis.clients.jedis.exceptions.JedisException;
  * @author Baoyi Chen
  */
 public class DefaultSentinel implements Sentinel {
-    
+
     protected static final Logger logger = LoggerFactory.getLogger(DefaultSentinel.class);
     
     protected volatile Jedis jedis;
@@ -62,48 +62,48 @@ public class DefaultSentinel implements Sentinel {
     protected AtomicBoolean running = new AtomicBoolean(true);
     protected final List<SentinelListener> listeners = new CopyOnWriteArrayList<>();
     protected final ScheduledExecutorService schedule = newSingleThreadScheduledExecutor();
-    
+
     public DefaultSentinel(List<HostAndPort> hosts, String masterName, Configuration configuration) {
         this.hosts = hosts;
         this.masterName = masterName;
         this.configuration = configuration;
     }
-    
+
     @Override
     public void open() throws IOException {
         await(schedule.scheduleWithFixedDelay(this::pulse, 0, 10, SECONDS));
     }
-    
+
     @Override
     public void close() throws IOException {
         unsubscribe(channel);
         terminateQuietly(schedule, 0, MILLISECONDS);
     }
-    
+
     @Override
     public boolean addSentinelListener(SentinelListener listener) {
         return this.listeners.add(listener);
     }
-    
+
     @Override
     public boolean removeSentinelListener(SentinelListener listener) {
         return this.listeners.remove(listener);
     }
-    
+
     protected void doCloseListener() {
         if (listeners.isEmpty()) return;
         for (SentinelListener listener : listeners) {
             listener.onClose(this);
         }
     }
-    
+
     protected void doSwitchListener(HostAndPort host) {
         if (listeners.isEmpty()) return;
         for (SentinelListener listener : listeners) {
             listener.onSwitch(this, host);
         }
     }
-    
+
     protected void pulse() {
         for (HostAndPort sentinel : hosts) {
             if (!this.running.get()) continue;
@@ -123,7 +123,7 @@ public class DefaultSentinel implements Sentinel {
             }
         }
     }
-    
+
     protected class PubSub extends JedisPubSub {
         
         @Override
@@ -145,7 +145,7 @@ public class DefaultSentinel implements Sentinel {
                     logger.error("failed to match master, prev: {}, next: {}", prev, next);
                     return;
                 }
-                
+
                 final String host = messages[3];
                 final int port = parseInt(messages[4]);
                 doSwitchListener(new HostAndPort(host, port));
