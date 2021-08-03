@@ -37,6 +37,7 @@ hs_err_pid*
 
 # Vscode
 /.vscode
+/.apt_generated_tests
 .factorypath
 
 # log

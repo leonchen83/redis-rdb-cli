@@ -81,12 +81,6 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
         escaper.encode(value, out);
     }
 
-    private void emitField(String field, int value) {
-        emitString(field.getBytes());
-        OutputStreams.write(':', out);
-        escaper.encode(String.valueOf(value).getBytes(), out);
-    }
-
     private void emitField(String field, long value) {
         emitString(field.getBytes());
         OutputStreams.write(':', out);
