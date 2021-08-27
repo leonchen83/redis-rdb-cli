@@ -786,6 +786,6 @@ rct -f test -s redis://127.0.0.1:6379 -o ./out.csv -t string -d 0 -e json
 
 ## Supported by IntelliJ IDEA
 
-[IntelliJ IDEA](https://www.jetbrains.com/?from=redis-replicator) is a Java integrated development environment (IDE) for developing computer software.  
+[IntelliJ IDEA](https://www.jetbrains.com/?from=redis-rdb-cli) is a Java integrated development environment (IDE) for developing computer software.  
 It is developed by JetBrains (formerly known as IntelliJ), and is available as an Apache 2 Licensed community edition,  
 and in a proprietary commercial edition. Both can be used for commercial development.  
