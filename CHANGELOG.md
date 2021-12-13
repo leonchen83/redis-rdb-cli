@@ -1,3 +1,7 @@
+### 0.7.1
+
+Update log4j2 to 2.15.0.  
+
 ### 0.7.0
 
 1. build native image supported.  
