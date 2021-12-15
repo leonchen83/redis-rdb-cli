@@ -1,6 +1,10 @@
+### 0.7.2
+
+Upgrade log4j2 to 2.16.0 to fix Security Vulnerability CVE-2021-44228.  
+
 ### 0.7.1
 
-Update log4j2 to 2.15.0.  
+Upgrade log4j2 to 2.15.0.  
 
 ### 0.7.0
 
