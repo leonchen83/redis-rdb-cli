@@ -581,13 +581,13 @@ User should follow the steps below to implement a sink service.
         <dependency>
             <groupId>com.moilioncircle</groupId>
             <artifactId>redis-rdb-cli-api</artifactId>
-            <version>1.5.1</version>
+            <version>1.6.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.moilioncircle</groupId>
             <artifactId>redis-replicator</artifactId>
-            <version>[3.4.0, )</version>
+            <version>[3.6.0, )</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
