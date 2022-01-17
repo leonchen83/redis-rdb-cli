@@ -28,8 +28,11 @@ import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.SET;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.ZADD;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.ZERO_BUF;
 import static com.moilioncircle.redis.replicator.Constants.DOLLAR;
+import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAINER_PACKED;
+import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAINER_PLAIN;
 import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
 import static com.moilioncircle.redis.replicator.Constants.STAR;
+import static com.moilioncircle.redis.replicator.rdb.BaseRdbParser.StringHelper.listPackEntry;
 import static java.nio.ByteBuffer.wrap;
 
 import java.io.File;
@@ -54,6 +57,7 @@ import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.BaseRdbParser;
 import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
+import com.moilioncircle.redis.replicator.util.ByteArray;
 import com.moilioncircle.redis.replicator.util.Strings;
 
 /**
@@ -381,8 +385,34 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     protected Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        // TODO
-        return null;
+        if (replace) emit(this.out, DEL, key);
+        BaseRdbParser parser = new BaseRdbParser(in);
+        RedisInputStream listPack = new RedisInputStream(parser.rdbLoadPlainStringObject());
+        List<byte[]> list = new ArrayList<>();
+        listPack.skip(4); // total-bytes
+        int len = listPack.readInt(2);
+        while (len > 0) {
+            byte[] element = listPackEntry(listPack);
+            len--;
+            double score = Double.valueOf(Strings.toString(listPackEntry(listPack)));
+            len--;
+            list.add(String.valueOf(score).getBytes());
+            list.add(element);
+            if (list.size() == 2 * batch) {
+                emit(this.out, ZADD, key, list);
+                list.clear();
+            }
+        }
+        int lpend = listPack.read(); // lp-end
+        if (lpend != 255) {
+            throw new AssertionError("listpack expect 255 but " + lpend);
+        }
+        if (!list.isEmpty()) emit(this.out, ZADD, key, list);
+        DummyKeyValuePair kv = new DummyKeyValuePair();
+        kv.setValueRdbType(type);
+        kv.setKey(key);
+        kv.setContains(contains);
+        return context.valueOf(kv);
     }
     
     @Override
@@ -420,8 +450,34 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     protected Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        // TODO
-        return null;
+        if (replace) emit(this.out, DEL, key);
+        BaseRdbParser parser = new BaseRdbParser(in);
+        RedisInputStream listPack = new RedisInputStream(parser.rdbLoadPlainStringObject());
+        listPack.skip(4); // total-bytes
+        int len = listPack.readInt(2);
+        List<byte[]> list = new ArrayList<>();
+        while (len > 0) {
+            byte[] field = listPackEntry(listPack);
+            len--;
+            byte[] value = listPackEntry(listPack);
+            len--;
+            list.add(field);
+            list.add(value);
+            if (list.size() == 2 * batch) {
+                emit(this.out, HMSET, key, list);
+                list.clear();
+            }
+        }
+        int lpend = listPack.read(); // lp-end
+        if (lpend != 255) {
+            throw new AssertionError("listpack expect 255 but " + lpend);
+        }
+        if (!list.isEmpty()) emit(this.out, HMSET, key, list);
+        DummyKeyValuePair kv = new DummyKeyValuePair();
+        kv.setValueRdbType(type);
+        kv.setKey(key);
+        kv.setContains(contains);
+        return context.valueOf(kv);
     }
     
     @Override
@@ -459,8 +515,45 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     protected Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        // TODO
-        return null;
+        if (replace) emit(this.out, DEL, key);
+        BaseRdbParser parser = new BaseRdbParser(in);
+        List<byte[]> list = new ArrayList<>();
+        long len = parser.rdbLoadLen().len;
+        for (long i = 0; i < len; i++) {
+            long container = parser.rdbLoadLen().len;
+            ByteArray bytes = parser.rdbLoadPlainStringObject();
+            if (container == QUICKLIST_NODE_CONTAINER_PLAIN) {
+                list.add(bytes.first());
+                if (list.size() == batch) {
+                    emit(this.out, RPUSH, key, list);
+                    list.clear();
+                }
+            } else if (container == QUICKLIST_NODE_CONTAINER_PACKED) {
+                RedisInputStream listPack = new RedisInputStream(bytes);
+                listPack.skip(4); // total-bytes
+                int innerLen = listPack.readInt(2);
+                for (int j = 0; j < innerLen; j++) {
+                    byte[] e = listPackEntry(listPack);
+                    list.add(e);
+                    if (list.size() == batch) {
+                        emit(this.out, RPUSH, key, list);
+                        list.clear();
+                    }
+                }
+                int lpend = listPack.read(); // lp-end
+                if (lpend != 255) {
+                    throw new AssertionError("listpack expect 255 but " + lpend);
+                }
+            } else {
+                throw new UnsupportedOperationException(String.valueOf(container));
+            }
+        }
+        if (!list.isEmpty()) emit(this.out, RPUSH, key, list);
+        DummyKeyValuePair kv = new DummyKeyValuePair();
+        kv.setValueRdbType(type);
+        kv.setKey(key);
+        kv.setContains(contains);
+        return context.valueOf(kv);
     }
     
     @Override

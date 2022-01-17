@@ -21,10 +21,14 @@ import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.RESTOR
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.SELECT;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.ZERO_BUF;
 import static com.moilioncircle.redis.replicator.Constants.DOLLAR;
+import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAINER_PACKED;
+import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAINER_PLAIN;
 import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
+import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_HASH;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_LIST;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET;
 import static com.moilioncircle.redis.replicator.Constants.STAR;
+import static com.moilioncircle.redis.replicator.rdb.BaseRdbParser.StringHelper.listPackEntry;
 import static java.nio.ByteBuffer.wrap;
 
 import java.io.File;
@@ -51,6 +55,7 @@ import com.moilioncircle.redis.replicator.rdb.BaseRdbParser;
 import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
 import com.moilioncircle.redis.replicator.util.ByteArray;
+import com.moilioncircle.redis.replicator.util.Strings;
 
 /**
  * @author Baoyi Chen
@@ -181,7 +186,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             if (version < 8 /* since redis rdb version 8 */) {
-                // downgrade to RDB_TYPE_LIST
+                // downgrade to RDB_TYPE_ZSET
                 BaseRdbParser parser = new BaseRdbParser(in);
                 BaseRdbEncoder encoder = new BaseRdbEncoder();
                 ByteBufferOutputStream out1 = new ByteBufferOutputStream(configure.getOutputBufferSize());
@@ -322,8 +327,48 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     protected Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        // TODO
-        return null;
+        ByteBuffer ex = ZERO_BUF;
+        if (context.getExpiredValue() != null) {
+            long ms = context.getExpiredValue() - System.currentTimeMillis();
+            if (ms <= 0) {
+                return super.doApplyZSetListPack(in, version, key, contains, type, context);
+            } else {
+                ex = wrap(String.valueOf(ms).getBytes());
+            }
+        }
+        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
+            if (version < 10 /* since redis rdb version 10 */) {
+                // downgrade to RDB_TYPE_ZSET
+                BaseRdbParser parser = new BaseRdbParser(in);
+                BaseRdbEncoder encoder = new BaseRdbEncoder();
+                ByteBufferOutputStream out1 = new ByteBufferOutputStream(configure.getOutputBufferSize());
+                RedisInputStream listPack = new RedisInputStream(parser.rdbLoadPlainStringObject());
+                listPack.skip(4); // total-bytes
+                int len = listPack.readInt(2);
+                long targetLen = len / 2;
+                while (len > 0) {
+                    byte[] element = listPackEntry(listPack);
+                    encoder.rdbGenericSaveStringObject(new ByteArray(element), out1);
+                    len--;
+                    double score = Double.valueOf(Strings.toString(listPackEntry(listPack)));
+                    encoder.rdbSaveDoubleValue(score, out1);
+                    len--;
+                }
+                try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper, false)) {
+                    listener.write((byte) RDB_TYPE_ZSET);
+                    listener.handle(encoder.rdbSaveLen(targetLen));
+                    listener.handle(out1.toByteBuffer());
+                }
+            } else {
+                try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
+                    listener.write((byte) type);
+                    super.doApplyZSetListPack(in, version, key, contains, type, context);
+                }
+            }
+            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
+            return context.valueOf(new DummyKeyValuePair());
+        }
     }
     
     @Override
@@ -350,8 +395,48 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     protected Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        // TODO
-        return null;
+        ByteBuffer ex = ZERO_BUF;
+        if (context.getExpiredValue() != null) {
+            long ms = context.getExpiredValue() - System.currentTimeMillis();
+            if (ms <= 0) {
+                return super.doApplyHashListPack(in, version, key, contains, type, context);
+            } else {
+                ex = wrap(String.valueOf(ms).getBytes());
+            }
+        }
+        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
+            if (version < 10 /* since redis rdb version 10 */) {
+                // downgrade to RDB_TYPE_HASH
+                BaseRdbParser parser = new BaseRdbParser(in);
+                BaseRdbEncoder encoder = new BaseRdbEncoder();
+                ByteBufferOutputStream out1 = new ByteBufferOutputStream(configure.getOutputBufferSize());
+                RedisInputStream listPack = new RedisInputStream(parser.rdbLoadPlainStringObject());
+                listPack.skip(4); // total-bytes
+                int len = listPack.readInt(2);
+                long targetLen = len / 2;
+                while (len > 0) {
+                    byte[] field = listPackEntry(listPack);
+                    encoder.rdbGenericSaveStringObject(new ByteArray(field), out1);
+                    len--;
+                    byte[] value = listPackEntry(listPack);
+                    encoder.rdbGenericSaveStringObject(new ByteArray(value), out1);
+                    len--;
+                }
+                try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper, false)) {
+                    listener.write((byte) RDB_TYPE_HASH);
+                    listener.handle(encoder.rdbSaveLen(targetLen));
+                    listener.handle(out1.toByteBuffer());
+                }
+            } else {
+                try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
+                    listener.write((byte) type);
+                    super.doApplyHashListPack(in, version, key, contains, type, context);
+                }
+            }
+            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
+            return context.valueOf(new DummyKeyValuePair());
+        }
     }
     
     @Override
@@ -407,8 +492,61 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     protected Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        // TODO
-        return null;
+        ByteBuffer ex = ZERO_BUF;
+        if (context.getExpiredValue() != null) {
+            long ms = context.getExpiredValue() - System.currentTimeMillis();
+            if (ms <= 0) {
+                return super.doApplyListQuickList2(in, version, key, contains, type, context);
+            } else {
+                ex = wrap(String.valueOf(ms).getBytes());
+            }
+        }
+        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
+            if (version < 10 /* since redis rdb version 10 */) {
+                // downgrade to RDB_TYPE_LIST
+                BaseRdbParser parser = new BaseRdbParser(in);
+                BaseRdbEncoder encoder = new BaseRdbEncoder();
+                ByteBufferOutputStream out1 = new ByteBufferOutputStream(configure.getOutputBufferSize());
+                int total = 0;
+                long len = parser.rdbLoadLen().len;
+                for (long i = 0; i < len; i++) {
+                    long container = parser.rdbLoadLen().len;
+                    ByteArray bytes = parser.rdbLoadPlainStringObject();
+                    if (container == QUICKLIST_NODE_CONTAINER_PLAIN) {
+                        encoder.rdbGenericSaveStringObject(new ByteArray(bytes.first()), out1);
+                        total++;
+                    } else if (container == QUICKLIST_NODE_CONTAINER_PACKED) {
+                        RedisInputStream listPack = new RedisInputStream(bytes);
+                        listPack.skip(4); // total-bytes
+                        int innerLen = listPack.readInt(2);
+                        for (int j = 0; j < innerLen; j++) {
+                            byte[] e = listPackEntry(listPack);
+                            encoder.rdbGenericSaveStringObject(new ByteArray(e), out1);
+                            total++;
+                        }
+                        int lpend = listPack.read(); // lp-end
+                        if (lpend != 255) {
+                            throw new AssertionError("listpack expect 255 but " + lpend);
+                        }
+                    } else {
+                        throw new UnsupportedOperationException(String.valueOf(container));
+                    }
+                }
+                try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper, false)) {
+                    listener.write((byte) RDB_TYPE_LIST);
+                    listener.handle(encoder.rdbSaveLen(total));
+                    listener.handle(out1.toByteBuffer());
+                }
+            } else {
+                try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
+                    listener.write((byte) type);
+                    super.doApplyListQuickList2(in, version, key, contains, type, context);
+                }
+            }
+            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
+            return context.valueOf(new DummyKeyValuePair());
+        }
     }
     
     @Override

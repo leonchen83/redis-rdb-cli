@@ -17,6 +17,8 @@
 package com.moilioncircle.redis.rdb.cli.ext.rct;
 
 import static com.moilioncircle.redis.rdb.cli.glossary.DataType.parse;
+import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAINER_PACKED;
+import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAINER_PLAIN;
 import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
 import static com.moilioncircle.redis.replicator.Constants.STREAM_ITEM_FLAG_DELETED;
 import static com.moilioncircle.redis.replicator.Constants.STREAM_ITEM_FLAG_SAMEFIELDS;
@@ -519,8 +521,36 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     
     @Override
     protected Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        // TODO
-        return null;
+        long mark = System.nanoTime();
+        BaseRdbParser parser = new BaseRdbParser(in);
+        ByteArray ary = parser.rdbLoadPlainStringObject();
+        RedisInputStream listPack = new RedisInputStream(ary);
+        long max = 0;
+        long length = 0;
+        listPack.skip(4); // total-bytes
+        int len = listPack.readInt(2);
+        while (len > 0) {
+            byte[] element = listPackEntry(listPack);
+            len--;
+            Double.valueOf(Strings.toString(listPackEntry(listPack)));
+            len--;
+            max = Math.max(max, size.element(element));
+            length++;
+        }
+        int lpend = listPack.read(); // lp-end
+        if (lpend != 255) {
+            throw new AssertionError("listpack expect 255 but " + lpend);
+        }
+        DummyKeyValuePair kv = new DummyKeyValuePair();
+        kv.setValueRdbType(type);
+        kv.setKey(key);
+        kv.setValue(ary.length());
+        kv.setContains(contains);
+        kv.setLength(length);
+        kv.setMax(max);
+        monitor.add("count_zset", 1, System.nanoTime() - mark);
+        monitor.add("memory_zset", kv.getValue());
+        return context.valueOf(kv);
     }
     
     @Override
@@ -561,8 +591,37 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     
     @Override
     protected Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        // TODO
-        return null;
+        long mark = System.nanoTime();
+        BaseRdbParser parser = new BaseRdbParser(in);
+        ByteArray ary = parser.rdbLoadPlainStringObject();
+        RedisInputStream listPack = new RedisInputStream(ary);
+        long max = 0;
+        long length = 0;
+        listPack.skip(4); // total-bytes
+        int len = listPack.readInt(2);
+        while (len > 0) {
+            byte[] field = listPackEntry(listPack);
+            len--;
+            byte[] value = listPackEntry(listPack);
+            len--;
+            max = Math.max(max, size.element(field));
+            max = Math.max(max, size.element(value));
+            length++;
+        }
+        int lpend = listPack.read(); // lp-end
+        if (lpend != 255) {
+            throw new AssertionError("listpack expect 255 but " + lpend);
+        }
+        DummyKeyValuePair kv = new DummyKeyValuePair();
+        kv.setValueRdbType(type);
+        kv.setKey(key);
+        kv.setValue(ary.length());
+        kv.setContains(contains);
+        kv.setLength(length);
+        kv.setMax(max);
+        monitor.add("count_hash", 1, System.nanoTime() - mark);
+        monitor.add("memory_hash", kv.getValue());
+        return context.valueOf(kv);
     }
     
     @Override
@@ -605,8 +664,47 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     
     @Override
     protected Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        // TODO
-        return null;
+        long mark = System.nanoTime();
+        BaseRdbParser parser = new BaseRdbParser(in);
+        long len = parser.rdbLoadLen().len;
+        long val = 0;
+        long max = 0;
+        long length = 0;
+        for (long i = 0; i < len; i++) {
+            long container = parser.rdbLoadLen().len;
+            ByteArray bytes = parser.rdbLoadPlainStringObject();
+            val += bytes.length();
+            if (container == QUICKLIST_NODE_CONTAINER_PLAIN) {
+                max = Math.max(max, size.element(bytes.first()));
+                length++;
+            } else if (container == QUICKLIST_NODE_CONTAINER_PACKED) {
+                RedisInputStream listPack = new RedisInputStream(bytes);
+                listPack.skip(4); // total-bytes
+                int innerLen = listPack.readInt(2);
+                for (int j = 0; j < innerLen; j++) {
+                    byte[] e = listPackEntry(listPack);
+                    max = Math.max(max, size.element(e));
+                    length++;
+                }
+                int lpend = listPack.read(); // lp-end
+                if (lpend != 255) {
+                    throw new AssertionError("listpack expect 255 but " + lpend);
+                }
+            } else {
+                throw new UnsupportedOperationException(String.valueOf(container));
+            }
+        }
+        val += size.quicklist(len);
+        DummyKeyValuePair kv = new DummyKeyValuePair();
+        kv.setValueRdbType(type);
+        kv.setKey(key);
+        kv.setValue(val);
+        kv.setContains(contains);
+        kv.setLength(length);
+        kv.setMax(max);
+        monitor.add("count_list", 1, System.nanoTime() - mark);
+        monitor.add("memory_list", kv.getValue());
+        return context.valueOf(kv);
     }
     
     @Override

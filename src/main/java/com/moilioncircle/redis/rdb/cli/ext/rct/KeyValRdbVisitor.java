@@ -16,7 +16,10 @@
 
 package com.moilioncircle.redis.rdb.cli.ext.rct;
 
+import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAINER_PACKED;
+import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAINER_PLAIN;
 import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
+import static com.moilioncircle.redis.replicator.rdb.BaseRdbParser.StringHelper.listPackEntry;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,6 +39,7 @@ import com.moilioncircle.redis.replicator.rdb.BaseRdbParser;
 import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
 import com.moilioncircle.redis.replicator.rdb.datatype.Module;
 import com.moilioncircle.redis.replicator.rdb.module.ModuleParser;
+import com.moilioncircle.redis.replicator.util.ByteArray;
 import com.moilioncircle.redis.replicator.util.Strings;
 
 /**
@@ -263,8 +267,28 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     protected Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        // TODO
-        return null;
+        quote(key, out);
+        delimiter(out);
+        BaseRdbParser parser = new BaseRdbParser(in);
+        RedisInputStream listPack = new RedisInputStream(parser.rdbLoadPlainStringObject());
+        listPack.skip(4); // total-bytes
+        int len = listPack.readInt(2);
+        while (len > 0) {
+            byte[] element = listPackEntry(listPack);
+            len--;
+            double score = Double.valueOf(Strings.toString(listPackEntry(listPack)));
+            len--;
+            quote(element, out);
+            delimiter(out);
+            escaper.encode(score, out);
+            if (len - 1 > 0) delimiter(out);
+            else OutputStreams.write('\n', out);
+        }
+        int lpend = listPack.read(); // lp-end
+        if (lpend != 255) {
+            throw new AssertionError("listpack expect 255 but " + lpend);
+        }
+        return context.valueOf(new DummyKeyValuePair());
     }
     
     @Override
@@ -296,8 +320,28 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     protected Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        // TODO
-        return null;
+        quote(key, out);
+        delimiter(out);
+        BaseRdbParser parser = new BaseRdbParser(in);
+        RedisInputStream listPack = new RedisInputStream(parser.rdbLoadPlainStringObject());
+        listPack.skip(4); // total-bytes
+        int len = listPack.readInt(2);
+        while (len > 0) {
+            byte[] field = listPackEntry(listPack);
+            len--;
+            byte[] value = listPackEntry(listPack);
+            len--;
+            quote(field, out);
+            delimiter(out);
+            quote(value, out);
+            if (len - 1 > 0) delimiter(out);
+            else OutputStreams.write('\n', out);
+        }
+        int lpend = listPack.read(); // lp-end
+        if (lpend != 255) {
+            throw new AssertionError("listpack expect 255 but " + lpend);
+        }
+        return context.valueOf(new DummyKeyValuePair());
     }
     
     @Override
@@ -328,8 +372,37 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     protected Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        // TODO
-        return null;
+        quote(key, out);
+        delimiter(out);
+        BaseRdbParser parser = new BaseRdbParser(in);
+        long len = parser.rdbLoadLen().len;
+        for (long i = 0; i < len; i++) {
+            long container = parser.rdbLoadLen().len;
+            ByteArray bytes = parser.rdbLoadPlainStringObject();
+            if (container == QUICKLIST_NODE_CONTAINER_PLAIN) {
+                quote(bytes.first(), out);
+                if (i + 1 < len) delimiter(out);
+                else OutputStreams.write('\n', out);
+            } else if (container == QUICKLIST_NODE_CONTAINER_PACKED) {
+                RedisInputStream listPack = new RedisInputStream(bytes);
+                listPack.skip(4); // total-bytes
+                int innerLen = listPack.readInt(2);
+                for (int j = 0; j < innerLen; j++) {
+                    byte[] e = listPackEntry(listPack);
+                    quote(e, out);
+                    if (i + 1 < len) delimiter(out);
+                    else if (j + 1 < innerLen) delimiter(out);
+                    else OutputStreams.write('\n', out);
+                }
+                int lpend = listPack.read(); // lp-end
+                if (lpend != 255) {
+                    throw new AssertionError("listpack expect 255 but " + lpend);
+                }
+            } else {
+                throw new UnsupportedOperationException(String.valueOf(container));
+            }
+        }
+        return context.valueOf(new DummyKeyValuePair());
     }
     
     @Override

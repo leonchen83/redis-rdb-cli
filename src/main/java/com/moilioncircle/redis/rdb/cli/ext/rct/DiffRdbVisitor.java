@@ -16,6 +16,8 @@
 
 package com.moilioncircle.redis.rdb.cli.ext.rct;
 
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.FUNCTION;
+import static com.moilioncircle.redis.replicator.Constants.RDB_OPCODE_FUNCTION;
 import static com.moilioncircle.redis.replicator.rdb.datatype.ExpiredType.NONE;
 
 import java.io.File;
@@ -54,9 +56,17 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    public Event applyFunction(RedisInputStream in, int version) {
-        // TODO
-        return null;
+    public Event applyFunction(RedisInputStream in, int version) throws IOException {
+        escaper.encode(FUNCTION, out);
+        delimiter(out);
+        Event event = null;
+        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
+            listener.write((byte) RDB_OPCODE_FUNCTION);
+            event = super.applyFunction(in, version);
+        }
+        OutputStreams.write('\n', out);
+        return event;
     }
     
     @Override
@@ -201,8 +211,16 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     public Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        // TODO
-        return null;
+        escaper.encode(key, out);
+        delimiter(out);
+        expire(context.getExpiredType(), context.getExpiredValue());
+        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
+            listener.write((byte) type);
+            super.doApplyZSetListPack(in, version, key, contains, type, context);
+        }
+        OutputStreams.write('\n', out);
+        return context.valueOf(new DummyKeyValuePair());
     }
     
     @Override
@@ -221,8 +239,16 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     public Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        // TODO
-        return null;
+        escaper.encode(key, out);
+        delimiter(out);
+        expire(context.getExpiredType(), context.getExpiredValue());
+        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
+            listener.write((byte) type);
+            super.doApplyHashListPack(in, version, key, contains, type, context);
+        }
+        OutputStreams.write('\n', out);
+        return context.valueOf(new DummyKeyValuePair());
     }
     
     @Override
@@ -241,8 +267,16 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     public Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        // TODO
-        return null;
+        escaper.encode(key, out);
+        delimiter(out);
+        expire(context.getExpiredType(), context.getExpiredValue());
+        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
+            listener.write((byte) type);
+            super.doApplyListQuickList2(in, version, key, contains, type, context);
+        }
+        OutputStreams.write('\n', out);
+        return context.valueOf(new DummyKeyValuePair());
     }
     
     @Override
