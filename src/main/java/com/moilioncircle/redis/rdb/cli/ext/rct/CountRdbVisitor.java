@@ -129,17 +129,35 @@ public class CountRdbVisitor extends AbstractRdbVisitor implements EventListener
         counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
         return super.doApplyZSetZipList(in, version, key, contains, type, context);
     }
+    
+    @Override
+    public Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
+        return super.doApplyZSetListPack(in, version, key, contains, type, context);
+    }
 
     @Override
     public Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
         return super.doApplyHashZipList(in, version, key, contains, type, context);
     }
+    
+    @Override
+    public Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
+        return super.doApplyHashListPack(in, version, key, contains, type, context);
+    }
 
     @Override
     public Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
         return super.doApplyListQuickList(in, version, key, contains, type, context);
+    }
+    
+    @Override
+    public Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
+        return super.doApplyListQuickList2(in, version, key, contains, type, context);
     }
 
     @Override

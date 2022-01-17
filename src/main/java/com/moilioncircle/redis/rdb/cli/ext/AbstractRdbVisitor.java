@@ -22,10 +22,12 @@ import static com.moilioncircle.redis.rdb.cli.glossary.Guard.SAVE;
 import static com.moilioncircle.redis.replicator.Constants.DOLLAR;
 import static com.moilioncircle.redis.replicator.Constants.MODULE_SET;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_HASH;
+import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_HASH_LISTPACK;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_HASH_ZIPLIST;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_HASH_ZIPMAP;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_LIST;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_LIST_QUICKLIST;
+import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_LIST_QUICKLIST_2;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_LIST_ZIPLIST;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_MODULE;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_MODULE_2;
@@ -35,6 +37,7 @@ import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_STREAM_LISTP
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_STRING;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET_2;
+import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET_LISTPACK;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET_ZIPLIST;
 import static com.moilioncircle.redis.replicator.Constants.STAR;
 import static java.util.stream.Collectors.toList;
@@ -456,6 +459,26 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
+    
+    @Override
+    public Event applyZSetListPack(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
+        try {
+            BaseRdbParser parser = new BaseRdbParser(in);
+            byte[] key = parser.rdbLoadEncodedStringObject().first();
+            boolean contains = contains(context.getDb().getDbNumber(), RDB_TYPE_ZSET_LISTPACK, Strings.toString(key));
+            if (contains) {
+                if (listener != null) listener.setGuard(DRAIN);
+                return doApplyZSetListPack(in, version, key, contains, RDB_TYPE_ZSET_LISTPACK, context);
+            } else {
+                if (listener != null) listener.setGuard(PASS);
+                SkipRdbParser skip = new SkipRdbParser(in);
+                skip.rdbLoadPlainStringObject();
+                return context.valueOf(new DummyKeyValuePair());
+            }
+        } finally {
+            if (listener != null) listener.setGuard(SAVE);
+        }
+    }
 
     @Override
     public Event applyHashZipList(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
@@ -466,6 +489,26 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (contains) {
                 if (listener != null) listener.setGuard(DRAIN);
                 return doApplyHashZipList(in, version, key, contains, RDB_TYPE_HASH_ZIPLIST, context);
+            } else {
+                if (listener != null) listener.setGuard(PASS);
+                SkipRdbParser skip = new SkipRdbParser(in);
+                skip.rdbLoadPlainStringObject();
+                return context.valueOf(new DummyKeyValuePair());
+            }
+        } finally {
+            if (listener != null) listener.setGuard(SAVE);
+        }
+    }
+    
+    @Override
+    public Event applyHashListPack(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
+        try {
+            BaseRdbParser parser = new BaseRdbParser(in);
+            byte[] key = parser.rdbLoadEncodedStringObject().first();
+            boolean contains = contains(context.getDb().getDbNumber(), RDB_TYPE_HASH_LISTPACK, Strings.toString(key));
+            if (contains) {
+                if (listener != null) listener.setGuard(DRAIN);
+                return doApplyHashListPack(in, version, key, contains, RDB_TYPE_HASH_LISTPACK, context);
             } else {
                 if (listener != null) listener.setGuard(PASS);
                 SkipRdbParser skip = new SkipRdbParser(in);
@@ -491,6 +534,30 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
                 SkipRdbParser skip = new SkipRdbParser(in);
                 long len = skip.rdbLoadLen().len;
                 for (long i = 0; i < len; i++) {
+                    skip.rdbGenericLoadStringObject();
+                }
+                return context.valueOf(new DummyKeyValuePair());
+            }
+        } finally {
+            if (listener != null) listener.setGuard(SAVE);
+        }
+    }
+    
+    @Override
+    public Event applyListQuickList2(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
+        try {
+            BaseRdbParser parser = new BaseRdbParser(in);
+            byte[] key = parser.rdbLoadEncodedStringObject().first();
+            boolean contains = contains(context.getDb().getDbNumber(), RDB_TYPE_LIST_QUICKLIST_2, Strings.toString(key));
+            if (contains) {
+                if (listener != null) listener.setGuard(DRAIN);
+                return doApplyListQuickList2(in, version, key, contains, RDB_TYPE_LIST_QUICKLIST_2, context);
+            } else {
+                if (listener != null) listener.setGuard(PASS);
+                SkipRdbParser skip = new SkipRdbParser(in);
+                long len = skip.rdbLoadLen().len;
+                for (long i = 0; i < len; i++) {
+                    skip.rdbLoadLen();
                     skip.rdbGenericLoadStringObject();
                 }
                 return context.valueOf(new DummyKeyValuePair());
@@ -678,8 +745,18 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         new SkipRdbParser(in).rdbLoadPlainStringObject();
         return context.valueOf(new DummyKeyValuePair());
     }
+    
+    protected Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        new SkipRdbParser(in).rdbLoadPlainStringObject();
+        return context.valueOf(new DummyKeyValuePair());
+    }
 
     protected Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        new SkipRdbParser(in).rdbLoadPlainStringObject();
+        return context.valueOf(new DummyKeyValuePair());
+    }
+    
+    protected Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         new SkipRdbParser(in).rdbLoadPlainStringObject();
         return context.valueOf(new DummyKeyValuePair());
     }
@@ -688,6 +765,16 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
         SkipRdbParser skipParser = new SkipRdbParser(in);
         long len = skipParser.rdbLoadLen().len;
         for (long i = 0; i < len; i++) {
+            skipParser.rdbGenericLoadStringObject();
+        }
+        return context.valueOf(new DummyKeyValuePair());
+    }
+    
+    protected Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        SkipRdbParser skipParser = new SkipRdbParser(in);
+        long len = skipParser.rdbLoadLen().len;
+        for (long i = 0; i < len; i++) {
+            skipParser.rdbLoadLen();
             skipParser.rdbGenericLoadStringObject();
         }
         return context.valueOf(new DummyKeyValuePair());

@@ -61,9 +61,19 @@ public class MergeRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     public Event applyModuleAux(RedisInputStream in, int version) throws IOException {
-        listener.setGuard(Guard.PASS);
+        listener.setGuard(Guard.DRAIN);
         try {
             return super.applyModuleAux(in, version);
+        } finally {
+            listener.setGuard(Guard.SAVE);
+        }
+    }
+    
+    @Override
+    public Event applyFunction(RedisInputStream in, int version) throws IOException {
+        listener.setGuard(Guard.DRAIN);
+        try {
+            return super.applyFunction(in, version);
         } finally {
             listener.setGuard(Guard.SAVE);
         }
@@ -84,6 +94,16 @@ public class MergeRdbVisitor extends AbstractRdbVisitor {
         listener.setGuard(Guard.DRAIN);
         try {
             return super.applyResizeDB(in, version, context);
+        } finally {
+            listener.setGuard(Guard.SAVE);
+        }
+    }
+    
+    @Override
+    public long applyEof(RedisInputStream in, int version) throws IOException {
+        listener.setGuard(Guard.PASS);
+        try {
+            return super.applyEof(in, version);
         } finally {
             listener.setGuard(Guard.SAVE);
         }

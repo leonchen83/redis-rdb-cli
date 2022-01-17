@@ -518,6 +518,12 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     }
     
     @Override
+    protected Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        // TODO
+        return null;
+    }
+    
+    @Override
     protected Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         long mark = System.nanoTime();
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -551,6 +557,12 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         monitor.add("count_hash", 1, System.nanoTime() - mark);
         monitor.add("memory_hash", kv.getValue());
         return context.valueOf(kv);
+    }
+    
+    @Override
+    protected Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        // TODO
+        return null;
     }
     
     @Override
@@ -589,6 +601,12 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         monitor.add("count_list", 1, System.nanoTime() - mark);
         monitor.add("memory_list", kv.getValue());
         return context.valueOf(kv);
+    }
+    
+    @Override
+    protected Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        // TODO
+        return null;
     }
     
     @Override

@@ -71,6 +71,12 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
+    public Event applyFunction(RedisInputStream in, int version) throws IOException {
+        // TODO
+        return null;
+    }
+    
+    @Override
     public DB applySelectDB(RedisInputStream in, int version) throws IOException {
         DB db = super.applySelectDB(in, version);
         emit(this.out, SELECT, String.valueOf(db.getDbNumber()).getBytes());
@@ -374,6 +380,12 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
+    protected Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        // TODO
+        return null;
+    }
+    
+    @Override
     protected Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         if (replace) emit(this.out, DEL, key);
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -407,6 +419,12 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
+    protected Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        // TODO
+        return null;
+    }
+    
+    @Override
     protected Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         if (replace) emit(this.out, DEL, key);
         BaseRdbParser parser = new BaseRdbParser(in);
@@ -437,6 +455,12 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         kv.setKey(key);
         kv.setContains(contains);
         return context.valueOf(kv);
+    }
+    
+    @Override
+    protected Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        // TODO
+        return null;
     }
     
     @Override

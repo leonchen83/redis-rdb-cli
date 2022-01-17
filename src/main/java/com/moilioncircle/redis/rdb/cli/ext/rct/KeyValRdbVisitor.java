@@ -262,6 +262,12 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
+    protected Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        // TODO
+        return null;
+    }
+    
+    @Override
     public Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
         delimiter(out);
@@ -289,6 +295,12 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
+    protected Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        // TODO
+        return null;
+    }
+    
+    @Override
     public Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
         delimiter(out);
@@ -312,6 +324,12 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
             }
         }
         return context.valueOf(new DummyKeyValuePair());
+    }
+    
+    @Override
+    protected Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        // TODO
+        return null;
     }
     
     @Override

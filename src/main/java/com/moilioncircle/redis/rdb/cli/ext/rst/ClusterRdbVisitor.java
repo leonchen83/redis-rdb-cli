@@ -74,6 +74,7 @@ import com.moilioncircle.redis.replicator.event.EventListener;
 import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreCommandSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
+import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpFunction;
 import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
 
 /**
@@ -127,6 +128,8 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
                 }
             } else if (event instanceof DumpKeyValuePair) {
                 retry((DumpKeyValuePair)event, configure.getMigrateRetries());
+            } else if (event instanceof DumpFunction) {
+                // TODO
             } else if (event instanceof PostRdbSyncEvent) {
                 this.endpoints.get().flushQuietly();
             } else if (event instanceof PreCommandSyncEvent) {

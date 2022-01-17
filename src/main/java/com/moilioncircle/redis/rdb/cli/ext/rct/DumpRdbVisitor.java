@@ -74,6 +74,12 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
+    public Event applyFunction(RedisInputStream in, int version) throws IOException {
+        // TODO
+        return null;
+    }
+    
+    @Override
     protected Event doApplyString(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
@@ -315,6 +321,12 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
+    protected Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        // TODO
+        return null;
+    }
+    
+    @Override
     protected Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
@@ -334,6 +346,12 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
             emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
+    }
+    
+    @Override
+    protected Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        // TODO
+        return null;
     }
     
     @Override
@@ -385,6 +403,12 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
             emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
+    }
+    
+    @Override
+    protected Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        // TODO
+        return null;
     }
     
     @Override

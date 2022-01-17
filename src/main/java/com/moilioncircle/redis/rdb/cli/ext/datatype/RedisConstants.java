@@ -41,6 +41,7 @@ public class RedisConstants {
     public static final byte[] EVALSHA = "evalsha".getBytes();
     public static final byte[] REPLACE = "replace".getBytes();
     public static final byte[] RESTORE = "restore".getBytes();
+    public static final byte[] FUNCTION = "function".getBytes();
     public static final byte[] EXPIREAT = "expireat".getBytes();
     public static final byte[] RESTORE_ASKING = "restore-asking".getBytes();
     
@@ -60,6 +61,7 @@ public class RedisConstants {
     public static final ByteBuffer EVALSHA_BUF = ByteBuffer.wrap(EVALSHA);
     public static final ByteBuffer REPLACE_BUF = ByteBuffer.wrap(REPLACE);
     public static final ByteBuffer RESTORE_BUF = ByteBuffer.wrap(RESTORE);
+    public static final ByteBuffer FUNCTION_BUF = ByteBuffer.wrap(FUNCTION);
     public static final ByteBuffer EXPIREAT_BUF = ByteBuffer.wrap(EXPIREAT);
     public static final ByteBuffer RESTORE_ASKING_BUF = ByteBuffer.wrap(RESTORE_ASKING);
     
@@ -79,6 +81,7 @@ public class RedisConstants {
     public static final ByteBuffers EVALSHA_BUFS = ByteBuffers.wrap(EVALSHA);
     public static final ByteBuffers REPLACE_BUFS = ByteBuffers.wrap(REPLACE);
     public static final ByteBuffers RESTORE_BUFS = ByteBuffers.wrap(RESTORE);
+    public static final ByteBuffers FUNCTION_BUFS = ByteBuffers.wrap(FUNCTION);
     public static final ByteBuffers EXPIREAT_BUFS = ByteBuffers.wrap(EXPIREAT);
     public static final ByteBuffers RESTORE_ASKING_BUFS = ByteBuffers.wrap(RESTORE_ASKING);
 }

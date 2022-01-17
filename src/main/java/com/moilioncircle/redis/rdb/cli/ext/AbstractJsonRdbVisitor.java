@@ -16,7 +16,10 @@
 
 package com.moilioncircle.redis.rdb.cli.ext;
 
+import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAINER_PACKED;
+import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAINER_PLAIN;
 import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
+import static com.moilioncircle.redis.replicator.rdb.BaseRdbParser.StringHelper.listPackEntry;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +37,7 @@ import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.BaseRdbParser;
 import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
 import com.moilioncircle.redis.replicator.rdb.datatype.ExpiredType;
+import com.moilioncircle.redis.replicator.util.ByteArray;
 import com.moilioncircle.redis.replicator.util.Strings;
 
 /**
@@ -371,6 +375,35 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
+    protected Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        json(context, key, type, () -> {
+            OutputStreams.write('{', out);
+            BaseRdbParser parser = new BaseRdbParser(in);
+            RedisInputStream listPack = new RedisInputStream(parser.rdbLoadPlainStringObject());
+            boolean flag = true;
+            listPack.skip(4); // total-bytes
+            int len = listPack.readInt(2);
+            while (len > 0) {
+                if (!flag) {
+                    OutputStreams.write(',', out);
+                }
+                byte[] element = listPackEntry(listPack);
+                len--;
+                double score = Double.valueOf(Strings.toString(listPackEntry(listPack)));
+                len--;
+                emitZSet(element, score);
+                flag = false;
+            }
+            int lpend = listPack.read(); // lp-end
+            if (lpend != 255) {
+                throw new AssertionError("listpack expect 255 but " + lpend);
+            }
+            OutputStreams.write('}', out);
+        });
+        return context.valueOf(new DummyKeyValuePair());
+    }
+    
+    @Override
     protected Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             OutputStreams.write('{', out);
@@ -401,6 +434,35 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
+    protected Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        json(context, key, type, () -> {
+            OutputStreams.write('{', out);
+            BaseRdbParser parser = new BaseRdbParser(in);
+            RedisInputStream listPack = new RedisInputStream(parser.rdbLoadPlainStringObject());
+            boolean flag = true;
+            listPack.skip(4); // total-bytes
+            int len = listPack.readInt(2);
+            while (len > 0) {
+                if (!flag) {
+                    OutputStreams.write(',', out);
+                }
+                byte[] field = listPackEntry(listPack);
+                len--;
+                byte[] value = listPackEntry(listPack);
+                len--;
+                emitField(field, value);
+                flag = false;
+            }
+            int lpend = listPack.read(); // lp-end
+            if (lpend != 255) {
+                throw new AssertionError("listpack expect 255 but " + lpend);
+            }
+            OutputStreams.write('}', out);
+        });
+        return context.valueOf(new DummyKeyValuePair());
+    }
+    
+    @Override
     protected Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             OutputStreams.write('[', out);
@@ -424,6 +486,47 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
                 int zlend = BaseRdbParser.LenHelper.zlend(stream);
                 if (zlend != 255) {
                     throw new AssertionError("zlend expect 255 but " + zlend);
+                }
+            }
+            OutputStreams.write(']', out);
+        });
+        return context.valueOf(new DummyKeyValuePair());
+    }
+    
+    @Override
+    protected Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        json(context, key, type, () -> {
+            OutputStreams.write('[', out);
+            BaseRdbParser parser = new BaseRdbParser(in);
+            boolean flag = true;
+            long len = parser.rdbLoadLen().len;
+            for (long i = 0; i < len; i++) {
+                long container = parser.rdbLoadLen().len;
+                ByteArray bytes = parser.rdbLoadPlainStringObject();
+                if (container == QUICKLIST_NODE_CONTAINER_PLAIN) {
+                    if (!flag) {
+                        OutputStreams.write(',', out);
+                    }
+                    emitString(bytes.first());
+                    flag = false;
+                } else if (container == QUICKLIST_NODE_CONTAINER_PACKED) {
+                    RedisInputStream listPack = new RedisInputStream(bytes);
+                    listPack.skip(4); // total-bytes
+                    int innerLen = listPack.readInt(2);
+                    for (int j = 0; j < innerLen; j++) {
+                        if (!flag) {
+                            OutputStreams.write(',', out);
+                        }
+                        byte[] e = listPackEntry(listPack);
+                        emitString(e);
+                        flag = false;
+                    }
+                    int lpend = listPack.read(); // lp-end
+                    if (lpend != 255) {
+                        throw new AssertionError("listpack expect 255 but " + lpend);
+                    }
+                } else {
+                    throw new UnsupportedOperationException(String.valueOf(container));
                 }
             }
             OutputStreams.write(']', out);

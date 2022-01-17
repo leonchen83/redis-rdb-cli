@@ -16,6 +16,8 @@
 
 package com.moilioncircle.redis.rdb.cli.ext.rct;
 
+import static com.moilioncircle.redis.replicator.Constants.RDB_OPCODE_FUNCTION;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -79,6 +81,11 @@ public class FormatterRdbVisitor extends AbstractRdbVisitor {
         }
         return event;
     }
+    
+    @Override
+    public Event applyFunction(RedisInputStream in, int version) throws IOException {
+        return formatter.applyFunction(replicator, in, version, RDB_OPCODE_FUNCTION);
+    }
 
     @Override
     protected Event doApplyString(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
@@ -129,15 +136,30 @@ public class FormatterRdbVisitor extends AbstractRdbVisitor {
     protected Event doApplyZSetZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         return formatter.applyZSetZipList(replicator, in, version, key, type, context);
     }
+    
+    @Override
+    protected Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        return formatter.applyZSetListPack(replicator, in, version, key, type, context);
+    }
 
     @Override
     protected Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         return formatter.applyHashZipList(replicator, in, version, key, type, context);
     }
+    
+    @Override
+    protected Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        return formatter.applyHashListPack(replicator, in, version, key, type, context);
+    }
 
     @Override
     protected Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         return formatter.applyListQuickList(replicator, in, version, key, type, context);
+    }
+    
+    @Override
+    protected Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        return formatter.applyListQuickList2(replicator, in, version, key, type, context);
     }
 
     @Override

@@ -92,14 +92,17 @@ public enum DataType {
             case 4:
             case 9:
             case 13:
+            case 16:
                 return HASH;
             case 1:
             case 10:
             case 14:
+            case 18:
                 return LIST;
             case 3:
             case 5:
             case 12:
+            case 17:
                 return SORTEDSET;
             case 6:
             case 7:
@@ -120,11 +123,11 @@ public enum DataType {
             case SET:
                 return type == 2 || type == 11;
             case HASH:
-                return type == 4 || type == 9 || type == 13;
+                return type == 4 || type == 9 || type == 13 || type == 16;
             case LIST:
-                return type == 1 || type == 10 || type == 14;
+                return type == 1 || type == 10 || type == 14 || type == 18;
             case SORTEDSET:
-                return type == 3 || type == 5 || type == 12;
+                return type == 3 || type == 5 || type == 12 || type == 17;
             case MODULE:
                 return type == 6 || type == 7;
             case STREAM:
@@ -165,6 +168,12 @@ public enum DataType {
                 return "module2";
             case 15:
                 return "listpacks";
+            case 16:
+                return "listpack";
+            case 17:
+                return "listpack";
+            case 18:
+                return "quicklist2";
             default:
                 throw new AssertionError("Unsupported data storage type '" + type + "'");
         }

@@ -54,6 +54,12 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
+    public Event applyFunction(RedisInputStream in, int version) {
+        // TODO
+        return null;
+    }
+    
+    @Override
     public Event doApplyString(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escaper.encode(key, out);
         delimiter(out);
@@ -194,6 +200,12 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
+    public Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        // TODO
+        return null;
+    }
+    
+    @Override
     public Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escaper.encode(key, out);
         delimiter(out);
@@ -208,6 +220,12 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
+    public Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        // TODO
+        return null;
+    }
+    
+    @Override
     public Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         escaper.encode(key, out);
         delimiter(out);
@@ -219,6 +237,12 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
         }
         OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
+    }
+    
+    @Override
+    public Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        // TODO
+        return null;
     }
     
     @Override
