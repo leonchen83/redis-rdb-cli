@@ -671,6 +671,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         if (replace) {
             emitArg(REPLACE_BUF);
         }
+        emitArg(ByteBuffer.wrap(function.getCode()));
     }
     
     protected void emitArg(ByteBuffer arg) {
