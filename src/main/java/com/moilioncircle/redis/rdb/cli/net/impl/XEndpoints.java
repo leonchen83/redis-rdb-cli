@@ -81,6 +81,17 @@ public class XEndpoints implements Closeable {
         short slot = slot(args[0]);
         return index2.get(slot).send(command, args);
     }
+    
+    public XEndpoint batch(boolean force, byte[] command, byte[]... args) {
+        for (XEndpoint prev : new HashSet<>(index1)) {
+            try {
+                prev.batch(force, command, args);
+            } catch (Throwable e) {
+                return prev;
+            }
+        }
+        return null;
+    }
 
     public void batch(boolean force, short slot, byte[] command, byte[]... args) {
         index2.get(slot).batch(force, command, args);

@@ -38,11 +38,13 @@ public class RedisConstants {
     public static final byte[] HMSET = "hmset".getBytes();
     public static final byte[] SELECT = "select".getBytes();
     public static final byte[] SCRIPT = "script".getBytes();
+    public static final byte[] DELETE = "delete".getBytes();
     public static final byte[] EVALSHA = "evalsha".getBytes();
     public static final byte[] REPLACE = "replace".getBytes();
     public static final byte[] RESTORE = "restore".getBytes();
     public static final byte[] FUNCTION = "function".getBytes();
     public static final byte[] EXPIREAT = "expireat".getBytes();
+    public static final byte[] DESCRIPTION = "description".getBytes();
     public static final byte[] RESTORE_ASKING = "restore-asking".getBytes();
     
     public static final ByteBuffer ONE_BUF = ByteBuffer.wrap(ONE);
@@ -57,12 +59,14 @@ public class RedisConstants {
     public static final ByteBuffer RPUSH_BUF = ByteBuffer.wrap(RPUSH);
     public static final ByteBuffer HMSET_BUF = ByteBuffer.wrap(HMSET);
     public static final ByteBuffer SELECT_BUF = ByteBuffer.wrap(SELECT);
+    public static final ByteBuffer DELETE_BUF = ByteBuffer.wrap(DELETE);
     public static final ByteBuffer SCRIPT_BUF = ByteBuffer.wrap(SCRIPT);
     public static final ByteBuffer EVALSHA_BUF = ByteBuffer.wrap(EVALSHA);
     public static final ByteBuffer REPLACE_BUF = ByteBuffer.wrap(REPLACE);
     public static final ByteBuffer RESTORE_BUF = ByteBuffer.wrap(RESTORE);
     public static final ByteBuffer FUNCTION_BUF = ByteBuffer.wrap(FUNCTION);
     public static final ByteBuffer EXPIREAT_BUF = ByteBuffer.wrap(EXPIREAT);
+    public static final ByteBuffer DESCRIPTION_BUF = ByteBuffer.wrap(DESCRIPTION);
     public static final ByteBuffer RESTORE_ASKING_BUF = ByteBuffer.wrap(RESTORE_ASKING);
     
     public static final ByteBuffers ONE_BUFS = ByteBuffers.wrap(ONE);
@@ -78,10 +82,12 @@ public class RedisConstants {
     public static final ByteBuffers HMSET_BUFS = ByteBuffers.wrap(HMSET);
     public static final ByteBuffers SELECT_BUFS = ByteBuffers.wrap(SELECT);
     public static final ByteBuffers SCRIPT_BUFS = ByteBuffers.wrap(SCRIPT);
+    public static final ByteBuffers DELETE_BUFS = ByteBuffers.wrap(DELETE);
     public static final ByteBuffers EVALSHA_BUFS = ByteBuffers.wrap(EVALSHA);
     public static final ByteBuffers REPLACE_BUFS = ByteBuffers.wrap(REPLACE);
     public static final ByteBuffers RESTORE_BUFS = ByteBuffers.wrap(RESTORE);
     public static final ByteBuffers FUNCTION_BUFS = ByteBuffers.wrap(FUNCTION);
     public static final ByteBuffers EXPIREAT_BUFS = ByteBuffers.wrap(EXPIREAT);
+    public static final ByteBuffers DESCRIPTION_BUFS = ByteBuffers.wrap(DESCRIPTION);
     public static final ByteBuffers RESTORE_ASKING_BUFS = ByteBuffers.wrap(RESTORE_ASKING);
 }

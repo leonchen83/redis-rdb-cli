@@ -16,6 +16,7 @@
 
 package com.moilioncircle.redis.rdb.cli.ext.rct;
 
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.FUNCTION_BUF;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.REPLACE_BUF;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.RESTORE_BUF;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.SELECT;
@@ -24,6 +25,7 @@ import static com.moilioncircle.redis.replicator.Constants.DOLLAR;
 import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAINER_PACKED;
 import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAINER_PLAIN;
 import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
+import static com.moilioncircle.redis.replicator.Constants.RDB_OPCODE_FUNCTION;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_HASH;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_LIST;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET;
@@ -54,6 +56,7 @@ import com.moilioncircle.redis.replicator.rdb.BaseRdbEncoder;
 import com.moilioncircle.redis.replicator.rdb.BaseRdbParser;
 import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
+import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpFunction;
 import com.moilioncircle.redis.replicator.util.ByteArray;
 import com.moilioncircle.redis.replicator.util.Strings;
 
@@ -80,8 +83,19 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     public Event applyFunction(RedisInputStream in, int version) throws IOException {
-        // TODO
-        return null;
+        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        if (version < 10 /* since redis rdb version 10 */) {
+            return super.applyFunction(in, version);
+        } else {
+            try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
+                try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
+                    listener.write((byte) RDB_OPCODE_FUNCTION);
+                    super.applyFunction(in, version);
+                }
+                emit(this.out, FUNCTION_BUF, RESTORE_BUF, out.toByteBuffers(), replace);
+                return new DumpFunction();
+            }
+        }
     }
     
     @Override
@@ -629,6 +643,25 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         emitArg(command);
         emitArg(key);
         emitArg(ex);
+        emitArg(value);
+        if (replace) {
+            emitArg(REPLACE_BUF);
+        }
+    }
+    
+    private void emit(OutputStream out, ByteBuffer function, ByteBuffer restore, ByteBuffers value, boolean replace) {
+        OutputStreams.write(STAR, out);
+        if (replace) {
+            OutputStreams.write("4".getBytes(), out);
+        } else {
+            OutputStreams.write("3".getBytes(), out);
+        }
+    
+        OutputStreams.write('\r', out);
+        OutputStreams.write('\n', out);
+    
+        emitArg(function);
+        emitArg(restore);
         emitArg(value);
         if (replace) {
             emitArg(REPLACE_BUF);

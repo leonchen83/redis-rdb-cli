@@ -17,8 +17,11 @@
 package com.moilioncircle.redis.rdb.cli.ext.rct;
 
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.DEL;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.DESCRIPTION_BUF;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.EXPIREAT;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.FUNCTION_BUF;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.HMSET;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.LOAD_BUF;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.REPLACE_BUF;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.RESTORE_BUF;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.RPUSH;
@@ -57,6 +60,7 @@ import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.BaseRdbParser;
 import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
+import com.moilioncircle.redis.replicator.rdb.datatype.Function;
 import com.moilioncircle.redis.replicator.util.ByteArray;
 import com.moilioncircle.redis.replicator.util.Strings;
 
@@ -76,8 +80,9 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     public Event applyFunction(RedisInputStream in, int version) throws IOException {
-        // TODO
-        return null;
+        Function function = (Function) super.applyFunction(in, version);
+        emit(this.out, function, replace);
+        return function;
     }
     
     @Override
@@ -637,6 +642,32 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
         emitArg(key);
         emitArg(ex);
         emitArg(value);
+        if (replace) {
+            emitArg(REPLACE_BUF);
+        }
+    }
+    
+    private void emit(OutputStream out, Function function, boolean replace) {
+        // FUNCTION LOAD <ENGINE NAME> <LIBRARY NAME> [REPLACE] [DESC <LIBRARY DESCRIPTION>] <LIBRARY CODE>
+        int count = 5;
+        if (function.getDescription() != null) {
+            count += 2;
+        }
+        if (replace) {
+            count += 1;
+        }
+        OutputStreams.write(STAR, out);
+        OutputStreams.write(String.valueOf(count).getBytes(), out);
+        OutputStreams.write('\r', out);
+        OutputStreams.write('\n', out);
+        emitArg(FUNCTION_BUF);
+        emitArg(LOAD_BUF);
+        emitArg(ByteBuffer.wrap(function.getEngineName()));
+        emitArg(ByteBuffer.wrap(function.getName()));
+        if (function.getDescription() != null) {
+            emitArg(DESCRIPTION_BUF);
+            emitArg(ByteBuffer.wrap(function.getDescription()));
+        }
         if (replace) {
             emitArg(REPLACE_BUF);
         }

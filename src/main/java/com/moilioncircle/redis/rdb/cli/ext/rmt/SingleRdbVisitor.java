@@ -17,6 +17,7 @@
 package com.moilioncircle.redis.rdb.cli.ext.rmt;
 
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.EVALSHA;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.FUNCTION;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.LOAD;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.ONE;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.REPLACE;
@@ -96,7 +97,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
             } else if (event instanceof DumpKeyValuePair) {
                 retry((DumpKeyValuePair)event, configure.getMigrateRetries());
             } else if (event instanceof DumpFunction) {
-                // TODO
+                retry((DumpFunction) event, configure.getMigrateRetries());
             } else if (event instanceof ClosingCommand) {
                 this.endpoint.get().flushQuietly();
                 XEndpoint.closeQuietly(this.endpoint.get());
@@ -149,6 +150,28 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
             } else {
                 monitor.add("failure_failed", 1);
                 logger.error("failure[failed] [{}], reason: {}", new String(dkv.getKey()), e.getMessage());
+            }
+        }
+    }
+    
+    public void retry(DumpFunction dfn, int times) {
+        logger.trace("sync rdb event [function], times {}", times);
+        try {
+            if (!replace) {
+                endpoint.get().batch(flush, FUNCTION, RESTORE, dfn.getSerialized());
+            } else {
+                endpoint.get().batch(flush, FUNCTION, RESTORE, dfn.getSerialized(), REPLACE);
+            }
+        } catch (Throwable e) {
+            times--;
+            if (times >= 0 && flush) {
+                XEndpoint prev = endpoint.get();
+                XEndpoint next = XEndpoint.valueOfQuietly(prev, prev.getDB());
+                if (next != null) endpoint.set(next);
+                retry(dfn, times);
+            } else {
+                monitor.add("failure_failed", 1);
+                logger.error("failure[failed] [function], reason: {}", e.getMessage());
             }
         }
     }

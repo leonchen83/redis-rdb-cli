@@ -17,7 +17,9 @@
 package com.moilioncircle.redis.rdb.cli.ext.rmt;
 
 import static com.moilioncircle.redis.rdb.cli.conf.NodeConfParser.slot;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.FUNCTION;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.REPLACE;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.RESTORE;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.RESTORE_ASKING;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.ZERO;
 import static com.moilioncircle.redis.replicator.Configuration.defaultSetting;
@@ -38,6 +40,7 @@ import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorFactory;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
+import com.moilioncircle.redis.rdb.cli.net.impl.XEndpoint;
 import com.moilioncircle.redis.rdb.cli.net.impl.XEndpoints;
 import com.moilioncircle.redis.rdb.cli.util.XThreadFactory;
 import com.moilioncircle.redis.replicator.Configuration;
@@ -90,7 +93,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             } else if (event instanceof DumpKeyValuePair) {
                 retry((DumpKeyValuePair)event, configure.getMigrateRetries());
             } else if (event instanceof DumpFunction) {
-                // TODO
+                retry((DumpFunction) event, configure.getMigrateRetries());
             } else if (event instanceof ClosingCommand) {
                 this.endpoints.get().flushQuietly();
                 XEndpoints.closeQuietly(this.endpoints.get());
@@ -134,6 +137,28 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             } else {
                 monitor.add("failure_failed", 1);
                 logger.error("failure[failed] [{}], reason: {}", new String(dkv.getKey()), e.getMessage());
+            }
+        }
+    }
+    
+    public void retry(DumpFunction dfn, int times) {
+        logger.trace("sync rdb event [function], times {}", times);
+        XEndpoint prev = null;
+        try {
+            if (!replace) {
+                prev = endpoints.get().batch(flush, FUNCTION, RESTORE, dfn.getSerialized());
+            } else {
+                prev = endpoints.get().batch(flush, FUNCTION, RESTORE, dfn.getSerialized(), REPLACE);
+            }
+            if (prev != null) throw new RuntimeException("failover");
+        } catch (Throwable e) {
+            times--;
+            if (times >= 0 && flush) {
+                this.endpoints.get().updateQuietly(prev);
+                retry(dfn, times);
+            } else {
+                monitor.add("failure_failed", 1);
+                logger.error("failure[failed] [function], reason: {}", e.getMessage());
             }
         }
     }
