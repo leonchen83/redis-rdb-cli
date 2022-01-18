@@ -95,7 +95,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
                     System.exit(-1);
                 }
             } else if (event instanceof DumpKeyValuePair) {
-                retry((DumpKeyValuePair)event, configure.getMigrateRetries());
+                retry((DumpKeyValuePair) event, configure.getMigrateRetries());
             } else if (event instanceof DumpFunction) {
                 retry((DumpFunction) event, configure.getMigrateRetries());
             } else if (event instanceof ClosingCommand) {
