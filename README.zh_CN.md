@@ -412,11 +412,11 @@ docker-compose down
 ```
   
 `cd /path/to/redis-rdb-cli/conf/redis-rdb-cli.conf`  
-把 [metric_gateway](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L194) 这个参数从 `none` 改成 `influxdb`  
+把 [metric_gateway](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L195) 这个参数从 `none` 改成 `influxdb`  
   
 浏览器打开 `http://localhost:3000` 来查看 `rct -f mem` 命令的结果.  
   
-如果你把这个工具部署在多个实例上, 需要更改如下参数 [metric_instance](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L240) 并保证在每个实例上参数名唯一  
+如果你把这个工具部署在多个实例上, 需要更改如下参数 [metric_instance](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L241) 并保证在每个实例上参数名唯一  
   
 ## Redis 6
   
@@ -434,8 +434,8 @@ $openssl pkcs12 -export -CAfile ca.crt -in redis.crt -inkey redis.key -out redis
 ```
   
 2. 如果源 redis 和目标 redis 使用同样的 keystore. 那么配置如下参数  
-将 [source_keystore_path](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L255) 和 [target_keystore_path](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L284) 指向 `/path/to/redis-6.0-rc1/tests/tls/redis.p12`  
-设置 [source_keystore_pass](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L263) 和 [target_keystore_pass](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L292)  
+将 [source_keystore_path](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L256) 和 [target_keystore_path](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L285) 指向 `/path/to/redis-6.0-rc1/tests/tls/redis.p12`  
+设置 [source_keystore_pass](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L264) 和 [target_keystore_pass](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L293)  
   
 3. 在配置完 ssl 参数之后, 在你的命令中使用 `rediss://host:port` 这样的URI来开启ssl, 比如: `rst -s rediss://127.0.0.1:6379 -m rediss://127.0.0.1:30001 -r -d 0`
   
