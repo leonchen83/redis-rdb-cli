@@ -90,7 +90,7 @@ public class LayeredOutputStream extends OutputStream {
     @Override
     public void write(byte b[], int off, int len) throws IOException {
         if (this.buffer.size() + len < max) {
-            this.buffer.write(b);
+            this.buffer.write(b, off, len);
         } else {
             flushToFile();
             if (len < max) {
