@@ -2,6 +2,10 @@
 
 Support for redis 7.0.  
 
+### 0.7.4
+
+Fix `rct -f dump` can't export correct `dump` aof bug.  
+
 ### 0.7.3
 
 Upgrade log4j2 to 2.17.0 to fix Security Vulnerability CVE-2021-45105.  
