@@ -193,7 +193,7 @@ public class XRst implements Callable<Integer> {
 				throw new ParameterException(spec.commandLine(), "Invalid options: '--migrate=<uri>'");
 			}
 			try (ProgressBar bar = new ProgressBar(-1)) {
-				Replicator r = new CliRedisReplicator(source, configure);
+				Replicator r = new CliRedisReplicator(source, configure, null);
 				r.setRdbVisitor(getRdbVisitor(r, configure, uri, db, replace, legacy));
 				Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 					Replicators.closeQuietly(r);
@@ -212,7 +212,7 @@ public class XRst implements Callable<Integer> {
 				throw new ParameterException(spec.commandLine(), "Invalid options: '--config=<config>'");
 			}
 			try (ProgressBar bar = new ProgressBar(-1)) {
-				Replicator r = new CliRedisReplicator(source, configure);
+				Replicator r = new CliRedisReplicator(source, configure, null);
 				List<String> lines = Files.readAllLines(exclusive.config.toPath());
 				r.setRdbVisitor(new ClusterRdbVisitor(r, configure, lines, replace));
 				Runtime.getRuntime().addShutdownHook(new Thread(() -> {

@@ -87,8 +87,7 @@ public enum Action {
                     } catch (EOFException e) {
                         continue;
                     }
-                    Replicator r = new CliRedisReplicator(uri.toString(), configure);
-                    r.getConfiguration().setReplFilter(DefaultReplFilter.RDB);
+                    Replicator r = new CliRedisReplicator(uri.toString(), configure, DefaultReplFilter.RDB);
                     r.setRdbVisitor(new MergeRdbVisitor(r, configure, arg, () -> out));
                     list.add(Tuples.of(r, file.getName()));
                 }
@@ -102,15 +101,13 @@ public enum Action {
                 out.write(Strings.lappend(version, 4, '0').getBytes());
                 return list;
             case SPLIT:
-                Replicator r = new CliRedisReplicator(arg.split, configure);
-                r.getConfiguration().setReplFilter(DefaultReplFilter.RDB);
+                Replicator r = new CliRedisReplicator(arg.split, configure, DefaultReplFilter.RDB);
                 List<String> lines = Files.readAllLines(arg.conf.toPath());
                 r.setRdbVisitor(new SplitRdbVisitor(r, configure, arg, () -> new ShardableFileOutputStream(arg.output, lines, configure)));
                 list.add(Tuples.of(r, null));
                 return list;
             case BACKUP:
-                r = new CliRedisReplicator(arg.backup, configure);
-                r.getConfiguration().setReplFilter(DefaultReplFilter.RDB);
+                r = new CliRedisReplicator(arg.backup, configure, DefaultReplFilter.RDB);
                 r.setRdbVisitor(new BackupRdbVisitor(r, configure, arg, () -> OutputStreams.newCRCOutputStream(arg.output, configure.getOutputBufferSize())));
                 list.add(Tuples.of(r, null));
                 return list;

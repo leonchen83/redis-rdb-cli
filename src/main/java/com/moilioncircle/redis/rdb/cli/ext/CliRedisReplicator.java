@@ -31,6 +31,7 @@ import com.moilioncircle.redis.replicator.RedisMixReplicator;
 import com.moilioncircle.redis.replicator.RedisRdbReplicator;
 import com.moilioncircle.redis.replicator.RedisSocketReplicator;
 import com.moilioncircle.redis.replicator.RedisURI;
+import com.moilioncircle.redis.replicator.ReplFilter;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.Status;
 import com.moilioncircle.redis.replicator.StatusListener;
@@ -51,21 +52,22 @@ public class CliRedisReplicator implements Replicator {
 
     protected Replicator replicator;
 
-    public CliRedisReplicator(String uri, Configure configure) throws URISyntaxException, IOException {
+    public CliRedisReplicator(String uri, Configure configure, ReplFilter filter) throws URISyntaxException, IOException {
         Objects.requireNonNull(uri);
         try {
             RedisURI u = new RedisURI(uri);
-            initialize(u, configure);
+            initialize(u, configure, filter);
         } catch (URISyntaxException e) {
             RedisSentinelURI u = new RedisSentinelURI(uri);
             initialize(u, configure);
         }
     }
 
-    private void initialize(RedisURI uri, Configure configure) throws IOException {
+    private void initialize(RedisURI uri, Configure configure, ReplFilter filter) throws IOException {
         Objects.requireNonNull(uri);
         Objects.requireNonNull(configure);
         Configuration configuration = configure.merge(uri, true);
+        configuration.setReplFilter(filter);
         if (uri.getFileType() != null) {
             PeekableInputStream in = new PeekableInputStream(uri.toURL().openStream());
             switch (uri.getFileType()) {

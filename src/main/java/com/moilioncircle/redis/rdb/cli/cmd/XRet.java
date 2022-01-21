@@ -88,7 +88,7 @@ public class XRet implements Callable<Integer> {
 		
 		Configure configure = Configure.bind();
 		try (ProgressBar bar = new ProgressBar(-1)) {
-			Replicator r = new CliRedisReplicator(source, configure);
+			Replicator r = new CliRedisReplicator(source, configure, null);
 			r.setRdbVisitor(parserService.getRdbVisitor(r));
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 				Replicators.closeQuietly(r);

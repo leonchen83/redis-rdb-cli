@@ -102,8 +102,7 @@ public class XRct implements Callable<Integer> {
 		source = normalize(source, FileType.RDB, spec, "Invalid options: '--source=<source>'");
 		Configure configure = Configure.bind();
 		try (ProgressBar bar = new ProgressBar(-1)) {
-			Replicator r = new CliRedisReplicator(source, configure);
-			r.getConfiguration().setReplFilter(DefaultReplFilter.RDB);
+			Replicator r = new CliRedisReplicator(source, configure, DefaultReplFilter.RDB);
 			r.addExceptionListener((rep, tx, e) -> {
 				throw new RuntimeException(tx.getMessage(), tx);
 			});

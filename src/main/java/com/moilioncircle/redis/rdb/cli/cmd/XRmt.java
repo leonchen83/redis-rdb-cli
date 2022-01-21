@@ -113,8 +113,7 @@ public class XRmt implements Callable<Integer> {
 				throw new ParameterException(spec.commandLine(), "Invalid options: '--migrate=<uri>'");
 			}
 			try (ProgressBar bar = new ProgressBar(-1)) {
-				Replicator r = new CliRedisReplicator(source, configure);
-				r.getConfiguration().setReplFilter(DefaultReplFilter.RDB);
+				Replicator r = new CliRedisReplicator(source, configure, DefaultReplFilter.RDB);
 				r.setRdbVisitor(getRdbVisitor(r, configure, uri));
 				Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 					Replicators.closeQuietly(r);
@@ -135,8 +134,7 @@ public class XRmt implements Callable<Integer> {
 				throw new ParameterException(spec.commandLine(), "Invalid options: '--config=<config>'");
 			}
 			try (ProgressBar bar = new ProgressBar(-1)) {
-				Replicator r = new CliRedisReplicator(source, configure);
-				r.getConfiguration().setReplFilter(DefaultReplFilter.RDB);
+				Replicator r = new CliRedisReplicator(source, configure, DefaultReplFilter.RDB);
 				List<String> lines = Files.readAllLines(exclusive.config.toPath());
 				r.setRdbVisitor(new ClusterRdbVisitor(r, configure, lines, regexs, parse(type), replace));
 				Runtime.getRuntime().addShutdownHook(new Thread(() -> {
