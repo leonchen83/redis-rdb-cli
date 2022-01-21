@@ -29,7 +29,7 @@ import com.moilioncircle.redis.rdb.cli.ext.CliRedisReplicator;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.glossary.Format;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
-import com.moilioncircle.redis.replicator.DefaultReplConfFilter;
+import com.moilioncircle.redis.replicator.DefaultReplFilter;
 import com.moilioncircle.redis.replicator.FileType;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.Replicators;
@@ -103,7 +103,7 @@ public class XRct implements Callable<Integer> {
 		Configure configure = Configure.bind();
 		try (ProgressBar bar = new ProgressBar(-1)) {
 			Replicator r = new CliRedisReplicator(source, configure);
-			r.getConfiguration().setReplConfFilter(DefaultReplConfFilter.RDB);
+			r.getConfiguration().setReplFilter(DefaultReplFilter.RDB);
 			r.addExceptionListener((rep, tx, e) -> {
 				throw new RuntimeException(tx.getMessage(), tx);
 			});

@@ -34,7 +34,7 @@ import com.moilioncircle.redis.rdb.cli.ext.rmt.SingleRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.net.impl.XEndpoint;
 import com.moilioncircle.redis.rdb.cli.net.protocol.RedisObject;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
-import com.moilioncircle.redis.replicator.DefaultReplConfFilter;
+import com.moilioncircle.redis.replicator.DefaultReplFilter;
 import com.moilioncircle.redis.replicator.FileType;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -114,7 +114,7 @@ public class XRmt implements Callable<Integer> {
 			}
 			try (ProgressBar bar = new ProgressBar(-1)) {
 				Replicator r = new CliRedisReplicator(source, configure);
-				r.getConfiguration().setReplConfFilter(DefaultReplConfFilter.RDB);
+				r.getConfiguration().setReplFilter(DefaultReplFilter.RDB);
 				r.setRdbVisitor(getRdbVisitor(r, configure, uri));
 				Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 					Replicators.closeQuietly(r);
@@ -136,7 +136,7 @@ public class XRmt implements Callable<Integer> {
 			}
 			try (ProgressBar bar = new ProgressBar(-1)) {
 				Replicator r = new CliRedisReplicator(source, configure);
-				r.getConfiguration().setReplConfFilter(DefaultReplConfFilter.RDB);
+				r.getConfiguration().setReplFilter(DefaultReplFilter.RDB);
 				List<String> lines = Files.readAllLines(exclusive.config.toPath());
 				r.setRdbVisitor(new ClusterRdbVisitor(r, configure, lines, regexs, parse(type), replace));
 				Runtime.getRuntime().addShutdownHook(new Thread(() -> {
