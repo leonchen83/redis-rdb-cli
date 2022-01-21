@@ -34,6 +34,7 @@ import com.moilioncircle.redis.rdb.cli.ext.rdt.SplitRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.io.ShardableFileOutputStream;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.rdb.cli.util.Strings;
+import com.moilioncircle.redis.replicator.DefaultReplConfFilter;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.io.CRCOutputStream;
@@ -87,6 +88,7 @@ public enum Action {
                         continue;
                     }
                     Replicator r = new CliRedisReplicator(uri.toString(), configure);
+                    r.getConfiguration().setReplConfFilter(DefaultReplConfFilter.RDB);
                     r.setRdbVisitor(new MergeRdbVisitor(r, configure, arg, () -> out));
                     list.add(Tuples.of(r, file.getName()));
                 }
@@ -101,12 +103,14 @@ public enum Action {
                 return list;
             case SPLIT:
                 Replicator r = new CliRedisReplicator(arg.split, configure);
+                r.getConfiguration().setReplConfFilter(DefaultReplConfFilter.RDB);
                 List<String> lines = Files.readAllLines(arg.conf.toPath());
                 r.setRdbVisitor(new SplitRdbVisitor(r, configure, arg, () -> new ShardableFileOutputStream(arg.output, lines, configure)));
                 list.add(Tuples.of(r, null));
                 return list;
             case BACKUP:
                 r = new CliRedisReplicator(arg.backup, configure);
+                r.getConfiguration().setReplConfFilter(DefaultReplConfFilter.RDB);
                 r.setRdbVisitor(new BackupRdbVisitor(r, configure, arg, () -> OutputStreams.newCRCOutputStream(arg.output, configure.getOutputBufferSize())));
                 list.add(Tuples.of(r, null));
                 return list;
