@@ -49,7 +49,7 @@ public class SplitRdbVisitor extends AbstractRdbVisitor {
             if (event instanceof PostRdbSyncEvent) {
                 ShardableFileOutputStream out = listener.getOutputStream();
                 out.writeCRC();
-                OutputStreams.close(out);
+                OutputStreams.closeQuietly(out);
             }
             if (event instanceof PreCommandSyncEvent) {
                 OutputStreams.closeQuietly(listener.getOutputStream());

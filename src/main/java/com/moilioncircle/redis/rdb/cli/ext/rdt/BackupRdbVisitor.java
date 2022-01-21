@@ -56,7 +56,7 @@ public class BackupRdbVisitor extends AbstractRdbVisitor {
                 CRCOutputStream out = listener.getOutputStream();
                 OutputStreams.write(0xFF, out);
                 OutputStreams.write(out.getCRC64(), out);
-                OutputStreams.close(out);
+                OutputStreams.closeQuietly(out);
             }
             if (event instanceof PreCommandSyncEvent) {
                 OutputStreams.closeQuietly(listener.getOutputStream());
