@@ -27,6 +27,7 @@ RUN unzip -o /tmp/redis-rdb-cli-release.zip \
         && ln -s /app/redis-rdb-cli/bin/rmt /usr/local/bin/rmt \
         && ln -s /app/redis-rdb-cli/bin/rst /usr/local/bin/rst \
         && ln -s /app/redis-rdb-cli/bin/ret /usr/local/bin/ret \
-        && ln -s /app/redis-rdb-cli/bin/rdt /usr/local/bin/rdt
+        && ln -s /app/redis-rdb-cli/bin/rdt /usr/local/bin/rdt \
+        && ln -s /app/redis-rdb-cli/bin/rcut /usr/local/bin/rcut
 
 WORKDIR /app/redis-rdb-cli
