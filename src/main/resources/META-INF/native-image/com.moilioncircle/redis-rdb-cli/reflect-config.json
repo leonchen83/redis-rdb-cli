@@ -14,6 +14,11 @@
   "allDeclaredMethods":true
 },
 {
+  "name":"com.moilioncircle.redis.rdb.cli.cmd.XRcut",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true
+},
+{
   "name":"com.moilioncircle.redis.rdb.cli.cmd.XRdt",
   "allDeclaredFields":true,
   "allDeclaredMethods":true
@@ -708,6 +713,21 @@
   "name":"org.apache.logging.log4j.core.config.ScriptsPlugin"
 },
 {
+  "name":"org.apache.logging.log4j.core.config.arbiters.ClassArbiter"
+},
+{
+  "name":"org.apache.logging.log4j.core.config.arbiters.DefaultArbiter"
+},
+{
+  "name":"org.apache.logging.log4j.core.config.arbiters.ScriptArbiter"
+},
+{
+  "name":"org.apache.logging.log4j.core.config.arbiters.SelectArbiter"
+},
+{
+  "name":"org.apache.logging.log4j.core.config.arbiters.SystemPropertyArbiter"
+},
+{
   "name":"org.apache.logging.log4j.core.config.json.JsonConfigurationFactory",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
@@ -1210,6 +1230,9 @@
 },
 {
   "name":"org.apache.logging.log4j.core.pattern.RelativeTimePatternConverter"
+},
+{
+  "name":"org.apache.logging.log4j.core.pattern.RepeatPatternConverter"
 },
 {
   "name":"org.apache.logging.log4j.core.pattern.RootThrowablePatternConverter"

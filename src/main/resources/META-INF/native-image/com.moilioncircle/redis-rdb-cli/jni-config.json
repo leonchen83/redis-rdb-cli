@@ -8,6 +8,10 @@
   "methods":[{"name":"main","parameterTypes":["java.lang.String[]"] }]
 },
 {
+  "name":"com.moilioncircle.redis.rdb.cli.Rcut",
+  "methods":[{"name":"main","parameterTypes":["java.lang.String[]"] }]
+},
+{
   "name":"com.moilioncircle.redis.rdb.cli.Rdt",
   "methods":[{"name":"main","parameterTypes":["java.lang.String[]"] }]
 },

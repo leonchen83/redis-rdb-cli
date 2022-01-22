@@ -264,6 +264,24 @@ Examples:
 
 ```
 
+```java  
+
+Usage: rcut [-hV] -s <source> -r <file> -a <file>
+
+Options:
+  -a, --aof <file>        Output aof file.
+  -h, --help              Show this help message and exit.
+  -r, --rdb <file>        Output rdb file.
+  -s, --source <source>   Source file that be cutted. the file
+                          format MUST BE aof-use-rdb-preamble.
+                          eg: /path/to/appendonly.aof
+  -V, --version           Print version information and exit.
+
+Examples:
+  rcut -s ./aof-use-rdb-preamble.aof -r ./dump.rdb -a ./appendonly.aof
+
+```
+
 ### Filter
 
 1. `rct`, `rdt` and `rmt` these 3 commands support data filter by `type`,`db` and `key` RegEx(Java style).  
@@ -382,6 +400,12 @@ rdt -s ./dump.rdb -c ./nodes.conf -o /path/to/folder -d 0
 
 ```java  
 rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
+```
+
+### Cut aof-use-rdb-preamble file to rdb file and aof file
+
+```java  
+rcut -s ./aof-use-rdb-preamble.aof -r ./dump.rdb -a ./appendonly.aof
 ```
 
 ### Other parameter

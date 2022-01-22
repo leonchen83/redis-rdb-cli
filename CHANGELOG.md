@@ -1,6 +1,7 @@
 ### 0.8.0
 
 Support for redis 7.0.  
+Add `rcut` command to handle `aof-use-rdb-preamble` file.  
 
 ### 0.7.4
 

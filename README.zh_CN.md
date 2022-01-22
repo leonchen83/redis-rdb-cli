@@ -264,6 +264,24 @@ Examples:
 
 ```
 
+```java  
+
+Usage: rcut [-hV] -s <source> -r <file> -a <file>
+
+Options:
+  -a, --aof <file>        Output aof file.
+  -h, --help              Show this help message and exit.
+  -r, --rdb <file>        Output rdb file.
+  -s, --source <source>   Source file that be cutted. the file
+                          format MUST BE aof-use-rdb-preamble.
+                          eg: /path/to/appendonly.aof
+  -V, --version           Print version information and exit.
+
+Examples:
+  rcut -s ./aof-use-rdb-preamble.aof -r ./dump.rdb -a ./appendonly.aof
+
+```
+
 ### 过滤
 
 1. `rct`, `rdt` 和 `rmt` 这3个命令支持`type`,`db` 和 `key`正则表达式(Java风格)数据过滤  
@@ -382,6 +400,12 @@ rdt -s ./dump.rdb -c ./nodes.conf -o /path/to/folder -d 0
 
 ```java  
 rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
+```
+
+### 将 aof-use-rdb-preamble 文件形式分割成 rdb 文件与 aof 文件
+
+```java  
+rcut -s ./aof-use-rdb-preamble.aof -r ./dump.rdb -a ./appendonly.aof
 ```
 
 ### 其他参数
