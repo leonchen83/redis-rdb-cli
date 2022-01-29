@@ -52,22 +52,22 @@ public class CliRedisReplicator implements Replicator {
 
     protected Replicator replicator;
 
-    public CliRedisReplicator(String uri, Configure configure, ReplFilter filter) throws URISyntaxException, IOException {
+    public CliRedisReplicator(String uri, Configure configure, ReplFilter... filters) throws URISyntaxException, IOException {
         Objects.requireNonNull(uri);
         try {
             RedisURI u = new RedisURI(uri);
-            initialize(u, configure, filter);
+            initialize(u, configure, filters);
         } catch (URISyntaxException e) {
             RedisSentinelURI u = new RedisSentinelURI(uri);
             initialize(u, configure);
         }
     }
 
-    private void initialize(RedisURI uri, Configure configure, ReplFilter filter) throws IOException {
+    private void initialize(RedisURI uri, Configure configure, ReplFilter... filters) throws IOException {
         Objects.requireNonNull(uri);
         Objects.requireNonNull(configure);
         Configuration configuration = configure.merge(uri, true);
-        configuration.setReplFilter(filter);
+        configuration.setReplFilters(filters);
         if (uri.getFileType() != null) {
             PeekableInputStream in = new PeekableInputStream(uri.toURL().openStream());
             switch (uri.getFileType()) {
