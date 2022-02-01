@@ -470,7 +470,8 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             GenericKeyCommand cmd = (GenericKeyCommand) parsedCommand;
             retry(command, slot(cmd.getKey()), times);
         } else if (parsedCommand instanceof PublishCommand) {
-            broadcast(command, times); // broadcast function command
+            PublishCommand cmd = (PublishCommand) parsedCommand;
+            retry(command, slot(cmd.getChannel()), times);
         } else {
             // swapdb
             // move
