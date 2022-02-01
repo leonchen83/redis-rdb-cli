@@ -62,6 +62,7 @@ import com.moilioncircle.redis.replicator.cmd.impl.MSetNxCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.PFCountCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.PFMergeCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.PingCommand;
+import com.moilioncircle.redis.replicator.cmd.impl.PublishCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.RPopLPushCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.RenameCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.RenameNxCommand;
@@ -468,12 +469,13 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
         } else if (parsedCommand instanceof GenericKeyCommand) {
             GenericKeyCommand cmd = (GenericKeyCommand) parsedCommand;
             retry(command, slot(cmd.getKey()), times);
+        } else if (parsedCommand instanceof PublishCommand) {
+            broadcast(command, times); // broadcast function command
         } else {
             // swapdb
             // move
             // flushall
             // flushdb
-            // publish
             // multi
             // exec
             // script flush
