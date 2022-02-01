@@ -53,6 +53,7 @@ import com.moilioncircle.redis.replicator.cmd.impl.BitOpCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.CopyCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.DefaultCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.DelCommand;
+import com.moilioncircle.redis.replicator.cmd.impl.FunctionCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.GenericKeyCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.GeoSearchStoreCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.LMoveCommand;
@@ -67,6 +68,7 @@ import com.moilioncircle.redis.replicator.cmd.impl.RenameNxCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.SDiffStoreCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.SInterStoreCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.SMoveCommand;
+import com.moilioncircle.redis.replicator.cmd.impl.SPublishCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.SelectCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.UnLinkCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.ZDiffStoreCommand;
@@ -132,7 +134,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             } else if (event instanceof DumpKeyValuePair) {
                 retry((DumpKeyValuePair)event, configure.getMigrateRetries());
             } else if (event instanceof DumpFunction) {
-                retry((DumpFunction) event, configure.getMigrateRetries());
+                broadcast((DumpFunction) event, configure.getMigrateRetries());
             } else if (event instanceof PostRdbSyncEvent) {
                 this.endpoints.get().flushQuietly();
             } else if (event instanceof PreCommandSyncEvent) {
@@ -192,7 +194,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
         }
     }
     
-    public void retry(DumpFunction dfn, int times) {
+    public void broadcast(DumpFunction dfn, int times) {
         logger.trace("sync rdb event [function], times {}", times);
         XEndpoint prev = null;
         try {
@@ -206,10 +208,28 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
             times--;
             if (times >= 0 && flush) {
                 this.endpoints.get().updateQuietly(prev);
-                retry(dfn, times);
+                broadcast(dfn, times);
             } else {
                 monitor.add("failure_failed", 1);
                 logger.error("failure[failed] [function], reason: {}", e.getMessage());
+            }
+        }
+    }
+    
+    public void broadcast(CombineCommand command, int times) {
+        XEndpoint prev = null;
+        try {
+            DefaultCommand dcmd = command.getDefaultCommand();
+            prev = endpoints.get().batch(flush, dcmd.getCommand(), dcmd.getArgs());
+            if (prev != null) throw new RuntimeException("failover");
+        } catch (Throwable e) {
+            times--;
+            if (times >= 0 && flush) {
+                this.endpoints.get().updateQuietly(prev);
+                broadcast(command, times);
+            } else {
+                monitor.add("failure_failed", 1);
+                logger.error("failure[failed] [{}], reason: {}", command, e.getMessage());
             }
         }
     }
@@ -440,6 +460,11 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
                 monitor.add("failure_slot", 1);
                 logger.error("failure[slot] [{}]", command);
             }
+        } else if (parsedCommand instanceof SPublishCommand) {
+            SPublishCommand cmd = (SPublishCommand) parsedCommand;
+            retry(command, slot(cmd.getChannel()), times);
+        } else if (parsedCommand instanceof FunctionCommand) {
+            broadcast(command, times); // broadcast function command
         } else if (parsedCommand instanceof GenericKeyCommand) {
             GenericKeyCommand cmd = (GenericKeyCommand) parsedCommand;
             retry(command, slot(cmd.getKey()), times);

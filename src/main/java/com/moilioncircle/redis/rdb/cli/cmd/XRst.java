@@ -54,6 +54,7 @@ import com.moilioncircle.redis.replicator.cmd.parser.ExpireAtParser;
 import com.moilioncircle.redis.replicator.cmd.parser.ExpireParser;
 import com.moilioncircle.redis.replicator.cmd.parser.FlushAllParser;
 import com.moilioncircle.redis.replicator.cmd.parser.FlushDBParser;
+import com.moilioncircle.redis.replicator.cmd.parser.FunctionParser;
 import com.moilioncircle.redis.replicator.cmd.parser.GeoAddParser;
 import com.moilioncircle.redis.replicator.cmd.parser.GeoSearchStoreParser;
 import com.moilioncircle.redis.replicator.cmd.parser.GetSetParser;
@@ -97,6 +98,7 @@ import com.moilioncircle.redis.replicator.cmd.parser.SAddParser;
 import com.moilioncircle.redis.replicator.cmd.parser.SDiffStoreParser;
 import com.moilioncircle.redis.replicator.cmd.parser.SInterStoreParser;
 import com.moilioncircle.redis.replicator.cmd.parser.SMoveParser;
+import com.moilioncircle.redis.replicator.cmd.parser.SPublishParser;
 import com.moilioncircle.redis.replicator.cmd.parser.SRemParser;
 import com.moilioncircle.redis.replicator.cmd.parser.SUnionStoreParser;
 import com.moilioncircle.redis.replicator.cmd.parser.ScriptParser;
@@ -338,6 +340,9 @@ public class XRst implements Callable<Integer> {
 		replicator.addCommandParser(CommandName.name("BLMOVE"), new CombineCommandParser(new BLMoveParser()));
 		replicator.addCommandParser(CommandName.name("ZDIFFSTORE"), new CombineCommandParser(new ZDiffStoreParser()));
 		replicator.addCommandParser(CommandName.name("GEOSEARCHSTORE"), new CombineCommandParser(new GeoSearchStoreParser()));
+		// since redis 7.0
+		replicator.addCommandParser(CommandName.name("SPUBLISH"), new CombineCommandParser(new SPublishParser()));
+		replicator.addCommandParser(CommandName.name("FUNCTION"), new CombineCommandParser(new FunctionParser()));
 		return replicator;
 	}
 }
