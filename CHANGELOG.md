@@ -1,3 +1,7 @@
+### 0.8.1
+
+Fix `rct -f resp` expire time bug.  
+
 ### 0.8.0
 
 Support for redis 7.0.  

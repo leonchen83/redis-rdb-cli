@@ -96,7 +96,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
     public Event applyExpireTime(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         DummyKeyValuePair kv = (DummyKeyValuePair) super.applyExpireTime(in, version, context);
         if (!kv.isContains() || kv.getKey() == null) return context.valueOf(kv);
-        emit(this.out, EXPIREAT, kv.getKey(), String.valueOf(kv.getExpiredSeconds() * 1000).getBytes());
+        emit(this.out, EXPIREAT, kv.getKey(), String.valueOf(kv.getExpiredSeconds()).getBytes());
         return context.valueOf(kv);
     }
     
@@ -104,7 +104,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
     public Event applyExpireTimeMs(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         DummyKeyValuePair kv = (DummyKeyValuePair) super.applyExpireTimeMs(in, version, context);
         if (!kv.isContains() || kv.getKey() == null) return context.valueOf(kv);
-        emit(this.out, EXPIREAT, kv.getKey(), String.valueOf(kv.getExpiredMs()).getBytes());
+        emit(this.out, EXPIREAT, kv.getKey(), String.valueOf(kv.getExpiredMs() / 1000).getBytes());
         return context.valueOf(kv);
     }
     
