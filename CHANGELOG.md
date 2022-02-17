@@ -1,3 +1,7 @@
+### 0.8.2
+
+Fix windows cmd running failed bug.  
+
 ### 0.8.1
 
 Fix `rct -f resp` expire time bug.  
