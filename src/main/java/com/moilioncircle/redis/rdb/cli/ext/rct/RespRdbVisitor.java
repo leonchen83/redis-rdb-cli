@@ -22,6 +22,7 @@ import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.EXPIRE
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.FUNCTION_BUF;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.HMSET;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.LOAD_BUF;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.PEXPIREAT;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.REPLACE_BUF;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.RESTORE_BUF;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.RPUSH;
@@ -104,7 +105,7 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
     public Event applyExpireTimeMs(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         DummyKeyValuePair kv = (DummyKeyValuePair) super.applyExpireTimeMs(in, version, context);
         if (!kv.isContains() || kv.getKey() == null) return context.valueOf(kv);
-        emit(this.out, EXPIREAT, kv.getKey(), String.valueOf(kv.getExpiredMs() / 1000).getBytes());
+        emit(this.out, PEXPIREAT, kv.getKey(), String.valueOf(kv.getExpiredMs()).getBytes());
         return context.valueOf(kv);
     }
     
