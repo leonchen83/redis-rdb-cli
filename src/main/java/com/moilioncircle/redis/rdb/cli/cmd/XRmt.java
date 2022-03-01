@@ -136,7 +136,7 @@ public class XRmt implements Callable<Integer> {
 			try (ProgressBar bar = new ProgressBar(-1)) {
 				Replicator r = new CliRedisReplicator(source, configure, DefaultReplFilter.RDB);
 				List<String> lines = Files.readAllLines(exclusive.config.toPath());
-				r.setRdbVisitor(new ClusterRdbVisitor(r, configure, lines, regexs, parse(type), replace));
+				r.setRdbVisitor(new ClusterRdbVisitor(r, configure, null, lines, regexs, parse(type), replace));
 				Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 					Replicators.closeQuietly(r);
 				}));
@@ -163,7 +163,7 @@ public class XRmt implements Callable<Integer> {
 			} else {
 				String config = r.getString();
 				List<String> lines = Arrays.asList(config.split("\n"));
-				return new ClusterRdbVisitor(replicator, configure, lines, regexs, parse(type), replace);
+				return new ClusterRdbVisitor(replicator, configure, uri, lines, regexs, parse(type), replace);
 			}
 		} catch (Throwable e) {
 			throw new RuntimeException("failed to connect to " + uri.getHost() + ":" + uri.getPort() + ", reason " + e.getMessage());

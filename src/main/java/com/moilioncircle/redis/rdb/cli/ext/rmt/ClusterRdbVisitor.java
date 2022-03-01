@@ -44,6 +44,7 @@ import com.moilioncircle.redis.rdb.cli.net.impl.XEndpoint;
 import com.moilioncircle.redis.rdb.cli.net.impl.XEndpoints;
 import com.moilioncircle.redis.rdb.cli.util.XThreadFactory;
 import com.moilioncircle.redis.replicator.Configuration;
+import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
@@ -65,13 +66,18 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
     
     public ClusterRdbVisitor(Replicator replicator,
                              Configure configure,
+                             RedisURI uri, 
                              List<String> lines,
                              List<String> regexs,
                              List<DataType> types,
                              boolean replace) throws IOException {
         super(replicator, configure, singletonList(0L), regexs, types, replace);
         this.lines = lines;
-        this.configuration = configure.merge(defaultSetting(), false);
+        if (uri == null) {
+            this.configuration = configure.merge(defaultSetting(), false);
+        } else {
+            this.configuration = configure.merge(uri, false);
+        }
         this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure.getMigrateThreads(), new XThreadFactory("sync-worker")));
     }
 

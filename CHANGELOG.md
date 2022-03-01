@@ -2,6 +2,7 @@
 
 Support for redis 7.0-RC2.  
 Fix windows cmd running failed bug.  
+Fix redis cluster acl bug. see [issue 28](https://github.com/leonchen83/redis-rdb-cli/issues/28).  
 
 ### 0.8.1
 
