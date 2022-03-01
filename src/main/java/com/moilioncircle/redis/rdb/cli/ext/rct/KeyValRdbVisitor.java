@@ -30,6 +30,7 @@ import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.DumpRawByteListener;
 import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
+import com.moilioncircle.redis.rdb.cli.ext.escape.RedisEscaper;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Constants;
@@ -48,8 +49,11 @@ import com.moilioncircle.redis.replicator.util.Strings;
  */
 public class KeyValRdbVisitor extends AbstractRdbVisitor {
     
+    private Escaper redis;
+    
     public KeyValRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escaper escaper) {
         super(replicator, configure, out, db, regexs, types, escaper);
+        this.redis = new RedisEscaper(configure.getDelimiter(), configure.getQuote());
     }
     
     @Override
@@ -412,7 +416,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         delimiter(out);
         out.write(configure.getQuote());
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
+        try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, redis)) {
             listener.write((byte) type);
             super.doApplyModule(in, version, key, contains, type, context);
         }
@@ -427,7 +431,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         delimiter(out);
         out.write(configure.getQuote());
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
+        try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, redis)) {
             listener.write((byte) type);
             super.doApplyModule2(in, version, key, contains, type, context);
         }
@@ -446,7 +450,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         delimiter(out);
         out.write(configure.getQuote());
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
+        try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, redis)) {
             listener.write((byte) type);
             super.doApplyStreamListPacks(in, version, key, contains, type, context);
         }
@@ -461,7 +465,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         delimiter(out);
         out.write(configure.getQuote());
         version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-        try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
+        try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, redis)) {
             if (version < 10) {
                 listener.write((byte) Constants.RDB_TYPE_STREAM_LISTPACKS);
             } else {
