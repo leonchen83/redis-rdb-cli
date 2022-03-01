@@ -1,9 +1,6 @@
-### 0.8.3
-
-Support for redis 7.0-RC2.  
-
 ### 0.8.2
 
+Support for redis 7.0-RC2.  
 Fix windows cmd running failed bug.  
 
 ### 0.8.1
