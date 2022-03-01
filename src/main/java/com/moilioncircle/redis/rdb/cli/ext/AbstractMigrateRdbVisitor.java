@@ -34,6 +34,7 @@ import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.escape.RawEscaper;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
+import com.moilioncircle.redis.replicator.Constants;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
@@ -547,6 +548,30 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
             }
             DumpKeyValuePair dump = new DumpKeyValuePair();
             dump.setValueRdbType(type);
+            dump.setKey(key);
+            dump.setValue(o.toByteArray());
+            return context.valueOf(dump);
+        }
+    }
+    
+    @Override
+    protected Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        try (ByteArrayOutputStream o = new ByteArrayOutputStream(configure.getOutputBufferSize())) {
+            try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, o, raw)) {
+                if (ver < 10) {
+                    listener.write((byte) Constants.RDB_TYPE_STREAM_LISTPACKS);
+                } else {
+                    listener.write((byte) type);
+                }
+                super.doApplyStreamListPacks2(in, ver, key, contains, type, context, listener);
+            }
+            DumpKeyValuePair dump = new DumpKeyValuePair();
+            if (ver < 10) {
+                dump.setValueRdbType((byte) Constants.RDB_TYPE_STREAM_LISTPACKS);
+            } else {
+                dump.setValueRdbType(type);
+            }
             dump.setKey(key);
             dump.setValue(o.toByteArray());
             return context.valueOf(dump);

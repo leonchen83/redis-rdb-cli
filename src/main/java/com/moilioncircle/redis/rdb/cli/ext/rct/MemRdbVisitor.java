@@ -846,6 +846,107 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
         return context.valueOf(kv);
     }
     
+    @Override
+    protected Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        long mark = System.nanoTime();
+        long length = 0;
+        long max = 0;
+        LengthRawByteListener listener = new LengthRawByteListener();
+        replicator.addRawByteListener(listener);
+        try {
+            BaseRdbParser parser = new BaseRdbParser(in);
+            long listPacks = parser.rdbLoadLen().len;
+            while (listPacks-- > 0) {
+                parser.rdbLoadPlainStringObject();
+                RedisInputStream listPack = new RedisInputStream(parser.rdbLoadPlainStringObject());
+                listPack.skip(4);
+                listPack.skip(2);
+                long count = Long.parseLong(Strings.toString(listPackEntry(listPack))); // count
+                long deleted = Long.parseLong(Strings.toString(listPackEntry(listPack))); // deleted
+                int numFields = Integer.parseInt(Strings.toString(listPackEntry(listPack))); // num-fields
+                byte[][] tempFields = new byte[numFields][];
+                for (int i = 0; i < numFields; i++) {
+                    tempFields[i] = listPackEntry(listPack);
+                }
+                listPackEntry(listPack); // 0
+                
+                long total = count + deleted;
+                while (total-- > 0) {
+                    int flag = Integer.parseInt(Strings.toString(listPackEntry(listPack)));
+                    listPackEntry(listPack);
+                    listPackEntry(listPack);
+                    boolean delete = (flag & STREAM_ITEM_FLAG_DELETED) != 0;
+                    if ((flag & STREAM_ITEM_FLAG_SAMEFIELDS) != 0) {
+                        for (int i = 0; i < numFields; i++) {
+                            byte[] value = listPackEntry(listPack);
+                            byte[] field = tempFields[i];
+                            max = Math.max(max, size.element(value));
+                            max = Math.max(max, size.element(field));
+                            if (!delete) length++;
+                        }
+                    } else {
+                        numFields = Integer.parseInt(Strings.toString(listPackEntry(listPack)));
+                        for (int i = 0; i < numFields; i++) {
+                            byte[] field = listPackEntry(listPack);
+                            byte[] value = listPackEntry(listPack);
+                            max = Math.max(max, size.element(value));
+                            max = Math.max(max, size.element(field));
+                            if (!delete) length++;
+                        }
+                    }
+                    listPackEntry(listPack); // lp-count
+                }
+                int lpend = listPack.read(); // lp-end
+                if (lpend != 255) {
+                    throw new AssertionError("listpack expect 255 but " + lpend);
+                }
+            }
+            SkipRdbParser skip = new SkipRdbParser(in);
+            skip.rdbLoadLen();
+            skip.rdbLoadLen();
+            skip.rdbLoadLen();
+            skip.rdbLoadLen();
+            skip.rdbLoadLen();
+            skip.rdbLoadLen();
+            skip.rdbLoadLen();
+            skip.rdbLoadLen();
+            long groupCount = skip.rdbLoadLen().len;
+            while (groupCount-- > 0) {
+                skip.rdbLoadPlainStringObject();
+                skip.rdbLoadLen();
+                skip.rdbLoadLen();
+                skip.rdbLoadLen();
+                long groupPel = skip.rdbLoadLen().len;
+                while (groupPel-- > 0) {
+                    in.skip(16);
+                    skip.rdbLoadMillisecondTime();
+                    skip.rdbLoadLen();
+                }
+                long consumerCount = skip.rdbLoadLen().len;
+                while (consumerCount-- > 0) {
+                    skip.rdbLoadPlainStringObject();
+                    skip.rdbLoadMillisecondTime();
+                    long consumerPel = skip.rdbLoadLen().len;
+                    while (consumerPel-- > 0) {
+                        in.skip(16);
+                    }
+                }
+            }
+        } finally {
+            replicator.removeRawByteListener(listener);
+        }
+        DummyKeyValuePair kv = new DummyKeyValuePair();
+        kv.setValueRdbType(type);
+        kv.setKey(key);
+        kv.setValue(listener.length);
+        kv.setContains(contains);
+        kv.setLength(length);
+        kv.setMax(max);
+        monitor.add("count_stream", 1, System.nanoTime() - mark);
+        monitor.add("memory_stream", kv.getValue());
+        return context.valueOf(kv);
+    }
+    
     private static class LengthRawByteListener implements RawByteListener {
         private long length;
         

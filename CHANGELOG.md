@@ -1,3 +1,7 @@
+### 0.8.3
+
+Support for redis 7.0-RC2.  
+
 ### 0.8.2
 
 Fix windows cmd running failed bug.  
@@ -8,7 +12,7 @@ Fix `rct -f resp` expire time bug.
 
 ### 0.8.0
 
-Support for redis 7.0.  
+Support for redis 7.0-RC1.  
 Add `rcut` command to handle `aof-use-rdb-preamble` file.  
 
 ### 0.7.4

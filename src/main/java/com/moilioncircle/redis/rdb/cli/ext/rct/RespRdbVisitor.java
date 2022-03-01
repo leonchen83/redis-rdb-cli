@@ -55,6 +55,7 @@ import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.io.LayeredOutputStream;
 import com.moilioncircle.redis.rdb.cli.util.ByteBuffers;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.replicator.Constants;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
@@ -622,6 +623,32 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplyStreamListPacks(in, version, key, contains, type, context);
+            }
+            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
+            return context.valueOf(new DummyKeyValuePair());
+        }
+    }
+    
+    @Override
+    protected Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        ByteBuffer ex = ZERO_BUF;
+        if (context.getExpiredValue() != null) {
+            long ms = context.getExpiredValue() - System.currentTimeMillis();
+            if (ms <= 0) {
+                return super.doApplyStreamListPacks2(in, version, key, contains, type, context);
+            } else {
+                ex = wrap(String.valueOf(ms).getBytes());
+            }
+        }
+        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
+                if (version < 10) {
+                    listener.write((byte) Constants.RDB_TYPE_STREAM_LISTPACKS);
+                } else {
+                    listener.write((byte) type);
+                }
+                super.doApplyStreamListPacks2(in, version, key, contains, type, context, listener);
             }
             emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());

@@ -164,4 +164,11 @@ public class KeyRdbVisitor extends AbstractRdbVisitor {
         OutputStreams.write('\n', out);
         return super.doApplyStreamListPacks(in, version, key, contains, type, context);
     }
+    
+    @Override
+    public Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        quote(key, out);
+        OutputStreams.write('\n', out);
+        return super.doApplyStreamListPacks2(in, version, key, contains, type, context);
+    }
 }

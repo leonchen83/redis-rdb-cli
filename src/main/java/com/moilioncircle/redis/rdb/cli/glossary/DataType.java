@@ -108,6 +108,7 @@ public enum DataType {
             case 7:
                 return MODULE;
             case 15:
+            case 19:
                 return STREAM;
             default:
                 throw new AssertionError(type);
@@ -131,7 +132,7 @@ public enum DataType {
             case MODULE:
                 return type == 6 || type == 7;
             case STREAM:
-                return type == 15;
+                return type == 15 || type == 19;
         }
         return false;
     }
@@ -174,6 +175,8 @@ public enum DataType {
                 return "listpack";
             case 18:
                 return "quicklist2";
+            case 19:
+                return "listpacks2";
             default:
                 throw new AssertionError("Unsupported data storage type '" + type + "'");
         }

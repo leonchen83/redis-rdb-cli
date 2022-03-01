@@ -176,4 +176,9 @@ public class FormatterRdbVisitor extends AbstractRdbVisitor {
     protected Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         return formatter.applyStreamListPacks(replicator, in, version, key, type, context);
     }
+    
+    @Override
+    protected Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        return formatter.applyStreamListPacks2(replicator, in, version, key, type, context);
+    }
 }

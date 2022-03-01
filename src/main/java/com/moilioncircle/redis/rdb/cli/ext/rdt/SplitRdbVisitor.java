@@ -211,5 +211,11 @@ public class SplitRdbVisitor extends AbstractRdbVisitor {
         shard(key);
         return super.doApplyStreamListPacks(in, version, key, contains, type, context);
     }
+    
+    @Override
+    protected Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        shard(key);
+        return super.doApplyStreamListPacks2(in, version, key, contains, type, context);
+    }
 
 }

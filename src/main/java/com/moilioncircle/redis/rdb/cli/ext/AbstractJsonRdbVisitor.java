@@ -31,6 +31,7 @@ import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.rdb.cli.ext.escape.RedisEscaper;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.replicator.Constants;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
@@ -539,9 +540,9 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
         json(context, key, type, () -> {
             OutputStreams.write('"', out);
             int v = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-            try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, redis)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener(replicator, v, out, redis)) {
                 listener.write((byte) type);
-                super.doApplyModule(in, v, key, contains, type, context);
+                super.doApplyModule(in, version, key, contains, type, context);
             }
             OutputStreams.write('"', out);
         });
@@ -553,9 +554,9 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
         json(context, key, type, () -> {
             OutputStreams.write('"', out);
             int v = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-            try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, redis)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener(replicator, v, out, redis)) {
                 listener.write((byte) type);
-                super.doApplyModule2(in, v, key, contains, type, context);
+                super.doApplyModule2(in, version, key, contains, type, context);
             }
             OutputStreams.write('"', out);
         });
@@ -567,9 +568,27 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
         json(context, key, type, () -> {
             OutputStreams.write('"', out);
             int v = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-            try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, redis)) {
+            try (DumpRawByteListener listener = new DumpRawByteListener(replicator, v, out, redis)) {
                 listener.write((byte) type);
-                super.doApplyStreamListPacks(in, v, key, contains, type, context);
+                super.doApplyStreamListPacks(in, version, key, contains, type, context);
+            }
+            OutputStreams.write('"', out);
+        });
+        return context.valueOf(new DummyKeyValuePair());
+    }
+    
+    @Override
+    protected Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        json(context, key, type, () -> {
+            OutputStreams.write('"', out);
+            int v = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+            try (DumpRawByteListener listener = new DumpRawByteListener(replicator, v, out, redis)) {
+                if (v < 10) {
+                    listener.write((byte) Constants.RDB_TYPE_STREAM_LISTPACKS);
+                } else {
+                    listener.write((byte) type);
+                }
+                super.doApplyStreamListPacks2(in, v, key, contains, type, context, listener);
             }
             OutputStreams.write('"', out);
         });

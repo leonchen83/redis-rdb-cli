@@ -34,6 +34,7 @@ import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_MODULE_2;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_SET;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_SET_INTSET;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_STREAM_LISTPACKS;
+import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_STREAM_LISTPACKS_2;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_STRING;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET_2;
@@ -61,6 +62,7 @@ import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
+import com.moilioncircle.redis.replicator.io.RawByteListener;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.BaseRdbParser;
 import com.moilioncircle.redis.replicator.rdb.DefaultRdbVisitor;
@@ -667,6 +669,60 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
             if (listener != null) listener.setGuard(SAVE);
         }
     }
+    
+    @Override
+    public Event applyStreamListPacks2(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
+        try {
+            BaseRdbParser parser = new BaseRdbParser(in);
+            byte[] key = parser.rdbLoadEncodedStringObject().first();
+            boolean contains = contains(context.getDb().getDbNumber(), RDB_TYPE_STREAM_LISTPACKS_2, Strings.toString(key));
+            if (contains) {
+                if (listener != null) listener.setGuard(DRAIN);
+                return doApplyStreamListPacks2(in, version, key, contains, RDB_TYPE_STREAM_LISTPACKS_2, context);
+            } else {
+                if (listener != null) listener.setGuard(PASS);
+                SkipRdbParser skip = new SkipRdbParser(in);
+                long listPacks = skip.rdbLoadLen().len;
+                while (listPacks-- > 0) {
+                    skip.rdbLoadPlainStringObject();
+                    skip.rdbLoadPlainStringObject();
+                }
+                skip.rdbLoadLen();
+                skip.rdbLoadLen();
+                skip.rdbLoadLen();
+                skip.rdbLoadLen();
+                skip.rdbLoadLen();
+                skip.rdbLoadLen();
+                skip.rdbLoadLen();
+                skip.rdbLoadLen();
+                long groupCount = skip.rdbLoadLen().len;
+                while (groupCount-- > 0) {
+                    skip.rdbLoadPlainStringObject();
+                    skip.rdbLoadLen();
+                    skip.rdbLoadLen();
+                    skip.rdbLoadLen();
+                    long groupPel = skip.rdbLoadLen().len;
+                    while (groupPel-- > 0) {
+                        in.skip(16);
+                        skip.rdbLoadMillisecondTime();
+                        skip.rdbLoadLen();
+                    }
+                    long consumerCount = skip.rdbLoadLen().len;
+                    while (consumerCount-- > 0) {
+                        skip.rdbLoadPlainStringObject();
+                        skip.rdbLoadMillisecondTime();
+                        long consumerPel = skip.rdbLoadLen().len;
+                        while (consumerPel-- > 0) {
+                            in.skip(16);
+                        }
+                    }
+                }
+                return context.valueOf(new DummyKeyValuePair());
+            }
+        } finally {
+            if (listener != null) listener.setGuard(SAVE);
+        }
+    }
 
     protected Event doApplyString(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         new SkipRdbParser(in).rdbLoadEncodedStringObject();
@@ -834,6 +890,91 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
                 }
             }
         }
+        return context.valueOf(new DummyKeyValuePair());
+    }
+    
+    protected Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        SkipRdbParser skipParser = new SkipRdbParser(in);
+        long listPacks = skipParser.rdbLoadLen().len;
+        while (listPacks-- > 0) {
+            skipParser.rdbLoadPlainStringObject();
+            skipParser.rdbLoadPlainStringObject();
+        }
+        skipParser.rdbLoadLen(); // length
+        skipParser.rdbLoadLen(); // lastId
+        skipParser.rdbLoadLen(); // lastId
+        skipParser.rdbLoadLen(); // firstId
+        skipParser.rdbLoadLen(); // firstId
+        skipParser.rdbLoadLen(); // maxDeletedEntryId
+        skipParser.rdbLoadLen(); // maxDeletedEntryId
+        skipParser.rdbLoadLen(); // entriesAdded
+        long groupCount = skipParser.rdbLoadLen().len;
+        while (groupCount-- > 0) {
+            skipParser.rdbLoadPlainStringObject();
+            skipParser.rdbLoadLen();
+            skipParser.rdbLoadLen();
+            skipParser.rdbLoadLen(); // entriesRead
+            long groupPel = skipParser.rdbLoadLen().len;
+            while (groupPel-- > 0) {
+                in.skip(16);
+                skipParser.rdbLoadMillisecondTime();
+                skipParser.rdbLoadLen();
+            }
+            long consumerCount = skipParser.rdbLoadLen().len;
+            while (consumerCount-- > 0) {
+                skipParser.rdbLoadPlainStringObject();
+                skipParser.rdbLoadMillisecondTime();
+                long consumerPel = skipParser.rdbLoadLen().len;
+                while (consumerPel-- > 0) {
+                    in.skip(16);
+                }
+            }
+        }
+        return context.valueOf(new DummyKeyValuePair());
+    }
+    
+    protected Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context, RawByteListener listener) throws IOException {
+        SkipRdbParser skipParser = new SkipRdbParser(in);
+        long listPacks = skipParser.rdbLoadLen().len;
+        while (listPacks-- > 0) {
+            skipParser.rdbLoadPlainStringObject();
+            skipParser.rdbLoadPlainStringObject();
+        }
+        skipParser.rdbLoadLen(); // length
+        skipParser.rdbLoadLen(); // lastId
+        skipParser.rdbLoadLen(); // lastId
+        if (version < 10) replicator.removeRawByteListener(listener);
+        skipParser.rdbLoadLen(); // firstId
+        skipParser.rdbLoadLen(); // firstId
+        skipParser.rdbLoadLen(); // maxDeletedEntryId
+        skipParser.rdbLoadLen(); // maxDeletedEntryId
+        skipParser.rdbLoadLen(); // entriesAdded
+        if (version < 10) replicator.addRawByteListener(listener);
+        long groupCount = skipParser.rdbLoadLen().len;
+        while (groupCount-- > 0) {
+            skipParser.rdbLoadPlainStringObject();
+            skipParser.rdbLoadLen();
+            skipParser.rdbLoadLen();
+            if (version < 10) replicator.removeRawByteListener(listener);
+            skipParser.rdbLoadLen(); // entriesRead
+            if (version < 10) replicator.addRawByteListener(listener);
+            long groupPel = skipParser.rdbLoadLen().len;
+            while (groupPel-- > 0) {
+                in.skip(16);
+                skipParser.rdbLoadMillisecondTime();
+                skipParser.rdbLoadLen();
+            }
+            long consumerCount = skipParser.rdbLoadLen().len;
+            while (consumerCount-- > 0) {
+                skipParser.rdbLoadPlainStringObject();
+                skipParser.rdbLoadMillisecondTime();
+                long consumerPel = skipParser.rdbLoadLen().len;
+                while (consumerPel-- > 0) {
+                    in.skip(16);
+                }
+            }
+        }
+        if (version < 10) context.setValueRdbType(RDB_TYPE_STREAM_LISTPACKS);
         return context.valueOf(new DummyKeyValuePair());
     }
 }

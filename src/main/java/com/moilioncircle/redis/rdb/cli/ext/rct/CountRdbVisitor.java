@@ -177,4 +177,10 @@ public class CountRdbVisitor extends AbstractRdbVisitor implements EventListener
         counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
         return super.doApplyStreamListPacks(in, version, key, contains, type, context);
     }
+    
+    @Override
+    public Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+        counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
+        return super.doApplyStreamListPacks2(in, version, key, contains, type, context);
+    }
 }
