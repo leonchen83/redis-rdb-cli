@@ -17,7 +17,6 @@
 *.zip
 *.tar.gz
 *.rar
-*.rdb
 *.mem
 *.aof
 

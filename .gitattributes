@@ -1,0 +1,11 @@
+*.resp binary
+*.dump binary
+*.dump7 binary
+*.rdb binary
+*.diff binary
+*.count binary
+*.text binary
+*.key binary
+*.keyval binary
+*.json binary
+*.jsonl binary

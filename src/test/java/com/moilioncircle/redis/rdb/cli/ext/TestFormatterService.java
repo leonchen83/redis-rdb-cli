@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.ext.rct;
+package com.moilioncircle.redis.rdb.cli.ext;
 
 import java.io.IOException;
 
