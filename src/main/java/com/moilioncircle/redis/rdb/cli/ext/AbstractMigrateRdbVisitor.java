@@ -66,7 +66,7 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     public Event applyFunction(RedisInputStream in, int version) throws IOException {
-        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        int ver = getVersion(version);
         try (ByteArrayOutputStream o = new ByteArrayOutputStream(configure.getOutputBufferSize())) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, o, raw)) {
                 listener.write((byte) RDB_OPCODE_FUNCTION);
@@ -87,7 +87,7 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     protected Event doApplyString(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        int ver = getVersion(version);
         try (ByteArrayOutputStream o = new ByteArrayOutputStream(configure.getOutputBufferSize())) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, o, raw)) {
                 listener.write((byte) type);
@@ -103,7 +103,7 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
 
     @Override
     protected Event doApplyList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        int ver = getVersion(version);
         try (ByteArrayOutputStream o = new ByteArrayOutputStream(configure.getOutputBufferSize())) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, o, raw)) {
                 listener.write((byte) type);
@@ -119,7 +119,7 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
 
     @Override
     protected Event doApplySet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        int ver = getVersion(version);
         try (ByteArrayOutputStream o = new ByteArrayOutputStream(configure.getOutputBufferSize())) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, o, raw)) {
                 listener.write((byte) type);
@@ -135,7 +135,7 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
 
     @Override
     protected Event doApplyZSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        int ver = getVersion(version);
         try (ByteArrayOutputStream o = new ByteArrayOutputStream(configure.getOutputBufferSize())) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, o, raw)) {
                 listener.write((byte) type);
@@ -151,7 +151,7 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
 
     @Override
     protected Event doApplyZSet2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        int ver = getVersion(version);
         if (ver < 8 /* since redis rdb version 8 */) {
             // downgrade to RDB_TYPE_ZSET
             BaseRdbParser parser = new BaseRdbParser(in);
@@ -198,7 +198,7 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
 
     @Override
     protected Event doApplyHash(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        int ver = getVersion(version);
         try (ByteArrayOutputStream o = new ByteArrayOutputStream(configure.getOutputBufferSize())) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, o, raw)) {
                 listener.write((byte) type);
@@ -214,7 +214,7 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
 
     @Override
     protected Event doApplyHashZipMap(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        int ver = getVersion(version);
         try (ByteArrayOutputStream o = new ByteArrayOutputStream(configure.getOutputBufferSize())) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, o, raw)) {
                 listener.write((byte) type);
@@ -230,7 +230,7 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
 
     @Override
     protected Event doApplyListZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        int ver = getVersion(version);
         try (ByteArrayOutputStream o = new ByteArrayOutputStream(configure.getOutputBufferSize())) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, o, raw)) {
                 listener.write((byte) type);
@@ -246,7 +246,7 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
 
     @Override
     protected Event doApplySetIntSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        int ver = getVersion(version);
         try (ByteArrayOutputStream o = new ByteArrayOutputStream(configure.getOutputBufferSize())) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, o, raw)) {
                 listener.write((byte) type);
@@ -262,7 +262,7 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
 
     @Override
     protected Event doApplyZSetZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        int ver = getVersion(version);
         try (ByteArrayOutputStream o = new ByteArrayOutputStream(configure.getOutputBufferSize())) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, o, raw)) {
                 listener.write((byte) type);
@@ -278,7 +278,7 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     protected Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        int ver = getVersion(version);
         if (ver < 10 /* since redis rdb version 10 */) {
             // downgrade to RDB_TYPE_ZSET
             BaseRdbParser parser = new BaseRdbParser(in);
@@ -327,7 +327,7 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
 
     @Override
     protected Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        int ver = getVersion(version);
         try (ByteArrayOutputStream o = new ByteArrayOutputStream(configure.getOutputBufferSize())) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, o, raw)) {
                 listener.write((byte) type);
@@ -343,7 +343,7 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     protected Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        int ver = getVersion(version);
         if (ver < 10 /* since redis rdb version 10 */) {
             // downgrade to RDB_TYPE_HASH
             BaseRdbParser parser = new BaseRdbParser(in);
@@ -392,7 +392,7 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
 
     @Override
     protected Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        int ver = getVersion(version);
         if (ver < 7 /* since redis rdb version 7 */) {
             // downgrade to RDB_TYPE_LIST
             BaseRdbParser parser = new BaseRdbParser(in);
@@ -446,7 +446,7 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     protected Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        int ver = getVersion(version);
         if (ver < 10 /* since redis rdb version 10 */) {
             // downgrade to RDB_TYPE_LIST
             BaseRdbParser parser = new BaseRdbParser(in);
@@ -507,7 +507,7 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
 
     @Override
     protected Event doApplyModule(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        int ver = getVersion(version);
         try (ByteArrayOutputStream o = new ByteArrayOutputStream(configure.getOutputBufferSize())) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, o, raw)) {
                 listener.write((byte) type);
@@ -523,7 +523,7 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
 
     @Override
     protected Event doApplyModule2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        int ver = getVersion(version);
         try (ByteArrayOutputStream o = new ByteArrayOutputStream(configure.getOutputBufferSize())) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, o, raw)) {
                 listener.write((byte) type);
@@ -539,7 +539,7 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
 
     @Override
     protected Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        int ver = getVersion(version);
         try (ByteArrayOutputStream o = new ByteArrayOutputStream(configure.getOutputBufferSize())) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, o, raw)) {
                 listener.write((byte) type);
@@ -555,7 +555,7 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
     
     @Override
     protected Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
-        int ver = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        int ver = getVersion(version);
         try (ByteArrayOutputStream o = new ByteArrayOutputStream(configure.getOutputBufferSize())) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, o, raw)) {
                 if (ver < 10) {

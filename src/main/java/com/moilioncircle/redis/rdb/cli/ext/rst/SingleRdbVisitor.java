@@ -24,6 +24,7 @@ import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.ONE;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.REPLACE;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.RESTORE;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.SCRIPT;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.SELECT;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.ZERO;
 
 import org.slf4j.Logger;
@@ -107,22 +108,14 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
                 this.db = select.getIndex();
                 if (filter.contains(db, 0, null)) {
                     DefaultCommand command = new DefaultCommand();
-                    command.setCommand("SELECT".getBytes());
+                    command.setCommand(SELECT);
                     command.setArgs(new byte[][]{String.valueOf(db).getBytes()});
                     retry(command, configure.getMigrateRetries());
                 }
             } else if (event instanceof CombineCommand) {
                 CombineCommand command = (CombineCommand)event;
                 if (command.getParsedCommand() instanceof PingCommand) {
-                    
-                    if (ping == 0) {
-                        ping = System.currentTimeMillis();
-                    }
-                    // ping every 10s
-                    if (System.currentTimeMillis() - ping > 10000) {
-                        retry(command.getDefaultCommand(), configure.getMigrateRetries());
-                        ping = System.currentTimeMillis();
-                    }
+                    ping(command);
                 } else if (filter.contains(db, 0, null)) {
                     retry(command.getDefaultCommand(), configure.getMigrateRetries());
                 }
@@ -137,6 +130,17 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
             logger.error("report an issue with exception stack on https://github.com/leonchen83/redis-rdb-cli/issues", e);
             System.out.println("fatal error, check log and report an issue with exception stack.");
             System.exit(-1);
+        }
+    }
+    
+    private void ping(CombineCommand command) {
+        if (ping == 0) {
+            ping = System.currentTimeMillis();
+        }
+        // ping every 10s
+        if (System.currentTimeMillis() - ping > 10000) {
+            retry(command.getDefaultCommand(), configure.getMigrateRetries());
+            ping = System.currentTimeMillis();
         }
     }
     

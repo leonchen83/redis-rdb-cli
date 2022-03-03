@@ -37,7 +37,6 @@ import com.moilioncircle.redis.rdb.cli.net.protocol.RedisObject;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
-import com.moilioncircle.redis.replicator.Replicators;
 import com.moilioncircle.redis.replicator.cmd.CommandName;
 import com.moilioncircle.redis.replicator.cmd.parser.AppendParser;
 import com.moilioncircle.redis.replicator.cmd.parser.BLMoveParser;
@@ -198,12 +197,6 @@ public class XRst implements Callable<Integer> {
 			try (ProgressBar bar = new ProgressBar(-1)) {
 				Replicator r = new XRedisReplicator(source, configure);
 				r.setRdbVisitor(getRdbVisitor(r, configure, uri));
-				Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-					Replicators.closeQuietly(r);
-				}));
-				r.addExceptionListener((rep, tx, e) -> {
-					throw new RuntimeException(tx.getMessage(), tx);
-				});
 				r.addEventListener((rep, event) -> {
 					if (event instanceof PreRdbSyncEvent)
 						rep.addRawByteListener(b -> bar.react(b.length));
@@ -218,12 +211,6 @@ public class XRst implements Callable<Integer> {
 				Replicator r = new XRedisReplicator(source, configure);
 				List<String> lines = Files.readAllLines(exclusive.config.toPath());
 				r.setRdbVisitor(new ClusterRdbVisitor(r, configure, null, XFilter.cluster(), lines, replace));
-				Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-					Replicators.closeQuietly(r);
-				}));
-				r.addExceptionListener((rep, tx, e) -> {
-					throw new RuntimeException(tx.getMessage(), tx);
-				});
 				r.addEventListener((rep, event) -> {
 					if (event instanceof PreRdbSyncEvent)
 						rep.addRawByteListener(b -> bar.react(b.length));

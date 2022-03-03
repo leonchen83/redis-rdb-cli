@@ -414,7 +414,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         quote(key, out);
         delimiter(out);
         out.write(configure.getQuote());
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, redis)) {
             listener.write((byte) type);
             super.doApplyModule(in, version, key, contains, type, context);
@@ -429,7 +429,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         quote(key, out);
         delimiter(out);
         out.write(configure.getQuote());
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, redis)) {
             listener.write((byte) type);
             super.doApplyModule2(in, version, key, contains, type, context);
@@ -448,7 +448,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         quote(key, out);
         delimiter(out);
         out.write(configure.getQuote());
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, redis)) {
             listener.write((byte) type);
             super.doApplyStreamListPacks(in, version, key, contains, type, context);
@@ -463,7 +463,7 @@ public class KeyValRdbVisitor extends AbstractRdbVisitor {
         quote(key, out);
         delimiter(out);
         out.write(configure.getQuote());
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, redis)) {
             if (version < 10) {
                 listener.write((byte) Constants.RDB_TYPE_STREAM_LISTPACKS);

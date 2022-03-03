@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.ext;
+package com.moilioncircle.redis.rdb.cli.ext.rct;
 
 import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAINER_PACKED;
 import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAINER_PLAIN;
@@ -26,6 +26,8 @@ import java.io.IOException;
 
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
+import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
+import com.moilioncircle.redis.rdb.cli.ext.DumpRawByteListener;
 import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.rdb.cli.ext.escape.RedisEscaper;
 import com.moilioncircle.redis.rdb.cli.filter.Filter;
@@ -539,8 +541,8 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     protected Event doApplyModule(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             OutputStreams.write('"', out);
-            int v = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-            try (DumpRawByteListener listener = new DumpRawByteListener(replicator, v, out, redis)) {
+            int ver = getVersion(version);
+            try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, out, redis)) {
                 listener.write((byte) type);
                 super.doApplyModule(in, version, key, contains, type, context);
             }
@@ -553,8 +555,8 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     protected Event doApplyModule2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             OutputStreams.write('"', out);
-            int v = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-            try (DumpRawByteListener listener = new DumpRawByteListener(replicator, v, out, redis)) {
+            int ver = getVersion(version);
+            try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, out, redis)) {
                 listener.write((byte) type);
                 super.doApplyModule2(in, version, key, contains, type, context);
             }
@@ -567,8 +569,8 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     protected Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             OutputStreams.write('"', out);
-            int v = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-            try (DumpRawByteListener listener = new DumpRawByteListener(replicator, v, out, redis)) {
+            int ver = getVersion(version);
+            try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, out, redis)) {
                 listener.write((byte) type);
                 super.doApplyStreamListPacks(in, version, key, contains, type, context);
             }
@@ -581,14 +583,14 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     protected Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             OutputStreams.write('"', out);
-            int v = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
-            try (DumpRawByteListener listener = new DumpRawByteListener(replicator, v, out, redis)) {
-                if (v < 10) {
+            int ver = getVersion(version);
+            try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, out, redis)) {
+                if (ver < 10) {
                     listener.write((byte) Constants.RDB_TYPE_STREAM_LISTPACKS);
                 } else {
                     listener.write((byte) type);
                 }
-                super.doApplyStreamListPacks2(in, v, key, contains, type, context, listener);
+                super.doApplyStreamListPacks2(in, ver, key, contains, type, context, listener);
             }
             OutputStreams.write('"', out);
         });

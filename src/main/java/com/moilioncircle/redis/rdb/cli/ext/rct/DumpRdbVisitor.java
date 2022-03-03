@@ -16,12 +16,8 @@
 
 package com.moilioncircle.redis.rdb.cli.ext.rct;
 
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.FUNCTION_BUF;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.REPLACE_BUF;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.RESTORE_BUF;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.SELECT;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.ZERO_BUF;
-import static com.moilioncircle.redis.replicator.Constants.DOLLAR;
 import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAINER_PACKED;
 import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAINER_PLAIN;
 import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
@@ -29,13 +25,11 @@ import static com.moilioncircle.redis.replicator.Constants.RDB_OPCODE_FUNCTION;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_HASH;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_LIST;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET;
-import static com.moilioncircle.redis.replicator.Constants.STAR;
 import static com.moilioncircle.redis.replicator.rdb.BaseRdbParser.StringHelper.listPackEntry;
 import static java.nio.ByteBuffer.wrap;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
@@ -45,8 +39,7 @@ import com.moilioncircle.redis.rdb.cli.ext.DumpRawByteListener;
 import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.rdb.cli.filter.Filter;
 import com.moilioncircle.redis.rdb.cli.io.LayeredOutputStream;
-import com.moilioncircle.redis.rdb.cli.util.ByteBuffers;
-import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.rdb.cli.net.protocol.Protocols;
 import com.moilioncircle.redis.replicator.Constants;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
@@ -77,13 +70,13 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     public DB applySelectDB(RedisInputStream in, int version) throws IOException {
         DB db = super.applySelectDB(in, version);
         long dbnum = db.getDbNumber();
-        emit(this.out, SELECT, String.valueOf(dbnum).getBytes());
+        Protocols.emit(this.out, SELECT, String.valueOf(dbnum).getBytes());
         return db;
     }
     
     @Override
     public Event applyFunction(RedisInputStream in, int version) throws IOException {
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         if (version < 10 /* since redis rdb version 10 */) {
             return super.applyFunction(in, version);
         } else {
@@ -92,7 +85,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                     listener.write((byte) RDB_OPCODE_FUNCTION);
                     super.applyFunction(in, version);
                 }
-                emit(this.out, FUNCTION_BUF, RESTORE_BUF, out.toByteBuffers(), replace);
+                Protocols.functionRestore(this.out, out.toByteBuffers(), replace);
                 return new DumpFunction();
             }
         }
@@ -109,13 +102,13 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
         }
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplyString(in, version, key, contains, type, context);
             }
-            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
+            Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
@@ -131,13 +124,13 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
         }
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplyList(in, version, key, contains, type, context);
             }
-            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
+            Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
@@ -153,13 +146,13 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
         }
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplySet(in, version, key, contains, type, context);
             }
-            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
+            Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
@@ -175,13 +168,13 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
         }
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplyZSet(in, version, key, contains, type, context);
             }
-            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
+            Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
@@ -197,7 +190,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
         }
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             if (version < 8 /* since redis rdb version 8 */) {
                 // downgrade to RDB_TYPE_ZSET
@@ -224,7 +217,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                     super.doApplyZSet2(in, version, key, contains, type, context);
                 }
             }
-            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
+            Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
@@ -240,13 +233,13 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
         }
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplyHash(in, version, key, contains, type, context);
             }
-            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
+            Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
@@ -262,13 +255,13 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
         }
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplyHashZipMap(in, version, key, contains, type, context);
             }
-            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
+            Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
@@ -284,13 +277,13 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
         }
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplyListZipList(in, version, key, contains, type, context);
             }
-            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
+            Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
@@ -306,13 +299,13 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
         }
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplySetIntSet(in, version, key, contains, type, context);
             }
-            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
+            Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
@@ -328,13 +321,13 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
         }
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplyZSetZipList(in, version, key, contains, type, context);
             }
-            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
+            Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
@@ -350,7 +343,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
         }
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             if (version < 10 /* since redis rdb version 10 */) {
                 // downgrade to RDB_TYPE_ZSET
@@ -380,7 +373,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                     super.doApplyZSetListPack(in, version, key, contains, type, context);
                 }
             }
-            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
+            Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
@@ -396,13 +389,13 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
         }
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplyHashZipList(in, version, key, contains, type, context);
             }
-            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
+            Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
@@ -418,7 +411,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
         }
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             if (version < 10 /* since redis rdb version 10 */) {
                 // downgrade to RDB_TYPE_HASH
@@ -448,7 +441,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                     super.doApplyHashListPack(in, version, key, contains, type, context);
                 }
             }
-            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
+            Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
@@ -464,7 +457,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
         }
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             if (version < 7 /* since redis rdb version 7 */) {
                 BaseRdbParser parser = new BaseRdbParser(in);
@@ -499,7 +492,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                     super.doApplyListQuickList(in, version, key, contains, type, context);
                 }
             }
-            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
+            Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
@@ -515,7 +508,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
         }
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             if (version < 10 /* since redis rdb version 10 */) {
                 // downgrade to RDB_TYPE_LIST
@@ -558,7 +551,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                     super.doApplyListQuickList2(in, version, key, contains, type, context);
                 }
             }
-            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
+            Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
@@ -574,13 +567,13 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
         }
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplyModule(in, version, key, contains, type, context);
             }
-            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
+            Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
@@ -596,13 +589,13 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
         }
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplyModule2(in, version, key, contains, type, context);
             }
-            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
+            Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
@@ -618,13 +611,13 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
         }
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
                 super.doApplyStreamListPacks(in, version, key, contains, type, context);
             }
-            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
+            Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
     }
@@ -640,7 +633,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
         }
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 if (version < 10) {
@@ -650,70 +643,8 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 }
                 super.doApplyStreamListPacks2(in, version, key, contains, type, context, listener);
             }
-            emit(this.out, RESTORE_BUF, wrap(key), ex, out.toByteBuffers(), replace);
+            Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
         }
-    }
-    
-    protected void emit(OutputStream out, ByteBuffer command, ByteBuffer key, ByteBuffer ex, ByteBuffers value, boolean replace) {
-        OutputStreams.write(STAR, out);
-        if (replace) {
-            OutputStreams.write("5".getBytes(), out);
-        } else {
-            OutputStreams.write("4".getBytes(), out);
-        }
-        
-        OutputStreams.write('\r', out);
-        OutputStreams.write('\n', out);
-        
-        emitArg(command);
-        emitArg(key);
-        emitArg(ex);
-        emitArg(value);
-        if (replace) {
-            emitArg(REPLACE_BUF);
-        }
-    }
-    
-    private void emit(OutputStream out, ByteBuffer function, ByteBuffer restore, ByteBuffers value, boolean replace) {
-        OutputStreams.write(STAR, out);
-        if (replace) {
-            OutputStreams.write("4".getBytes(), out);
-        } else {
-            OutputStreams.write("3".getBytes(), out);
-        }
-    
-        OutputStreams.write('\r', out);
-        OutputStreams.write('\n', out);
-    
-        emitArg(function);
-        emitArg(restore);
-        emitArg(value);
-        if (replace) {
-            emitArg(REPLACE_BUF);
-        }
-    }
-    
-    protected void emitArg(ByteBuffer arg) {
-        OutputStreams.write(DOLLAR, out);
-        OutputStreams.write(String.valueOf(arg.remaining()).getBytes(), out);
-        OutputStreams.write('\r', out);
-        OutputStreams.write('\n', out);
-        OutputStreams.write(arg.array(), arg.position(), arg.limit(), out);
-        OutputStreams.write('\r', out);
-        OutputStreams.write('\n', out);
-    }
-    
-    protected void emitArg(ByteBuffers value) {
-        OutputStreams.write(DOLLAR, out);
-        OutputStreams.write(String.valueOf(value.getSize()).getBytes(), out);
-        OutputStreams.write('\r', out);
-        OutputStreams.write('\n', out);
-        while (value.getBuffers().hasNext()) {
-            ByteBuffer buf = value.getBuffers().next();
-            OutputStreams.write(buf.array(), buf.position(), buf.limit(), out);
-        }
-        OutputStreams.write('\r', out);
-        OutputStreams.write('\n', out);
     }
 }

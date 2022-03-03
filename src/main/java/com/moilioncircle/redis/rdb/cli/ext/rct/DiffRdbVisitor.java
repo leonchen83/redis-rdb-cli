@@ -60,7 +60,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
         escaper.encode(FUNCTION, out);
         delimiter(out);
         Event event = null;
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) RDB_OPCODE_FUNCTION);
             event = super.applyFunction(in, version);
@@ -74,7 +74,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
             super.doApplyString(in, version, key, contains, type, context);
@@ -88,7 +88,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
             super.doApplyList(in, version, key, contains, type, context);
@@ -102,7 +102,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
             super.doApplySet(in, version, key, contains, type, context);
@@ -116,7 +116,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
             super.doApplyZSet(in, version, key, contains, type, context);
@@ -130,7 +130,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
             super.doApplyZSet2(in, version, key, contains, type, context);
@@ -144,7 +144,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
             super.doApplyHash(in, version, key, contains, type, context);
@@ -158,7 +158,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
             super.doApplyHashZipMap(in, version, key, contains, type, context);
@@ -172,7 +172,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
             super.doApplyListZipList(in, version, key, contains, type, context);
@@ -186,7 +186,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
             super.doApplySetIntSet(in, version, key, contains, type, context);
@@ -200,7 +200,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
             super.doApplyZSetZipList(in, version, key, contains, type, context);
@@ -214,7 +214,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
             super.doApplyZSetListPack(in, version, key, contains, type, context);
@@ -228,7 +228,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
             super.doApplyHashZipList(in, version, key, contains, type, context);
@@ -242,7 +242,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
             super.doApplyHashListPack(in, version, key, contains, type, context);
@@ -256,7 +256,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
             super.doApplyListQuickList(in, version, key, contains, type, context);
@@ -270,7 +270,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
             super.doApplyListQuickList2(in, version, key, contains, type, context);
@@ -284,7 +284,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
             super.doApplyModule(in, version, key, contains, type, context);
@@ -298,7 +298,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
             super.doApplyModule2(in, version, key, contains, type, context);
@@ -312,7 +312,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
             super.doApplyStreamListPacks(in, version, key, contains, type, context);
@@ -326,7 +326,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
-        version = configure.getDumpRdbVersion() == -1 ? version : configure.getDumpRdbVersion();
+        version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             if (version < 10) {
                 listener.write((byte) Constants.RDB_TYPE_STREAM_LISTPACKS);

@@ -53,7 +53,6 @@ public enum Action {
     MERGE,
     BACKUP;
     
-    @SuppressWarnings("all")
     public List<Tuple2<Replicator, String>> dress(Configure configure, Args.RdtArgs arg) throws Exception {
         List<Tuple2<Replicator, String>> list = new ArrayList<>();
         switch (this) {

@@ -24,8 +24,6 @@ import static com.moilioncircle.redis.replicator.Constants.STAR;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.util.Iterator;
 
 import com.moilioncircle.redis.rdb.cli.util.ByteBuffers;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
@@ -45,58 +43,11 @@ public class Protocol {
     }
     
     public void emit(byte[] command, byte[]... ary) throws IOException {
-        out.write(STAR);
-        out.write(String.valueOf(ary.length + 1).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        out.write(String.valueOf(command.length).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(command);
-        out.write('\r');
-        out.write('\n');
-        for (final byte[] arg : ary) {
-            out.write(DOLLAR);
-            out.write(String.valueOf(arg.length).getBytes());
-            out.write('\r');
-            out.write('\n');
-            out.write(arg);
-            out.write('\r');
-            out.write('\n');
-        }
+        Protocols.emit(out, command, ary);
     }
     
     public void emit(ByteBuffers command, ByteBuffers... ary) throws IOException {
-        out.write(STAR);
-        out.write(String.valueOf(ary.length + 1).getBytes());
-        out.write('\r');
-        out.write('\n');
-        out.write(DOLLAR);
-        out.write(String.valueOf(command.getSize()).getBytes());
-        out.write('\r');
-        out.write('\n');
-        Iterator<ByteBuffer> cit = command.getBuffers();
-        while (cit.hasNext()) {
-            ByteBuffer tmp = cit.next();
-            out.write(tmp.array(), tmp.position(), tmp.limit());
-        }
-        
-        out.write('\r');
-        out.write('\n');
-        for (final ByteBuffers arg : ary) {
-            out.write(DOLLAR);
-            out.write(String.valueOf(arg.getSize()).getBytes());
-            out.write('\r');
-            out.write('\n');
-            Iterator<ByteBuffer> ait = arg.getBuffers();
-            while (ait.hasNext()) {
-                ByteBuffer tmp = ait.next();
-                out.write(tmp.array(), tmp.position(), tmp.limit());
-            }
-            out.write('\r');
-            out.write('\n');
-        }
+        Protocols.emit(out, command, ary);
     }
 
     public RedisObject parse() throws IOException {

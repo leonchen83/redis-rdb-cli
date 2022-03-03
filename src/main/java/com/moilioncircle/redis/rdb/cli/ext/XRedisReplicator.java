@@ -33,6 +33,7 @@ import com.moilioncircle.redis.replicator.RedisSocketReplicator;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.ReplFilter;
 import com.moilioncircle.redis.replicator.Replicator;
+import com.moilioncircle.redis.replicator.Replicators;
 import com.moilioncircle.redis.replicator.Status;
 import com.moilioncircle.redis.replicator.StatusListener;
 import com.moilioncircle.redis.replicator.cmd.Command;
@@ -100,6 +101,12 @@ public class XRedisReplicator implements Replicator {
         } else {
             this.replicator = new RedisSocketReplicator(uri.getHost(), uri.getPort(), configuration);
         }
+        this.replicator.addExceptionListener((r, t, e) -> {
+            throw new RuntimeException(t.getMessage(), t);
+        });
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            Replicators.closeQuietly(this.replicator);
+        }));
     }
 
     private void initialize(RedisSentinelURI uri, Configure configure, ReplFilter... filters) throws IOException {
@@ -108,6 +115,12 @@ public class XRedisReplicator implements Replicator {
         Configuration configuration = configure.merge(uri, true);
         configuration.setReplFilters(filters);
         this.replicator = new RedisSentinelReplicator(uri, configuration);
+        this.replicator.addExceptionListener((r, t, e) -> {
+            throw new RuntimeException(t.getMessage(), t);
+        });
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            Replicators.closeQuietly(this.replicator);
+        }));
     }
 
     @Override

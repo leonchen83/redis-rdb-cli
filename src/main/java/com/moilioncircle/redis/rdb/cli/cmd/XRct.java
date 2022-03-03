@@ -103,14 +103,8 @@ public class XRct implements Callable<Integer> {
 		Configure configure = Configure.bind();
 		try (ProgressBar bar = new ProgressBar(-1)) {
 			Replicator r = new XRedisReplicator(source, configure, DefaultReplFilter.RDB);
-			r.addExceptionListener((rep, tx, e) -> {
-				throw new RuntimeException(tx.getMessage(), tx);
-			});
 			
 			new Format(format, configure).dress(r, output, XFilter.filter(regexs, db, type), largest, bytes, escape, replace);
-			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-				Replicators.closeQuietly(r);
-			}));
 			r.addEventListener((rep, event) -> {
 				if (event instanceof PreRdbSyncEvent)
 					rep.addRawByteListener(b -> bar.react(b.length));

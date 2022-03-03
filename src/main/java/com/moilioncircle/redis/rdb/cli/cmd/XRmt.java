@@ -115,12 +115,6 @@ public class XRmt implements Callable<Integer> {
 			try (ProgressBar bar = new ProgressBar(-1)) {
 				Replicator r = new XRedisReplicator(source, configure, DefaultReplFilter.RDB);
 				r.setRdbVisitor(getRdbVisitor(r, configure, uri));
-				Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-					Replicators.closeQuietly(r);
-				}));
-				r.addExceptionListener((rep, tx, e) -> {
-					throw new RuntimeException(tx.getMessage(), tx);
-				});
 				r.addEventListener((rep, event) -> {
 					if (event instanceof PreRdbSyncEvent)
 						rep.addRawByteListener(b -> bar.react(b.length));
@@ -137,12 +131,6 @@ public class XRmt implements Callable<Integer> {
 				Replicator r = new XRedisReplicator(source, configure, DefaultReplFilter.RDB);
 				List<String> lines = Files.readAllLines(exclusive.config.toPath());
 				r.setRdbVisitor(new ClusterRdbVisitor(r, configure, null, XFilter.cluster(regexs, type), lines, replace));
-				Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-					Replicators.closeQuietly(r);
-				}));
-				r.addExceptionListener((rep, tx, e) -> {
-					throw new RuntimeException(tx.getMessage(), tx);
-				});
 				r.addEventListener((rep, event) -> {
 					if (event instanceof PreRdbSyncEvent)
 						rep.addRawByteListener(b -> bar.react(b.length));

@@ -164,14 +164,8 @@ public class XRdt implements Callable<Integer> {
 			arg.filter = XFilter.filter(regexs, db, type);
 			
 			List<Tuple2<Replicator, String>> list = action.dress(configure, arg);
-			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-				for (Tuple2<Replicator, String> tuple : list) Replicators.closeQuietly(tuple.getV1());
-			}));
 			
 			for (Tuple2<Replicator, String> tuple : list) {
-				tuple.getV1().addExceptionListener((rep, tx, e) -> {
-					throw new RuntimeException(tx.getMessage(), tx);
-				});
 				tuple.getV1().addEventListener((rep, event) -> {
 					if (event instanceof PreRdbSyncEvent)
 						rep.addRawByteListener(b -> bar.react(b.length, tuple.getV2()));

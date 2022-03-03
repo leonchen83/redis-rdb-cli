@@ -35,7 +35,6 @@ import com.moilioncircle.redis.rdb.cli.ext.XRedisReplicator;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
 import com.moilioncircle.redis.rdb.cli.util.XThreadFactory;
 import com.moilioncircle.redis.replicator.Replicator;
-import com.moilioncircle.redis.replicator.Replicators;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 
 import picocli.CommandLine.Command;
@@ -90,12 +89,6 @@ public class XRet implements Callable<Integer> {
 		try (ProgressBar bar = new ProgressBar(-1)) {
 			Replicator r = new XRedisReplicator(source, configure);
 			r.setRdbVisitor(parserService.getRdbVisitor(r));
-			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-				Replicators.closeQuietly(r);
-			}));
-			r.addExceptionListener((rep, tx, e) -> {
-				throw new RuntimeException(tx.getMessage(), tx);
-			});
 			r.addEventListener((rep, event) -> {
 				if (event instanceof PreRdbSyncEvent)
 					rep.addRawByteListener(b -> bar.react(b.length));

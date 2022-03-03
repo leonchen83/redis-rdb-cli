@@ -19,7 +19,6 @@ package com.moilioncircle.redis.rdb.cli.ext;
 import static com.moilioncircle.redis.rdb.cli.glossary.Guard.DRAIN;
 import static com.moilioncircle.redis.rdb.cli.glossary.Guard.PASS;
 import static com.moilioncircle.redis.rdb.cli.glossary.Guard.SAVE;
-import static com.moilioncircle.redis.replicator.Constants.DOLLAR;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_HASH;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_HASH_LISTPACK;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_HASH_ZIPLIST;
@@ -39,13 +38,10 @@ import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET_2;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET_LISTPACK;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET_ZIPLIST;
-import static com.moilioncircle.redis.replicator.Constants.STAR;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.util.List;
 import java.util.function.Supplier;
 
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
@@ -73,12 +69,14 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
 	// common
 	protected Filter filter;
 	protected Configure configure;
+	protected RdbValueVisitor valueVisitor;
+	
 	//rct
 	protected Escaper escaper;
 	protected OutputStream out;
+	
 	//rdt
 	protected GuardRawByteListener listener;
-	protected RdbValueVisitor valueVisitor; 
 	
 	/**
 	 * rmt rst
@@ -114,6 +112,14 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
 		this.replicator.addRawByteListener(listener);
 	}
 	
+	protected int getVersion(int version) {
+		if (configure.getDumpRdbVersion() == -1) {
+			return version;
+		} else {
+			return configure.getDumpRdbVersion();
+		}
+	}
+	
 	protected void delimiter(OutputStream out) {
 		OutputStreams.write(configure.getDelimiter(), out);
 	}
@@ -130,82 +136,6 @@ public abstract class AbstractRdbVisitor extends DefaultRdbVisitor {
 			OutputStreams.write(bytes, out);
 		}
 		OutputStreams.write(configure.getQuote(), out);
-	}
-	
-	protected void emit(OutputStream out, ByteBuffer command, ByteBuffer... ary) {
-		OutputStreams.write(STAR, out);
-		OutputStreams.write(String.valueOf(ary.length + 1).getBytes(), out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
-		OutputStreams.write(DOLLAR, out);
-		OutputStreams.write(String.valueOf(command.remaining()).getBytes(), out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
-		OutputStreams.write(command.array(), command.position(), command.limit(), out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
-		for (final ByteBuffer arg : ary) {
-			OutputStreams.write(DOLLAR, out);
-			OutputStreams.write(String.valueOf(arg.remaining()).getBytes(), out);
-			OutputStreams.write('\r', out);
-			OutputStreams.write('\n', out);
-			OutputStreams.write(arg.array(), arg.position(), arg.limit(), out);
-			OutputStreams.write('\r', out);
-			OutputStreams.write('\n', out);
-		}
-	}
-	
-	protected void emit(OutputStream out, byte[] command, byte[]... ary) {
-		OutputStreams.write(STAR, out);
-		OutputStreams.write(String.valueOf(ary.length + 1).getBytes(), out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
-		OutputStreams.write(DOLLAR, out);
-		OutputStreams.write(String.valueOf(command.length).getBytes(), out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
-		OutputStreams.write(command, out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
-		for (final byte[] arg : ary) {
-			OutputStreams.write(DOLLAR, out);
-			OutputStreams.write(String.valueOf(arg.length).getBytes(), out);
-			OutputStreams.write('\r', out);
-			OutputStreams.write('\n', out);
-			OutputStreams.write(arg, out);
-			OutputStreams.write('\r', out);
-			OutputStreams.write('\n', out);
-		}
-	}
-	
-	protected void emit(OutputStream out, byte[] command, byte[] key, List<byte[]> ary) {
-		OutputStreams.write(STAR, out);
-		OutputStreams.write(String.valueOf(ary.size() + 2).getBytes(), out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
-		OutputStreams.write(DOLLAR, out);
-		OutputStreams.write(String.valueOf(command.length).getBytes(), out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
-		OutputStreams.write(command, out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
-		OutputStreams.write(DOLLAR, out);
-		OutputStreams.write(String.valueOf(key.length).getBytes(), out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
-		OutputStreams.write(key, out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
-		for (final byte[] arg : ary) {
-			OutputStreams.write(DOLLAR, out);
-			OutputStreams.write(String.valueOf(arg.length).getBytes(), out);
-			OutputStreams.write('\r', out);
-			OutputStreams.write('\n', out);
-			OutputStreams.write(arg, out);
-			OutputStreams.write('\r', out);
-			OutputStreams.write('\n', out);
-		}
 	}
 	
 	@Override
