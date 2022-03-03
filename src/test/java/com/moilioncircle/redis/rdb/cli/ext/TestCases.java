@@ -156,10 +156,10 @@ public class TestCases {
         new CommandLine(new XRct()).execute(new String[]{"-f", "diff", "-s", dd3, "-o", target(dd3, "diff")});
         eq1(target(d3, "diff"), target(dd3, "diff"));
     
-        new CommandLine(new XRdt()).execute(new String[]{"-b", dump, "-t", "string", "-o", target(dump, "rdb")});
+        new CommandLine(new XRdt()).execute(new String[]{"-b", dump, "-t", "sortedset", "list", "hash", "set", "stream", "-o", target(dump, "rdb")});
         map = Files.list(source).collect(Collectors.toMap(e -> e.getFileName().toString(), e -> e.toAbsolutePath().toString()));
         String actualString = map.get("dump.rdb.rdb");
-        String string = map.get("string.rdb");
+        String string = map.get("filter.rdb");
     
         new CommandLine(new XRct()).execute(new String[]{"-f", "diff", "-s", string, "-o", target(string, "diff")});
         new CommandLine(new XRct()).execute(new String[]{"-f", "diff", "-s", actualString, "-o", target(actualString, "diff")});
