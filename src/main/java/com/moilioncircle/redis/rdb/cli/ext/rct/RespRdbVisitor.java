@@ -46,12 +46,12 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.DumpRawByteListener;
 import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
-import com.moilioncircle.redis.rdb.cli.ext.escape.RawEscaper;
-import com.moilioncircle.redis.rdb.cli.glossary.DataType;
+import com.moilioncircle.redis.rdb.cli.filter.Filter;
 import com.moilioncircle.redis.rdb.cli.io.LayeredOutputStream;
 import com.moilioncircle.redis.rdb.cli.util.ByteBuffers;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
@@ -74,8 +74,8 @@ public class RespRdbVisitor extends AbstractRdbVisitor {
     private final int batch;
     private final boolean replace;
     
-    public RespRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) {
-        super(replicator, configure, out, db, regexs, types, new RawEscaper());
+    public RespRdbVisitor(Replicator replicator, Configure configure, File out, Filter filter, boolean replace, Escaper escaper) {
+        super(replicator, configure, out, filter, escaper);
         this.batch = configure.getBatchSize();
         this.replace = replace;
     }

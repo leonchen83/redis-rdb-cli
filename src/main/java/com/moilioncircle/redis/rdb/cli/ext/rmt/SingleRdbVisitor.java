@@ -25,8 +25,6 @@ import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.RESTOR
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.SCRIPT;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.ZERO;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +33,7 @@ import com.moilioncircle.redis.rdb.cli.api.sink.cmd.ClosingCommand;
 import com.moilioncircle.redis.rdb.cli.api.sink.listener.AsyncEventListener;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractMigrateRdbVisitor;
-import com.moilioncircle.redis.rdb.cli.glossary.DataType;
+import com.moilioncircle.redis.rdb.cli.filter.Filter;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorFactory;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
@@ -66,15 +64,8 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
     private final Configuration conf;
     private ThreadLocal<XEndpoint> endpoint = new ThreadLocal<>();
     
-    public SingleRdbVisitor(Replicator replicator,
-                            Configure configure,
-                            RedisURI uri,
-                            List<Long> db,
-                            List<String> regexs,
-                            List<DataType> types,
-                            boolean replace,
-                            boolean legacy) throws Exception {
-        super(replicator, configure, db, regexs, types, replace);
+    public SingleRdbVisitor(Replicator replicator, Configure configure, RedisURI uri, Filter filter, boolean replace, boolean legacy) throws Exception {
+        super(replicator, configure, filter, replace);
         this.uri = uri;
         this.legacy = legacy;
         this.conf = configure.merge(this.uri, false);
@@ -88,7 +79,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
                 XEndpoint.closeQuietly(this.endpoint.get());
                 int pipe = configure.getMigrateBatchSize();
                 try {
-                    this.endpoint.set(new XEndpoint(uri.getHost(), uri.getPort(), 0, pipe, true, conf, configure));
+                    this.endpoint.set(new XEndpoint(uri.getHost(), uri.getPort(), 0, pipe, true, conf));
                 } catch (Throwable e) {
                     // unrecoverable error
                     System.out.println("failed to connect " + uri.getHost() + ":" + uri.getPort() + ", reason : " + e.getMessage());

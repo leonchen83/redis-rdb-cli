@@ -32,7 +32,6 @@ import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.conf.NodeConfParser;
 import com.moilioncircle.redis.rdb.cli.net.protocol.RedisObject;
 import com.moilioncircle.redis.rdb.cli.util.ByteBuffers;
@@ -46,18 +45,18 @@ public class XEndpoints implements Closeable {
     
     private static final Logger logger = LoggerFactory.getLogger(XEndpoints.class);
 
-    private final Configure configure;
+    private final int pipe;
     private final Configuration configuration;
     private Set<XEndpoint> index1 = new HashSet<>();
     private List<String> clusterNodes = new ArrayList<>();
     private Map<Short, XEndpoint> index2 = new HashMap<>(16384);
 
-    public XEndpoints(List<String> lines, int pipe, boolean statistics, Configuration configuration, Configure configure) {
+    public XEndpoints(List<String> lines, int pipe, boolean statistics, Configuration configuration) {
+        this.pipe = pipe;
         this.clusterNodes = lines;
-        this.configure = configure;
         this.configuration = configuration;
         Function<Tuple3<String, Integer, String>, XEndpoint> mapper = t -> {
-            return new XEndpoint(t.getV1(), t.getV2(), 0, pipe, statistics, configuration, configure);
+            return new XEndpoint(t.getV1(), t.getV2(), 0, pipe, statistics, configuration);
         };
         new NodeConfParser<>(mapper).parse(lines, index1, index2);
     }
@@ -207,7 +206,7 @@ public class XEndpoints implements Closeable {
         }
         for (DummyEndpoint dummy : next1) {
             if (!n1.contains(dummy)) {
-                n1.add(DummyEndpoint.valueOf(dummy, configuration, configure)); // new endpoint
+                n1.add(DummyEndpoint.valueOf(dummy, configuration, pipe)); // new endpoint
             }
         }
         

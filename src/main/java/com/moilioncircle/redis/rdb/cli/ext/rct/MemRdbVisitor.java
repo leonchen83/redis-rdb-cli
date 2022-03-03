@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
@@ -42,13 +41,14 @@ import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
+import com.moilioncircle.redis.rdb.cli.filter.Filter;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorFactory;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
 import com.moilioncircle.redis.rdb.cli.util.CmpHeap;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
-import com.moilioncircle.redis.rdb.cli.util.Tuple2Ex;
+import com.moilioncircle.redis.rdb.cli.util.XTuple2;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
@@ -70,7 +70,7 @@ import com.moilioncircle.redis.replicator.util.type.Tuple2;
 /**
  * @author Baoyi Chen
  */
-public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2Ex>, EventListener {
+public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<XTuple2>, EventListener {
 
     private static final Monitor monitor = MonitorFactory.getMonitor("memory_statistics");
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
@@ -78,15 +78,15 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     private final Long bytes;
     private MemCalculator size;
     private MonitorManager manager;
-    private final CmpHeap<Tuple2Ex> heap;
+    private final CmpHeap<XTuple2> heap;
     
     //
     private long totalMem = 0;
     private boolean rdb6 = true;
     private Map<Long, Tuple2<Long, Long>> dbInfo = new LinkedHashMap<>();
     
-    public MemRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escaper escaper, Long largest, Long bytes) {
-        super(replicator, configure, out, db, regexs, types, escaper);
+    public MemRdbVisitor(Replicator replicator, Configure configure, File out, Filter filter, Escaper escaper, Long largest, Long bytes) {
+        super(replicator, configure, out, filter, escaper);
         this.bytes = bytes;
         this.manager = new MonitorManager(configure);
         this.manager.open("memory_statistics");
@@ -96,7 +96,7 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
     }
     
     @Override
-    public void accept(Tuple2Ex tuple) {
+    public void accept(XTuple2 tuple) {
         DummyKeyValuePair kv = tuple.getV2();
         OutputStreams.write(String.valueOf(kv.getDb().getDbNumber()).getBytes(), out);
         delimiter(out);
@@ -149,11 +149,11 @@ public class MemRdbVisitor extends AbstractRdbVisitor implements Consumer<Tuple2
             if (!dkv.isContains() || dkv.getKey() == null) return;
             dkv.setValue(dkv.getValue() + size.object(dkv.getKey(), dkv.getExpiredType() != NONE));
             if (bytes == null || dkv.getValue() >= bytes) {
-                Tuple2Ex tuple = new Tuple2Ex(dkv.getValue(), dkv);
+                XTuple2 tuple = new XTuple2(dkv.getValue(), dkv);
                 heap.add(tuple);
             }
         } else if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
-            for (Tuple2Ex tuple : heap.get(true)) {
+            for (XTuple2 tuple : heap.get(true)) {
                 accept(tuple);
             }
     

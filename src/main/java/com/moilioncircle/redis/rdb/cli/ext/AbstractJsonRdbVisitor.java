@@ -23,12 +23,12 @@ import static com.moilioncircle.redis.replicator.rdb.BaseRdbParser.StringHelper.
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.rdb.cli.ext.escape.RedisEscaper;
+import com.moilioncircle.redis.rdb.cli.filter.Filter;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Constants;
@@ -49,8 +49,8 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     private boolean firstkey = true;
     private Escaper redis;
     
-    public AbstractJsonRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escaper escaper) {
-        super(replicator, configure, out, db, regexs, types, escaper);
+    public AbstractJsonRdbVisitor(Replicator replicator, Configure configure, File out, Filter filter, Escaper escaper) {
+        super(replicator, configure, out, filter, escaper);
         this.redis = new RedisEscaper(configure.getDelimiter(), configure.getQuote());
     }
 

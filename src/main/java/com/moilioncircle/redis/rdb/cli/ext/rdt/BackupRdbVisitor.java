@@ -22,9 +22,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.function.Supplier;
 
+import com.moilioncircle.redis.rdb.cli.cmd.Args;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
-import com.moilioncircle.redis.rdb.cli.glossary.Action;
 import com.moilioncircle.redis.rdb.cli.glossary.Guard;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -45,8 +45,8 @@ public class BackupRdbVisitor extends AbstractRdbVisitor {
     
     private Long goal;
 
-    public BackupRdbVisitor(Replicator replicator, Configure configure, Action.Arg arg, Supplier<OutputStream> supplier) {
-        super(replicator, configure, arg.db, arg.regexs, arg.types, supplier);
+    public BackupRdbVisitor(Replicator replicator, Configure configure, Args.RdtArgs arg, Supplier<OutputStream> supplier) {
+        super(replicator, configure, arg.filter, supplier);
         this.goal = arg.goal;
         this.replicator.addEventListener((rep, event) -> {
             if (event instanceof PreRdbSyncEvent) {
@@ -54,8 +54,8 @@ public class BackupRdbVisitor extends AbstractRdbVisitor {
             }
             if (event instanceof PostRdbSyncEvent) {
                 CRCOutputStream out = listener.getOutputStream();
-                OutputStreams.write(0xFF, out);
-                OutputStreams.write(out.getCRC64(), out);
+                OutputStreams.writeQuietly(0xFF, out);
+                OutputStreams.writeQuietly(out.getCRC64(), out);
                 OutputStreams.closeQuietly(out);
             }
             if (event instanceof PreCommandSyncEvent) {

@@ -31,7 +31,6 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.io.BufferedOutputStream;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorFactory;
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
@@ -63,21 +62,19 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
     private final Protocol protocol;
     private final Configuration conf;
     private final boolean statistics;
-    private final Configure configure;
     private final RedisInputStream in;
 
     private final Monitor monitor;
     
-    public XEndpoint(String host, int port, Configuration conf, Configure configure) {
-        this(host, port, 0, 1, false, conf, configure);
+    public XEndpoint(String host, int port, Configuration conf) {
+        this(host, port, 0, 1, false, conf);
     }
     
-    public XEndpoint(String host, int port, int db, int pipe, boolean statistics, Configuration conf, Configure configure) {
+    public XEndpoint(String host, int port, int db, int pipe, boolean statistics, Configuration conf) {
         this.host = host;
         this.port = port;
         this.pipe = pipe;
         this.conf = conf;
-        this.configure = configure;
         this.statistics = statistics;
         this.monitor = MonitorFactory.getMonitor("endpoint_statistics");
         try {
@@ -209,7 +206,9 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
     }
     
     public static void close(XEndpoint endpoint) {
-        if (endpoint == null) return;
+        if (endpoint == null) {
+            return;
+        }
         try {
             endpoint.close();
         } catch (IOException e) {
@@ -223,7 +222,9 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
     }
     
     public static void closeQuietly(XEndpoint endpoint) {
-        if (endpoint == null) return;
+        if (endpoint == null) {
+            return;
+        }
         try {
             endpoint.close();
         } catch (Throwable e) {
@@ -251,9 +252,11 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
     }
 
     public static XEndpoint valueOf(String host, int port, int db, XEndpoint endpoint) {
-        if (endpoint.statistics) endpoint.monitor.add("reconnect_" + endpoint.address, 1);
+        if (endpoint.statistics) {
+            endpoint.monitor.add("reconnect_" + endpoint.address, 1);
+        }
         closeQuietly(endpoint);
-        XEndpoint v = new XEndpoint(host, port, db, endpoint.pipe, endpoint.statistics, endpoint.conf, endpoint.configure);
+        XEndpoint v = new XEndpoint(host, port, db, endpoint.pipe, endpoint.statistics, endpoint.conf);
         v.setSlots(new ArrayList<>(endpoint.slots));
         return v;
     }

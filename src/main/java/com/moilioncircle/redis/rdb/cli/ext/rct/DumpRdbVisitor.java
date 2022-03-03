@@ -37,14 +37,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.util.List;
 
+import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.DumpRawByteListener;
 import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
-import com.moilioncircle.redis.rdb.cli.ext.escape.RawEscaper;
-import com.moilioncircle.redis.rdb.cli.glossary.DataType;
+import com.moilioncircle.redis.rdb.cli.filter.Filter;
 import com.moilioncircle.redis.rdb.cli.io.LayeredOutputStream;
 import com.moilioncircle.redis.rdb.cli.util.ByteBuffers;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
@@ -69,8 +68,8 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     // TODO https://github.com/leonchen83/redis-rdb-cli/issues/6
     private final boolean replace;
     
-    public DumpRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) {
-        super(replicator, configure, out, db, regexs, types, new RawEscaper());
+    public DumpRdbVisitor(Replicator replicator, Configure configure, File out, Filter filter, boolean replace, Escaper escaper) {
+        super(replicator, configure, out, filter, escaper);
         this.replace = replace;
     }
     

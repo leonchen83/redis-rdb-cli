@@ -17,12 +17,11 @@
 package com.moilioncircle.redis.rdb.cli.ext.rct;
 
 import java.io.File;
-import java.util.List;
 
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractJsonRdbVisitor;
-import com.moilioncircle.redis.rdb.cli.glossary.DataType;
+import com.moilioncircle.redis.rdb.cli.filter.Filter;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Replicator;
 
@@ -31,8 +30,8 @@ import com.moilioncircle.redis.replicator.Replicator;
  */
 public class JsonlRdbVisitor extends AbstractJsonRdbVisitor {
     
-    public JsonlRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escaper escaper) {
-        super(replicator, configure, out, db, regexs, types, escaper);
+    public JsonlRdbVisitor(Replicator replicator, Configure configure, File out, Filter filter, Escaper escaper) {
+        super(replicator, configure, out, filter, escaper);
     }
 
     @Override

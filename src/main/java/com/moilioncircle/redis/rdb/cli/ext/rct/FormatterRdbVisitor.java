@@ -20,13 +20,12 @@ import static com.moilioncircle.redis.replicator.Constants.RDB_OPCODE_FUNCTION;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 import com.moilioncircle.redis.rdb.cli.api.format.FormatterService;
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
-import com.moilioncircle.redis.rdb.cli.glossary.DataType;
+import com.moilioncircle.redis.rdb.cli.filter.Filter;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
@@ -42,8 +41,8 @@ public class FormatterRdbVisitor extends AbstractRdbVisitor {
     
     protected FormatterService formatter;
 
-    public FormatterRdbVisitor(Replicator replicator, Configure configure, File output, List<Long> db, List<String> regexs, List<DataType> types, Escaper escaper, FormatterService formatter) {
-        super(replicator, configure, db, regexs, types);
+    public FormatterRdbVisitor(Replicator replicator, Configure configure, File output, Filter filter, Escaper escaper, FormatterService formatter) {
+        super(replicator, configure, filter);
         this.escaper = escaper;
         this.formatter = formatter;
         this.formatter.setEscaper(escaper);

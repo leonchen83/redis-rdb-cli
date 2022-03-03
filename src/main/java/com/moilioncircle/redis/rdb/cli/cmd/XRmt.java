@@ -16,7 +16,6 @@
 
 package com.moilioncircle.redis.rdb.cli.cmd;
 
-import static com.moilioncircle.redis.rdb.cli.glossary.DataType.parse;
 import static com.moilioncircle.redis.rdb.cli.util.XUris.normalize;
 
 import java.io.File;
@@ -28,9 +27,10 @@ import java.util.concurrent.Callable;
 
 import com.moilioncircle.redis.rdb.cli.cmd.support.XVersionProvider;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.ext.CliRedisReplicator;
+import com.moilioncircle.redis.rdb.cli.ext.XRedisReplicator;
 import com.moilioncircle.redis.rdb.cli.ext.rmt.ClusterRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rmt.SingleRdbVisitor;
+import com.moilioncircle.redis.rdb.cli.filter.XFilter;
 import com.moilioncircle.redis.rdb.cli.net.impl.XEndpoint;
 import com.moilioncircle.redis.rdb.cli.net.protocol.RedisObject;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
@@ -88,8 +88,8 @@ public class XRmt implements Callable<Integer> {
 	@Option(names = {"-s", "--source"}, required = true, description = {"Source file or uri. eg:", "/path/to/dump.rdb", "redis://host:port?authPassword=foobar", "redis:///path/to/dump.rdb."})
 	private String source;
 	
-	@Option(names = {"-d", "--db"}, arity = "1..*", description = {"Database number. multiple databases can be", "provided. if not specified, all databases", "will be included."}, type = Long.class)
-	private List<Long> db = new ArrayList<>();
+	@Option(names = {"-d", "--db"}, arity = "1..*", description = {"Database number. multiple databases can be", "provided. if not specified, all databases", "will be included."}, type = Integer.class)
+	private List<Integer> db = new ArrayList<>();
 	
 	@Option(names = {"-k", "--key"}, arity = "1..*", paramLabel = "<regex>", description = {"Keys to export. this can be a regex. if not", "specified, all keys will be returned."})
 	private List<String> regexs = new ArrayList<>();
@@ -113,7 +113,7 @@ public class XRmt implements Callable<Integer> {
 				throw new ParameterException(spec.commandLine(), "Invalid options: '--migrate=<uri>'");
 			}
 			try (ProgressBar bar = new ProgressBar(-1)) {
-				Replicator r = new CliRedisReplicator(source, configure, DefaultReplFilter.RDB);
+				Replicator r = new XRedisReplicator(source, configure, DefaultReplFilter.RDB);
 				r.setRdbVisitor(getRdbVisitor(r, configure, uri));
 				Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 					Replicators.closeQuietly(r);
@@ -134,9 +134,9 @@ public class XRmt implements Callable<Integer> {
 				throw new ParameterException(spec.commandLine(), "Invalid options: '--config=<config>'");
 			}
 			try (ProgressBar bar = new ProgressBar(-1)) {
-				Replicator r = new CliRedisReplicator(source, configure, DefaultReplFilter.RDB);
+				Replicator r = new XRedisReplicator(source, configure, DefaultReplFilter.RDB);
 				List<String> lines = Files.readAllLines(exclusive.config.toPath());
-				r.setRdbVisitor(new ClusterRdbVisitor(r, configure, null, lines, regexs, parse(type), replace));
+				r.setRdbVisitor(new ClusterRdbVisitor(r, configure, null, XFilter.cluster(regexs, type), lines, replace));
 				Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 					Replicators.closeQuietly(r);
 				}));
@@ -156,14 +156,14 @@ public class XRmt implements Callable<Integer> {
 	}
 	
 	private RdbVisitor getRdbVisitor(Replicator replicator, Configure configure, RedisURI uri) throws Exception {
-		try (XEndpoint endpoint = new XEndpoint(uri.getHost(), uri.getPort(), configure.merge(uri, false), configure)) {
+		try (XEndpoint endpoint = new XEndpoint(uri.getHost(), uri.getPort(), configure.merge(uri, false))) {
 			RedisObject r = endpoint.send("cluster".getBytes(), "nodes".getBytes());
 			if (r.type.isError()) {
-				return new SingleRdbVisitor(replicator, configure, uri, db, regexs, parse(type), replace, legacy);
+				return new SingleRdbVisitor(replicator, configure, uri, XFilter.filter(regexs, db, type), replace, legacy);
 			} else {
 				String config = r.getString();
 				List<String> lines = Arrays.asList(config.split("\n"));
-				return new ClusterRdbVisitor(replicator, configure, uri, lines, regexs, parse(type), replace);
+				return new ClusterRdbVisitor(replicator, configure, uri, XFilter.cluster(regexs, type), lines, replace);
 			}
 		} catch (Throwable e) {
 			throw new RuntimeException("failed to connect to " + uri.getHost() + ":" + uri.getPort() + ", reason " + e.getMessage());

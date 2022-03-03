@@ -31,7 +31,7 @@ import com.moilioncircle.redis.rdb.cli.api.sink.SinkService;
 import com.moilioncircle.redis.rdb.cli.api.sink.listener.AsyncEventListener;
 import com.moilioncircle.redis.rdb.cli.cmd.support.XVersionProvider;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.ext.CliRedisReplicator;
+import com.moilioncircle.redis.rdb.cli.ext.XRedisReplicator;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
 import com.moilioncircle.redis.rdb.cli.util.XThreadFactory;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -88,7 +88,7 @@ public class XRet implements Callable<Integer> {
 		
 		Configure configure = Configure.bind();
 		try (ProgressBar bar = new ProgressBar(-1)) {
-			Replicator r = new CliRedisReplicator(source, configure, null);
+			Replicator r = new XRedisReplicator(source, configure);
 			r.setRdbVisitor(parserService.getRdbVisitor(r));
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 				Replicators.closeQuietly(r);
@@ -113,10 +113,11 @@ public class XRet implements Callable<Integer> {
 		Iterator<SinkService> it = loader.iterator();
 		while (it.hasNext()) {
 			SinkService temp = it.next();
-			if (temp.sink().equals(sink)) {
-				service = temp;
-				break;
+			if (!temp.sink().equals(sink)) {
+				continue;
 			}
+			service = temp;
+			break;
 		}
 		
 		if (service == null) {
@@ -135,9 +136,10 @@ public class XRet implements Callable<Integer> {
 		while (it.hasNext()) {
 			ParserService temp = it.next();
 			if (temp.parser().equals(parser)) {
-				service = temp;
-				break;
+				continue;
 			}
+			service = temp;
+			break;
 		}
 		
 		if (service == null) {

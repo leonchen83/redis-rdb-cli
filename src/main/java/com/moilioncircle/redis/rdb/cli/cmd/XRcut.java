@@ -62,7 +62,7 @@ public class XRcut implements Callable<Integer> {
 	@CommandLine.Spec
 	private CommandLine.Model.CommandSpec spec;
 	
-	@CommandLine.Option(names = {"-s", "--source"}, required = true, type = File.class, description = {"Source file that be cutted. the file", "format MUST BE aof-use-rdb-preamble.", "eg: /path/to/appendonly.aof"})
+	@CommandLine.Option(names = {"-s", "--source"}, required = true, type = File.class, description = {"Source file that be cut. the file", "format MUST BE aof-use-rdb-preamble.", "eg: /path/to/appendonly.aof"})
 	private File source;
 	
 	@CommandLine.Option(names = {"-r", "--rdb"}, required = true, paramLabel = "<file>", description = "Output rdb file.", type = File.class)

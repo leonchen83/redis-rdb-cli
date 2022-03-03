@@ -21,19 +21,21 @@ import static com.moilioncircle.redis.replicator.FileType.RDB;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
-import java.net.URI;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.moilioncircle.redis.rdb.cli.cmd.Args;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.ext.CliRedisReplicator;
+import com.moilioncircle.redis.rdb.cli.ext.XRedisReplicator;
 import com.moilioncircle.redis.rdb.cli.ext.rdt.BackupRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rdt.MergeRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rdt.SplitRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.io.ShardableFileOutputStream;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.rdb.cli.util.Strings;
+import com.moilioncircle.redis.rdb.cli.util.XUris;
 import com.moilioncircle.redis.replicator.DefaultReplFilter;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -51,24 +53,8 @@ public enum Action {
     MERGE,
     BACKUP;
     
-    public static class Arg {
-        public String split;
-        public File conf;
-    
-        public String backup;
-        public Long goal;
-    
-        public List<File> merge;
-    
-        public String output;
-    
-        public List<Long> db;
-        public List<String> regexs;
-        public List<DataType> types;
-    }
-    
     @SuppressWarnings("all")
-    public List<Tuple2<Replicator, String>> dress(Configure configure, Arg arg) throws Exception {
+    public List<Tuple2<Replicator, String>> dress(Configure configure, Args.RdtArgs arg) throws Exception {
         List<Tuple2<Replicator, String>> list = new ArrayList<>();
         switch (this) {
             case MERGE:
@@ -76,38 +62,32 @@ public enum Action {
                 CRCOutputStream out = OutputStreams.newCRCOutputStream(arg.output, configure.getOutputBufferSize());
                 int version = 0;
                 for (File file : arg.merge) {
-                    URI u = file.toURI();
-                    RedisURI uri = new RedisURI(new URI("redis", u.getRawAuthority(), u.getRawPath(), u.getRawQuery(), u.getRawFragment()).toString());
+                    RedisURI uri = XUris.fromFile(file);
                     if (uri.getFileType() == null || uri.getFileType() != RDB) {
                         throw new UnsupportedOperationException("Invalid options: '--merge <file>...' must be rdb file.");
                     }
-                    try (RedisInputStream in = new RedisInputStream(new FileInputStream(file))) {
-                        in.skip(5); // skip REDIS
-                        version = Math.max(version, Integer.parseInt(in.readString(4)));
-                    } catch (EOFException e) {
-                        continue;
-                    }
-                    Replicator r = new CliRedisReplicator(uri.toString(), configure, DefaultReplFilter.RDB);
+                    version = maxVersion(version, file);
+                    Replicator r = new XRedisReplicator(uri, configure, DefaultReplFilter.RDB);
                     r.setRdbVisitor(new MergeRdbVisitor(r, configure, arg, () -> out));
                     list.add(Tuples.of(r, file.getName()));
                 }
                 list.get(list.size() - 1).getV1().addCloseListener(r -> {
-                    OutputStreams.write(0xFF, out);
-                    OutputStreams.write(out.getCRC64(), out);
-                    OutputStreams.close(out);
+                    OutputStreams.writeQuietly(0xFF, out);
+                    OutputStreams.writeQuietly(out.getCRC64(), out);
+                    OutputStreams.closeQuietly(out);
                 });
                 // header & version
                 out.write("REDIS".getBytes());
                 out.write(Strings.lappend(version, 4, '0').getBytes());
                 return list;
             case SPLIT:
-                Replicator r = new CliRedisReplicator(arg.split, configure, DefaultReplFilter.RDB);
-                List<String> lines = Files.readAllLines(arg.conf.toPath());
+                Replicator r = new XRedisReplicator(arg.split, configure, DefaultReplFilter.RDB);
+                List<String> lines = Files.readAllLines(arg.config.toPath());
                 r.setRdbVisitor(new SplitRdbVisitor(r, configure, arg, () -> new ShardableFileOutputStream(arg.output, lines, configure)));
                 list.add(Tuples.of(r, null));
                 return list;
             case BACKUP:
-                r = new CliRedisReplicator(arg.backup, configure, DefaultReplFilter.RDB);
+                r = new XRedisReplicator(arg.backup, configure, DefaultReplFilter.RDB);
                 r.setRdbVisitor(new BackupRdbVisitor(r, configure, arg, () -> OutputStreams.newCRCOutputStream(arg.output, configure.getOutputBufferSize())));
                 list.add(Tuples.of(r, null));
                 return list;
@@ -115,6 +95,15 @@ public enum Action {
                 return list;
             default:
                 throw new AssertionError("Unsupported action '" + this + "'");
+        }
+    }
+    
+    private int maxVersion(int version, File file) throws IOException {
+        try (RedisInputStream in = new RedisInputStream(new FileInputStream(file))) {
+            in.skip(5); // skip REDIS
+            return Math.max(version, Integer.parseInt(in.readString(4)));
+        } catch (EOFException e) {
+            return version;
         }
     }
 }

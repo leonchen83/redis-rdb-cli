@@ -21,15 +21,14 @@ import static com.moilioncircle.redis.rdb.cli.util.XUris.normalize;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
 import com.moilioncircle.redis.rdb.cli.cmd.support.XVersionProvider;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
+import com.moilioncircle.redis.rdb.cli.filter.XFilter;
 import com.moilioncircle.redis.rdb.cli.glossary.Action;
-import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
 import com.moilioncircle.redis.replicator.FileType;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -103,11 +102,11 @@ public class XRdt implements Callable<Integer> {
 		public File config;
 	}
 	
-	@Option(names = {"-o", "--out"}, required = true, paramLabel = "<file>", description = {"If --backup <source> or --merge <file>...","specified. the <file> is the target file.","if --split <source> specified. the <file>", "is the target path."})
-	private String output;
+	@Option(names = {"-o", "--out"}, required = true, paramLabel = "<file>", description = {"If --backup <source> or --merge <file>...","specified. the <file> is the target file.","if --split <source> specified. the <file>", "is the target path."}, type = File.class)
+	private File output;
 	
-	@Option(names = {"-d", "--db"}, arity = "1..*", description = {"Database number. multiple databases can be", "provided. if not specified, all databases", "will be included."}, type = Long.class)
-	private List<Long> db = new ArrayList<>();
+	@Option(names = {"-d", "--db"}, arity = "1..*", description = {"Database number. multiple databases can be", "provided. if not specified, all databases", "will be included."}, type = Integer.class)
+	private List<Integer> db = new ArrayList<>();
 	
 	@Option(names = {"-k", "--key"}, arity = "1..*", paramLabel = "<regex>", description = {"Keys to export. this can be a regex. if not", "specified, all keys will be returned."})
 	private List<String> regexs = new ArrayList<>();
@@ -126,24 +125,26 @@ public class XRdt implements Callable<Integer> {
 		Long goal = null;
 		String backup = null;
 		
+		// merge
+		List<File> merge = null;
+		
+		Path path = output.toPath();
 		if (exclusive.split != null && exclusive.split.split != null) {
 			split = normalize(exclusive.split.split, FileType.RDB, spec, "Invalid options: '--split=<source>'");
 			config = exclusive.split.config;
-			Path path = Paths.get(output);
-			if (Files.exists(path) && !Files.isDirectory(Paths.get(output))) {
+			if (Files.exists(path) && !Files.isDirectory(path)) {
 				throw new ParameterException(spec.commandLine(), "Invalid options: '--out=<file>'");
 			}
 			action = Action.SPLIT;
 		} else if (exclusive.backup != null && exclusive.backup.backup!= null) {
 			backup = normalize(exclusive.backup.backup, FileType.RDB, spec, "Invalid options: '--backup=<backup>'");
 			goal = exclusive.backup.goal;
-			Path path = Paths.get(output);
 			if (Files.exists(path) && !Files.isRegularFile(path)) {
 				throw new ParameterException(spec.commandLine(), "Invalid options: '--out=<file>'");
 			}
 			action = Action.BACKUP;
 		} else if (exclusive.merge != null) {
-			Path path = Paths.get(output);
+			merge = exclusive.merge;
 			if (Files.exists(path) && !Files.isRegularFile(path)) {
 				throw new ParameterException(spec.commandLine(), "Invalid options: '--out=<file>'");
 			}
@@ -152,16 +153,15 @@ public class XRdt implements Callable<Integer> {
 		
 		Configure configure = Configure.bind();
 		try (ProgressBar bar = new ProgressBar(-1)) {
-			Action.Arg arg = new Action.Arg();
-			arg.split = split;
-			arg.conf = config;
-			arg.backup = backup;
+			// bind args
+			Args.RdtArgs arg = new Args.RdtArgs();
 			arg.goal = goal;
-			arg.merge = exclusive.merge;
+			arg.split = split;
+			arg.merge = merge;
+			arg.config = config;
+			arg.backup = backup;
 			arg.output = output;
-			arg.db = db;
-			arg.regexs = regexs;
-			arg.types = DataType.parse(type);
+			arg.filter = XFilter.filter(regexs, db, type);
 			
 			List<Tuple2<Replicator, String>> list = action.dress(configure, arg);
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> {

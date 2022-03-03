@@ -18,7 +18,6 @@ package com.moilioncircle.redis.rdb.cli.net.impl;
 
 import java.util.ArrayList;
 
-import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.net.AbstractEndpoint;
 import com.moilioncircle.redis.replicator.Configuration;
 
@@ -37,8 +36,8 @@ public class DummyEndpoint extends AbstractEndpoint {
         return "<" + host + ":" + port + ">";
     }
     
-    public static XEndpoint valueOf(DummyEndpoint dummy, Configuration conf, Configure configure) {
-        XEndpoint v = new XEndpoint(dummy.host, dummy.port, 0, configure.getMigrateBatchSize(), true, conf, configure);
+    public static XEndpoint valueOf(DummyEndpoint dummy, Configuration conf, int pipe) {
+        XEndpoint v = new XEndpoint(dummy.host, dummy.port, 0, pipe, true, conf);
         v.setSlots(new ArrayList<>(dummy.getSlots()));
         return v;
     }

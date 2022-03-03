@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.ext.escape;
+package com.moilioncircle.redis.rdb.cli.util;
 
-
-import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
+import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
+import com.moilioncircle.redis.replicator.util.type.Tuple2;
 
 /**
  * @author Baoyi Chen
  */
-public class Escapers {
-    public static Escaper parse(String escaper, Escaper defaultValue, byte... excludes) {
-        if (escaper == null) return defaultValue;
-        switch (escaper) {
-            case "raw":
-                return new RawEscaper();
-            case "json":
-                return new JsonEscaper();
-            case "redis":
-                return new RedisEscaper(excludes);
-            default:
-                throw new AssertionError("Unsupported escape '" + escaper + "'");
-        }
+public class XTuple2 extends Tuple2<Long, DummyKeyValuePair> implements Comparable<XTuple2> {
+
+    private static final long serialVersionUID = 1L;
+
+    public XTuple2(Long v1, DummyKeyValuePair v2) {
+        super(v1, v2);
+    }
+
+    @Override
+    public int compareTo(XTuple2 that) {
+        return Long.compare(this.getV1(), that.getV1());
     }
 }

@@ -65,11 +65,10 @@ public class ByteBuffers implements Closeable {
     }
     
     public void reset() {
-        if (out != null) {
-            ByteBuffers that = out.toByteBuffers();
-            this.size = that.size;
-            this.buffers = that.buffers;
-        }
+        if (out == null) return;
+        ByteBuffers that = out.toByteBuffers();
+        this.size = that.size;
+        this.buffers = that.buffers;
     }
     
     @Override

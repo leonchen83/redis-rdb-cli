@@ -17,7 +17,6 @@ import org.junit.Test;
 
 import com.moilioncircle.redis.rdb.cli.cmd.XRct;
 import com.moilioncircle.redis.rdb.cli.cmd.XRdt;
-import com.moilioncircle.redis.rdb.cli.cmd.XRmt;
 
 import picocli.CommandLine;
 
@@ -127,7 +126,6 @@ public class TestCases {
         String rdt = "rdt";
         Path source = new File(this.path + "/" + rdt).toPath();
         Map<String, String> map = Files.list(source).collect(Collectors.toMap(e -> e.getFileName().toString(), e -> e.toAbsolutePath().toString()));
-        System.out.println(map);
         String d1 = map.get("12.rdb");
         String d2 = map.get("34.rdb");
         String d3 = map.get("89.rdb");
@@ -166,18 +164,18 @@ public class TestCases {
         eq1(target(string, "diff"), target(actualString, "diff"));
     }
     
-    @Test
-    public void testRmt() throws Exception {
-        String rmt = "rmt";
-        Path source = new File(this.path + "/" + rmt).toPath();
-        Map<String, String> map = Files.list(source).collect(Collectors.toMap(e -> e.getFileName().toString(), e -> e.toAbsolutePath().toString()));
-        String dump = map.get("dump.rdb");
-        System.setProperty("dump_rdb_version", "7");
-        new CommandLine(new XRmt()).execute(new String[]{"-s", dump, "-m", "redis://127.0.0.1:6379", "-r" , "-t", "sortedset", "list", "hash", "string", "set"});
-        new CommandLine(new XRct()).execute(new String[]{"-f", "count", "-s", "redis://127.0.0.1:6379", "-o", target(dump, "count")});
-    
-        new CommandLine(new XRmt()).execute(new String[]{"-s", "redis://127.0.0.1:6379", "-m", "redis://127.0.0.1:6380?authPassword=test", "-r" , "-t", "sortedset", "list", "hash", "string", "set"});
-        new CommandLine(new XRct()).execute(new String[]{"-f", "count", "-s", "redis://127.0.0.1:6380?authPassword=test", "-o", target(dump, "count", ACTUAL_SUFFIX)});
-        eq0(dump, "count");
-    }
+//    @Test
+//    public void testRmt() throws Exception {
+//        String rmt = "rmt";
+//        Path source = new File(this.path + "/" + rmt).toPath();
+//        Map<String, String> map = Files.list(source).collect(Collectors.toMap(e -> e.getFileName().toString(), e -> e.toAbsolutePath().toString()));
+//        String dump = map.get("dump.rdb");
+//        System.setProperty("dump_rdb_version", "7");
+//        new CommandLine(new XRmt()).execute(new String[]{"-s", dump, "-m", "redis://127.0.0.1:6379", "-r" , "-t", "sortedset", "list", "hash", "string", "set"});
+//        new CommandLine(new XRct()).execute(new String[]{"-f", "count", "-s", "redis://127.0.0.1:6379", "-o", target(dump, "count")});
+//    
+//        new CommandLine(new XRmt()).execute(new String[]{"-s", "redis://127.0.0.1:6379", "-m", "redis://127.0.0.1:6380?authPassword=test", "-r" , "-t", "sortedset", "list", "hash", "string", "set"});
+//        new CommandLine(new XRct()).execute(new String[]{"-f", "count", "-s", "redis://127.0.0.1:6380?authPassword=test", "-o", target(dump, "count", ACTUAL_SUFFIX)});
+//        eq0(dump, "count");
+//    }
 }

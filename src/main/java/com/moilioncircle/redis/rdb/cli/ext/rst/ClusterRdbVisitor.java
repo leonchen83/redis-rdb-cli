@@ -22,11 +22,8 @@ import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.REPLAC
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.RESTORE;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.RESTORE_ASKING;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.ZERO;
-import static com.moilioncircle.redis.replicator.Configuration.defaultSetting;
-import static java.util.Collections.singletonList;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -38,6 +35,7 @@ import com.moilioncircle.redis.rdb.cli.api.sink.cmd.CombineCommand;
 import com.moilioncircle.redis.rdb.cli.api.sink.listener.AsyncEventListener;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractMigrateRdbVisitor;
+import com.moilioncircle.redis.rdb.cli.filter.Filter;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorFactory;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
@@ -98,29 +96,11 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
     private final Configuration configuration;
     private ThreadLocal<XEndpoints> endpoints = new ThreadLocal<>();
     
-    public ClusterRdbVisitor(Replicator replicator,
-                             Configure configure,
-                             RedisURI uri, 
-                             List<String> lines,
-                             boolean replace) throws IOException {
-        super(replicator, configure, singletonList(0L), new ArrayList<>(), new ArrayList<>(), replace);
+    public ClusterRdbVisitor(Replicator replicator, Configure configure, RedisURI uri, Filter filter, List<String> lines, boolean replace) throws IOException {
+        super(replicator, configure, filter, replace);
         this.lines = lines;
-        if (uri == null) {
-            this.configuration = configure.merge(defaultSetting(), false);
-        } else {
-            this.configuration = configure.merge(uri, false);
-        }
+        this.configuration = configure.merge(uri, false);
         this.replicator.addEventListener(new AsyncEventListener(this, replicator, configure.getMigrateThreads(), new XThreadFactory("sync-worker")));
-    }
-
-    @Override
-    protected boolean containsType(int type) {
-        return true;
-    }
-
-    @Override
-    protected boolean containsKey(String key) {
-        return true;
     }
 
     @Override
@@ -132,7 +112,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
                 List<String> nodes = prev != null ? prev.getClusterNodes() : lines;
                 int pipe = configure.getMigrateBatchSize();
                 try {
-                    this.endpoints.set(new XEndpoints(nodes, pipe, true, configuration, configure));
+                    this.endpoints.set(new XEndpoints(nodes, pipe, true, configuration));
                 } catch (Throwable e) {
                     // unrecoverable error
                     System.out.println("failed to connect cluster nodes, reason : " + e.getMessage());
@@ -150,7 +130,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
                 SelectCommand select = (SelectCommand)event;
                 this.db = select.getIndex();
             } else if (event instanceof CombineCommand) {
-                if (containsDB(db)) {
+                if (filter.contains(db, 0, null)) {
                     retry((CombineCommand)event, configure.getMigrateRetries());
                 }
             } else if (event instanceof ClosingCommand) {

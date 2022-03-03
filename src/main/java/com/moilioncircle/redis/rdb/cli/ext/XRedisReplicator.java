@@ -48,19 +48,29 @@ import com.moilioncircle.redis.replicator.rdb.module.ModuleParser;
 /**
  * @author Baoyi Chen
  */
-public class CliRedisReplicator implements Replicator {
+public class XRedisReplicator implements Replicator {
 
     protected Replicator replicator;
 
-    public CliRedisReplicator(String uri, Configure configure, ReplFilter... filters) throws URISyntaxException, IOException {
+    public XRedisReplicator(String uri, Configure configure, ReplFilter... filters) throws URISyntaxException, IOException {
         Objects.requireNonNull(uri);
         try {
             RedisURI u = new RedisURI(uri);
             initialize(u, configure, filters);
         } catch (URISyntaxException e) {
             RedisSentinelURI u = new RedisSentinelURI(uri);
-            initialize(u, configure);
+            initialize(u, configure, filters);
         }
+    }
+    
+    public XRedisReplicator(RedisURI uri, Configure configure, ReplFilter... filters) throws URISyntaxException, IOException {
+        Objects.requireNonNull(uri);
+        initialize(uri, configure, filters);
+    }
+    
+    public XRedisReplicator(RedisSentinelURI uri, Configure configure, ReplFilter... filters) throws URISyntaxException, IOException {
+        Objects.requireNonNull(uri);
+        initialize(uri, configure, filters);
     }
 
     private void initialize(RedisURI uri, Configure configure, ReplFilter... filters) throws IOException {
@@ -92,10 +102,11 @@ public class CliRedisReplicator implements Replicator {
         }
     }
 
-    private void initialize(RedisSentinelURI uri, Configure configure) throws IOException {
+    private void initialize(RedisSentinelURI uri, Configure configure, ReplFilter... filters) throws IOException {
         Objects.requireNonNull(uri);
         Objects.requireNonNull(configure);
         Configuration configuration = configure.merge(uri, true);
+        configuration.setReplFilters(filters);
         this.replicator = new RedisSentinelReplicator(uri, configuration);
     }
 

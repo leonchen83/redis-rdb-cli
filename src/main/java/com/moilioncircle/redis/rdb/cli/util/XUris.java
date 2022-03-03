@@ -17,7 +17,9 @@
 package com.moilioncircle.redis.rdb.cli.util;
 
 import java.io.File;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Objects;
 
 import com.moilioncircle.redis.rdb.cli.sentinel.RedisSentinelURI;
 import com.moilioncircle.redis.replicator.FileType;
@@ -50,6 +52,11 @@ public abstract class XUris {
 			}
 		}
 		throw new ParameterException(spec.commandLine(), message);
+	}
+	
+	public static RedisURI fromFile(File file) throws URISyntaxException {
+		URI u = Objects.requireNonNull(file).toURI();
+		return new RedisURI(new URI("redis", u.getRawAuthority(), u.getRawPath(), u.getRawQuery(), u.getRawFragment()).toString());
 	}
 	
 }

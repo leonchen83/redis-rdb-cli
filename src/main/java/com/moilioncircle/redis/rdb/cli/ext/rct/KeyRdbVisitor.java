@@ -18,12 +18,11 @@ package com.moilioncircle.redis.rdb.cli.ext.rct;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
-import com.moilioncircle.redis.rdb.cli.glossary.DataType;
+import com.moilioncircle.redis.rdb.cli.filter.Filter;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
@@ -35,8 +34,8 @@ import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
  */
 public class KeyRdbVisitor extends AbstractRdbVisitor {
     
-    public KeyRdbVisitor(Replicator replicator, Configure configure, File out, List<Long> db, List<String> regexs, List<DataType> types, Escaper escaper) {
-        super(replicator, configure, out, db, regexs, types, escaper);
+    public KeyRdbVisitor(Replicator replicator, Configure configure, File out, Filter filter, Escaper escaper) {
+        super(replicator, configure, out, filter, escaper);
     }
     
     @Override

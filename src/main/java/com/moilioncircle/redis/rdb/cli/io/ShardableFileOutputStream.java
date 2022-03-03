@@ -16,10 +16,10 @@
 
 package com.moilioncircle.redis.rdb.cli.io;
 
-import static java.nio.file.Paths.get;
-
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -43,9 +43,10 @@ public class ShardableFileOutputStream extends OutputStream {
     private final Set<CRCOutputStream> set = new HashSet<>();
     private final Map<Short, CRCOutputStream> map = new HashMap<>();
 
-    public ShardableFileOutputStream(String path, List<String> lines, Configure configure) {
+    public ShardableFileOutputStream(File path, List<String> lines, Configure configure) {
         Function<Tuple3<String, Integer, String>, CRCOutputStream> mapper = t -> {
-            return OutputStreams.newCRCOutputStream(get(path, t.getV3() + ".rdb").toFile(), configure.getOutputBufferSize());
+            File file = Paths.get(path.getAbsolutePath(), t.getV3() + ".rdb").toFile();
+            return OutputStreams.newCRCOutputStream(file, configure.getOutputBufferSize());
         };
         new NodeConfParser<>(mapper).parse(lines, set, map);
     }
@@ -97,8 +98,8 @@ public class ShardableFileOutputStream extends OutputStream {
 
     public void writeCRC() {
         for (CRCOutputStream out : set) {
-            OutputStreams.write(0xFF, out);
-            OutputStreams.write(out.getCRC64(), out);
+            OutputStreams.writeQuietly(0xFF, out);
+            OutputStreams.writeQuietly(out.getCRC64(), out);
         }
     }
 }

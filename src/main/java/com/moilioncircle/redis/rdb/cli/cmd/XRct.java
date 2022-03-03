@@ -25,8 +25,8 @@ import java.util.concurrent.Callable;
 
 import com.moilioncircle.redis.rdb.cli.cmd.support.XVersionProvider;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.ext.CliRedisReplicator;
-import com.moilioncircle.redis.rdb.cli.glossary.DataType;
+import com.moilioncircle.redis.rdb.cli.ext.XRedisReplicator;
+import com.moilioncircle.redis.rdb.cli.filter.XFilter;
 import com.moilioncircle.redis.rdb.cli.glossary.Format;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
 import com.moilioncircle.redis.replicator.DefaultReplFilter;
@@ -76,8 +76,8 @@ public class XRct implements Callable<Integer> {
 	@Option(names = {"-o", "--out"}, required = true, paramLabel = "<file>", description = "Output file.", type = File.class)
 	private File output;
 	
-	@Option(names = {"-d", "--db"}, arity = "1..*", description = {"Database number. multiple databases can be", "provided. if not specified, all databases", "will be included."}, type = Long.class)
-	private List<Long> db = new ArrayList<>();
+	@Option(names = {"-d", "--db"}, arity = "1..*", description = {"Database number. multiple databases can be", "provided. if not specified, all databases", "will be included."}, type = Integer.class)
+	private List<Integer> db = new ArrayList<>();
 	
 	@Option(names = {"-k", "--key"}, arity = "1..*", paramLabel = "<regex>", description = {"Keys to export. this can be a regex. if not", "specified, all keys will be returned."})
 	private List<String> regexs = new ArrayList<>();
@@ -102,12 +102,12 @@ public class XRct implements Callable<Integer> {
 		source = normalize(source, FileType.RDB, spec, "Invalid options: '--source=<source>'");
 		Configure configure = Configure.bind();
 		try (ProgressBar bar = new ProgressBar(-1)) {
-			Replicator r = new CliRedisReplicator(source, configure, DefaultReplFilter.RDB);
+			Replicator r = new XRedisReplicator(source, configure, DefaultReplFilter.RDB);
 			r.addExceptionListener((rep, tx, e) -> {
 				throw new RuntimeException(tx.getMessage(), tx);
 			});
 			
-			new Format(format, configure).dress(r, output, db, regexs, largest, bytes, DataType.parse(type), escape, replace);
+			new Format(format, configure).dress(r, output, XFilter.filter(regexs, db, type), largest, bytes, escape, replace);
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 				Replicators.closeQuietly(r);
 			}));

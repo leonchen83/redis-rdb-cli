@@ -20,9 +20,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.function.Supplier;
 
+import com.moilioncircle.redis.rdb.cli.cmd.Args;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
-import com.moilioncircle.redis.rdb.cli.glossary.Action;
 import com.moilioncircle.redis.rdb.cli.glossary.Guard;
 import com.moilioncircle.redis.rdb.cli.io.ShardableFileOutputStream;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
@@ -40,8 +40,8 @@ import com.moilioncircle.redis.replicator.rdb.datatype.DB;
  */
 public class SplitRdbVisitor extends AbstractRdbVisitor {
 
-    public SplitRdbVisitor(Replicator replicator, Configure configure, Action.Arg arg, Supplier<OutputStream> supplier) {
-        super(replicator, configure, arg.db, arg.regexs, arg.types, supplier);
+    public SplitRdbVisitor(Replicator replicator, Configure configure, Args.RdtArgs arg, Supplier<OutputStream> supplier) {
+        super(replicator, configure, arg.filter, supplier);
         this.replicator.addEventListener((rep, event) -> {
             if (event instanceof PreRdbSyncEvent) {
                 listener.reset(supplier.get());

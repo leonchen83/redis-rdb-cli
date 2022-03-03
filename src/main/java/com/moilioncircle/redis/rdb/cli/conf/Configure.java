@@ -565,8 +565,13 @@ public class Configure {
     }
 
     public Configuration merge(RedisURI uri, boolean source) {
-        Configuration v = merge(Configuration.valueOf(uri), source);
-        return v;
+        Configuration base;
+        if (uri != null) {
+            base = Configuration.valueOf(uri);
+        } else {
+            base = Configuration.defaultSetting();
+        }
+        return merge(base, source);
     }
 
     public Configuration merge(RedisSentinelURI uri, boolean source) {

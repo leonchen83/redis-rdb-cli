@@ -28,9 +28,10 @@ import java.util.concurrent.Callable;
 import com.moilioncircle.redis.rdb.cli.api.sink.cmd.CombineCommandParser;
 import com.moilioncircle.redis.rdb.cli.cmd.support.XVersionProvider;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.ext.CliRedisReplicator;
+import com.moilioncircle.redis.rdb.cli.ext.XRedisReplicator;
 import com.moilioncircle.redis.rdb.cli.ext.rst.ClusterRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rst.SingleRdbVisitor;
+import com.moilioncircle.redis.rdb.cli.filter.XFilter;
 import com.moilioncircle.redis.rdb.cli.net.impl.XEndpoint;
 import com.moilioncircle.redis.rdb.cli.net.protocol.RedisObject;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
@@ -171,8 +172,8 @@ public class XRst implements Callable<Integer> {
 		private File config;
 	}
 	
-	@Option(names = {"-d", "--db"}, arity = "1..*", description = {"Database number. multiple databases can be", "provided. if not specified, all databases", "will be included."}, type = Long.class)
-	private List<Long> db = new ArrayList<>();
+	@Option(names = {"-d", "--db"}, arity = "1..*", description = {"Database number. multiple databases can be", "provided. if not specified, all databases", "will be included."}, type = Integer.class)
+	private List<Integer> db = new ArrayList<>();
 	
 	@Option(names = {"-s", "--source"}, required = true, paramLabel = "<uri>", description = {"Redis uri. eg:", "redis://host:port?authPassword=foobar"})
 	private String source;
@@ -195,8 +196,8 @@ public class XRst implements Callable<Integer> {
 				throw new ParameterException(spec.commandLine(), "Invalid options: '--migrate=<uri>'");
 			}
 			try (ProgressBar bar = new ProgressBar(-1)) {
-				Replicator r = new CliRedisReplicator(source, configure, null);
-				r.setRdbVisitor(getRdbVisitor(r, configure, uri, db, replace, legacy));
+				Replicator r = new XRedisReplicator(source, configure);
+				r.setRdbVisitor(getRdbVisitor(r, configure, uri));
 				Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 					Replicators.closeQuietly(r);
 				}));
@@ -214,9 +215,9 @@ public class XRst implements Callable<Integer> {
 				throw new ParameterException(spec.commandLine(), "Invalid options: '--config=<config>'");
 			}
 			try (ProgressBar bar = new ProgressBar(-1)) {
-				Replicator r = new CliRedisReplicator(source, configure, null);
+				Replicator r = new XRedisReplicator(source, configure);
 				List<String> lines = Files.readAllLines(exclusive.config.toPath());
-				r.setRdbVisitor(new ClusterRdbVisitor(r, configure, null, lines, replace));
+				r.setRdbVisitor(new ClusterRdbVisitor(r, configure, null, XFilter.cluster(), lines, replace));
 				Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 					Replicators.closeQuietly(r);
 				}));
@@ -233,15 +234,15 @@ public class XRst implements Callable<Integer> {
 		return 0;
 	}
 	
-	private RdbVisitor getRdbVisitor(Replicator replicator, Configure configure, RedisURI uri, List<Long> db, boolean replace, boolean legacy) throws Exception {
-		try (XEndpoint endpoint = new XEndpoint(uri.getHost(), uri.getPort(), configure.merge(uri, false), configure)) {
+	private RdbVisitor getRdbVisitor(Replicator replicator, Configure configure, RedisURI uri) throws Exception {
+		try (XEndpoint endpoint = new XEndpoint(uri.getHost(), uri.getPort(), configure.merge(uri, false))) {
 			RedisObject r = endpoint.send("cluster".getBytes(), "nodes".getBytes());
 			if (r.type.isError()) {
-				return new SingleRdbVisitor(replicator, configure, uri, db, replace, legacy);
+				return new SingleRdbVisitor(replicator, configure, uri, XFilter.filter(db), replace, legacy);
 			} else {
 				String config = r.getString();
 				List<String> lines = Arrays.asList(config.split("\n"));
-				return new ClusterRdbVisitor(replicator, configure, uri, lines, replace);
+				return new ClusterRdbVisitor(replicator, configure, uri, XFilter.cluster(), lines, replace);
 			}
 		} catch (Throwable e) {
 			throw new RuntimeException("failed to connect to " + uri.getHost() + ":" + uri.getPort() + ", reason " + e.getMessage());

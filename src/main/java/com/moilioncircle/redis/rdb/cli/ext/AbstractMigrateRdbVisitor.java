@@ -27,12 +27,11 @@ import static com.moilioncircle.redis.replicator.rdb.BaseRdbParser.StringHelper.
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.List;
 
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.escape.RawEscaper;
-import com.moilioncircle.redis.rdb.cli.glossary.DataType;
+import com.moilioncircle.redis.rdb.cli.filter.Filter;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
 import com.moilioncircle.redis.replicator.Constants;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -57,8 +56,8 @@ public abstract class AbstractMigrateRdbVisitor extends AbstractRdbVisitor {
     protected MonitorManager manager;
     protected Escaper raw = new RawEscaper();
 
-    public AbstractMigrateRdbVisitor(Replicator replicator, Configure configure, List<Long> db, List<String> regexs, List<DataType> types, boolean replace) {
-        super(replicator, configure, db, regexs, types);
+    public AbstractMigrateRdbVisitor(Replicator replicator, Configure configure, Filter filter, boolean replace) {
+        super(replicator, configure, filter);
         this.replace = replace;
         this.flush = configure.isMigrateFlush();
         this.manager = new MonitorManager(configure);
