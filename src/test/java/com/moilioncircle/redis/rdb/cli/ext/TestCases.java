@@ -209,6 +209,6 @@ public class TestCases {
 
         new CommandLine(new XRmt()).execute(new String[]{"-s", "redis://127.0.0.1:6379", "-m", "redis://127.0.0.1:6380?authPassword=test", "-r" , "-t", "sortedset", "list", "hash", "string", "set"});
         new CommandLine(new XRct()).execute(new String[]{"-f", "count", "-s", "redis://127.0.0.1:6380?authPassword=test", "-o", target(dump, "count", ACTUAL_SUFFIX)});
-        eq0(dump, "count");
+        eq0(dump, "count", true);
     }
 }
