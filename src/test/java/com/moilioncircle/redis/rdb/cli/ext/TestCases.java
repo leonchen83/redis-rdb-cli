@@ -67,22 +67,42 @@ public class TestCases {
         return target(source, null, null);
     }
     
-    private void eq1(String source, String target) {
+    private void eq1(String source, String extension) {
+        eq1(source, extension, false);
+    }
+    
+    private void eq0(String source, String extension) {
+        eq0(source, extension, false);
+    }
+    
+    private void eq1(String source, String target, boolean print) {
         try {
             byte[] expect = Files.readAllBytes(new File(source).toPath());
             byte[] actual = Files.readAllBytes(new File(target).toPath());
+            if (print) {
+                System.out.println("expect:");
+                System.out.println(new String(expect));
+                System.out.println("actual:");
+                System.out.println(new String(actual));
+            }
             assertArrayEquals(MessageFormat.format("expect file: {0}, actual file: {1}", source, target), expect, actual);
         } catch (IOException e) {
             fail();
         }
     }
     
-    private void eq0(String source, String extension) {
+    private void eq0(String source, String extension, boolean print) {
         try {
             String efile = target(source, extension);
             String afile = target(source, extension, ACTUAL_SUFFIX);
             byte[] expect = Files.readAllBytes(new File(efile).toPath());
             byte[] actual = Files.readAllBytes(new File(afile).toPath());
+            if (print) {
+                System.out.println("expect:");
+                System.out.println(new String(expect));
+                System.out.println("actual:");
+                System.out.println(new String(actual));
+            }
             assertArrayEquals(MessageFormat.format("expect file: {0}, actual file: {1}", efile, afile), expect, actual);
         } catch (IOException e) {
             fail();
