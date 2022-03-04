@@ -3,6 +3,7 @@
   "includes":[
     {"pattern":"\\Q.version\\E"}, 
     {"pattern":"\\QMETA-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins.dat\\E"}, 
+    {"pattern":"\\QMETA-INF/services/com.moilioncircle.redis.rdb.cli.api.format.FormatterService\\E"}, 
     {"pattern":"\\QMETA-INF/services/com.moilioncircle.redis.rdb.cli.api.sink.ParserService\\E"}, 
     {"pattern":"\\QMETA-INF/services/com.moilioncircle.redis.rdb.cli.api.sink.SinkService\\E"}, 
     {"pattern":"\\QMETA-INF/services/org.apache.logging.log4j.core.util.ContextDataProvider\\E"}, 
