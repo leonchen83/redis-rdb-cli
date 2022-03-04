@@ -24,7 +24,7 @@ import java.io.IOException;
 import com.moilioncircle.redis.rdb.cli.api.format.FormatterService;
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
+import com.moilioncircle.redis.rdb.cli.ext.visitor.BaseRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.filter.Filter;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -37,11 +37,12 @@ import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
 /**
  * @author Baoyi Chen
  */
-public class FormatterRdbVisitor extends AbstractRdbVisitor {
+public class FormatterRdbVisitor extends BaseRdbVisitor {
     
+    protected Escaper escaper;
     protected FormatterService formatter;
 
-    public FormatterRdbVisitor(Replicator replicator, Configure configure, File output, Filter filter, Escaper escaper, FormatterService formatter) {
+    public FormatterRdbVisitor(Replicator replicator, Configure configure, Filter filter, File output, Escaper escaper, FormatterService formatter) {
         super(replicator, configure, filter);
         this.escaper = escaper;
         this.formatter = formatter;
@@ -87,97 +88,97 @@ public class FormatterRdbVisitor extends AbstractRdbVisitor {
     }
 
     @Override
-    protected Event doApplyString(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyString(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         return formatter.applyString(replicator, in, version, key, type, context);
     }
 
     @Override
-    protected Event doApplyList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         return formatter.applyList(replicator, in, version, key, type, context);
     }
 
     @Override
-    protected Event doApplySet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplySet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         return formatter.applySet(replicator, in, version, key, type, context);
     }
 
     @Override
-    protected Event doApplyZSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyZSet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         return formatter.applyZSet(replicator, in, version, key, type, context);
     }
 
     @Override
-    protected Event doApplyZSet2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyZSet2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         return formatter.applyZSet2(replicator, in, version, key, type, context);
     }
 
     @Override
-    protected Event doApplyHash(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyHash(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         return formatter.applyHash(replicator, in, version, key, type, context);
     }
 
     @Override
-    protected Event doApplyHashZipMap(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyHashZipMap(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         return formatter.applyHashZipMap(replicator, in, version, key, type, context);
     }
 
     @Override
-    protected Event doApplyListZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyListZipList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         return formatter.applyListZipList(replicator, in, version, key, type, context);
     }
 
     @Override
-    protected Event doApplySetIntSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplySetIntSet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         return formatter.applySetIntSet(replicator, in, version, key, type, context);
     }
 
     @Override
-    protected Event doApplyZSetZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyZSetZipList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         return formatter.applyZSetZipList(replicator, in, version, key, type, context);
     }
     
     @Override
-    protected Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         return formatter.applyZSetListPack(replicator, in, version, key, type, context);
     }
 
     @Override
-    protected Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         return formatter.applyHashZipList(replicator, in, version, key, type, context);
     }
     
     @Override
-    protected Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         return formatter.applyHashListPack(replicator, in, version, key, type, context);
     }
 
     @Override
-    protected Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         return formatter.applyListQuickList(replicator, in, version, key, type, context);
     }
     
     @Override
-    protected Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         return formatter.applyListQuickList2(replicator, in, version, key, type, context);
     }
 
     @Override
-    protected Event doApplyModule(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyModule(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         return formatter.applyModule(replicator, in, version, key, type, context);
     }
 
     @Override
-    protected Event doApplyModule2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyModule2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         return formatter.applyModule2(replicator, in, version, key, type, context);
     }
 
     @Override
-    protected Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         return formatter.applyStreamListPacks(replicator, in, version, key, type, context);
     }
     
     @Override
-    protected Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         return formatter.applyStreamListPacks2(replicator, in, version, key, type, context);
     }
 }

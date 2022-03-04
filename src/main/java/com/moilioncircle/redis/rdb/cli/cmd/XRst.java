@@ -210,7 +210,7 @@ public class XRst implements Callable<Integer> {
 			try (ProgressBar bar = new ProgressBar(-1)) {
 				Replicator r = new XRedisReplicator(source, configure);
 				List<String> lines = Files.readAllLines(exclusive.config.toPath());
-				r.setRdbVisitor(new ClusterRdbVisitor(r, configure, null, XFilter.cluster(), lines, replace));
+				r.setRdbVisitor(new ClusterRdbVisitor(r, configure, XFilter.cluster(), null, lines, replace));
 				r.addEventListener((rep, event) -> {
 					if (event instanceof PreRdbSyncEvent)
 						rep.addRawByteListener(b -> bar.react(b.length));
@@ -225,11 +225,11 @@ public class XRst implements Callable<Integer> {
 		try (XEndpoint endpoint = new XEndpoint(uri.getHost(), uri.getPort(), configure.merge(uri, false))) {
 			RedisObject r = endpoint.send("cluster".getBytes(), "nodes".getBytes());
 			if (r.type.isError()) {
-				return new SingleRdbVisitor(replicator, configure, uri, XFilter.filter(db), replace, legacy);
+				return new SingleRdbVisitor(replicator, configure, XFilter.filter(db), uri, replace, legacy);
 			} else {
 				String config = r.getString();
 				List<String> lines = Arrays.asList(config.split("\n"));
-				return new ClusterRdbVisitor(replicator, configure, uri, XFilter.cluster(), lines, replace);
+				return new ClusterRdbVisitor(replicator, configure, XFilter.cluster(), uri, lines, replace);
 			}
 		} catch (Throwable e) {
 			throw new RuntimeException("failed to connect to " + uri.getHost() + ":" + uri.getPort() + ", reason " + e.getMessage());

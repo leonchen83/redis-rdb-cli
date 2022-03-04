@@ -26,7 +26,6 @@ import java.io.IOException;
 
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.DumpRawByteListener;
 import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.rdb.cli.ext.escape.RedisEscaper;
@@ -46,13 +45,13 @@ import com.moilioncircle.redis.replicator.util.Strings;
 /**
  * @author Baoyi Chen
  */
-public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
+public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
 
-    private boolean firstkey = true;
     private Escaper redis;
+    private boolean firstkey = true;
     
-    public AbstractJsonRdbVisitor(Replicator replicator, Configure configure, File out, Filter filter, Escaper escaper) {
-        super(replicator, configure, out, filter, escaper);
+    public AbstractJsonRdbVisitor(Replicator replicator, Configure configure, Filter filter, File output, Escaper escaper) {
+        super(replicator, configure, filter, output, escaper);
         this.redis = new RedisEscaper(configure.getDelimiter(), configure.getQuote());
     }
 
@@ -133,7 +132,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyString(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyString(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             BaseRdbParser parser = new BaseRdbParser(in);
             byte[] val = parser.rdbLoadEncodedStringObject().first();
@@ -143,7 +142,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     }
 
     @Override
-    protected Event doApplyList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             OutputStreams.write('[', out);
             BaseRdbParser parser = new BaseRdbParser(in);
@@ -164,7 +163,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplySet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplySet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             OutputStreams.write('[', out);
             BaseRdbParser parser = new BaseRdbParser(in);
@@ -185,7 +184,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyZSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyZSet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             OutputStreams.write('{', out);
             BaseRdbParser parser = new BaseRdbParser(in);
@@ -207,7 +206,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyZSet2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyZSet2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             OutputStreams.write('{', out);
             BaseRdbParser parser = new BaseRdbParser(in);
@@ -229,7 +228,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyHash(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyHash(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             OutputStreams.write('{', out);
             BaseRdbParser parser = new BaseRdbParser(in);
@@ -251,7 +250,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyHashZipMap(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyHashZipMap(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             OutputStreams.write('{', out);
             BaseRdbParser parser = new BaseRdbParser(in);
@@ -285,7 +284,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyListZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyListZipList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             OutputStreams.write('[', out);
             BaseRdbParser parser = new BaseRdbParser(in);
@@ -313,7 +312,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplySetIntSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplySetIntSet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             OutputStreams.write('[', out);
             BaseRdbParser parser = new BaseRdbParser(in);
@@ -348,7 +347,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyZSetZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyZSetZipList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             OutputStreams.write('{', out);
             BaseRdbParser parser = new BaseRdbParser(in);
@@ -378,7 +377,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             OutputStreams.write('{', out);
             BaseRdbParser parser = new BaseRdbParser(in);
@@ -407,7 +406,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             OutputStreams.write('{', out);
             BaseRdbParser parser = new BaseRdbParser(in);
@@ -437,7 +436,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             OutputStreams.write('{', out);
             BaseRdbParser parser = new BaseRdbParser(in);
@@ -466,7 +465,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             OutputStreams.write('[', out);
             BaseRdbParser parser = new BaseRdbParser(in);
@@ -497,7 +496,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             OutputStreams.write('[', out);
             BaseRdbParser parser = new BaseRdbParser(in);
@@ -538,13 +537,13 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyModule(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyModule(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             OutputStreams.write('"', out);
             int ver = getVersion(version);
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, out, redis)) {
                 listener.write((byte) type);
-                super.doApplyModule(in, version, key, contains, type, context);
+                super.doApplyModule(in, version, key, type, context);
             }
             OutputStreams.write('"', out);
         });
@@ -552,13 +551,13 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyModule2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyModule2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             OutputStreams.write('"', out);
             int ver = getVersion(version);
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, out, redis)) {
                 listener.write((byte) type);
-                super.doApplyModule2(in, version, key, contains, type, context);
+                super.doApplyModule2(in, version, key, type, context);
             }
             OutputStreams.write('"', out);
         });
@@ -566,13 +565,13 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             OutputStreams.write('"', out);
             int ver = getVersion(version);
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, out, redis)) {
                 listener.write((byte) type);
-                super.doApplyStreamListPacks(in, version, key, contains, type, context);
+                super.doApplyStreamListPacks(in, version, key, type, context);
             }
             OutputStreams.write('"', out);
         });
@@ -580,7 +579,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             OutputStreams.write('"', out);
             int ver = getVersion(version);
@@ -590,7 +589,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRdbVisitor {
                 } else {
                     listener.write((byte) type);
                 }
-                super.doApplyStreamListPacks2(in, ver, key, contains, type, context, listener);
+                super.doApplyStreamListPacks2(in, ver, key, type, context, listener);
             }
             OutputStreams.write('"', out);
         });

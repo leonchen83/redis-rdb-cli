@@ -25,7 +25,6 @@ import java.io.IOException;
 
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.DumpRawByteListener;
 import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.rdb.cli.filter.Filter;
@@ -40,10 +39,10 @@ import com.moilioncircle.redis.replicator.rdb.datatype.ExpiredType;
 /**
  * @author Baoyi Chen
  */
-public class DiffRdbVisitor extends AbstractRdbVisitor {
+public class DiffRdbVisitor extends AbstractRctRdbVisitor {
     
-    public DiffRdbVisitor(Replicator replicator, Configure configure, File out, Filter filter, Escaper escaper) {
-        super(replicator, configure, out, filter, escaper);
+    public DiffRdbVisitor(Replicator replicator, Configure configure, Filter filter, File output, Escaper escaper) {
+        super(replicator, configure, filter, output, escaper);
     }
     
     protected void expire(ExpiredType type, Long value) {
@@ -70,259 +69,259 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    public Event doApplyString(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyString(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
         version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
-            super.doApplyString(in, version, key, contains, type, context);
+            super.doApplyString(in, version, key, type, context);
         }
         OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
     @Override
-    public Event doApplyList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
         version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
-            super.doApplyList(in, version, key, contains, type, context);
+            super.doApplyList(in, version, key, type, context);
         }
         OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
     @Override
-    public Event doApplySet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplySet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
         version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
-            super.doApplySet(in, version, key, contains, type, context);
+            super.doApplySet(in, version, key, type, context);
         }
         OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
     @Override
-    public Event doApplyZSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyZSet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
         version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
-            super.doApplyZSet(in, version, key, contains, type, context);
+            super.doApplyZSet(in, version, key, type, context);
         }
         OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
     @Override
-    public Event doApplyZSet2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyZSet2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
         version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
-            super.doApplyZSet2(in, version, key, contains, type, context);
+            super.doApplyZSet2(in, version, key, type, context);
         }
         OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
     @Override
-    public Event doApplyHash(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyHash(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
         version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
-            super.doApplyHash(in, version, key, contains, type, context);
+            super.doApplyHash(in, version, key, type, context);
         }
         OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
     @Override
-    public Event doApplyHashZipMap(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyHashZipMap(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
         version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
-            super.doApplyHashZipMap(in, version, key, contains, type, context);
+            super.doApplyHashZipMap(in, version, key, type, context);
         }
         OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
     @Override
-    public Event doApplyListZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyListZipList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
         version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
-            super.doApplyListZipList(in, version, key, contains, type, context);
+            super.doApplyListZipList(in, version, key, type, context);
         }
         OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
     @Override
-    public Event doApplySetIntSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplySetIntSet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
         version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
-            super.doApplySetIntSet(in, version, key, contains, type, context);
+            super.doApplySetIntSet(in, version, key, type, context);
         }
         OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
     @Override
-    public Event doApplyZSetZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyZSetZipList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
         version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
-            super.doApplyZSetZipList(in, version, key, contains, type, context);
+            super.doApplyZSetZipList(in, version, key, type, context);
         }
         OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
     @Override
-    public Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
         version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
-            super.doApplyZSetListPack(in, version, key, contains, type, context);
+            super.doApplyZSetListPack(in, version, key, type, context);
         }
         OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
     @Override
-    public Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
         version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
-            super.doApplyHashZipList(in, version, key, contains, type, context);
+            super.doApplyHashZipList(in, version, key, type, context);
         }
         OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
     @Override
-    public Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
         version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
-            super.doApplyHashListPack(in, version, key, contains, type, context);
+            super.doApplyHashListPack(in, version, key, type, context);
         }
         OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
     @Override
-    public Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
         version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
-            super.doApplyListQuickList(in, version, key, contains, type, context);
+            super.doApplyListQuickList(in, version, key, type, context);
         }
         OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
     @Override
-    public Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
         version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
-            super.doApplyListQuickList2(in, version, key, contains, type, context);
+            super.doApplyListQuickList2(in, version, key, type, context);
         }
         OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
     @Override
-    public Event doApplyModule(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyModule(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
         version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
-            super.doApplyModule(in, version, key, contains, type, context);
+            super.doApplyModule(in, version, key, type, context);
         }
         OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
     @Override
-    public Event doApplyModule2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyModule2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
         version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
-            super.doApplyModule2(in, version, key, contains, type, context);
+            super.doApplyModule2(in, version, key, type, context);
         }
         OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
     @Override
-    public Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
         version = getVersion(version);
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) type);
-            super.doApplyStreamListPacks(in, version, key, contains, type, context);
+            super.doApplyStreamListPacks(in, version, key, type, context);
         }
         OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());
     }
     
     @Override
-    public Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         escaper.encode(key, out);
         delimiter(out);
         expire(context.getExpiredType(), context.getExpiredValue());
@@ -333,7 +332,7 @@ public class DiffRdbVisitor extends AbstractRdbVisitor {
             } else {
                 listener.write((byte) type);
             }
-            super.doApplyStreamListPacks2(in, version, key, contains, type, context, listener);
+            super.doApplyStreamListPacks2(in, version, key, type, context, listener);
         }
         OutputStreams.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());

@@ -31,8 +31,8 @@ import com.moilioncircle.redis.replicator.io.RedisInputStream;
  */
 public class JsonRdbVisitor extends AbstractJsonRdbVisitor {
     
-    public JsonRdbVisitor(Replicator replicator, Configure configure, File out, Filter filter, Escaper escaper) {
-        super(replicator, configure, out, filter, escaper);
+    public JsonRdbVisitor(Replicator replicator, Configure configure, Filter filter, File output, Escaper escaper) {
+        super(replicator, configure, filter, output, escaper);
     }
 
     @Override

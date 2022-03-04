@@ -34,7 +34,6 @@ import java.nio.ByteBuffer;
 
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.DumpRawByteListener;
 import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.rdb.cli.filter.Filter;
@@ -56,13 +55,13 @@ import com.moilioncircle.redis.replicator.util.Strings;
 /**
  * @author Baoyi Chen
  */
-public class DumpRdbVisitor extends AbstractRdbVisitor {
+public class DumpRdbVisitor extends AbstractRctRdbVisitor {
     
     // TODO https://github.com/leonchen83/redis-rdb-cli/issues/6
     private final boolean replace;
     
-    public DumpRdbVisitor(Replicator replicator, Configure configure, File out, Filter filter, boolean replace, Escaper escaper) {
-        super(replicator, configure, out, filter, escaper);
+    public DumpRdbVisitor(Replicator replicator, Configure configure, Filter filter, File output, boolean replace, Escaper escaper) {
+        super(replicator, configure, filter, output, escaper);
         this.replace = replace;
     }
     
@@ -92,12 +91,12 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyString(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyString(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
-                return super.doApplyString(in, version, key, contains, type, context);
+                return super.doApplyString(in, version, key, type, context);
             } else {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
@@ -106,7 +105,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
-                super.doApplyString(in, version, key, contains, type, context);
+                super.doApplyString(in, version, key, type, context);
             }
             Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
@@ -114,12 +113,12 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
-                return super.doApplyList(in, version, key, contains, type, context);
+                return super.doApplyList(in, version, key, type, context);
             } else {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
@@ -128,7 +127,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
-                super.doApplyList(in, version, key, contains, type, context);
+                super.doApplyList(in, version, key, type, context);
             }
             Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
@@ -136,12 +135,12 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplySet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplySet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
-                return super.doApplySet(in, version, key, contains, type, context);
+                return super.doApplySet(in, version, key, type, context);
             } else {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
@@ -150,7 +149,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
-                super.doApplySet(in, version, key, contains, type, context);
+                super.doApplySet(in, version, key, type, context);
             }
             Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
@@ -158,12 +157,12 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyZSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyZSet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
-                return super.doApplyZSet(in, version, key, contains, type, context);
+                return super.doApplyZSet(in, version, key, type, context);
             } else {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
@@ -172,7 +171,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
-                super.doApplyZSet(in, version, key, contains, type, context);
+                super.doApplyZSet(in, version, key, type, context);
             }
             Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
@@ -180,12 +179,12 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyZSet2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyZSet2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
-                return super.doApplyZSet2(in, version, key, contains, type, context);
+                return super.doApplyZSet2(in, version, key, type, context);
             } else {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
@@ -214,7 +213,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
             } else {
                 try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                     listener.write((byte) type);
-                    super.doApplyZSet2(in, version, key, contains, type, context);
+                    super.doApplyZSet2(in, version, key, type, context);
                 }
             }
             Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
@@ -223,12 +222,12 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyHash(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyHash(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
-                return super.doApplyHash(in, version, key, contains, type, context);
+                return super.doApplyHash(in, version, key, type, context);
             } else {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
@@ -237,7 +236,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
-                super.doApplyHash(in, version, key, contains, type, context);
+                super.doApplyHash(in, version, key, type, context);
             }
             Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
@@ -245,12 +244,12 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyHashZipMap(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyHashZipMap(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
-                return super.doApplyHashZipMap(in, version, key, contains, type, context);
+                return super.doApplyHashZipMap(in, version, key, type, context);
             } else {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
@@ -259,7 +258,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
-                super.doApplyHashZipMap(in, version, key, contains, type, context);
+                super.doApplyHashZipMap(in, version, key, type, context);
             }
             Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
@@ -267,12 +266,12 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyListZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyListZipList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
-                return super.doApplyListZipList(in, version, key, contains, type, context);
+                return super.doApplyListZipList(in, version, key, type, context);
             } else {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
@@ -281,7 +280,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
-                super.doApplyListZipList(in, version, key, contains, type, context);
+                super.doApplyListZipList(in, version, key, type, context);
             }
             Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
@@ -289,12 +288,12 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplySetIntSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplySetIntSet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
-                return super.doApplySetIntSet(in, version, key, contains, type, context);
+                return super.doApplySetIntSet(in, version, key, type, context);
             } else {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
@@ -303,7 +302,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
-                super.doApplySetIntSet(in, version, key, contains, type, context);
+                super.doApplySetIntSet(in, version, key, type, context);
             }
             Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
@@ -311,12 +310,12 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyZSetZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyZSetZipList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
-                return super.doApplyZSetZipList(in, version, key, contains, type, context);
+                return super.doApplyZSetZipList(in, version, key, type, context);
             } else {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
@@ -325,7 +324,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
-                super.doApplyZSetZipList(in, version, key, contains, type, context);
+                super.doApplyZSetZipList(in, version, key, type, context);
             }
             Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
@@ -333,12 +332,12 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
-                return super.doApplyZSetListPack(in, version, key, contains, type, context);
+                return super.doApplyZSetListPack(in, version, key, type, context);
             } else {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
@@ -370,7 +369,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
             } else {
                 try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                     listener.write((byte) type);
-                    super.doApplyZSetListPack(in, version, key, contains, type, context);
+                    super.doApplyZSetListPack(in, version, key, type, context);
                 }
             }
             Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
@@ -379,12 +378,12 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
-                return super.doApplyHashZipList(in, version, key, contains, type, context);
+                return super.doApplyHashZipList(in, version, key, type, context);
             } else {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
@@ -393,7 +392,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
-                super.doApplyHashZipList(in, version, key, contains, type, context);
+                super.doApplyHashZipList(in, version, key, type, context);
             }
             Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
@@ -401,12 +400,12 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
-                return super.doApplyHashListPack(in, version, key, contains, type, context);
+                return super.doApplyHashListPack(in, version, key, type, context);
             } else {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
@@ -438,7 +437,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
             } else {
                 try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                     listener.write((byte) type);
-                    super.doApplyHashListPack(in, version, key, contains, type, context);
+                    super.doApplyHashListPack(in, version, key, type, context);
                 }
             }
             Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
@@ -447,12 +446,12 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
-                return super.doApplyListQuickList(in, version, key, contains, type, context);
+                return super.doApplyListQuickList(in, version, key, type, context);
             } else {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
@@ -489,7 +488,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
             } else {
                 try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                     listener.write((byte) type);
-                    super.doApplyListQuickList(in, version, key, contains, type, context);
+                    super.doApplyListQuickList(in, version, key, type, context);
                 }
             }
             Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
@@ -498,12 +497,12 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
-                return super.doApplyListQuickList2(in, version, key, contains, type, context);
+                return super.doApplyListQuickList2(in, version, key, type, context);
             } else {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
@@ -548,7 +547,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
             } else {
                 try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                     listener.write((byte) type);
-                    super.doApplyListQuickList2(in, version, key, contains, type, context);
+                    super.doApplyListQuickList2(in, version, key, type, context);
                 }
             }
             Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
@@ -557,12 +556,12 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyModule(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyModule(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
-                return super.doApplyModule(in, version, key, contains, type, context);
+                return super.doApplyModule(in, version, key, type, context);
             } else {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
@@ -571,7 +570,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
-                super.doApplyModule(in, version, key, contains, type, context);
+                super.doApplyModule(in, version, key, type, context);
             }
             Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
@@ -579,12 +578,12 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyModule2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyModule2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
-                return super.doApplyModule2(in, version, key, contains, type, context);
+                return super.doApplyModule2(in, version, key, type, context);
             } else {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
@@ -593,7 +592,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
-                super.doApplyModule2(in, version, key, contains, type, context);
+                super.doApplyModule2(in, version, key, type, context);
             }
             Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
@@ -601,12 +600,12 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
-                return super.doApplyStreamListPacks(in, version, key, contains, type, context);
+                return super.doApplyStreamListPacks(in, version, key, type, context);
             } else {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
@@ -615,7 +614,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
         try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                 listener.write((byte) type);
-                super.doApplyStreamListPacks(in, version, key, contains, type, context);
+                super.doApplyStreamListPacks(in, version, key, type, context);
             }
             Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());
@@ -623,12 +622,12 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
     }
     
     @Override
-    protected Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    protected Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {
             long ms = context.getExpiredValue() - System.currentTimeMillis();
             if (ms <= 0) {
-                return super.doApplyStreamListPacks2(in, version, key, contains, type, context);
+                return super.doApplyStreamListPacks2(in, version, key, type, context);
             } else {
                 ex = wrap(String.valueOf(ms).getBytes());
             }
@@ -641,7 +640,7 @@ public class DumpRdbVisitor extends AbstractRdbVisitor {
                 } else {
                     listener.write((byte) type);
                 }
-                super.doApplyStreamListPacks2(in, version, key, contains, type, context, listener);
+                super.doApplyStreamListPacks2(in, version, key, type, context, listener);
             }
             Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
             return context.valueOf(new DummyKeyValuePair());

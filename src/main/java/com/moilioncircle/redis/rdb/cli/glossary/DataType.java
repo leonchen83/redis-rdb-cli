@@ -53,7 +53,6 @@ public enum DataType {
     }
     
     public static boolean contains(List<DataType> list, int rdb) {
-        if (list.isEmpty()) return true;
         for (DataType type : list) if (type.contains(rdb)) return true;
         return false;
     }

@@ -22,7 +22,6 @@ import java.util.function.Supplier;
 
 import com.moilioncircle.redis.rdb.cli.cmd.Args;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.glossary.Guard;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
@@ -33,7 +32,7 @@ import com.moilioncircle.redis.replicator.rdb.datatype.DB;
 /**
  * @author Baoyi Chen
  */
-public class MergeRdbVisitor extends AbstractRdbVisitor {
+public class MergeRdbVisitor extends AbstractRdtRdbVisitor {
     
     public MergeRdbVisitor(Replicator replicator, Configure configure, Args.RdtArgs arg, Supplier<OutputStream> supplier) {
         super(replicator, configure, arg.filter, supplier);

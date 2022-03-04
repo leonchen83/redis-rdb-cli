@@ -24,7 +24,6 @@ import java.util.function.Supplier;
 
 import com.moilioncircle.redis.rdb.cli.cmd.Args;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.glossary.Guard;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -41,7 +40,7 @@ import com.moilioncircle.redis.replicator.rdb.datatype.DB;
 /**
  * @author Baoyi Chen
  */
-public class BackupRdbVisitor extends AbstractRdbVisitor {
+public class BackupRdbVisitor extends AbstractRdtRdbVisitor {
     
     private Long goal;
 

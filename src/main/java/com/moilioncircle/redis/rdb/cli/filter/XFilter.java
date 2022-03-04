@@ -77,11 +77,11 @@ public class XFilter implements Filter {
 	}
 	
 	private boolean containsDB(long db) {
-		return dbs == null || dbs.isEmpty() || dbs.contains((int)db);
+		return dbs == null || dbs.isEmpty() || dbs.contains((int) db);
 	}
 	
 	private boolean containsType(int type) {
-		if (types == null) {
+		if (types == null || types.isEmpty()) {
 			return true;
 		}
 		
@@ -102,6 +102,7 @@ public class XFilter implements Filter {
 	
 	@Override
 	public boolean contains(long db, int type, String key) {
-		return containsDB(db) && containsType(type) && containsKey(key);
+		boolean r = containsDB(db) && containsType(type) && containsKey(key);
+		return r;
 	}
 }

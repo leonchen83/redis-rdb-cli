@@ -25,7 +25,6 @@ import java.util.Map;
 
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.ext.AbstractRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.filter.Filter;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
@@ -40,12 +39,12 @@ import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
 /**
  * @author Baoyi Chen
  */
-public class CountRdbVisitor extends AbstractRdbVisitor implements EventListener {
+public class CountRdbVisitor extends AbstractRctRdbVisitor implements EventListener {
 
     private Map<String, Long> counter = new HashMap<>();
 
-    public CountRdbVisitor(Replicator replicator, Configure configure, File out, Filter filter, Escaper escaper) {
-        super(replicator, configure, out, filter, escaper);
+    public CountRdbVisitor(Replicator replicator, Configure configure, Filter filter, File output, Escaper escaper) {
+        super(replicator, configure, filter, output, escaper);
         replicator.addEventListener(this);
     }
 
@@ -72,116 +71,116 @@ public class CountRdbVisitor extends AbstractRdbVisitor implements EventListener
     }
 
     @Override
-    public Event doApplyString(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyString(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
-        return super.doApplyString(in, version, key, contains, type, context);
+        return super.doApplyString(in, version, key, type, context);
     }
 
     @Override
-    public Event doApplyList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
-        return super.doApplyList(in, version, key, contains, type, context);
+        return super.doApplyList(in, version, key, type, context);
     }
 
     @Override
-    public Event doApplySet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplySet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
-        return super.doApplySet(in, version, key, contains, type, context);
+        return super.doApplySet(in, version, key, type, context);
     }
 
     @Override
-    public Event doApplyZSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyZSet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
-        return super.doApplyZSet(in, version, key, contains, type, context);
+        return super.doApplyZSet(in, version, key, type, context);
     }
 
     @Override
-    public Event doApplyZSet2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyZSet2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
-        return super.doApplyZSet2(in, version, key, contains, type, context);
+        return super.doApplyZSet2(in, version, key, type, context);
     }
 
     @Override
-    public Event doApplyHash(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyHash(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
-        return super.doApplyHash(in, version, key, contains, type, context);
+        return super.doApplyHash(in, version, key, type, context);
     }
 
     @Override
-    public Event doApplyHashZipMap(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyHashZipMap(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
-        return super.doApplyHashZipMap(in, version, key, contains, type, context);
+        return super.doApplyHashZipMap(in, version, key, type, context);
     }
 
     @Override
-    public Event doApplyListZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyListZipList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
-        return super.doApplyListZipList(in, version, key, contains, type, context);
+        return super.doApplyListZipList(in, version, key, type, context);
     }
 
     @Override
-    public Event doApplySetIntSet(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplySetIntSet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
-        return super.doApplySetIntSet(in, version, key, contains, type, context);
+        return super.doApplySetIntSet(in, version, key, type, context);
     }
 
     @Override
-    public Event doApplyZSetZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyZSetZipList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
-        return super.doApplyZSetZipList(in, version, key, contains, type, context);
+        return super.doApplyZSetZipList(in, version, key, type, context);
     }
     
     @Override
-    public Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
-        return super.doApplyZSetListPack(in, version, key, contains, type, context);
+        return super.doApplyZSetListPack(in, version, key, type, context);
     }
 
     @Override
-    public Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
-        return super.doApplyHashZipList(in, version, key, contains, type, context);
+        return super.doApplyHashZipList(in, version, key, type, context);
     }
     
     @Override
-    public Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
-        return super.doApplyHashListPack(in, version, key, contains, type, context);
+        return super.doApplyHashListPack(in, version, key, type, context);
     }
 
     @Override
-    public Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
-        return super.doApplyListQuickList(in, version, key, contains, type, context);
+        return super.doApplyListQuickList(in, version, key, type, context);
     }
     
     @Override
-    public Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
-        return super.doApplyListQuickList2(in, version, key, contains, type, context);
+        return super.doApplyListQuickList2(in, version, key, type, context);
     }
 
     @Override
-    public Event doApplyModule(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyModule(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
-        return super.doApplyModule(in, version, key, contains, type, context);
+        return super.doApplyModule(in, version, key, type, context);
     }
 
     @Override
-    public Event doApplyModule2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyModule2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
-        return super.doApplyModule2(in, version, key, contains, type, context);
+        return super.doApplyModule2(in, version, key, type, context);
     }
 
     @Override
-    public Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
-        return super.doApplyStreamListPacks(in, version, key, contains, type, context);
+        return super.doApplyStreamListPacks(in, version, key, type, context);
     }
     
     @Override
-    public Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, boolean contains, int type, ContextKeyValuePair context) throws IOException {
+    public Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
-        return super.doApplyStreamListPacks2(in, version, key, contains, type, context);
+        return super.doApplyStreamListPacks2(in, version, key, type, context);
     }
 }

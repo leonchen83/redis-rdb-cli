@@ -18,11 +18,13 @@ package com.moilioncircle.redis.rdb.cli.ext.escape;
 
 
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
+import com.moilioncircle.redis.rdb.cli.conf.Configure;
 
 /**
  * @author Baoyi Chen
  */
 public class Escapers {
+    
     public static Escaper parse(String escaper, Escaper defaultValue, byte... excludes) {
         if (escaper == null) return defaultValue;
         switch (escaper) {
@@ -35,5 +37,13 @@ public class Escapers {
             default:
                 throw new AssertionError("Unsupported escape '" + escaper + "'");
         }
+    }
+    
+    public static Escaper getEscaper(String escaper, Escaper defaultValue, Configure configure) {
+        return Escapers.parse(escaper, defaultValue, configure.getDelimiter(), configure.getQuote());
+    }
+    
+    public static Escaper getEscaper(String escaper, Configure configure) {
+        return Escapers.parse(escaper, new RawEscaper(), configure.getDelimiter(), configure.getQuote());
     }
 }

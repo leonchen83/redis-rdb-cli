@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.ext;
+package com.moilioncircle.redis.rdb.cli.ext.visitor;
 
 import static com.moilioncircle.redis.replicator.Constants.MODULE_SET;
 

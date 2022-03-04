@@ -104,7 +104,7 @@ public class XRct implements Callable<Integer> {
 		try (ProgressBar bar = new ProgressBar(-1)) {
 			Replicator r = new XRedisReplicator(source, configure, DefaultReplFilter.RDB);
 			
-			new Format(format, configure).dress(r, output, XFilter.filter(regexs, db, type), largest, bytes, escape, replace);
+			new Format(format, configure).dress(r, XFilter.filter(regexs, db, type), output, largest, bytes, escape, replace);
 			r.addEventListener((rep, event) -> {
 				if (event instanceof PreRdbSyncEvent)
 					rep.addRawByteListener(b -> bar.react(b.length));

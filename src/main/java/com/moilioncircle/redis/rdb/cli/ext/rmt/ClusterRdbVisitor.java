@@ -33,7 +33,6 @@ import com.moilioncircle.redis.rdb.cli.api.sink.cmd.ClosedCommand;
 import com.moilioncircle.redis.rdb.cli.api.sink.cmd.ClosingCommand;
 import com.moilioncircle.redis.rdb.cli.api.sink.listener.AsyncEventListener;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.ext.AbstractMigrateRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.filter.Filter;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorFactory;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
@@ -53,7 +52,7 @@ import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
 /**
  * @author Baoyi Chen
  */
-public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements EventListener {
+public class ClusterRdbVisitor extends AbstractRmtRdbVisitor implements EventListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ClusterRdbVisitor.class);
     private static final Monitor monitor = MonitorFactory.getMonitor("endpoint_statistics");
@@ -62,7 +61,7 @@ public class ClusterRdbVisitor extends AbstractMigrateRdbVisitor implements Even
     private final Configuration configuration;
     private ThreadLocal<XEndpoints> endpoints = new ThreadLocal<>();
     
-    public ClusterRdbVisitor(Replicator replicator, Configure configure, RedisURI uri, Filter filter, List<String> lines, boolean replace) throws IOException {
+    public ClusterRdbVisitor(Replicator replicator, Configure configure, Filter filter, RedisURI uri, List<String> lines, boolean replace) throws IOException {
         super(replicator, configure, filter, replace);
         this.lines = lines;
         this.configuration = configure.merge(uri, false);

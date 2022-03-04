@@ -14,27 +14,25 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.ext.rct;
+package com.moilioncircle.redis.rdb.cli.ext.rdt;
 
-import java.io.File;
+import java.io.OutputStream;
+import java.util.function.Supplier;
 
-import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
+import com.moilioncircle.redis.rdb.cli.ext.GuardRawByteListener;
+import com.moilioncircle.redis.rdb.cli.ext.visitor.BaseRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.filter.Filter;
-import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
 import com.moilioncircle.redis.replicator.Replicator;
 
 /**
  * @author Baoyi Chen
  */
-public class JsonlRdbVisitor extends AbstractJsonRdbVisitor {
-    
-    public JsonlRdbVisitor(Replicator replicator, Configure configure, Filter filter, File output, Escaper escaper) {
-        super(replicator, configure, filter, output, escaper);
-    }
-
-    @Override
-    protected void separator() {
-        OutputStreams.write('\n', out);
-    }
+public abstract class AbstractRdtRdbVisitor extends BaseRdbVisitor {
+	
+	public AbstractRdtRdbVisitor(Replicator replicator, Configure configure, Filter filter, Supplier<OutputStream> supplier) {
+		super(replicator, configure, filter);
+		listener = new GuardRawByteListener(configure.getOutputBufferSize(), supplier.get());
+		replicator.addRawByteListener(listener);
+	}
 }

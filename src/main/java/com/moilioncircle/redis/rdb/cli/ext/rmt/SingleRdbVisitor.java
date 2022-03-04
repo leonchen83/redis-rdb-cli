@@ -32,7 +32,6 @@ import com.moilioncircle.redis.rdb.cli.api.sink.cmd.ClosedCommand;
 import com.moilioncircle.redis.rdb.cli.api.sink.cmd.ClosingCommand;
 import com.moilioncircle.redis.rdb.cli.api.sink.listener.AsyncEventListener;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.ext.AbstractMigrateRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.filter.Filter;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorFactory;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
@@ -53,7 +52,7 @@ import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
 /**
  * @author Baoyi Chen
  */
-public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements EventListener {
+public class SingleRdbVisitor extends AbstractRmtRdbVisitor implements EventListener {
 
     private static final Logger logger = LoggerFactory.getLogger(SingleRdbVisitor.class);
     private static final Monitor monitor = MonitorFactory.getMonitor("endpoint_statistics");
@@ -64,7 +63,7 @@ public class SingleRdbVisitor extends AbstractMigrateRdbVisitor implements Event
     private final Configuration conf;
     private ThreadLocal<XEndpoint> endpoint = new ThreadLocal<>();
     
-    public SingleRdbVisitor(Replicator replicator, Configure configure, RedisURI uri, Filter filter, boolean replace, boolean legacy) throws Exception {
+    public SingleRdbVisitor(Replicator replicator, Configure configure, Filter filter, RedisURI uri, boolean replace, boolean legacy) throws Exception {
         super(replicator, configure, filter, replace);
         this.uri = uri;
         this.legacy = legacy;
