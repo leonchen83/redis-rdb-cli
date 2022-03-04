@@ -18,15 +18,14 @@ package com.moilioncircle.redis.rdb.cli.ext.rct;
 
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_STREAM_LISTPACKS;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
+import com.moilioncircle.redis.rdb.cli.cmd.Args;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.rdb.cli.ext.visitor.BaseRdbVisitor;
-import com.moilioncircle.redis.rdb.cli.filter.Filter;
 import com.moilioncircle.redis.rdb.cli.util.Outputs;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
@@ -44,13 +43,13 @@ public abstract class AbstractRctRdbVisitor extends BaseRdbVisitor {
 	protected Escaper escaper;
 	protected OutputStream out;
 	
-	public AbstractRctRdbVisitor(Replicator replicator, Configure configure, Filter filter, File output, Escaper escaper) {
-		super(replicator, configure, filter);
+	public AbstractRctRdbVisitor(Replicator replicator, Configure configure, Args.RctArgs args, Escaper escaper) {
+		super(replicator, configure, args.filter);
 		this.escaper = escaper;
 		replicator.addEventListener((rep, event) -> {
 			if (event instanceof PreRdbSyncEvent) {
 				Outputs.closeQuietly(this.out);
-				this.out = Outputs.newBufferedOutput(output, configure.getOutputBufferSize());
+				this.out = Outputs.newBufferedOutput(args.output, configure.getOutputBufferSize());
 			}
 		});
 		replicator.addCloseListener(rep -> Outputs.closeQuietly(out));

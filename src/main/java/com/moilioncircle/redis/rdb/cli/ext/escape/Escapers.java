@@ -39,11 +39,11 @@ public class Escapers {
         }
     }
     
-    public static Escaper getEscaper(String escaper, Escaper defaultValue, Configure configure) {
+    public static Escaper getEscape(String escaper, Escaper defaultValue, Configure configure) {
         return Escapers.parse(escaper, defaultValue, configure.getDelimiter(), configure.getQuote());
     }
     
-    public static Escaper getEscaper(String escaper, Configure configure) {
+    public static Escaper getEscape(String escaper, Configure configure) {
         return Escapers.parse(escaper, new RawEscaper(), configure.getDelimiter(), configure.getQuote());
     }
 }

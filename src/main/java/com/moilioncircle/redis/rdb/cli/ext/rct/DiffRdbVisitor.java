@@ -20,14 +20,13 @@ import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.FUNC
 import static com.moilioncircle.redis.replicator.Constants.RDB_OPCODE_FUNCTION;
 import static com.moilioncircle.redis.replicator.rdb.datatype.ExpiredType.NONE;
 
-import java.io.File;
 import java.io.IOException;
 
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
+import com.moilioncircle.redis.rdb.cli.cmd.Args;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.DumpRawByteListener;
 import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
-import com.moilioncircle.redis.rdb.cli.filter.Filter;
 import com.moilioncircle.redis.rdb.cli.util.Outputs;
 import com.moilioncircle.redis.replicator.Constants;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -41,8 +40,8 @@ import com.moilioncircle.redis.replicator.rdb.datatype.ExpiredType;
  */
 public class DiffRdbVisitor extends AbstractRctRdbVisitor {
     
-    public DiffRdbVisitor(Replicator replicator, Configure configure, Filter filter, File output, Escaper escaper) {
-        super(replicator, configure, filter, output, escaper);
+    public DiffRdbVisitor(Replicator replicator, Configure configure, Args.RctArgs args, Escaper escaper) {
+        super(replicator, configure, args, escaper);
     }
     
     protected void expire(ExpiredType type, Long value) {

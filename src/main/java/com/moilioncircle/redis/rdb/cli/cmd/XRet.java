@@ -86,13 +86,17 @@ public class XRet implements Callable<Integer> {
 		ParserService parserService = loadParseService(parser, config);
 		
 		Configure configure = Configure.bind();
+		
 		try (ProgressBar bar = new ProgressBar(-1)) {
+			
 			Replicator r = new XRedisReplicator(source, configure);
 			r.setRdbVisitor(parserService.getRdbVisitor(r));
 			
 			r.addEventListener((rep, event) -> {
 				if (event instanceof PreRdbSyncEvent) {
-					rep.addRawByteListener(b -> bar.react(b.length));
+					rep.addRawByteListener(b -> {
+						bar.react(b.length);
+					});
 				}
 			});
 			r.addEventListener(new AsyncEventListener(sinkService, r, configure.getMigrateThreads(), new XThreadFactory("sync-worker")));

@@ -18,13 +18,14 @@ package com.moilioncircle.redis.rdb.cli.cmd;
 
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.CLUSTER;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.NODES;
+import static com.moilioncircle.redis.rdb.cli.filter.XFilter.cluster;
+import static com.moilioncircle.redis.rdb.cli.filter.XFilter.filter;
 import static com.moilioncircle.redis.rdb.cli.util.XUris.normalize;
 import static java.nio.file.Files.readAllLines;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -33,7 +34,6 @@ import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.XRedisReplicator;
 import com.moilioncircle.redis.rdb.cli.ext.rmt.ClusterRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rmt.SingleRdbVisitor;
-import com.moilioncircle.redis.rdb.cli.filter.XFilter;
 import com.moilioncircle.redis.rdb.cli.net.impl.XEndpoint;
 import com.moilioncircle.redis.rdb.cli.net.protocol.RedisObject;
 import com.moilioncircle.redis.rdb.cli.util.Collections;
@@ -93,13 +93,13 @@ public class XRmt implements Callable<Integer> {
 	private String source;
 	
 	@Option(names = {"-d", "--db"}, arity = "1..*", description = {"Database number. multiple databases can be", "provided. if not specified, all databases", "will be included."}, type = Integer.class)
-	private List<Integer> db = new ArrayList<>();
+	private List<Integer> db;
 	
 	@Option(names = {"-k", "--key"}, arity = "1..*", paramLabel = "<regex>", description = {"Keys to export. this can be a regex. if not", "specified, all keys will be returned."})
-	private List<String> regexs = new ArrayList<>();
+	private List<String> regexs;
 	
 	@Option(names = {"-t", "--type"}, arity = "1..*", description = {"Data type to export. possible values are", "string, hash, set, sortedset, list, module, ", "stream. multiple types can be provided. if not", "specified, all data types will be returned."})
-	private List<String> type = new ArrayList<>();
+	private List<String> type;
 	
 	@Option(names = {"-r", "--replace"}, description = {"Replace exist key value. if not specified,", "default value is false."})
 	private boolean replace;
@@ -150,12 +150,14 @@ public class XRmt implements Callable<Integer> {
 			try (ProgressBar bar = new ProgressBar(-1)) {
 				
 				Replicator r = new XRedisReplicator(source, configure, DefaultReplFilter.RDB);
-				r.setRdbVisitor(new ClusterRdbVisitor(r, configure, XFilter.cluster(regexs, type), null, readAllLines(path), replace));
+				r.setRdbVisitor(new ClusterRdbVisitor(r, configure, cluster(regexs, type), null, readAllLines(path), replace));
 				
 				r.addEventListener((rep, event) -> {
 					
 					if (event instanceof PreRdbSyncEvent) {
-						rep.addRawByteListener(b -> bar.react(b.length));
+						rep.addRawByteListener(b -> {
+							bar.react(b.length);
+						});
 					}
 						
 					if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
@@ -173,11 +175,10 @@ public class XRmt implements Callable<Integer> {
 		try (XEndpoint endpoint = new XEndpoint(uri.getHost(), uri.getPort(), configure.merge(uri, false))) {
 			RedisObject r = endpoint.send(CLUSTER, NODES);
 			if (r.type.isError()) {
-				return new SingleRdbVisitor(replicator, configure, XFilter.filter(regexs, db, type), uri, replace, legacy);
+				return new SingleRdbVisitor(replicator, configure, filter(regexs, db, type), uri, replace, legacy);
 			} else {
-				String config = r.getString();
-				List<String> lines = Collections.ofList(config.split("\n"));
-				return new ClusterRdbVisitor(replicator, configure, XFilter.cluster(regexs, type), uri, lines, replace);
+				List<String> lines = Collections.ofList(r.getString().split("\n"));
+				return new ClusterRdbVisitor(replicator, configure, cluster(regexs, type), uri, lines, replace);
 			}
 		} catch (Throwable e) {
 			throw new RuntimeException("failed to connect to " + uri.getHost() + ":" + uri.getPort() + ", reason " + e.getMessage());

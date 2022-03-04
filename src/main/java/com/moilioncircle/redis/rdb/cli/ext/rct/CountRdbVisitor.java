@@ -16,7 +16,6 @@
 
 package com.moilioncircle.redis.rdb.cli.ext.rct;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,8 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
+import com.moilioncircle.redis.rdb.cli.cmd.Args;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.filter.Filter;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.util.Outputs;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -43,8 +42,8 @@ public class CountRdbVisitor extends AbstractRctRdbVisitor implements EventListe
 
     private Map<String, Long> counter = new HashMap<>();
 
-    public CountRdbVisitor(Replicator replicator, Configure configure, Filter filter, File output, Escaper escaper) {
-        super(replicator, configure, filter, output, escaper);
+    public CountRdbVisitor(Replicator replicator, Configure configure, Args.RctArgs args, Escaper escaper) {
+        super(replicator, configure, args, escaper);
         replicator.addEventListener(this);
     }
 

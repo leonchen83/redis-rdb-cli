@@ -16,17 +16,16 @@
 
 package com.moilioncircle.redis.rdb.cli.cmd;
 
+import static com.moilioncircle.redis.rdb.cli.filter.XFilter.filter;
 import static com.moilioncircle.redis.rdb.cli.util.XUris.normalize;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
 import com.moilioncircle.redis.rdb.cli.cmd.support.XVersionProvider;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.XRedisReplicator;
-import com.moilioncircle.redis.rdb.cli.filter.XFilter;
 import com.moilioncircle.redis.rdb.cli.glossary.Format;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
 import com.moilioncircle.redis.replicator.DefaultReplFilter;
@@ -77,22 +76,22 @@ public class XRct implements Callable<Integer> {
 	private File output;
 	
 	@Option(names = {"-d", "--db"}, arity = "1..*", description = {"Database number. multiple databases can be", "provided. if not specified, all databases", "will be included."}, type = Integer.class)
-	private List<Integer> db = new ArrayList<>();
+	private List<Integer> db;
 	
 	@Option(names = {"-k", "--key"}, arity = "1..*", paramLabel = "<regex>", description = {"Keys to export. this can be a regex. if not", "specified, all keys will be returned."})
-	private List<String> regexs = new ArrayList<>();
+	private List<String> regexs;
 	
 	@Option(names = {"-t", "--type"}, arity = "1..*", description = {"Data type to export. possible values are", "string, hash, set, sortedset, list, module, ", "stream. multiple types can be provided. if not", "specified, all data types will be returned."})
-	private List<String> type = new ArrayList<>();
+	private List<String> type;
 	
 	@Option(names = {"-e", "--escape"}, description = {"Escape strings to encoding: raw (default),", "redis, json."})
 	private String escape;
 	
 	@Option(names = {"-b", "--bytes"}, description = {"Limit memory output(--format mem) to keys", "greater to or equal to this value (in bytes)"})
-	private Long bytes;
+	private long bytes = -1L;
 	
 	@Option(names = {"-l", "--largest"}, paramLabel = "<n>", description = {"Limit memory output(--format mem) to only the", "top n keys (by size)."})
-	private Long largest;
+	private int largest = -1;
 	
 	@Option(names = {"-r", "--replace"}, description = {"Whether the generated aof with <replace>", "parameter(--format dump). if not specified,", "default value is false."})
 	private boolean replace;
@@ -102,17 +101,27 @@ public class XRct implements Callable<Integer> {
 		source = normalize(source, FileType.RDB, spec, "Invalid options: '--source=<source>'");
 		Configure configure = Configure.bind();
 		try (ProgressBar bar = new ProgressBar(-1)) {
+			// bind args
+			Args.RctArgs args = new Args.RctArgs();
+			args.bytes = bytes;
+			args.output = output;
+			args.replace = replace;
+			args.largest = largest;
+			args.filter = filter(regexs, db, type);
+			
 			Replicator r = new XRedisReplicator(source, configure, DefaultReplFilter.RDB);
 			
-			new Format(format, configure).dress(r, XFilter.filter(regexs, db, type), output, largest, bytes, escape, replace);
+			new Format(format).dress(r, configure, args, escape);
 			
 			r.addEventListener((rep, event) -> {
 				if (event instanceof PreRdbSyncEvent) {
-					rep.addRawByteListener(b -> bar.react(b.length));
+					rep.addRawByteListener(b -> {
+						bar.react(b.length);
+					});
 				}
 				
 				if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
-					Replicators.closeQuietly(r);
+					Replicators.closeQuietly(rep);
 				}
 				
 			});

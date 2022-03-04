@@ -21,15 +21,14 @@ import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAI
 import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
 import static com.moilioncircle.redis.replicator.rdb.BaseRdbParser.StringHelper.listPackEntry;
 
-import java.io.File;
 import java.io.IOException;
 
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
+import com.moilioncircle.redis.rdb.cli.cmd.Args;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.DumpRawByteListener;
 import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.rdb.cli.ext.escape.RedisEscaper;
-import com.moilioncircle.redis.rdb.cli.filter.Filter;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.util.Outputs;
 import com.moilioncircle.redis.replicator.Constants;
@@ -50,8 +49,8 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
     private Escaper redis;
     private boolean firstkey = true;
     
-    public AbstractJsonRdbVisitor(Replicator replicator, Configure configure, Filter filter, File output, Escaper escaper) {
-        super(replicator, configure, filter, output, escaper);
+    public AbstractJsonRdbVisitor(Replicator replicator, Configure configure, Args.RctArgs args, Escaper escaper) {
+        super(replicator, configure, args, escaper);
         this.redis = new RedisEscaper(configure.getDelimiter(), configure.getQuote());
     }
 

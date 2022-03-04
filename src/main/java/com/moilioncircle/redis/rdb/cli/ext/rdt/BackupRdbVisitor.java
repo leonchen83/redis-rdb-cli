@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.function.Supplier;
 
-import com.moilioncircle.redis.rdb.cli.cmd.Misc;
+import com.moilioncircle.redis.rdb.cli.cmd.Args;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.glossary.Guard;
 import com.moilioncircle.redis.rdb.cli.util.Outputs;
@@ -44,7 +44,7 @@ public class BackupRdbVisitor extends AbstractRdtRdbVisitor {
     
     private Long goal;
 
-    public BackupRdbVisitor(Replicator replicator, Configure configure, Misc.RdtArgs arg, Supplier<OutputStream> supplier) {
+    public BackupRdbVisitor(Replicator replicator, Configure configure, Args.RdtArgs arg, Supplier<OutputStream> supplier) {
         super(replicator, configure, arg.filter, supplier);
         this.goal = arg.goal;
         this.replicator.addEventListener((rep, event) -> {

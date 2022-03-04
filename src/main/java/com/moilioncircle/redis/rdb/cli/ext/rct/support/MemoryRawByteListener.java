@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.util;
+package com.moilioncircle.redis.rdb.cli.ext.rct.support;
 
-import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
-import com.moilioncircle.redis.replicator.util.type.Tuple2;
+import com.moilioncircle.redis.replicator.io.RawByteListener;
 
 /**
  * @author Baoyi Chen
  */
-public class XTuple2 extends Tuple2<Long, DummyKeyValuePair> implements Comparable<XTuple2> {
-
-    private static final long serialVersionUID = 1L;
-
-    public XTuple2(Long v1, DummyKeyValuePair v2) {
-        super(v1, v2);
-    }
-
-    @Override
-    public int compareTo(XTuple2 that) {
-        return Long.compare(this.getV1(), that.getV1());
-    }
+public class MemoryRawByteListener implements RawByteListener {
+	
+	private long length;
+	
+	public long getLength() {
+		return length;
+	}
+	
+	@Override
+	public void handle(byte... rawBytes) {
+		length += rawBytes.length;
+	}
 }

@@ -16,13 +16,13 @@
 
 package com.moilioncircle.redis.rdb.cli.glossary;
 
-import static com.moilioncircle.redis.rdb.cli.ext.escape.Escapers.getEscaper;
+import static com.moilioncircle.redis.rdb.cli.ext.escape.Escapers.getEscape;
 
-import java.io.File;
 import java.util.ServiceLoader;
 import java.util.function.Predicate;
 
 import com.moilioncircle.redis.rdb.cli.api.format.FormatterService;
+import com.moilioncircle.redis.rdb.cli.cmd.Args;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.escape.JsonEscaper;
 import com.moilioncircle.redis.rdb.cli.ext.rct.CountRdbVisitor;
@@ -35,7 +35,6 @@ import com.moilioncircle.redis.rdb.cli.ext.rct.KeyRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rct.KeyValRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rct.MemRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rct.RespRdbVisitor;
-import com.moilioncircle.redis.rdb.cli.filter.Filter;
 import com.moilioncircle.redis.rdb.cli.util.Iterators;
 import com.moilioncircle.redis.replicator.Replicator;
 
@@ -45,50 +44,48 @@ import com.moilioncircle.redis.replicator.Replicator;
 public class Format {
 
     private String value;
-    private Configure configure;
     private FormatterService formatter;
 
-    public Format(String value, Configure configure) {
+    public Format(String value) {
         this.value = value;
-        this.configure = configure;
         Predicate<FormatterService> test = e -> e.format() != null && e.format().equals(value);
         this.formatter = Iterators.find(ServiceLoader.load(FormatterService.class).iterator(), test);
     }
 
-    public void dress(Replicator r, Filter filter, File output, Long largest, Long bytes, String escaper, boolean replace) {
+    public void dress(Replicator r, Configure configure, Args.RctArgs args, String escape) {
         // self define formatter has highest priority
         if (formatter != null) {
-            r.setRdbVisitor(new FormatterRdbVisitor(r, configure, filter, output, getEscaper(escaper, configure), formatter));
+            r.setRdbVisitor(new FormatterRdbVisitor(r, configure, args, getEscape(escape, configure), formatter));
             return;
         }
         
         switch (value) {
             case "diff":
-                r.setRdbVisitor(new DiffRdbVisitor(r, configure, filter, output, getEscaper("redis", configure)));
+                r.setRdbVisitor(new DiffRdbVisitor(r, configure, args, getEscape("redis", configure)));
                 break;
             case "count":
-                r.setRdbVisitor(new CountRdbVisitor(r, configure, filter, output, getEscaper("redis", configure)));
+                r.setRdbVisitor(new CountRdbVisitor(r, configure, args, getEscape("redis", configure)));
                 break;
             case "dump":
-                r.setRdbVisitor(new DumpRdbVisitor(r, configure, filter, output, replace, getEscaper("raw", configure)));
+                r.setRdbVisitor(new DumpRdbVisitor(r, configure, args, getEscape("raw", configure)));
                 break;
             case "resp":
-                r.setRdbVisitor(new RespRdbVisitor(r, configure, filter, output, replace, getEscaper("raw", configure)));
+                r.setRdbVisitor(new RespRdbVisitor(r, configure, args, getEscape("raw", configure)));
                 break;
             case "key":
-                r.setRdbVisitor(new KeyRdbVisitor(r, configure, filter, output, getEscaper(escaper, configure)));
+                r.setRdbVisitor(new KeyRdbVisitor(r, configure, args, getEscape(escape, configure)));
                 break;
             case "keyval":
-                r.setRdbVisitor(new KeyValRdbVisitor(r, configure, filter, output, getEscaper(escaper, configure)));
+                r.setRdbVisitor(new KeyValRdbVisitor(r, configure, args, getEscape(escape, configure)));
                 break;
             case "mem":
-                r.setRdbVisitor(new MemRdbVisitor(r, configure, filter, output, getEscaper(escaper, configure), largest, bytes));
+                r.setRdbVisitor(new MemRdbVisitor(r, configure, args, getEscape(escape, configure)));
                 break;
             case "json":
-                r.setRdbVisitor(new JsonRdbVisitor(r, configure, filter, output, getEscaper(escaper, new JsonEscaper(), configure)));
+                r.setRdbVisitor(new JsonRdbVisitor(r, configure, args, getEscape(escape, new JsonEscaper(), configure)));
                 break;
             case "jsonl":
-                r.setRdbVisitor(new JsonlRdbVisitor(r, configure, filter, output, getEscaper(escaper, new JsonEscaper(), configure)));
+                r.setRdbVisitor(new JsonlRdbVisitor(r, configure, args, getEscape(escape, new JsonEscaper(), configure)));
                 break;
             default:
                 throw new AssertionError("Unsupported format '" + value + "'");

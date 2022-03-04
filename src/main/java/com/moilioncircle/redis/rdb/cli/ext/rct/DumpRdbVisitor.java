@@ -28,15 +28,14 @@ import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET;
 import static com.moilioncircle.redis.replicator.rdb.BaseRdbParser.StringHelper.listPackEntry;
 import static java.nio.ByteBuffer.wrap;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
+import com.moilioncircle.redis.rdb.cli.cmd.Args;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.DumpRawByteListener;
 import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
-import com.moilioncircle.redis.rdb.cli.filter.Filter;
 import com.moilioncircle.redis.rdb.cli.io.LayeredOutputStream;
 import com.moilioncircle.redis.rdb.cli.net.protocol.Protocols;
 import com.moilioncircle.redis.replicator.Constants;
@@ -60,9 +59,9 @@ public class DumpRdbVisitor extends AbstractRctRdbVisitor {
     // TODO https://github.com/leonchen83/redis-rdb-cli/issues/6
     private final boolean replace;
     
-    public DumpRdbVisitor(Replicator replicator, Configure configure, Filter filter, File output, boolean replace, Escaper escaper) {
-        super(replicator, configure, filter, output, escaper);
-        this.replace = replace;
+    public DumpRdbVisitor(Replicator replicator, Configure configure, Args.RctArgs args, Escaper escaper) {
+        super(replicator, configure, args, escaper);
+        this.replace = args.replace;
     }
     
     @Override

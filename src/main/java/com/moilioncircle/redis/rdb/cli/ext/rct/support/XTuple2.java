@@ -14,27 +14,24 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.cmd;
+package com.moilioncircle.redis.rdb.cli.ext.rct.support;
 
-import java.io.File;
-import java.util.List;
-
-import com.moilioncircle.redis.rdb.cli.filter.Filter;
+import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
+import com.moilioncircle.redis.replicator.util.type.Tuple2;
 
 /**
  * @author Baoyi Chen
  */
-public interface Misc {
-	
-	class RdtArgs {
-		public Long goal;
-		public File config;
-		public File output;
-		public String split;
-		public String backup;
-		public Filter filter;
-		public List<File> merge;
-	}
-	
-}
+public class XTuple2 extends Tuple2<Long, DummyKeyValuePair> implements Comparable<XTuple2> {
 
+    private static final long serialVersionUID = 1L;
+
+    public XTuple2(Long v1, DummyKeyValuePair v2) {
+        super(v1, v2);
+    }
+
+    @Override
+    public int compareTo(XTuple2 that) {
+        return Long.compare(this.getV1(), that.getV1());
+    }
+}

@@ -23,7 +23,6 @@ import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.NODE
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import com.moilioncircle.redis.rdb.cli.conf.NodeConfParser;
 import com.moilioncircle.redis.rdb.cli.net.protocol.RedisObject;
 import com.moilioncircle.redis.rdb.cli.util.ByteBuffers;
+import com.moilioncircle.redis.rdb.cli.util.Collections;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.util.type.Tuple3;
 
@@ -166,7 +166,7 @@ public class XEndpoints implements Closeable {
                         continue;
                     }
                     String config = r.getString();
-                    lines = Arrays.asList(config.split("\n"));
+                    lines = Collections.ofList(config.split("\n"));
                     break;
                 } catch (Throwable error) {
                 }

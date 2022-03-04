@@ -76,20 +76,30 @@ public class XRcut implements Callable<Integer> {
 		Configure configure = Configure.bind();
 		OutputStream rdbStream = newBufferedOutput(rdb, configure.getOutputBufferSize());
 		OutputStream aofStream = newBufferedOutput(aof, configure.getOutputBufferSize());
+		
 		RawByteListener rdbListener = new XRawByteListener(rdbStream);
 		RawByteListener aofListener = new XRawByteListener(aofStream);
+		
 		try (ProgressBar bar = new ProgressBar(-1)) {
+			
 			Replicator r = new RedisReplicator(source, FileType.MIXED, Configuration.defaultSetting());
+			
 			r.addExceptionListener((rep, tx, e) -> {
 				throw new RuntimeException(tx.getMessage(), tx);
 			});
+			
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 				Replicators.closeQuietly(r);
 			}));
+			
 			r.addEventListener((rep, event) -> {
-				if (event instanceof PreRdbSyncEvent)
-					rep.addRawByteListener(b -> bar.react(b.length));
+				if (event instanceof PreRdbSyncEvent) {
+					rep.addRawByteListener(b -> {
+						bar.react(b.length);
+					});
+				}
 			});
+			
 			r.addEventListener(new EventListener() {
 				@Override
 				public void onEvent(Replicator replicator, Event event) {

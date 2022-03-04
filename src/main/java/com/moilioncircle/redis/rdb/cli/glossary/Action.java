@@ -27,7 +27,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.moilioncircle.redis.rdb.cli.cmd.Misc;
+import com.moilioncircle.redis.rdb.cli.cmd.Args;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.XRedisReplicator;
 import com.moilioncircle.redis.rdb.cli.ext.rdt.BackupRdbVisitor;
@@ -54,7 +54,7 @@ public enum Action {
     MERGE,
     BACKUP;
     
-    public List<Tuple2<Replicator, String>> dress(Configure configure, Misc.RdtArgs arg) throws Exception {
+    public List<Tuple2<Replicator, String>> dress(Configure configure, Args.RdtArgs arg) throws Exception {
         List<Tuple2<Replicator, String>> list = new ArrayList<>();
         switch (this) {
             case MERGE:

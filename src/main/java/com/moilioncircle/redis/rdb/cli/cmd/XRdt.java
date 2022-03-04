@@ -21,7 +21,6 @@ import static com.moilioncircle.redis.rdb.cli.util.XUris.normalize;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -106,13 +105,13 @@ public class XRdt implements Callable<Integer> {
 	private File output;
 	
 	@Option(names = {"-d", "--db"}, arity = "1..*", description = {"Database number. multiple databases can be", "provided. if not specified, all databases", "will be included."}, type = Integer.class)
-	private List<Integer> db = new ArrayList<>();
+	private List<Integer> db;
 	
 	@Option(names = {"-k", "--key"}, arity = "1..*", paramLabel = "<regex>", description = {"Keys to export. this can be a regex. if not", "specified, all keys will be returned."})
-	private List<String> regexs = new ArrayList<>();
+	private List<String> regexs;
 	
 	@Option(names = {"-t", "--type"}, arity = "1..*", description = {"Data type to export. possible values are", "string, hash, set, sortedset, list, module, ", "stream. multiple types can be provided. if not", "specified, all data types will be returned."})
-	private List<String> type = new ArrayList<>();
+	private List<String> type;
 	
 	@Override
 	public Integer call() throws Exception {
@@ -158,7 +157,7 @@ public class XRdt implements Callable<Integer> {
 		try (ProgressBar bar = new ProgressBar(-1)) {
 			
 			// bind args
-			Misc.RdtArgs arg = new Misc.RdtArgs();
+			Args.RdtArgs arg = new Args.RdtArgs();
 			arg.goal = goal;
 			arg.split = split;
 			arg.merge = merge;
@@ -172,11 +171,13 @@ public class XRdt implements Callable<Integer> {
 			for (Tuple2<Replicator, String> tuple : list) {
 				tuple.getV1().addEventListener((rep, event) -> {
 					if (event instanceof PreRdbSyncEvent) {
-						rep.addRawByteListener(b -> bar.react(b.length, tuple.getV2()));
+						rep.addRawByteListener(b -> {
+							bar.react(b.length, tuple.getV2());
+						});
 					}
 					
 					if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
-						Replicators.closeQuietly(tuple.getV1());
+						Replicators.closeQuietly(rep);
 					}
 					
 				});
