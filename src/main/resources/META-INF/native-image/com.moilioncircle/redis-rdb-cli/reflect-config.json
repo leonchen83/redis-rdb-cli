@@ -688,8 +688,16 @@
   "allDeclaredMethods":true
 },
 {
+  "name":"org.apache.logging.log4j.core.config.LoggerConfig$Builder",
+  "allDeclaredFields":true
+},
+{
   "name":"org.apache.logging.log4j.core.config.LoggerConfig$RootLogger",
   "allDeclaredMethods":true
+},
+{
+  "name":"org.apache.logging.log4j.core.config.LoggerConfig$RootLogger$Builder",
+  "allDeclaredFields":true
 },
 {
   "name":"org.apache.logging.log4j.core.config.LoggerConfig[]"
