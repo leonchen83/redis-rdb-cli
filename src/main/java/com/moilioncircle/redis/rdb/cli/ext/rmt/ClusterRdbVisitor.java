@@ -17,11 +17,11 @@
 package com.moilioncircle.redis.rdb.cli.ext.rmt;
 
 import static com.moilioncircle.redis.rdb.cli.conf.NodeConfParser.slot;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.FUNCTION;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.REPLACE;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.RESTORE;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.RESTORE_ASKING;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.ZERO;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.FUNCTION;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.REPLACE;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.RESTORE;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.RESTORE_ASKING;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.ZERO;
 
 import java.io.IOException;
 import java.util.List;

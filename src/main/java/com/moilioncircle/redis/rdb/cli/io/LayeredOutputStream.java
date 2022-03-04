@@ -44,6 +44,7 @@ import com.moilioncircle.redis.replicator.io.ByteBufferOutputStream;
 public class LayeredOutputStream extends OutputStream {
     
     protected static final ByteBuffer EMPTY = allocate(0);
+    
     protected static final File TEMP_DIR = new File(System.getProperty("java.io.tmpdir"));
     protected static final OpenOption[] OPTIONS = new OpenOption[]{READ, WRITE, TRUNCATE_EXISTING, CREATE, DELETE_ON_CLOSE};
     

@@ -19,7 +19,7 @@ package com.moilioncircle.redis.rdb.cli.ext.escape;
 import java.io.OutputStream;
 
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
-import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.rdb.cli.util.Outputs;
 
 /**
  * @author Baoyi Chen
@@ -43,29 +43,29 @@ public class RedisEscaper implements Escaper {
     public void encode(int b, OutputStream out) {
         b = b & 0xFF;
         if (b == '\n') {
-            OutputStreams.write('\\', out);
-            OutputStreams.write('n', out);
+            Outputs.write('\\', out);
+            Outputs.write('n', out);
         } else if (b == '\r') {
-            OutputStreams.write('\\', out);
-            OutputStreams.write('r', out);
+            Outputs.write('\\', out);
+            Outputs.write('r', out);
         } else if (b == '\t') {
-            OutputStreams.write('\\', out);
-            OutputStreams.write('t', out);
+            Outputs.write('\\', out);
+            Outputs.write('t', out);
         } else if (b == '\b') {
-            OutputStreams.write('\\', out);
-            OutputStreams.write('b', out);
+            Outputs.write('\\', out);
+            Outputs.write('b', out);
         } else if (b == 7) {
-            OutputStreams.write('\\', out);
-            OutputStreams.write('a', out);
+            Outputs.write('\\', out);
+            Outputs.write('a', out);
         } else if (b == 34 || b == 39 || b == 92 || b <= 32 || b >= 127 || isContains(b)) {
-            OutputStreams.write('\\', out);
-            OutputStreams.write('x', out);
+            Outputs.write('\\', out);
+            Outputs.write('x', out);
             int ma = b >>> 4;
             int mi = b & 0xF;
-            OutputStreams.write(NUMERALS[ma], out);
-            OutputStreams.write(NUMERALS[mi], out);
+            Outputs.write(NUMERALS[ma], out);
+            Outputs.write(NUMERALS[mi], out);
         } else {
-            OutputStreams.write(b, out);
+            Outputs.write(b, out);
         }
     }
     

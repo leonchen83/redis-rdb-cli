@@ -22,10 +22,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.function.Supplier;
 
-import com.moilioncircle.redis.rdb.cli.cmd.Args;
+import com.moilioncircle.redis.rdb.cli.cmd.Misc;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.glossary.Guard;
-import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.rdb.cli.util.Outputs;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
@@ -44,7 +44,7 @@ public class BackupRdbVisitor extends AbstractRdtRdbVisitor {
     
     private Long goal;
 
-    public BackupRdbVisitor(Replicator replicator, Configure configure, Args.RdtArgs arg, Supplier<OutputStream> supplier) {
+    public BackupRdbVisitor(Replicator replicator, Configure configure, Misc.RdtArgs arg, Supplier<OutputStream> supplier) {
         super(replicator, configure, arg.filter, supplier);
         this.goal = arg.goal;
         this.replicator.addEventListener((rep, event) -> {
@@ -52,13 +52,13 @@ public class BackupRdbVisitor extends AbstractRdtRdbVisitor {
                 listener.reset(supplier.get());
             }
             if (event instanceof PostRdbSyncEvent) {
-                CRCOutputStream out = listener.getOutputStream();
-                OutputStreams.writeQuietly(0xFF, out);
-                OutputStreams.writeQuietly(out.getCRC64(), out);
-                OutputStreams.closeQuietly(out);
+                CRCOutputStream out = listener.getOutput();
+                Outputs.writeQuietly(0xFF, out);
+                Outputs.writeQuietly(out.getCRC64(), out);
+                Outputs.closeQuietly(out);
             }
             if (event instanceof PreCommandSyncEvent) {
-                OutputStreams.closeQuietly(listener.getOutputStream());
+                Outputs.closeQuietly(listener.getOutput());
             }
         });
     }

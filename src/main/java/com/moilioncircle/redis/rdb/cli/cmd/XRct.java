@@ -105,11 +105,16 @@ public class XRct implements Callable<Integer> {
 			Replicator r = new XRedisReplicator(source, configure, DefaultReplFilter.RDB);
 			
 			new Format(format, configure).dress(r, XFilter.filter(regexs, db, type), output, largest, bytes, escape, replace);
+			
 			r.addEventListener((rep, event) -> {
-				if (event instanceof PreRdbSyncEvent)
+				if (event instanceof PreRdbSyncEvent) {
 					rep.addRawByteListener(b -> bar.react(b.length));
-				if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent)
+				}
+				
+				if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
 					Replicators.closeQuietly(r);
+				}
+				
 			});
 			r.open();
 		}

@@ -16,14 +16,14 @@
 
 package com.moilioncircle.redis.rdb.cli.ext.rmt;
 
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.EVALSHA;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.FUNCTION;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.LOAD;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.ONE;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.REPLACE;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.RESTORE;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.SCRIPT;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.ZERO;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.EVALSHA;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.FUNCTION;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.LOAD;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.ONE;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.REPLACE;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.RESTORE;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.SCRIPT;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.ZERO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

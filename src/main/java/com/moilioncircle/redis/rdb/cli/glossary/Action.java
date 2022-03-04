@@ -16,6 +16,7 @@
 
 package com.moilioncircle.redis.rdb.cli.glossary;
 
+import static com.moilioncircle.redis.rdb.cli.util.Collections.isEmpty;
 import static com.moilioncircle.redis.replicator.FileType.RDB;
 
 import java.io.EOFException;
@@ -26,14 +27,14 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.moilioncircle.redis.rdb.cli.cmd.Args;
+import com.moilioncircle.redis.rdb.cli.cmd.Misc;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.XRedisReplicator;
 import com.moilioncircle.redis.rdb.cli.ext.rdt.BackupRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rdt.MergeRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rdt.SplitRdbVisitor;
-import com.moilioncircle.redis.rdb.cli.io.ShardableFileOutputStream;
-import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.rdb.cli.io.FilesOutputStream;
+import com.moilioncircle.redis.rdb.cli.util.Outputs;
 import com.moilioncircle.redis.rdb.cli.util.Strings;
 import com.moilioncircle.redis.rdb.cli.util.XUris;
 import com.moilioncircle.redis.replicator.DefaultReplFilter;
@@ -53,28 +54,33 @@ public enum Action {
     MERGE,
     BACKUP;
     
-    public List<Tuple2<Replicator, String>> dress(Configure configure, Args.RdtArgs arg) throws Exception {
+    public List<Tuple2<Replicator, String>> dress(Configure configure, Misc.RdtArgs arg) throws Exception {
         List<Tuple2<Replicator, String>> list = new ArrayList<>();
         switch (this) {
             case MERGE:
-                if (arg.merge.isEmpty()) return list;
-                CRCOutputStream out = OutputStreams.newCRCOutputStream(arg.output, configure.getOutputBufferSize());
+                if (isEmpty(arg.merge)) return list;
+                CRCOutputStream out = Outputs.newCRCOutput(arg.output, configure.getOutputBufferSize());
                 int version = 0;
                 for (File file : arg.merge) {
                     RedisURI uri = XUris.fromFile(file);
                     if (uri.getFileType() == null || uri.getFileType() != RDB) {
                         throw new UnsupportedOperationException("Invalid options: '--merge <file>...' must be rdb file.");
                     }
+                    
                     version = maxVersion(version, file);
+                    
                     Replicator r = new XRedisReplicator(uri, configure, DefaultReplFilter.RDB);
                     r.setRdbVisitor(new MergeRdbVisitor(r, configure, arg, () -> out));
+                    
                     list.add(Tuples.of(r, file.getName()));
                 }
+                
                 list.get(list.size() - 1).getV1().addCloseListener(r -> {
-                    OutputStreams.writeQuietly(0xFF, out);
-                    OutputStreams.writeQuietly(out.getCRC64(), out);
-                    OutputStreams.closeQuietly(out);
+                    Outputs.writeQuietly(0xFF, out);
+                    Outputs.writeQuietly(out.getCRC64(), out);
+                    Outputs.closeQuietly(out);
                 });
+                
                 // header & version
                 out.write("REDIS".getBytes());
                 out.write(Strings.lappend(version, 4, '0').getBytes());
@@ -82,12 +88,12 @@ public enum Action {
             case SPLIT:
                 Replicator r = new XRedisReplicator(arg.split, configure, DefaultReplFilter.RDB);
                 List<String> lines = Files.readAllLines(arg.config.toPath());
-                r.setRdbVisitor(new SplitRdbVisitor(r, configure, arg, () -> new ShardableFileOutputStream(arg.output, lines, configure)));
+                r.setRdbVisitor(new SplitRdbVisitor(r, configure, arg, () -> new FilesOutputStream(arg.output, lines, configure)));
                 list.add(Tuples.of(r, null));
                 return list;
             case BACKUP:
                 r = new XRedisReplicator(arg.backup, configure, DefaultReplFilter.RDB);
-                r.setRdbVisitor(new BackupRdbVisitor(r, configure, arg, () -> OutputStreams.newCRCOutputStream(arg.output, configure.getOutputBufferSize())));
+                r.setRdbVisitor(new BackupRdbVisitor(r, configure, arg, () -> Outputs.newCRCOutput(arg.output, configure.getOutputBufferSize())));
                 list.add(Tuples.of(r, null));
                 return list;
             case NONE:

@@ -16,10 +16,10 @@
 
 package com.moilioncircle.redis.rdb.cli.cmd;
 
+import static com.moilioncircle.redis.rdb.cli.util.Iterators.find;
 import static com.moilioncircle.redis.rdb.cli.util.XUris.normalize;
 
 import java.io.File;
-import java.util.Iterator;
 import java.util.ServiceLoader;
 import java.util.concurrent.Callable;
 
@@ -89,9 +89,11 @@ public class XRet implements Callable<Integer> {
 		try (ProgressBar bar = new ProgressBar(-1)) {
 			Replicator r = new XRedisReplicator(source, configure);
 			r.setRdbVisitor(parserService.getRdbVisitor(r));
+			
 			r.addEventListener((rep, event) -> {
-				if (event instanceof PreRdbSyncEvent)
+				if (event instanceof PreRdbSyncEvent) {
 					rep.addRawByteListener(b -> bar.react(b.length));
+				}
 			});
 			r.addEventListener(new AsyncEventListener(sinkService, r, configure.getMigrateThreads(), new XThreadFactory("sync-worker")));
 			parserService.wrap(r).open();
@@ -101,18 +103,7 @@ public class XRet implements Callable<Integer> {
 	
 	private SinkService loadSinkService(String sink, File config) throws Exception {
 		ServiceLoader<SinkService> loader = ServiceLoader.load(SinkService.class);
-		
-		SinkService service = null;
-		Iterator<SinkService> it = loader.iterator();
-		while (it.hasNext()) {
-			SinkService temp = it.next();
-			if (!temp.sink().equals(sink)) {
-				continue;
-			}
-			service = temp;
-			break;
-		}
-		
+		SinkService service = find(loader.iterator(), e -> e.sink().equals(sink));
 		if (service == null) {
 			throw new ParameterException(spec.commandLine(), "Failed to load sink service. Invalid options: '--name=<sink>'");
 		}
@@ -123,18 +114,7 @@ public class XRet implements Callable<Integer> {
 	
 	private ParserService loadParseService(String parser, File config) throws Exception {
 		ServiceLoader<ParserService> loader = ServiceLoader.load(ParserService.class);
-		
-		ParserService service = null;
-		Iterator<ParserService> it = loader.iterator();
-		while (it.hasNext()) {
-			ParserService temp = it.next();
-			if (temp.parser().equals(parser)) {
-				continue;
-			}
-			service = temp;
-			break;
-		}
-		
+		ParserService service = find(loader.iterator(), e -> e.parser().equals(parser));
 		if (service == null) {
 			throw new ParameterException(spec.commandLine(), "Failed to load parser service. Invalid options: '--parser=<parser>'");
 		}

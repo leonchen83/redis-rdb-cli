@@ -16,8 +16,8 @@
 
 package com.moilioncircle.redis.rdb.cli.ext.rct;
 
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.SELECT;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.ZERO_BUF;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.SELECT;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.ZERO_BUF;
 import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAINER_PACKED;
 import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAINER_PLAIN;
 import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;

@@ -18,6 +18,7 @@ package com.moilioncircle.redis.rdb.cli.util;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.function.Predicate;
 
 /**
  * @author Baoyi Chen
@@ -54,5 +55,16 @@ public class Iterators {
             }
         }
         return t == null ? (Iterator<T>) EMPTY : new Iter();
+    }
+    
+    public static <T> T find(Iterator<T> it, Predicate<T> condition) {
+        if (it == null) return null;
+        while (it.hasNext()) {
+            T t = it.next();
+            if (condition.test(t)) {
+                return t;
+            }
+        }
+        return null;
     }
 }

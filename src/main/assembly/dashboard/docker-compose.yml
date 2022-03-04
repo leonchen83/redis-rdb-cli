@@ -2,7 +2,7 @@ version: '2.1'
 
 services:
   influxdb:
-    image: influxdb:1.7.9
+    image: influxdb:1.8.10
     container_name: influxdb
     ports:
       - "8086:8086"
@@ -12,7 +12,7 @@ services:
       - ./influxdb/:/docker-entrypoint-initdb.d
     restart: on-failure
   grafana:
-    image: grafana/grafana:5.3.2
+    image: grafana/grafana:8.4.3
     container_name: grafana
     ports:
       - "3000:3000"

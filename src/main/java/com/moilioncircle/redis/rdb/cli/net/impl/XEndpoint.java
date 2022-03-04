@@ -16,9 +16,9 @@
 
 package com.moilioncircle.redis.rdb.cli.net.impl;
 
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.AUTH;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.PING;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.SELECT;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.AUTH;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.PING;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.SELECT;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -38,7 +38,7 @@ import com.moilioncircle.redis.rdb.cli.net.AbstractEndpoint;
 import com.moilioncircle.redis.rdb.cli.net.protocol.Protocol;
 import com.moilioncircle.redis.rdb.cli.net.protocol.RedisObject;
 import com.moilioncircle.redis.rdb.cli.util.ByteBuffers;
-import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.rdb.cli.util.Outputs;
 import com.moilioncircle.redis.rdb.cli.util.Sockets;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
@@ -181,7 +181,7 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
     public void flush() {
         try {
             if (count <= 0) return;
-            OutputStreams.flush(out);
+            Outputs.flush(out);
             for (int i = 0; i < count; i++) {
                 RedisObject r = protocol.parse();
                 if (r != null && r.type.isError()) {

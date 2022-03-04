@@ -16,11 +16,14 @@
 
 package com.moilioncircle.redis.rdb.cli.net.protocol;
 
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.DESCRIPTION_BUF;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.FUNCTION_BUF;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.LOAD_BUF;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.REPLACE_BUF;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.RESTORE_BUF;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.DESCRIPTION_BUF;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.FIVE;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.FOUR;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.FUNCTION_BUF;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.LOAD_BUF;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.REPLACE_BUF;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.RESTORE_BUF;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.THREE;
 import static com.moilioncircle.redis.replicator.Constants.DOLLAR;
 import static com.moilioncircle.redis.replicator.Constants.STAR;
 
@@ -30,7 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.moilioncircle.redis.rdb.cli.util.ByteBuffers;
-import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.rdb.cli.util.Outputs;
 import com.moilioncircle.redis.replicator.rdb.datatype.Function;
 
 /**
@@ -39,124 +42,98 @@ import com.moilioncircle.redis.replicator.rdb.datatype.Function;
 public class Protocols {
 	
 	public static void emit(OutputStream out, ByteBuffer command, ByteBuffer... ary) {
-		OutputStreams.write(STAR, out);
-		OutputStreams.write(String.valueOf(ary.length + 1).getBytes(), out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
-		OutputStreams.write(DOLLAR, out);
-		OutputStreams.write(String.valueOf(command.remaining()).getBytes(), out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
-		OutputStreams.write(command.array(), command.position(), command.limit(), out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
+		Outputs.write(STAR, out);
+		Outputs.write(String.valueOf(ary.length + 1).getBytes(), out);
+		writeCrLf(out);
+		Outputs.write(DOLLAR, out);
+		Outputs.write(String.valueOf(command.remaining()).getBytes(), out);
+		writeCrLf(out);
+		Outputs.write(command.array(), command.position(), command.limit(), out);
+		writeCrLf(out);
 		for (final ByteBuffer arg : ary) {
-			OutputStreams.write(DOLLAR, out);
-			OutputStreams.write(String.valueOf(arg.remaining()).getBytes(), out);
-			OutputStreams.write('\r', out);
-			OutputStreams.write('\n', out);
-			OutputStreams.write(arg.array(), arg.position(), arg.limit(), out);
-			OutputStreams.write('\r', out);
-			OutputStreams.write('\n', out);
+			Outputs.write(DOLLAR, out);
+			Outputs.write(String.valueOf(arg.remaining()).getBytes(), out);
+			writeCrLf(out);
+			Outputs.write(arg.array(), arg.position(), arg.limit(), out);
+			writeCrLf(out);
 		}
 	}
 	
 	public static void emit(OutputStream out, ByteBuffers command, ByteBuffers... ary) {
-		OutputStreams.write(STAR, out);
-		OutputStreams.write(String.valueOf(ary.length + 1).getBytes(), out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
-		OutputStreams.write(DOLLAR, out);
-		OutputStreams.write(String.valueOf(command.getSize()).getBytes(), out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
+		Outputs.write(STAR, out);
+		Outputs.write(String.valueOf(ary.length + 1).getBytes(), out);
+		writeCrLf(out);
+		Outputs.write(DOLLAR, out);
+		Outputs.write(String.valueOf(command.getSize()).getBytes(), out);
+		writeCrLf(out);
 		Iterator<ByteBuffer> cit = command.getBuffers();
 		while (cit.hasNext()) {
 			ByteBuffer tmp = cit.next();
-			OutputStreams.write(tmp.array(), tmp.position(), tmp.limit(), out);
+			Outputs.write(tmp.array(), tmp.position(), tmp.limit(), out);
 		}
-		
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
+		writeCrLf(out);
 		for (final ByteBuffers arg : ary) {
-			OutputStreams.write(DOLLAR, out);
-			OutputStreams.write(String.valueOf(arg.getSize()).getBytes(), out);
-			OutputStreams.write('\r', out);
-			OutputStreams.write('\n', out);
+			Outputs.write(DOLLAR, out);
+			Outputs.write(String.valueOf(arg.getSize()).getBytes(), out);
+			writeCrLf(out);
 			Iterator<ByteBuffer> ait = arg.getBuffers();
 			while (ait.hasNext()) {
 				ByteBuffer tmp = ait.next();
-				OutputStreams.write(tmp.array(), tmp.position(), tmp.limit(), out);
+				Outputs.write(tmp.array(), tmp.position(), tmp.limit(), out);
 			}
-			OutputStreams.write('\r', out);
-			OutputStreams.write('\n', out);
+			writeCrLf(out);
 		}
 	}
 	
 	public static void emit(OutputStream out, byte[] command, byte[]... ary) {
-		OutputStreams.write(STAR, out);
-		OutputStreams.write(String.valueOf(ary.length + 1).getBytes(), out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
-		OutputStreams.write(DOLLAR, out);
-		OutputStreams.write(String.valueOf(command.length).getBytes(), out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
-		OutputStreams.write(command, out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
+		Outputs.write(STAR, out);
+		Outputs.write(String.valueOf(ary.length + 1).getBytes(), out);
+		writeCrLf(out);
+		Outputs.write(DOLLAR, out);
+		Outputs.write(String.valueOf(command.length).getBytes(), out);
+		writeCrLf(out);
+		Outputs.write(command, out);
+		writeCrLf(out);
 		for (final byte[] arg : ary) {
-			OutputStreams.write(DOLLAR, out);
-			OutputStreams.write(String.valueOf(arg.length).getBytes(), out);
-			OutputStreams.write('\r', out);
-			OutputStreams.write('\n', out);
-			OutputStreams.write(arg, out);
-			OutputStreams.write('\r', out);
-			OutputStreams.write('\n', out);
+			Outputs.write(DOLLAR, out);
+			Outputs.write(String.valueOf(arg.length).getBytes(), out);
+			writeCrLf(out);
+			Outputs.write(arg, out);
+			writeCrLf(out);
 		}
 	}
 	
 	public static void emit(OutputStream out, byte[] command, byte[] key, List<byte[]> ary) {
-		OutputStreams.write(STAR, out);
-		OutputStreams.write(String.valueOf(ary.size() + 2).getBytes(), out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
-		OutputStreams.write(DOLLAR, out);
-		OutputStreams.write(String.valueOf(command.length).getBytes(), out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
-		OutputStreams.write(command, out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
-		OutputStreams.write(DOLLAR, out);
-		OutputStreams.write(String.valueOf(key.length).getBytes(), out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
-		OutputStreams.write(key, out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
+		Outputs.write(STAR, out);
+		Outputs.write(String.valueOf(ary.size() + 2).getBytes(), out);
+		writeCrLf(out);
+		Outputs.write(DOLLAR, out);
+		Outputs.write(String.valueOf(command.length).getBytes(), out);
+		writeCrLf(out);
+		Outputs.write(command, out);
+		writeCrLf(out);
+		Outputs.write(DOLLAR, out);
+		Outputs.write(String.valueOf(key.length).getBytes(), out);
+		writeCrLf(out);
+		Outputs.write(key, out);
+		writeCrLf(out);
 		for (final byte[] arg : ary) {
-			OutputStreams.write(DOLLAR, out);
-			OutputStreams.write(String.valueOf(arg.length).getBytes(), out);
-			OutputStreams.write('\r', out);
-			OutputStreams.write('\n', out);
-			OutputStreams.write(arg, out);
-			OutputStreams.write('\r', out);
-			OutputStreams.write('\n', out);
+			Outputs.write(DOLLAR, out);
+			Outputs.write(String.valueOf(arg.length).getBytes(), out);
+			writeCrLf(out);
+			Outputs.write(arg, out);
+			writeCrLf(out);
 		}
 	}
 	
 	public static void restore(OutputStream out, ByteBuffer key, ByteBuffer ex, ByteBuffers value, boolean replace) {
-		OutputStreams.write(STAR, out);
+		Outputs.write(STAR, out);
 		if (replace) {
-			OutputStreams.write("5".getBytes(), out);
+			Outputs.write(FIVE, out);
 		} else {
-			OutputStreams.write("4".getBytes(), out);
+			Outputs.write(FOUR, out);
 		}
-		
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
-		
+		writeCrLf(out);
 		emitArg(out, RESTORE_BUF);
 		emitArg(out, key);
 		emitArg(out, ex);
@@ -167,15 +144,13 @@ public class Protocols {
 	}
 	
 	public static void functionRestore(OutputStream out, ByteBuffers value, boolean replace) {
-		OutputStreams.write(STAR, out);
+		Outputs.write(STAR, out);
 		if (replace) {
-			OutputStreams.write("4".getBytes(), out);
+			Outputs.write(FOUR, out);
 		} else {
-			OutputStreams.write("3".getBytes(), out);
+			Outputs.write(THREE, out);
 		}
-		
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
+		writeCrLf(out);
 		emitArg(out, FUNCTION_BUF);
 		emitArg(out, RESTORE_BUF);
 		emitArg(out, value);
@@ -192,10 +167,9 @@ public class Protocols {
 		if (replace) {
 			count += 1;
 		}
-		OutputStreams.write(STAR, out);
-		OutputStreams.write(String.valueOf(count).getBytes(), out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
+		Outputs.write(STAR, out);
+		Outputs.write(String.valueOf(count).getBytes(), out);
+		writeCrLf(out);
 		emitArg(out, FUNCTION_BUF);
 		emitArg(out, LOAD_BUF);
 		emitArg(out, ByteBuffer.wrap(function.getEngineName()));
@@ -211,25 +185,26 @@ public class Protocols {
 	}
 	
 	private static void emitArg(OutputStream out, ByteBuffer arg) {
-		OutputStreams.write(DOLLAR, out);
-		OutputStreams.write(String.valueOf(arg.remaining()).getBytes(), out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
-		OutputStreams.write(arg.array(), arg.position(), arg.limit(), out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
+		Outputs.write(DOLLAR, out);
+		Outputs.write(String.valueOf(arg.remaining()).getBytes(), out);
+		writeCrLf(out);
+		Outputs.write(arg.array(), arg.position(), arg.limit(), out);
+		writeCrLf(out);
 	}
 	
 	private static void emitArg(OutputStream out, ByteBuffers value) {
-		OutputStreams.write(DOLLAR, out);
-		OutputStreams.write(String.valueOf(value.getSize()).getBytes(), out);
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
+		Outputs.write(DOLLAR, out);
+		Outputs.write(String.valueOf(value.getSize()).getBytes(), out);
+		writeCrLf(out);
 		while (value.getBuffers().hasNext()) {
 			ByteBuffer buf = value.getBuffers().next();
-			OutputStreams.write(buf.array(), buf.position(), buf.limit(), out);
+			Outputs.write(buf.array(), buf.position(), buf.limit(), out);
 		}
-		OutputStreams.write('\r', out);
-		OutputStreams.write('\n', out);
+		writeCrLf(out);
+	}
+	
+	private static void writeCrLf(OutputStream out) {
+		Outputs.write('\r', out);
+		Outputs.write('\n', out);
 	}
 }

@@ -27,7 +27,7 @@ import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.filter.Filter;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
-import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.rdb.cli.util.Outputs;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
@@ -53,20 +53,20 @@ public class CountRdbVisitor extends AbstractRctRdbVisitor implements EventListe
         if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
             List<String> keys = new ArrayList<>(counter.keySet());
             for (String key : keys) {
-                OutputStreams.write(key.getBytes(), out);
+                Outputs.write(key.getBytes(), out);
                 delimiter(out);
             }
-            OutputStreams.write("summary".getBytes(), out);
-            OutputStreams.write('\n', out);
+            Outputs.write("summary".getBytes(), out);
+            Outputs.write('\n', out);
             long total = 0;
             for (String key : keys) {
                 long t = counter.get(key);
                 total += t;
-                OutputStreams.write(String.valueOf(t).getBytes(), out);
+                Outputs.write(String.valueOf(t).getBytes(), out);
                 delimiter(out);
             }
-            OutputStreams.write(String.valueOf(total).getBytes(), out);
-            OutputStreams.write('\n', out);
+            Outputs.write(String.valueOf(total).getBytes(), out);
+            Outputs.write('\n', out);
         }
     }
 

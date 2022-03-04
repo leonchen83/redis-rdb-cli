@@ -16,7 +16,7 @@
 
 package com.moilioncircle.redis.rdb.cli.cmd;
 
-import static com.moilioncircle.redis.rdb.cli.util.OutputStreams.newBufferedOutputStream;
+import static com.moilioncircle.redis.rdb.cli.util.Outputs.newBufferedOutput;
 
 import java.io.File;
 import java.io.OutputStream;
@@ -24,7 +24,7 @@ import java.util.concurrent.Callable;
 
 import com.moilioncircle.redis.rdb.cli.cmd.support.XVersionProvider;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.rdb.cli.util.Outputs;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
 import com.moilioncircle.redis.replicator.CloseListener;
 import com.moilioncircle.redis.replicator.Configuration;
@@ -74,8 +74,8 @@ public class XRcut implements Callable<Integer> {
 	@Override
 	public Integer call() throws Exception {
 		Configure configure = Configure.bind();
-		OutputStream rdbStream = newBufferedOutputStream(rdb, configure.getOutputBufferSize());
-		OutputStream aofStream = newBufferedOutputStream(aof, configure.getOutputBufferSize());
+		OutputStream rdbStream = newBufferedOutput(rdb, configure.getOutputBufferSize());
+		OutputStream aofStream = newBufferedOutput(aof, configure.getOutputBufferSize());
 		RawByteListener rdbListener = new XRawByteListener(rdbStream);
 		RawByteListener aofListener = new XRawByteListener(aofStream);
 		try (ProgressBar bar = new ProgressBar(-1)) {
@@ -110,8 +110,8 @@ public class XRcut implements Callable<Integer> {
 			r.addCloseListener(new CloseListener() {
 				@Override
 				public void handle(Replicator replicator) {
-					OutputStreams.closeQuietly(rdbStream);
-					OutputStreams.closeQuietly(aofStream);
+					Outputs.closeQuietly(rdbStream);
+					Outputs.closeQuietly(aofStream);
 				}
 			});
 			r.open();
@@ -129,7 +129,7 @@ public class XRcut implements Callable<Integer> {
 		
 		@Override
 		public void handle(byte... bytes) {
-			OutputStreams.writeQuietly(bytes, out);
+			Outputs.writeQuietly(bytes, out);
 		}
 	}
 }

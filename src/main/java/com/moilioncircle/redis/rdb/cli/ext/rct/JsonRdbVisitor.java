@@ -22,7 +22,7 @@ import java.io.IOException;
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.filter.Filter;
-import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.rdb.cli.util.Outputs;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 
@@ -37,13 +37,13 @@ public class JsonRdbVisitor extends AbstractJsonRdbVisitor {
 
     @Override
     public String applyMagic(RedisInputStream in) throws IOException {
-        OutputStreams.write('[', out);
+        Outputs.write('[', out);
         return super.applyMagic(in);
     }
 
     @Override
     public long applyEof(RedisInputStream in, int version) throws IOException {
-        OutputStreams.write(']', out);
+        Outputs.write(']', out);
         return super.applyEof(in, version);
     }
 
@@ -51,8 +51,8 @@ public class JsonRdbVisitor extends AbstractJsonRdbVisitor {
      *
      */
     protected void separator() {
-        OutputStreams.write(',', out);
-        OutputStreams.write('\n', out);
+        Outputs.write(',', out);
+        Outputs.write('\n', out);
     }
     
 }

@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import com.moilioncircle.redis.rdb.cli.glossary.Guard;
-import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.rdb.cli.util.Outputs;
 import com.moilioncircle.redis.replicator.util.ByteBuilder;
 
 /**
@@ -46,7 +46,7 @@ public class GuardOutputStream extends OutputStream {
     }
     
     public void reset(OutputStream out) {
-        OutputStreams.closeQuietly(this.out);
+        Outputs.closeQuietly(this.out);
         this.out = out;
         this.builder.clear();
     }

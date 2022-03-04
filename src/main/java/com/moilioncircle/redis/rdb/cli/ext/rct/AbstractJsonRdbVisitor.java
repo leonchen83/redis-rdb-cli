@@ -31,7 +31,7 @@ import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.rdb.cli.ext.escape.RedisEscaper;
 import com.moilioncircle.redis.rdb.cli.filter.Filter;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
-import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.rdb.cli.util.Outputs;
 import com.moilioncircle.redis.replicator.Constants;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
@@ -56,9 +56,9 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
     }
 
     private void emitString(byte[] str) {
-        OutputStreams.write('"', out);
+        Outputs.write('"', out);
         escaper.encode(str, out);
-        OutputStreams.write('"', out);
+        Outputs.write('"', out);
     }
 
     private void emitField(String field, byte[] value) {
@@ -71,25 +71,25 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
 
     private void emitField(byte[] field, byte[] value) {
         emitString(field);
-        OutputStreams.write(':', out);
+        Outputs.write(':', out);
         emitString(value);
     }
 
     private void emitNull(byte[] field) {
         emitString(field);
-        OutputStreams.write(':', out);
+        Outputs.write(':', out);
         escaper.encode("null".getBytes(), out);
     }
 
     private void emitZSet(byte[] field, double value) {
         emitString(field);
-        OutputStreams.write(':', out);
+        Outputs.write(':', out);
         escaper.encode(value, out);
     }
 
     private void emitField(String field, long value) {
         emitString(field.getBytes());
-        OutputStreams.write(':', out);
+        Outputs.write(':', out);
         escaper.encode(String.valueOf(value).getBytes(), out);
     }
     
@@ -107,20 +107,20 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
             separator();
         }
         firstkey = false;
-        OutputStreams.write('{', out);
+        Outputs.write('{', out);
         emitField("key", key);
-        OutputStreams.write(',', out);
+        Outputs.write(',', out);
         emitString("value".getBytes());
-        OutputStreams.write(':', out);
+        Outputs.write(':', out);
         emitable.emitValue();
         if (configure.isExportMeta()) {
-            OutputStreams.write(',', out);
+            Outputs.write(',', out);
             emitField("db", context.getDb().getDbNumber());
-            OutputStreams.write(',', out);
+            Outputs.write(',', out);
             emitField("type", DataType.parse(type).getValue());
             ExpiredType expiry = context.getExpiredType();
             if (expiry != ExpiredType.NONE) {
-                OutputStreams.write(',', out);
+                Outputs.write(',', out);
                 if (expiry == ExpiredType.SECOND) {
                     emitField("expiry", context.getExpiredValue() * 1000);
                 } else {
@@ -128,7 +128,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
                 }
             }
         }
-        OutputStreams.write('}', out);
+        Outputs.write('}', out);
     }
     
     @Override
@@ -144,20 +144,20 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
     @Override
     protected Event doApplyList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
-            OutputStreams.write('[', out);
+            Outputs.write('[', out);
             BaseRdbParser parser = new BaseRdbParser(in);
             long len = parser.rdbLoadLen().len;
             boolean flag = true;
             while (len > 0) {
                 if (!flag) {
-                    OutputStreams.write(',', out);
+                    Outputs.write(',', out);
                 }
                 byte[] element = parser.rdbLoadEncodedStringObject().first();
                 emitString(element);
                 flag = false;
                 len--;
             }
-            OutputStreams.write(']', out);
+            Outputs.write(']', out);
         });
         return context.valueOf(new DummyKeyValuePair());
     }
@@ -165,20 +165,20 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
     @Override
     protected Event doApplySet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
-            OutputStreams.write('[', out);
+            Outputs.write('[', out);
             BaseRdbParser parser = new BaseRdbParser(in);
             long len = parser.rdbLoadLen().len;
             boolean flag = true;
             while (len > 0) {
                 if (!flag) {
-                    OutputStreams.write(',', out);
+                    Outputs.write(',', out);
                 }
                 byte[] element = parser.rdbLoadEncodedStringObject().first();
                 emitString(element);
                 flag = false;
                 len--;
             }
-            OutputStreams.write(']', out);
+            Outputs.write(']', out);
         });
         return context.valueOf(new DummyKeyValuePair());
     }
@@ -186,13 +186,13 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
     @Override
     protected Event doApplyZSet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
-            OutputStreams.write('{', out);
+            Outputs.write('{', out);
             BaseRdbParser parser = new BaseRdbParser(in);
             long len = parser.rdbLoadLen().len;
             boolean flag = true;
             while (len > 0) {
                 if (!flag) {
-                    OutputStreams.write(',', out);
+                    Outputs.write(',', out);
                 }
                 byte[] element = parser.rdbLoadEncodedStringObject().first();
                 double score = parser.rdbLoadDoubleValue();
@@ -200,7 +200,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
                 flag = false;
                 len--;
             }
-            OutputStreams.write('}', out);
+            Outputs.write('}', out);
         });
         return context.valueOf(new DummyKeyValuePair());
     }
@@ -208,13 +208,13 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
     @Override
     protected Event doApplyZSet2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
-            OutputStreams.write('{', out);
+            Outputs.write('{', out);
             BaseRdbParser parser = new BaseRdbParser(in);
             long len = parser.rdbLoadLen().len;
             boolean flag = true;
             while (len > 0) {
                 if (!flag) {
-                    OutputStreams.write(',', out);
+                    Outputs.write(',', out);
                 }
                 byte[] element = parser.rdbLoadEncodedStringObject().first();
                 double score = parser.rdbLoadBinaryDoubleValue();
@@ -222,7 +222,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
                 flag = false;
                 len--;
             }
-            OutputStreams.write('}', out);
+            Outputs.write('}', out);
         });
         return context.valueOf(new DummyKeyValuePair());
     }
@@ -230,13 +230,13 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
     @Override
     protected Event doApplyHash(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
-            OutputStreams.write('{', out);
+            Outputs.write('{', out);
             BaseRdbParser parser = new BaseRdbParser(in);
             long len = parser.rdbLoadLen().len;
             boolean flag = true;
             while (len > 0) {
                 if (!flag) {
-                    OutputStreams.write(',', out);
+                    Outputs.write(',', out);
                 }
                 byte[] field = parser.rdbLoadEncodedStringObject().first();
                 byte[] value = parser.rdbLoadEncodedStringObject().first();
@@ -244,7 +244,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
                 flag = false;
                 len--;
             }
-            OutputStreams.write('}', out);
+            Outputs.write('}', out);
         });
         return context.valueOf(new DummyKeyValuePair());
     }
@@ -252,7 +252,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
     @Override
     protected Event doApplyHashZipMap(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
-            OutputStreams.write('{', out);
+            Outputs.write('{', out);
             BaseRdbParser parser = new BaseRdbParser(in);
             RedisInputStream stream = new RedisInputStream(parser.rdbLoadPlainStringObject());
             BaseRdbParser.LenHelper.zmlen(stream); // zmlen
@@ -263,7 +263,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
                     break;
                 }
                 if (!flag) {
-                    OutputStreams.write(',', out);
+                    Outputs.write(',', out);
                 }
                 flag = false;
                 byte[] field = BaseRdbParser.StringHelper.bytes(stream, zmEleLen);
@@ -278,7 +278,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
                 BaseRdbParser.StringHelper.skip(stream, free);
                 emitField(field, value);
             }
-            OutputStreams.write('}', out);
+            Outputs.write('}', out);
         });
         return context.valueOf(new DummyKeyValuePair());
     }
@@ -286,7 +286,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
     @Override
     protected Event doApplyListZipList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
-            OutputStreams.write('[', out);
+            Outputs.write('[', out);
             BaseRdbParser parser = new BaseRdbParser(in);
             RedisInputStream stream = new RedisInputStream(parser.rdbLoadPlainStringObject());
 
@@ -296,7 +296,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
             boolean flag = true;
             for (int i = 0; i < zllen; i++) {
                 if (!flag) {
-                    OutputStreams.write(',', out);
+                    Outputs.write(',', out);
                 }
                 byte[] e = BaseRdbParser.StringHelper.zipListEntry(stream);
                 emitString(e);
@@ -306,7 +306,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
             if (zlend != 255) {
                 throw new AssertionError("zlend expect 255 but " + zlend);
             }
-            OutputStreams.write(']', out);
+            Outputs.write(']', out);
         });
         return context.valueOf(new DummyKeyValuePair());
     }
@@ -314,7 +314,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
     @Override
     protected Event doApplySetIntSet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
-            OutputStreams.write('[', out);
+            Outputs.write('[', out);
             BaseRdbParser parser = new BaseRdbParser(in);
             RedisInputStream stream = new RedisInputStream(parser.rdbLoadPlainStringObject());
             boolean flag = true;
@@ -322,7 +322,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
             long lenOfContent = BaseRdbParser.LenHelper.lenOfContent(stream);
             for (long i = 0; i < lenOfContent; i++) {
                 if (!flag) {
-                    OutputStreams.write(',', out);
+                    Outputs.write(',', out);
                 }
                 String element;
                 switch (encoding) {
@@ -341,7 +341,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
                 emitString(element.getBytes());
                 flag = false;
             }
-            OutputStreams.write(']', out);
+            Outputs.write(']', out);
         });
         return context.valueOf(new DummyKeyValuePair());
     }
@@ -349,7 +349,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
     @Override
     protected Event doApplyZSetZipList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
-            OutputStreams.write('{', out);
+            Outputs.write('{', out);
             BaseRdbParser parser = new BaseRdbParser(in);
             RedisInputStream stream = new RedisInputStream(parser.rdbLoadPlainStringObject());
             boolean flag = true;
@@ -358,7 +358,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
             int zllen = BaseRdbParser.LenHelper.zllen(stream);
             while (zllen > 0) {
                 if (!flag) {
-                    OutputStreams.write(',', out);
+                    Outputs.write(',', out);
                 }
                 byte[] element = BaseRdbParser.StringHelper.zipListEntry(stream);
                 zllen--;
@@ -371,7 +371,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
             if (zlend != 255) {
                 throw new AssertionError("zlend expect 255 but " + zlend);
             }
-            OutputStreams.write('}', out);
+            Outputs.write('}', out);
         });
         return context.valueOf(new DummyKeyValuePair());
     }
@@ -379,7 +379,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
     @Override
     protected Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
-            OutputStreams.write('{', out);
+            Outputs.write('{', out);
             BaseRdbParser parser = new BaseRdbParser(in);
             RedisInputStream listPack = new RedisInputStream(parser.rdbLoadPlainStringObject());
             boolean flag = true;
@@ -387,7 +387,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
             int len = listPack.readInt(2);
             while (len > 0) {
                 if (!flag) {
-                    OutputStreams.write(',', out);
+                    Outputs.write(',', out);
                 }
                 byte[] element = listPackEntry(listPack);
                 len--;
@@ -400,7 +400,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
             if (lpend != 255) {
                 throw new AssertionError("listpack expect 255 but " + lpend);
             }
-            OutputStreams.write('}', out);
+            Outputs.write('}', out);
         });
         return context.valueOf(new DummyKeyValuePair());
     }
@@ -408,7 +408,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
     @Override
     protected Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
-            OutputStreams.write('{', out);
+            Outputs.write('{', out);
             BaseRdbParser parser = new BaseRdbParser(in);
             RedisInputStream stream = new RedisInputStream(parser.rdbLoadPlainStringObject());
             BaseRdbParser.LenHelper.zlbytes(stream); // zlbytes
@@ -417,7 +417,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
             int zllen = BaseRdbParser.LenHelper.zllen(stream);
             while (zllen > 0) {
                 if (!flag) {
-                    OutputStreams.write(',', out);
+                    Outputs.write(',', out);
                 }
                 byte[] field = BaseRdbParser.StringHelper.zipListEntry(stream);
                 zllen--;
@@ -430,7 +430,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
             if (zlend != 255) {
                 throw new AssertionError("zlend expect 255 but " + zlend);
             }
-            OutputStreams.write('}', out);
+            Outputs.write('}', out);
         });
         return context.valueOf(new DummyKeyValuePair());
     }
@@ -438,7 +438,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
     @Override
     protected Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
-            OutputStreams.write('{', out);
+            Outputs.write('{', out);
             BaseRdbParser parser = new BaseRdbParser(in);
             RedisInputStream listPack = new RedisInputStream(parser.rdbLoadPlainStringObject());
             boolean flag = true;
@@ -446,7 +446,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
             int len = listPack.readInt(2);
             while (len > 0) {
                 if (!flag) {
-                    OutputStreams.write(',', out);
+                    Outputs.write(',', out);
                 }
                 byte[] field = listPackEntry(listPack);
                 len--;
@@ -459,7 +459,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
             if (lpend != 255) {
                 throw new AssertionError("listpack expect 255 but " + lpend);
             }
-            OutputStreams.write('}', out);
+            Outputs.write('}', out);
         });
         return context.valueOf(new DummyKeyValuePair());
     }
@@ -467,7 +467,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
     @Override
     protected Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
-            OutputStreams.write('[', out);
+            Outputs.write('[', out);
             BaseRdbParser parser = new BaseRdbParser(in);
             boolean flag = true;
             long len = parser.rdbLoadLen().len;
@@ -479,7 +479,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
                 int zllen = BaseRdbParser.LenHelper.zllen(stream);
                 for (int j = 0; j < zllen; j++) {
                     if (!flag) {
-                        OutputStreams.write(',', out);
+                        Outputs.write(',', out);
                     }
                     byte[] e = BaseRdbParser.StringHelper.zipListEntry(stream);
                     emitString(e);
@@ -490,7 +490,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
                     throw new AssertionError("zlend expect 255 but " + zlend);
                 }
             }
-            OutputStreams.write(']', out);
+            Outputs.write(']', out);
         });
         return context.valueOf(new DummyKeyValuePair());
     }
@@ -498,7 +498,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
     @Override
     protected Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
-            OutputStreams.write('[', out);
+            Outputs.write('[', out);
             BaseRdbParser parser = new BaseRdbParser(in);
             boolean flag = true;
             long len = parser.rdbLoadLen().len;
@@ -507,7 +507,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
                 ByteArray bytes = parser.rdbLoadPlainStringObject();
                 if (container == QUICKLIST_NODE_CONTAINER_PLAIN) {
                     if (!flag) {
-                        OutputStreams.write(',', out);
+                        Outputs.write(',', out);
                     }
                     emitString(bytes.first());
                     flag = false;
@@ -517,7 +517,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
                     int innerLen = listPack.readInt(2);
                     for (int j = 0; j < innerLen; j++) {
                         if (!flag) {
-                            OutputStreams.write(',', out);
+                            Outputs.write(',', out);
                         }
                         byte[] e = listPackEntry(listPack);
                         emitString(e);
@@ -531,7 +531,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
                     throw new UnsupportedOperationException(String.valueOf(container));
                 }
             }
-            OutputStreams.write(']', out);
+            Outputs.write(']', out);
         });
         return context.valueOf(new DummyKeyValuePair());
     }
@@ -539,13 +539,13 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
     @Override
     protected Event doApplyModule(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
-            OutputStreams.write('"', out);
+            Outputs.write('"', out);
             int ver = getVersion(version);
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, out, redis)) {
                 listener.write((byte) type);
                 super.doApplyModule(in, version, key, type, context);
             }
-            OutputStreams.write('"', out);
+            Outputs.write('"', out);
         });
         return context.valueOf(new DummyKeyValuePair());
     }
@@ -553,13 +553,13 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
     @Override
     protected Event doApplyModule2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
-            OutputStreams.write('"', out);
+            Outputs.write('"', out);
             int ver = getVersion(version);
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, out, redis)) {
                 listener.write((byte) type);
                 super.doApplyModule2(in, version, key, type, context);
             }
-            OutputStreams.write('"', out);
+            Outputs.write('"', out);
         });
         return context.valueOf(new DummyKeyValuePair());
     }
@@ -567,13 +567,13 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
     @Override
     protected Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
-            OutputStreams.write('"', out);
+            Outputs.write('"', out);
             int ver = getVersion(version);
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, out, redis)) {
                 listener.write((byte) type);
                 super.doApplyStreamListPacks(in, version, key, type, context);
             }
-            OutputStreams.write('"', out);
+            Outputs.write('"', out);
         });
         return context.valueOf(new DummyKeyValuePair());
     }
@@ -581,7 +581,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
     @Override
     protected Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
-            OutputStreams.write('"', out);
+            Outputs.write('"', out);
             int ver = getVersion(version);
             try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, out, redis)) {
                 if (ver < 10) {
@@ -591,7 +591,7 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
                 }
                 super.doApplyStreamListPacks2(in, ver, key, type, context, listener);
             }
-            OutputStreams.write('"', out);
+            Outputs.write('"', out);
         });
         return context.valueOf(new DummyKeyValuePair());
     }

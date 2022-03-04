@@ -45,8 +45,8 @@ import com.moilioncircle.redis.rdb.cli.glossary.DataType;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorFactory;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
 import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
-import com.moilioncircle.redis.rdb.cli.util.CmpHeap;
-import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.rdb.cli.util.MaximHeap;
+import com.moilioncircle.redis.rdb.cli.util.Outputs;
 import com.moilioncircle.redis.rdb.cli.util.XTuple2;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
@@ -77,7 +77,7 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
     private final Long bytes;
     private MemCalculator size;
     private MonitorManager manager;
-    private final CmpHeap<XTuple2> heap;
+    private final MaximHeap<XTuple2> heap;
     
     //
     private long totalMem = 0;
@@ -89,7 +89,7 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
         this.bytes = bytes;
         this.manager = new MonitorManager(configure);
         this.manager.open("memory_statistics");
-        this.heap = new CmpHeap<>(largest == null ? -1 : largest.intValue());
+        this.heap = new MaximHeap<>(largest == null ? -1 : largest.intValue());
         this.heap.setConsumer(this);
         this.replicator.addEventListener(this);
     }
@@ -97,17 +97,17 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
     @Override
     public void accept(XTuple2 tuple) {
         DummyKeyValuePair kv = tuple.getV2();
-        OutputStreams.write(String.valueOf(kv.getDb().getDbNumber()).getBytes(), out);
+        Outputs.write(String.valueOf(kv.getDb().getDbNumber()).getBytes(), out);
         delimiter(out);
-        OutputStreams.write(parse(kv.getValueRdbType()).getValue().getBytes(), out);
+        Outputs.write(parse(kv.getValueRdbType()).getValue().getBytes(), out);
         delimiter(out);
         quote(kv.getKey(), out);
         delimiter(out);
         quote(pretty(tuple.getV1()).getBytes(), out, false);
         delimiter(out);
-        OutputStreams.write(DataType.type(kv.getValueRdbType()).getBytes(), out);
+        Outputs.write(DataType.type(kv.getValueRdbType()).getBytes(), out);
         delimiter(out);
-        OutputStreams.write(String.valueOf(kv.getLength()).getBytes(), out);
+        Outputs.write(String.valueOf(kv.getLength()).getBytes(), out);
         delimiter(out);
         quote(pretty(kv.getMax()).getBytes(), out, false);
         delimiter(out);
@@ -116,7 +116,7 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
         } else {
             quote("".getBytes(), out, false);
         }
-        OutputStreams.write('\n', out);
+        Outputs.write('\n', out);
     }
     
     private String pretty(long value) {
@@ -167,22 +167,22 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
         } else if (event instanceof PreRdbSyncEvent) {
             // header
             // database,type,key,size_in_bytes,encoding,num_elements,len_largest_element
-            OutputStreams.write("database".getBytes(), out);
+            Outputs.write("database".getBytes(), out);
             delimiter(out);
-            OutputStreams.write("type".getBytes(), out);
+            Outputs.write("type".getBytes(), out);
             delimiter(out);
-            OutputStreams.write("key".getBytes(), out);
+            Outputs.write("key".getBytes(), out);
             delimiter(out);
-            OutputStreams.write("size_in_bytes".getBytes(), out);
+            Outputs.write("size_in_bytes".getBytes(), out);
             delimiter(out);
-            OutputStreams.write("encoding".getBytes(), out);
+            Outputs.write("encoding".getBytes(), out);
             delimiter(out);
-            OutputStreams.write("num_elements".getBytes(), out);
+            Outputs.write("num_elements".getBytes(), out);
             delimiter(out);
-            OutputStreams.write("len_largest_element".getBytes(), out);
+            Outputs.write("len_largest_element".getBytes(), out);
             delimiter(out);
-            OutputStreams.write("expiry".getBytes(), out);
-            OutputStreams.write('\n', out);
+            Outputs.write("expiry".getBytes(), out);
+            Outputs.write('\n', out);
             
             manager.reset("memory_statistics");
         } else if (event instanceof AuxField) {

@@ -28,7 +28,7 @@ import com.moilioncircle.redis.replicator.io.CRCOutputStream;
 /**
  * @author Baoyi Chen
  */
-public class OutputStreams {
+public class Outputs {
     
     public static void close(OutputStream out) {
         if (out == null) return;
@@ -145,19 +145,19 @@ public class OutputStreams {
         }
     }
     
-    public static BufferedOutputStream newBufferedOutputStream(String file, int buf) {
-        return call(() -> newBufferedOutputStream(new File(file), buf));
+    public static BufferedOutputStream newBufferedOutput(String file, int buf) {
+        return call(() -> newBufferedOutput(new File(file), buf));
     }
     
-    public static BufferedOutputStream newBufferedOutputStream(File file, int buf) {
+    public static BufferedOutputStream newBufferedOutput(File file, int buf) {
         return call(() -> new BufferedOutputStream(new FileOutputStream(file), buf));
     }
     
-    public static CRCOutputStream newCRCOutputStream(String file, int buf) {
-        return call(() -> newCRCOutputStream(new File(file), buf));
+    public static CRCOutputStream newCRCOutput(String file, int buf) {
+        return call(() -> newCRCOutput(new File(file), buf));
     }
     
-    public static CRCOutputStream newCRCOutputStream(File file, int buf) {
+    public static CRCOutputStream newCRCOutput(File file, int buf) {
         return call(() -> new CRCOutputStream(new BufferedOutputStream(new FileOutputStream(file), buf)));
     }
 }

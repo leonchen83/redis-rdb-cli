@@ -27,7 +27,7 @@ import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
 import com.moilioncircle.redis.rdb.cli.ext.visitor.BaseRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.filter.Filter;
-import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.rdb.cli.util.Outputs;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
@@ -49,15 +49,15 @@ public abstract class AbstractRctRdbVisitor extends BaseRdbVisitor {
 		this.escaper = escaper;
 		replicator.addEventListener((rep, event) -> {
 			if (event instanceof PreRdbSyncEvent) {
-				OutputStreams.closeQuietly(this.out);
-				this.out = OutputStreams.newBufferedOutputStream(output, configure.getOutputBufferSize());
+				Outputs.closeQuietly(this.out);
+				this.out = Outputs.newBufferedOutput(output, configure.getOutputBufferSize());
 			}
 		});
-		replicator.addCloseListener(rep -> OutputStreams.closeQuietly(out));
+		replicator.addCloseListener(rep -> Outputs.closeQuietly(out));
 	}
 	
 	protected void delimiter(OutputStream out) {
-		OutputStreams.write(configure.getDelimiter(), out);
+		Outputs.write(configure.getDelimiter(), out);
 	}
 	
 	protected void quote(byte[] bytes, OutputStream out) {
@@ -65,13 +65,13 @@ public abstract class AbstractRctRdbVisitor extends BaseRdbVisitor {
 	}
 	
 	protected void quote(byte[] bytes, OutputStream out, boolean escape) {
-		OutputStreams.write(configure.getQuote(), out);
+		Outputs.write(configure.getQuote(), out);
 		if (escape) {
 			this.escaper.encode(bytes, out);
 		} else {
-			OutputStreams.write(bytes, out);
+			Outputs.write(bytes, out);
 		}
-		OutputStreams.write(configure.getQuote(), out);
+		Outputs.write(configure.getQuote(), out);
 	}
 	
 	protected Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context, RawByteListener listener) throws IOException {

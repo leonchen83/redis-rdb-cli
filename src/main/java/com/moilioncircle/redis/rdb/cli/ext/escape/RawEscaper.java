@@ -19,7 +19,7 @@ package com.moilioncircle.redis.rdb.cli.ext.escape;
 import java.io.OutputStream;
 
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
-import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.rdb.cli.util.Outputs;
 
 
 /**
@@ -29,12 +29,12 @@ public class RawEscaper implements Escaper {
 
     @Override
     public void encode(int b, OutputStream out) {
-        OutputStreams.write(b & 0xFF, out);
+        Outputs.write(b & 0xFF, out);
     }
     
     @Override
     public void encode(byte[] bytes, int off, int len, OutputStream out) {
         if (bytes == null) return;
-        OutputStreams.write(bytes, off, len, out);
+        Outputs.write(bytes, off, len, out);
     }
 }

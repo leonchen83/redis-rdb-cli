@@ -16,6 +16,7 @@
 
 package com.moilioncircle.redis.rdb.cli.conf;
 
+import static com.moilioncircle.redis.rdb.cli.util.Collections.isEmpty;
 import static java.lang.Integer.parseInt;
 
 import java.util.ArrayList;
@@ -45,7 +46,7 @@ public class NodeConfParser<T> {
         Map<String, T> map = new HashMap<>();
         for (String line : conf) {
             List<String> args = parseLine(line);
-            if (args.isEmpty()) continue;
+            if (isEmpty(args)) continue;
             if (args.get(0).equals("vars")) {
                 for (int i = 1; i < args.size(); i += 2) {
                     switch (args.get(i)) {

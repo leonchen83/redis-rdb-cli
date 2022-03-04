@@ -17,12 +17,10 @@
 package com.moilioncircle.redis.rdb.cli.glossary;
 
 import static com.moilioncircle.redis.rdb.cli.ext.escape.Escapers.getEscaper;
-import static java.util.ServiceLoader.load;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.ServiceLoader;
+import java.util.function.Predicate;
 
 import com.moilioncircle.redis.rdb.cli.api.format.FormatterService;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
@@ -38,6 +36,7 @@ import com.moilioncircle.redis.rdb.cli.ext.rct.KeyValRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rct.MemRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rct.RespRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.filter.Filter;
+import com.moilioncircle.redis.rdb.cli.util.Iterators;
 import com.moilioncircle.redis.replicator.Replicator;
 
 /**
@@ -47,26 +46,21 @@ public class Format {
 
     private String value;
     private Configure configure;
-    private List<FormatterService> formatters = new ArrayList<>();
+    private FormatterService formatter;
 
     public Format(String value, Configure configure) {
         this.value = value;
         this.configure = configure;
-        Iterator<FormatterService> it = load(FormatterService.class).iterator();
-        while (it.hasNext()) this.formatters.add(it.next());
+        Predicate<FormatterService> test = e -> e.format() != null && e.format().equals(value);
+        this.formatter = Iterators.find(ServiceLoader.load(FormatterService.class).iterator(), test);
     }
 
     public void dress(Replicator r, Filter filter, File output, Long largest, Long bytes, String escaper, boolean replace) {
         // self define formatter has highest priority
-        boolean found = false;
-        for (FormatterService formatter : formatters) {
-            if (formatter.format() == null) continue;
-            if (!formatter.format().equals(value)) continue;
+        if (formatter != null) {
             r.setRdbVisitor(new FormatterRdbVisitor(r, configure, filter, output, getEscaper(escaper, configure), formatter));
-            found = true;
-            break;
+            return;
         }
-        if (found) return;
         
         switch (value) {
             case "diff":

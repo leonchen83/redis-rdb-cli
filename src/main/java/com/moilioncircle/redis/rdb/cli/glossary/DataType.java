@@ -16,6 +16,7 @@
 
 package com.moilioncircle.redis.rdb.cli.glossary;
 
+import static com.moilioncircle.redis.rdb.cli.util.Collections.isEmpty;
 import static java.util.Collections.singletonList;
 
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public enum DataType {
     }
     
     public static List<DataType> parse(List<String> list) {
-        if (list.isEmpty()) return singletonList(ALL);
+        if (isEmpty(list)) return singletonList(ALL);
         List<DataType> r = new ArrayList<>(list.size());
         for (String name : list) r.add(DataType.parse(name));
         return r;

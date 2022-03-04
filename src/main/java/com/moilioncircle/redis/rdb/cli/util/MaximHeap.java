@@ -24,9 +24,9 @@ import java.util.function.Consumer;
 /**
  * @author Baoyi Chen
  */
-public class CmpHeap<T extends Comparable<T>> {
+public class MaximHeap<T extends Comparable<T>> {
     
-    private final int n;
+    private final int cap;
     private final List<T> ary;
     private Consumer<T> consumer;
     
@@ -34,23 +34,23 @@ public class CmpHeap<T extends Comparable<T>> {
         this.consumer = consumer;
     }
     
-    public CmpHeap(int n) {
-        this.n = n;
+    public MaximHeap(int cap) {
+        this.cap = cap;
         this.ary = new ArrayList<>();
     }
     
     private void heapify(List<T> ary, int idx) {
-        int l = idx == 0 ? 1 : (idx << 1);
-        int r = idx == 0 ? 2 : (idx << 1) + 1;
+        int lt = idx == 0 ? 1 : (idx << 1);
+        int rt = idx == 0 ? 2 : (idx << 1) + 1;
         int min = idx;
-        if (l < ary.size()) {
-            if (ary.get(l).compareTo(ary.get(idx)) < 0) {
-                min = l;
+        if (lt < ary.size()) {
+            if (ary.get(lt).compareTo(ary.get(idx)) < 0) {
+                min = lt;
             }
         }
-        if (r < ary.size()) {
-            if (ary.get(r).compareTo(ary.get(min)) < 0) {
-                min = r;
+        if (rt < ary.size()) {
+            if (ary.get(rt).compareTo(ary.get(min)) < 0) {
+                min = rt;
             }
         }
         if (min != idx) {
@@ -69,15 +69,17 @@ public class CmpHeap<T extends Comparable<T>> {
     }
     
     public void add(T t) {
-        if (n <= 0) {
-            if (consumer != null) consumer.accept(t);
+        if (cap <= 0) {
+            if (consumer != null) {
+                consumer.accept(t);
+            }
             return;
         }
-        if (ary.size() < n) {
+        if (ary.size() < cap) {
             ary.add(t);
             return;
         }
-        if (ary.size() == n) {
+        if (ary.size() == cap) {
             build(ary);
         }
         if (ary.get(0).compareTo(t) < 0) {
@@ -87,7 +89,9 @@ public class CmpHeap<T extends Comparable<T>> {
     }
     
     public List<T> get(boolean sort) {
-        if (sort) ary.sort(Comparator.reverseOrder());
+        if (sort) {
+            ary.sort(Comparator.reverseOrder());
+        }
         return ary;
     }
 }

@@ -22,7 +22,7 @@ import java.io.IOException;
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.filter.Filter;
-import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.rdb.cli.util.Outputs;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
@@ -40,133 +40,133 @@ public class KeyRdbVisitor extends AbstractRctRdbVisitor {
     @Override
     public Event doApplyString(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
-        OutputStreams.write('\n', out);
+        Outputs.write('\n', out);
         return super.doApplyString(in, version, key, type, context);
     }
     
     @Override
     public Event doApplyList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
-        OutputStreams.write('\n', out);
+        Outputs.write('\n', out);
         return super.doApplyList(in, version, key, type, context);
     }
     
     @Override
     public Event doApplySet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
-        OutputStreams.write('\n', out);
+        Outputs.write('\n', out);
         return super.doApplySet(in, version, key, type, context);
     }
     
     @Override
     public Event doApplyZSet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
-        OutputStreams.write('\n', out);
+        Outputs.write('\n', out);
         return super.doApplyZSet(in, version, key, type, context);
     }
     
     @Override
     public Event doApplyZSet2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
-        OutputStreams.write('\n', out);
+        Outputs.write('\n', out);
         return super.doApplyZSet2(in, version, key, type, context);
     }
     
     @Override
     public Event doApplyHash(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
-        OutputStreams.write('\n', out);
+        Outputs.write('\n', out);
         return super.doApplyHash(in, version, key, type, context);
     }
     
     @Override
     public Event doApplyHashZipMap(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
-        OutputStreams.write('\n', out);
+        Outputs.write('\n', out);
         return super.doApplyHashZipMap(in, version, key, type, context);
     }
     
     @Override
     public Event doApplyListZipList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
-        OutputStreams.write('\n', out);
+        Outputs.write('\n', out);
         return super.doApplyListZipList(in, version, key, type, context);
     }
     
     @Override
     public Event doApplySetIntSet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
-        OutputStreams.write('\n', out);
+        Outputs.write('\n', out);
         return super.doApplySetIntSet(in, version, key, type, context);
     }
     
     @Override
     public Event doApplyZSetZipList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
-        OutputStreams.write('\n', out);
+        Outputs.write('\n', out);
         return super.doApplyZSetZipList(in, version, key, type, context);
     }
     
     @Override
     protected Event doApplyZSetListPack(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
-        OutputStreams.write('\n', out);
+        Outputs.write('\n', out);
         return super.doApplyZSetListPack(in, version, key, type, context);
     }
     
     @Override
     public Event doApplyHashZipList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
-        OutputStreams.write('\n', out);
+        Outputs.write('\n', out);
         return super.doApplyHashZipList(in, version, key, type, context);
     }
     
     @Override
     protected Event doApplyHashListPack(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
-        OutputStreams.write('\n', out);
+        Outputs.write('\n', out);
         return super.doApplyHashListPack(in, version, key, type, context);
     }
     
     @Override
     public Event doApplyListQuickList(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
-        OutputStreams.write('\n', out);
+        Outputs.write('\n', out);
         return super.doApplyListQuickList(in, version, key, type, context);
     }
     
     @Override
     protected Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
-        OutputStreams.write('\n', out);
+        Outputs.write('\n', out);
         return super.doApplyListQuickList2(in, version, key, type, context);
     }
     
     @Override
     public Event doApplyModule(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
-        OutputStreams.write('\n', out);
+        Outputs.write('\n', out);
         return super.doApplyModule(in, version, key, type, context);
     }
     
     @Override
     public Event doApplyModule2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
-        OutputStreams.write('\n', out);
+        Outputs.write('\n', out);
         return super.doApplyModule2(in, version, key, type, context);
     }
     
     @Override
     public Event doApplyStreamListPacks(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
-        OutputStreams.write('\n', out);
+        Outputs.write('\n', out);
         return super.doApplyStreamListPacks(in, version, key, type, context);
     }
     
     @Override
     public Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
-        OutputStreams.write('\n', out);
+        Outputs.write('\n', out);
         return super.doApplyStreamListPacks2(in, version, key, type, context);
     }
 }

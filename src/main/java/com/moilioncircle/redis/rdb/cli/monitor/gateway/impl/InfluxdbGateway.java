@@ -1,5 +1,6 @@
 package com.moilioncircle.redis.rdb.cli.monitor.gateway.impl;
 
+import static com.moilioncircle.redis.rdb.cli.util.Collections.isEmpty;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.influxdb.BatchOptions.DEFAULTS;
 import static org.influxdb.InfluxDB.ConsistencyLevel.ONE;
@@ -80,7 +81,7 @@ public class InfluxdbGateway implements MetricGateway {
     @Override
     public boolean save(List<MonitorPoint> points) {
         //
-        if (points.isEmpty()) {
+        if (isEmpty(points)) {
             return false;
         }
 

@@ -20,5 +20,9 @@ package com.moilioncircle.redis.rdb.cli.filter;
  * @author Baoyi Chen
  */
 public interface Filter {
+	
+	boolean contains(long db);
+	
 	boolean contains(long db, int type, String key);
+	
 }

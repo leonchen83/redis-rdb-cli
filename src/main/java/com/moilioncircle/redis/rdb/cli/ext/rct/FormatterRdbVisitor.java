@@ -26,7 +26,7 @@ import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.visitor.BaseRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.filter.Filter;
-import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.rdb.cli.util.Outputs;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
@@ -50,12 +50,12 @@ public class FormatterRdbVisitor extends BaseRdbVisitor {
         this.formatter.setProperties(configure.properties());
         replicator.addEventListener((rep, event) -> {
             if (event instanceof PreRdbSyncEvent) {
-                OutputStreams.closeQuietly(this.formatter.getOutputStream());
-                this.formatter.setOutputStream(OutputStreams.newBufferedOutputStream(output, configure.getOutputBufferSize()));
+                Outputs.closeQuietly(this.formatter.getOutputStream());
+                this.formatter.setOutputStream(Outputs.newBufferedOutput(output, configure.getOutputBufferSize()));
             }
             this.formatter.onEvent(rep, event);
         });
-        replicator.addCloseListener(rep -> OutputStreams.closeQuietly(this.formatter.getOutputStream()));
+        replicator.addCloseListener(rep -> Outputs.closeQuietly(this.formatter.getOutputStream()));
     }
 
     @Override

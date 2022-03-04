@@ -17,6 +17,8 @@
 package com.moilioncircle.redis.rdb.cli.net.impl;
 
 import static com.moilioncircle.redis.rdb.cli.conf.NodeConfParser.slot;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.CLUSTER;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.NODES;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -158,7 +160,7 @@ public class XEndpoints implements Closeable {
             List<String> lines = null;
             for (XEndpoint prev : index1) {
                 try {
-                    RedisObject r = prev.send("cluster".getBytes(), "nodes".getBytes());
+                    RedisObject r = prev.send(CLUSTER, NODES);
                     if (r.type.isError()) {
                         // try next endpoint
                         continue;

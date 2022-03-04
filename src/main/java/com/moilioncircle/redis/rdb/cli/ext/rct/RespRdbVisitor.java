@@ -16,16 +16,17 @@
 
 package com.moilioncircle.redis.rdb.cli.ext.rct;
 
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.DEL;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.EXPIREAT;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.HMSET;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.PEXPIREAT;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.RPUSH;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.SADD;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.SELECT;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.SET;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.ZADD;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.ZERO_BUF;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.DEL;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.EXPIREAT;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.HMSET;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.PEXPIREAT;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.RPUSH;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.SADD;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.SELECT;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.SET;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.ZADD;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.ZERO_BUF;
+import static com.moilioncircle.redis.rdb.cli.util.Collections.isEmpty;
 import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAINER_PACKED;
 import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAINER_PLAIN;
 import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
@@ -128,7 +129,7 @@ public class RespRdbVisitor extends AbstractRctRdbVisitor {
             }
             len--;
         }
-        if (!list.isEmpty()) Protocols.emit(this.out, RPUSH, key, list);
+        if (!isEmpty(list)) Protocols.emit(this.out, RPUSH, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setValueRdbType(type);
         kv.setKey(key);
@@ -151,7 +152,7 @@ public class RespRdbVisitor extends AbstractRctRdbVisitor {
             }
             len--;
         }
-        if (!list.isEmpty()) Protocols.emit(this.out, SADD, key, list);
+        if (!isEmpty(list)) Protocols.emit(this.out, SADD, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setValueRdbType(type);
         kv.setKey(key);
@@ -176,7 +177,7 @@ public class RespRdbVisitor extends AbstractRctRdbVisitor {
             }
             len--;
         }
-        if (!list.isEmpty()) Protocols.emit(this.out, ZADD, key, list);
+        if (!isEmpty(list)) Protocols.emit(this.out, ZADD, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setValueRdbType(type);
         kv.setKey(key);
@@ -201,7 +202,7 @@ public class RespRdbVisitor extends AbstractRctRdbVisitor {
             }
             len--;
         }
-        if (!list.isEmpty()) Protocols.emit(this.out, ZADD, key, list);
+        if (!isEmpty(list)) Protocols.emit(this.out, ZADD, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setValueRdbType(type);
         kv.setKey(key);
@@ -226,7 +227,7 @@ public class RespRdbVisitor extends AbstractRctRdbVisitor {
             }
             len--;
         }
-        if (!list.isEmpty()) Protocols.emit(this.out, HMSET, key, list);
+        if (!isEmpty(list)) Protocols.emit(this.out, HMSET, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setValueRdbType(type);
         kv.setKey(key);
@@ -244,7 +245,7 @@ public class RespRdbVisitor extends AbstractRctRdbVisitor {
         while (true) {
             int zmEleLen = BaseRdbParser.LenHelper.zmElementLen(stream);
             if (zmEleLen == 255) {
-                if (!list.isEmpty()) {
+                if (!isEmpty(list)) {
                     Protocols.emit(this.out, HMSET, key, list);
                     list.clear();
                 }
@@ -301,7 +302,7 @@ public class RespRdbVisitor extends AbstractRctRdbVisitor {
         if (zlend != 255) {
             throw new AssertionError("zlend expect 255 but " + zlend);
         }
-        if (!list.isEmpty()) Protocols.emit(this.out, RPUSH, key, list);
+        if (!isEmpty(list)) Protocols.emit(this.out, RPUSH, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setValueRdbType(type);
         kv.setKey(key);
@@ -339,7 +340,7 @@ public class RespRdbVisitor extends AbstractRctRdbVisitor {
                 list.clear();
             }
         }
-        if (!list.isEmpty()) Protocols.emit(this.out, SADD, key, list);
+        if (!isEmpty(list)) Protocols.emit(this.out, SADD, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setValueRdbType(type);
         kv.setKey(key);
@@ -372,7 +373,7 @@ public class RespRdbVisitor extends AbstractRctRdbVisitor {
         if (zlend != 255) {
             throw new AssertionError("zlend expect 255 but " + zlend);
         }
-        if (!list.isEmpty()) Protocols.emit(this.out, ZADD, key, list);
+        if (!isEmpty(list)) Protocols.emit(this.out, ZADD, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setValueRdbType(type);
         kv.setKey(key);
@@ -404,7 +405,7 @@ public class RespRdbVisitor extends AbstractRctRdbVisitor {
         if (lpend != 255) {
             throw new AssertionError("listpack expect 255 but " + lpend);
         }
-        if (!list.isEmpty()) Protocols.emit(this.out, ZADD, key, list);
+        if (!isEmpty(list)) Protocols.emit(this.out, ZADD, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setValueRdbType(type);
         kv.setKey(key);
@@ -437,7 +438,7 @@ public class RespRdbVisitor extends AbstractRctRdbVisitor {
         if (zlend != 255) {
             throw new AssertionError("zlend expect 255 but " + zlend);
         }
-        if (!list.isEmpty()) Protocols.emit(this.out, HMSET, key, list);
+        if (!isEmpty(list)) Protocols.emit(this.out, HMSET, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setValueRdbType(type);
         kv.setKey(key);
@@ -469,7 +470,7 @@ public class RespRdbVisitor extends AbstractRctRdbVisitor {
         if (lpend != 255) {
             throw new AssertionError("listpack expect 255 but " + lpend);
         }
-        if (!list.isEmpty()) Protocols.emit(this.out, HMSET, key, list);
+        if (!isEmpty(list)) Protocols.emit(this.out, HMSET, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setValueRdbType(type);
         kv.setKey(key);
@@ -502,7 +503,7 @@ public class RespRdbVisitor extends AbstractRctRdbVisitor {
                 throw new AssertionError("zlend expect 255 but " + zlend);
             }
         }
-        if (!list.isEmpty()) Protocols.emit(this.out, RPUSH, key, list);
+        if (!isEmpty(list)) Protocols.emit(this.out, RPUSH, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setValueRdbType(type);
         kv.setKey(key);
@@ -545,7 +546,7 @@ public class RespRdbVisitor extends AbstractRctRdbVisitor {
                 throw new UnsupportedOperationException(String.valueOf(container));
             }
         }
-        if (!list.isEmpty()) Protocols.emit(this.out, RPUSH, key, list);
+        if (!isEmpty(list)) Protocols.emit(this.out, RPUSH, key, list);
         DummyKeyValuePair kv = new DummyKeyValuePair();
         kv.setValueRdbType(type);
         kv.setKey(key);

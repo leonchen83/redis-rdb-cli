@@ -16,10 +16,14 @@
 
 package com.moilioncircle.redis.rdb.cli.cmd;
 
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.CLUSTER;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.NODES;
 import static com.moilioncircle.redis.rdb.cli.util.XUris.normalize;
+import static java.nio.file.Files.readAllLines;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -195,26 +199,38 @@ public class XRst implements Callable<Integer> {
 				throw new ParameterException(spec.commandLine(), "Invalid options: '--migrate=<uri>'");
 			}
 			try (ProgressBar bar = new ProgressBar(-1)) {
+				
 				Replicator r = new XRedisReplicator(source, configure);
 				r.setRdbVisitor(getRdbVisitor(r, configure, uri));
+				
 				r.addEventListener((rep, event) -> {
-					if (event instanceof PreRdbSyncEvent)
+					if (event instanceof PreRdbSyncEvent) {
 						rep.addRawByteListener(b -> bar.react(b.length));
+					}
 				});
 				dress(r).open();
 			}
 		} else {
-			if (exclusive.config == null || !Files.exists(exclusive.config.toPath())) {
+			if (exclusive.config == null) {
 				throw new ParameterException(spec.commandLine(), "Invalid options: '--config=<config>'");
 			}
+			Path path = exclusive.config.toPath();
+			
+			if (!Files.exists(path)) {
+				throw new ParameterException(spec.commandLine(), "Invalid options: '--config=<config>'");
+			}
+			
 			try (ProgressBar bar = new ProgressBar(-1)) {
+				
 				Replicator r = new XRedisReplicator(source, configure);
-				List<String> lines = Files.readAllLines(exclusive.config.toPath());
-				r.setRdbVisitor(new ClusterRdbVisitor(r, configure, XFilter.cluster(), null, lines, replace));
+				r.setRdbVisitor(new ClusterRdbVisitor(r, configure, XFilter.cluster(), null, readAllLines(path), replace));
+				
 				r.addEventListener((rep, event) -> {
-					if (event instanceof PreRdbSyncEvent)
+					if (event instanceof PreRdbSyncEvent) {
 						rep.addRawByteListener(b -> bar.react(b.length));
+					}
 				});
+				
 				dress(r).open();
 			}
 		}
@@ -223,7 +239,7 @@ public class XRst implements Callable<Integer> {
 	
 	private RdbVisitor getRdbVisitor(Replicator replicator, Configure configure, RedisURI uri) throws Exception {
 		try (XEndpoint endpoint = new XEndpoint(uri.getHost(), uri.getPort(), configure.merge(uri, false))) {
-			RedisObject r = endpoint.send("cluster".getBytes(), "nodes".getBytes());
+			RedisObject r = endpoint.send(CLUSTER, NODES);
 			if (r.type.isError()) {
 				return new SingleRdbVisitor(replicator, configure, XFilter.filter(db), uri, replace, legacy);
 			} else {

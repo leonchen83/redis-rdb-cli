@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import com.moilioncircle.redis.rdb.cli.util.Strings;
+
 import redis.clients.jedis.HostAndPort;
 
 /**
@@ -336,7 +338,7 @@ public class RedisSentinelURI implements Comparable<RedisSentinelURI>, Serializa
             if (index > 0) {
                 host = v.substring(0, index).trim();
                 String p = v.substring(index + 1, v.length()).trim();
-                if (p != null && !p.isEmpty()) {
+                if (!Strings.isEmpty(p)) {
                     try {
                         port = parseInt(p);
                     } catch (NumberFormatException tx) {

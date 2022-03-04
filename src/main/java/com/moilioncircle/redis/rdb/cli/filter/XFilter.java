@@ -16,7 +16,7 @@
 
 package com.moilioncircle.redis.rdb.cli.filter;
 
-import static java.util.Collections.singletonList;
+import static com.moilioncircle.redis.rdb.cli.util.Collections.isEmpty;
 import static java.util.stream.Collectors.toList;
 
 import java.util.HashSet;
@@ -25,13 +25,14 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
+import com.moilioncircle.redis.rdb.cli.util.Collections;
 
 /**
  * @author Baoyi Chen
  */
 public class XFilter implements Filter {
 	
-	private static final List<Integer> DB0 = singletonList(0);
+	private static final List<Integer> DB0 = Collections.ofList(0);
 	
 	private Set<String> keys;
 	private List<Integer> dbs;
@@ -48,14 +49,14 @@ public class XFilter implements Filter {
 	
 	private XFilter(List<String> regexs, List<Integer> dbs, List<String> types) {
 		
-		if (regexs != null && !regexs.isEmpty()) {
+		if (!isEmpty(regexs)) {
 			this.keys = new HashSet<>(regexs);
 			this.regexs = regexs.stream().map(Pattern::compile).collect(toList());
 		}
 		
 		this.dbs = dbs;
 		
-		if (types != null && !types.isEmpty()) {
+		if (!isEmpty(types)) {
 			this.types = DataType.parse(types);
 		}
 	}
@@ -76,20 +77,16 @@ public class XFilter implements Filter {
 		return new XFilter(regexs, dbs, types);
 	}
 	
-	private boolean containsDB(long db) {
-		return dbs == null || dbs.isEmpty() || dbs.contains((int) db);
-	}
-	
-	private boolean containsType(int type) {
-		if (types == null || types.isEmpty()) {
+	private boolean contains(int type) {
+		if (isEmpty(types)) {
 			return true;
 		}
 		
 		return DataType.contains(types, type);
 	}
 	
-	private boolean containsKey(String key) {
-		if (keys == null || keys.isEmpty() || keys.contains(key)) {
+	private boolean contains(String key) {
+		if (isEmpty(keys) || keys.contains(key)) {
 			return true;
 		}
 		for (Pattern pattern : regexs) {
@@ -101,8 +98,12 @@ public class XFilter implements Filter {
 	}
 	
 	@Override
+	public boolean contains(long db) {
+		return isEmpty(dbs) || dbs.contains((int) db);
+	}
+	
+	@Override
 	public boolean contains(long db, int type, String key) {
-		boolean r = containsDB(db) && containsType(type) && containsKey(key);
-		return r;
+		return contains(db) && contains(type) && contains(key);
 	}
 }

@@ -17,15 +17,15 @@
 package com.moilioncircle.redis.rdb.cli.ext.rst;
 
 
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.EVALSHA;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.FUNCTION;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.LOAD;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.ONE;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.REPLACE;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.RESTORE;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.SCRIPT;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.SELECT;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.RedisConstants.ZERO;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.EVALSHA;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.FUNCTION;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.LOAD;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.ONE;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.REPLACE;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.RESTORE;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.SCRIPT;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.SELECT;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.ZERO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,7 +105,7 @@ public class SingleRdbVisitor extends AbstractRstRdbVisitor implements EventList
             } else if (event instanceof SelectCommand) {
                 SelectCommand select = (SelectCommand)event;
                 this.db = select.getIndex();
-                if (filter.contains(db, 0, null)) {
+                if (filter.contains(db)) {
                     DefaultCommand command = new DefaultCommand();
                     command.setCommand(SELECT);
                     command.setArgs(new byte[][]{String.valueOf(db).getBytes()});
@@ -115,7 +115,7 @@ public class SingleRdbVisitor extends AbstractRstRdbVisitor implements EventList
                 CombineCommand command = (CombineCommand)event;
                 if (command.getParsedCommand() instanceof PingCommand) {
                     ping(command);
-                } else if (filter.contains(db, 0, null)) {
+                } else if (filter.contains(db)) {
                     retry(command.getDefaultCommand(), configure.getMigrateRetries());
                 }
             } else if (event instanceof ClosingCommand) {

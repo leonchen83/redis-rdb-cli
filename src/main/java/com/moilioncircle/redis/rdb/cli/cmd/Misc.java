@@ -24,9 +24,9 @@ import com.moilioncircle.redis.rdb.cli.filter.Filter;
 /**
  * @author Baoyi Chen
  */
-public interface Args {
+public interface Misc {
 	
-	class RdtArgs implements Args {
+	class RdtArgs {
 		public Long goal;
 		public File config;
 		public File output;
@@ -35,4 +35,6 @@ public interface Args {
 		public Filter filter;
 		public List<File> merge;
 	}
+	
 }
+

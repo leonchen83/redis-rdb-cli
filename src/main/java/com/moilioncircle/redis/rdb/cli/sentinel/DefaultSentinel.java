@@ -16,6 +16,7 @@
 
 package com.moilioncircle.redis.rdb.cli.sentinel;
 
+import static com.moilioncircle.redis.rdb.cli.util.Collections.isEmpty;
 import static com.moilioncircle.redis.replicator.util.Concurrents.terminateQuietly;
 import static com.moilioncircle.redis.replicator.util.Strings.isEquals;
 import static java.lang.Integer.parseInt;
@@ -91,14 +92,14 @@ public class DefaultSentinel implements Sentinel {
     }
 
     protected void doCloseListener() {
-        if (listeners.isEmpty()) return;
+        if (isEmpty(listeners)) return;
         for (SentinelListener listener : listeners) {
             listener.onClose(this);
         }
     }
 
     protected void doSwitchListener(HostAndPort host) {
-        if (listeners.isEmpty()) return;
+        if (isEmpty(listeners)) return;
         for (SentinelListener listener : listeners) {
             listener.onSwitch(this, host);
         }

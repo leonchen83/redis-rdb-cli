@@ -21,7 +21,7 @@ import java.io.File;
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.filter.Filter;
-import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.rdb.cli.util.Outputs;
 import com.moilioncircle.redis.replicator.Replicator;
 
 /**
@@ -35,6 +35,6 @@ public class JsonlRdbVisitor extends AbstractJsonRdbVisitor {
 
     @Override
     protected void separator() {
-        OutputStreams.write('\n', out);
+        Outputs.write('\n', out);
     }
 }

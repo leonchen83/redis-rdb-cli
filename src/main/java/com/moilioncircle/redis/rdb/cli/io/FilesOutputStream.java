@@ -29,24 +29,24 @@ import java.util.function.Function;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.conf.NodeConfParser;
-import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.rdb.cli.util.Outputs;
 import com.moilioncircle.redis.replicator.io.CRCOutputStream;
 import com.moilioncircle.redis.replicator.util.type.Tuple3;
 
 /**
  * @author Baoyi Chen
  */
-public class ShardableFileOutputStream extends OutputStream {
+public class FilesOutputStream extends OutputStream {
 
     private byte[] key;
 
     private final Set<CRCOutputStream> set = new HashSet<>();
     private final Map<Short, CRCOutputStream> map = new HashMap<>();
 
-    public ShardableFileOutputStream(File path, List<String> lines, Configure configure) {
+    public FilesOutputStream(File path, List<String> lines, Configure configure) {
         Function<Tuple3<String, Integer, String>, CRCOutputStream> mapper = t -> {
             File file = Paths.get(path.getAbsolutePath(), t.getV3() + ".rdb").toFile();
-            return OutputStreams.newCRCOutputStream(file, configure.getOutputBufferSize());
+            return Outputs.newCRCOutput(file, configure.getOutputBufferSize());
         };
         new NodeConfParser<>(mapper).parse(lines, set, map);
     }
@@ -98,8 +98,8 @@ public class ShardableFileOutputStream extends OutputStream {
 
     public void writeCRC() {
         for (CRCOutputStream out : set) {
-            OutputStreams.writeQuietly(0xFF, out);
-            OutputStreams.writeQuietly(out.getCRC64(), out);
+            Outputs.writeQuietly(0xFF, out);
+            Outputs.writeQuietly(out.getCRC64(), out);
         }
     }
 }

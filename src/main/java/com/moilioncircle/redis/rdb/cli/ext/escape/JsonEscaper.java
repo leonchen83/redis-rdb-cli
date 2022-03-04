@@ -19,7 +19,7 @@ package com.moilioncircle.redis.rdb.cli.ext.escape;
 import java.io.OutputStream;
 
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
-import com.moilioncircle.redis.rdb.cli.util.OutputStreams;
+import com.moilioncircle.redis.rdb.cli.util.Outputs;
 
 
 /**
@@ -55,7 +55,7 @@ public class JsonEscaper implements Escaper {
 
     @Override
     public void encode(int b, OutputStream out) {
-        OutputStreams.write(b & 0xFF, out);
+        Outputs.write(b & 0xFF, out);
     }
 
     @Override
@@ -77,13 +77,13 @@ public class JsonEscaper implements Escaper {
             int ch = value.charAt(off++);
             if (ch <= 0x7F) {
                 if (ESCAPES[ch] == 0) {
-                    OutputStreams.write((byte) ch, out);
+                    Outputs.write((byte) ch, out);
                     continue;
                 }
                 int escape = ESCAPES[ch];
                 if (escape > 0) {
-                    OutputStreams.write('\\', out);
-                    OutputStreams.write((byte) escape, out);
+                    Outputs.write('\\', out);
+                    Outputs.write((byte) escape, out);
                 } else {
                     // ctrl-char, 6-byte escape...
                     writeGenericEscape(ch, out);
@@ -91,8 +91,8 @@ public class JsonEscaper implements Escaper {
                 continue;
             }
             if (ch <= 0x7FF) {
-                OutputStreams.write((byte) (0xc0 | (ch >> 6)), out);
-                OutputStreams.write((byte) (0x80 | (ch & 0x3f)), out);
+                Outputs.write((byte) (0xc0 | (ch >> 6)), out);
+                Outputs.write((byte) (0x80 | (ch & 0x3f)), out);
             } else {
                 writeMultiByteChar(ch, out);
             }
@@ -100,33 +100,33 @@ public class JsonEscaper implements Escaper {
     }
 
     private void writeGenericEscape(int ch, OutputStream out) {
-        OutputStreams.write((byte) '\\', out);
-        OutputStreams.write((byte) 'u', out);
+        Outputs.write((byte) '\\', out);
+        Outputs.write((byte) 'u', out);
         if (ch > 0xFF) {
             int hi = (ch >> 8) & 0xFF;
-            OutputStreams.write((byte) HEX[hi >> 4], out);
-            OutputStreams.write((byte) HEX[hi & 0xF], out);
+            Outputs.write((byte) HEX[hi >> 4], out);
+            Outputs.write((byte) HEX[hi & 0xF], out);
             ch &= 0xFF;
         } else {
-            OutputStreams.write((byte) '0', out);
-            OutputStreams.write((byte) '0', out);
+            Outputs.write((byte) '0', out);
+            Outputs.write((byte) '0', out);
         }
-        OutputStreams.write((byte) HEX[ch >> 4], out);
-        OutputStreams.write((byte) HEX[ch & 0xF], out);
+        Outputs.write((byte) HEX[ch >> 4], out);
+        Outputs.write((byte) HEX[ch & 0xF], out);
     }
 
     private void writeMultiByteChar(int ch, OutputStream out) {
         if (ch >= SURR1_FIRST && ch <= SURR2_LAST) {
-            OutputStreams.write((byte) '\\', out);
-            OutputStreams.write((byte) 'u', out);
-            OutputStreams.write((byte) HEX[(ch >> 12) & 0xF], out);
-            OutputStreams.write((byte) HEX[(ch >> 8) & 0xF], out);
-            OutputStreams.write((byte) HEX[(ch >> 4) & 0xF], out);
-            OutputStreams.write((byte) HEX[ch & 0xF], out);
+            Outputs.write((byte) '\\', out);
+            Outputs.write((byte) 'u', out);
+            Outputs.write((byte) HEX[(ch >> 12) & 0xF], out);
+            Outputs.write((byte) HEX[(ch >> 8) & 0xF], out);
+            Outputs.write((byte) HEX[(ch >> 4) & 0xF], out);
+            Outputs.write((byte) HEX[ch & 0xF], out);
         } else {
-            OutputStreams.write((byte) (0xe0 | (ch >> 12)), out);
-            OutputStreams.write((byte) (0x80 | ((ch >> 6) & 0x3f)), out);
-            OutputStreams.write((byte) (0x80 | (ch & 0x3f)), out);
+            Outputs.write((byte) (0xe0 | (ch >> 12)), out);
+            Outputs.write((byte) (0x80 | ((ch >> 6) & 0x3f)), out);
+            Outputs.write((byte) (0x80 | (ch & 0x3f)), out);
         }
     }
 }

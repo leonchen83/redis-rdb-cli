@@ -135,6 +135,7 @@ public class XRdt implements Callable<Integer> {
 			if (Files.exists(path) && !Files.isDirectory(path)) {
 				throw new ParameterException(spec.commandLine(), "Invalid options: '--out=<file>'");
 			}
+			
 			action = Action.SPLIT;
 		} else if (exclusive.backup != null && exclusive.backup.backup!= null) {
 			backup = normalize(exclusive.backup.backup, FileType.RDB, spec, "Invalid options: '--backup=<backup>'");
@@ -142,19 +143,22 @@ public class XRdt implements Callable<Integer> {
 			if (Files.exists(path) && !Files.isRegularFile(path)) {
 				throw new ParameterException(spec.commandLine(), "Invalid options: '--out=<file>'");
 			}
+			
 			action = Action.BACKUP;
 		} else if (exclusive.merge != null) {
 			merge = exclusive.merge;
 			if (Files.exists(path) && !Files.isRegularFile(path)) {
 				throw new ParameterException(spec.commandLine(), "Invalid options: '--out=<file>'");
 			}
+			
 			action = Action.MERGE;
 		}
 		
 		Configure configure = Configure.bind();
 		try (ProgressBar bar = new ProgressBar(-1)) {
+			
 			// bind args
-			Args.RdtArgs arg = new Args.RdtArgs();
+			Misc.RdtArgs arg = new Misc.RdtArgs();
 			arg.goal = goal;
 			arg.split = split;
 			arg.merge = merge;
@@ -167,14 +171,19 @@ public class XRdt implements Callable<Integer> {
 			
 			for (Tuple2<Replicator, String> tuple : list) {
 				tuple.getV1().addEventListener((rep, event) -> {
-					if (event instanceof PreRdbSyncEvent)
+					if (event instanceof PreRdbSyncEvent) {
 						rep.addRawByteListener(b -> bar.react(b.length, tuple.getV2()));
-					if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent)
+					}
+					
+					if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
 						Replicators.closeQuietly(tuple.getV1());
+					}
+					
 				});
 				tuple.getV1().open();
 			}
 		}
+		
 		return 0;
 	}
 }
