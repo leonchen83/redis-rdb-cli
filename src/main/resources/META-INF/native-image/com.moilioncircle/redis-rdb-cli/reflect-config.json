@@ -262,6 +262,10 @@
   "allPublicMethods":true
 },
 {
+  "name":"java.lang.reflect.AccessibleObject",
+  "fields":[{"name":"override"}]
+},
+{
   "name":"java.math.BigDecimal"
 },
 {
@@ -294,6 +298,9 @@
 },
 {
   "name":"java.sql.Connection"
+},
+{
+  "name":"java.sql.Date"
 },
 {
   "name":"java.sql.Driver"
@@ -1351,6 +1358,10 @@
 {
   "name":"sun.management.RuntimeImpl",
   "allPublicConstructors":true
+},
+{
+  "name":"sun.misc.Unsafe",
+  "fields":[{"name":"theUnsafe"}]
 },
 {
   "name":"sun.security.pkcs.SignerInfo[]"

@@ -732,15 +732,6 @@ public class Configure {
             configuration.setReplOffset(getLong(parameters.get("replOffset"), -1L));
         }
         // redis 6
-        if (uri.isSsl()) {
-            configuration.setSsl(true);
-        }
-        if (uri.getUser() != null) {
-            configuration.setAuthUser(uri.getUser());
-        }
-        if (uri.getPassword() != null) {
-            configuration.setAuthPassword(uri.getPassword());
-        }
         return configuration;
     }
 

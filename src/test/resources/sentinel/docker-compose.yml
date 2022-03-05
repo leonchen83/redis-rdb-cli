@@ -21,5 +21,6 @@ services:
     environment:
       - REDIS_MASTER_PASSWORD=password
       - REDIS_MASTER_HOST=127.0.0.1
+      - REDIS_SENTINEL_PASSWORD=test
     ports:
       - '26379-26381:26379'
