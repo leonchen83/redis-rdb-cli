@@ -22,7 +22,7 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": 2,
-  "iteration": 1646481519959,
+  "iteration": 1646482470279,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -622,7 +622,7 @@
       }
     }
   ],
-  "refresh": "5s",
+  "refresh": "30s",
   "schemaVersion": 35,
   "style": "dark",
   "tags": [],
@@ -630,9 +630,10 @@
     "list": [
       {
         "current": {
+          "isNone": true,
           "selected": false,
-          "text": "instance0",
-          "value": "instance0"
+          "text": "None",
+          "value": ""
         },
         "datasource": {
           "type": "influxdb",
