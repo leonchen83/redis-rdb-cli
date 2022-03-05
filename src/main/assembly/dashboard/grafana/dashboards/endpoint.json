@@ -1,24 +1,4 @@
 {
-  "__requires": [
-    {
-      "type": "grafana",
-      "id": "grafana",
-      "name": "Grafana",
-      "version": "5.3.2"
-    },
-    {
-      "type": "panel",
-      "id": "graph",
-      "name": "Graph",
-      "version": "5.0.0"
-    },
-    {
-      "type": "datasource",
-      "id": "influxdb",
-      "name": "InfluxDB",
-      "version": "5.0.0"
-    }
-  ],
   "annotations": {
     "list": [
       {
@@ -28,31 +8,38 @@
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
         "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
         "type": "dashboard"
       }
     ]
   },
   "editable": true,
-  "gnetId": null,
+  "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": null,
-  "iteration": 1573997980362,
+  "id": 2,
+  "iteration": 1646481519959,
   "links": [],
+  "liveNow": false,
   "panels": [
     {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "influxdb",
-      "decimals": null,
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 7,
         "w": 12,
         "x": 0,
         "y": 0
       },
+      "hiddenSeries": false,
       "id": 2,
       "interval": "15s",
       "legend": {
@@ -65,7 +52,6 @@
         "min": false,
         "rightSide": false,
         "show": true,
-        "sideWidth": null,
         "total": true,
         "values": true
       },
@@ -73,7 +59,11 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
+      "pluginVersion": "8.4.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -83,7 +73,11 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "$tag_facade",
+          "alias": "$tag_property",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P3C6603E967DC8568"
+          },
           "groupBy": [
             {
               "params": [
@@ -107,6 +101,8 @@
           "measurement": "endpoint_statistics",
           "orderByTime": "ASC",
           "policy": "30days",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"success_respond\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY time($__interval), \"property\" fill(null)",
+          "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -151,8 +147,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
-      "timeShift": null,
+      "timeRegions": [],
       "title": "success mean count",
       "tooltip": {
         "shared": true,
@@ -161,35 +156,27 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
-          "decimals": null,
           "format": "none",
           "label": "",
           "logBase": 1,
-          "max": null,
           "min": "0",
           "show": true
         },
         {
-          "decimals": null,
           "format": "short",
           "label": "",
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -197,15 +184,15 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "influxdb",
-      "decimals": null,
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 7,
         "w": 12,
         "x": 12,
         "y": 0
       },
+      "hiddenSeries": false,
       "id": 3,
       "interval": "15s",
       "legend": {
@@ -218,7 +205,6 @@
         "min": false,
         "rightSide": false,
         "show": true,
-        "sideWidth": null,
         "total": true,
         "values": true
       },
@@ -226,7 +212,11 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
+      "pluginVersion": "8.4.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -236,7 +226,11 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "$tag_facade",
+          "alias": "$tag_property",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P3C6603E967DC8568"
+          },
           "groupBy": [
             {
               "params": [
@@ -260,6 +254,8 @@
           "measurement": "endpoint_statistics",
           "orderByTime": "ASC",
           "policy": "30days",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"failure_respond\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY time($__interval), \"property\" fill(null)",
+          "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -304,8 +300,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
-      "timeShift": null,
+      "timeRegions": [],
       "title": "failure mean count",
       "tooltip": {
         "shared": true,
@@ -314,35 +309,27 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
-          "decimals": null,
           "format": "none",
           "label": "",
           "logBase": 1,
-          "max": null,
           "min": "0",
           "show": true
         },
         {
-          "decimals": null,
           "format": "short",
           "label": "",
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -350,15 +337,15 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "influxdb",
-      "decimals": null,
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 7,
         "w": 12,
         "x": 0,
         "y": 7
       },
+      "hiddenSeries": false,
       "id": 4,
       "interval": "15s",
       "legend": {
@@ -371,7 +358,6 @@
         "min": false,
         "rightSide": false,
         "show": true,
-        "sideWidth": null,
         "total": true,
         "values": true
       },
@@ -379,7 +365,11 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
+      "pluginVersion": "8.4.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -389,17 +379,21 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "$tag_facade",
+          "alias": "$tag_property",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P3C6603E967DC8568"
+          },
           "groupBy": [
             {
               "params": [
-                "5s"
+                "$__interval"
               ],
               "type": "time"
             },
             {
               "params": [
-                "facade"
+                "property"
               ],
               "type": "tag"
             },
@@ -410,9 +404,11 @@
               "type": "fill"
             }
           ],
-          "measurement": "endpoint_statistics",
+          "measurement": "send",
           "orderByTime": "ASC",
           "policy": "30days",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"send\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY time($__interval), \"property\" fill(null)",
+          "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -431,34 +427,16 @@
           ],
           "tags": [
             {
-              "key": "facade",
-              "operator": "=~",
-              "value": "/^send_*/"
-            },
-            {
               "condition": "AND",
               "key": "instance",
               "operator": "=~",
               "value": "/^$instance$/"
-            },
-            {
-              "condition": "AND",
-              "key": "module",
-              "operator": "=",
-              "value": "endpoint"
-            },
-            {
-              "condition": "AND",
-              "key": "type",
-              "operator": "=",
-              "value": "COUNTER"
             }
           ]
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
-      "timeShift": null,
+      "timeRegions": [],
       "title": "send mean count",
       "tooltip": {
         "shared": true,
@@ -467,35 +445,27 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
-          "decimals": null,
           "format": "none",
           "label": "",
           "logBase": 1,
-          "max": null,
           "min": "0",
           "show": true
         },
         {
-          "decimals": null,
           "format": "short",
           "label": "",
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -503,15 +473,15 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "influxdb",
-      "decimals": null,
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 7,
         "w": 12,
         "x": 12,
         "y": 7
       },
+      "hiddenSeries": false,
       "id": 5,
       "interval": "15s",
       "legend": {
@@ -524,7 +494,6 @@
         "min": false,
         "rightSide": false,
         "show": true,
-        "sideWidth": null,
         "total": true,
         "values": true
       },
@@ -532,7 +501,11 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
+      "pluginVersion": "8.4.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -543,6 +516,10 @@
       "targets": [
         {
           "alias": "$tag_facade",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P3C6603E967DC8568"
+          },
           "groupBy": [
             {
               "params": [
@@ -566,6 +543,8 @@
           "measurement": "endpoint_statistics",
           "orderByTime": "ASC",
           "policy": "30days",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"reconnect\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY time($__interval), \"property\" fill(null)",
+          "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -610,8 +589,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
-      "timeShift": null,
+      "timeRegions": [],
       "title": "reconnect target mean count",
       "tooltip": {
         "shared": true,
@@ -620,48 +598,47 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
-          "decimals": null,
           "format": "none",
           "label": "",
           "logBase": 1,
-          "max": null,
           "min": "0",
           "show": true
         },
         {
-          "decimals": null,
           "format": "short",
           "label": "",
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     }
   ],
   "refresh": "5s",
-  "schemaVersion": 16,
+  "schemaVersion": 35,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": [
       {
-        "allValue": null,
-        "current": {},
-        "datasource": "influxdb",
+        "current": {
+          "selected": false,
+          "text": "instance0",
+          "value": "instance0"
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "P3C6603E967DC8568"
+        },
+        "definition": "",
         "hide": 0,
         "includeAll": false,
         "label": "instance",
@@ -674,7 +651,6 @@
         "skipUrlSync": false,
         "sort": 1,
         "tagValuesQuery": "",
-        "tags": [],
         "tagsQuery": "",
         "type": "query",
         "useTags": false
@@ -712,6 +688,7 @@
   },
   "timezone": "",
   "title": "endpoint",
-  "uid": "-IGKt31Wz",
-  "version": 14
+  "uid": "endpoint",
+  "version": 1,
+  "weekStart": ""
 }
