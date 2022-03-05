@@ -1,3 +1,7 @@
+### 0.8.3
+
+Fix `redis sentinel` auth and ssl bug.  
+
 ### 0.8.2
 
 Support for redis 7.0-RC2.  
