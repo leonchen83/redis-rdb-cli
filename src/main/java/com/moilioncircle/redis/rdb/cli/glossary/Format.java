@@ -33,7 +33,7 @@ import com.moilioncircle.redis.rdb.cli.ext.rct.JsonRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rct.JsonlRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rct.KeyRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rct.KeyValRdbVisitor;
-import com.moilioncircle.redis.rdb.cli.ext.rct.MemRdbVisitor;
+import com.moilioncircle.redis.rdb.cli.ext.rct.MemoryRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.ext.rct.RespRdbVisitor;
 import com.moilioncircle.redis.rdb.cli.util.Iterators;
 import com.moilioncircle.redis.replicator.Replicator;
@@ -79,7 +79,7 @@ public class Format {
                 r.setRdbVisitor(new KeyValRdbVisitor(r, configure, args, getEscape(escape, configure)));
                 break;
             case "mem":
-                r.setRdbVisitor(new MemRdbVisitor(r, configure, args, getEscape(escape, configure)));
+                r.setRdbVisitor(new MemoryRdbVisitor(r, configure, args, getEscape(escape, configure)));
                 break;
             case "json":
                 r.setRdbVisitor(new JsonRdbVisitor(r, configure, args, getEscape(escape, new JsonEscaper(), configure)));

@@ -16,6 +16,8 @@
 
 package com.moilioncircle.redis.rdb.cli.ext.rmt;
 
+import static com.moilioncircle.redis.rdb.cli.glossary.Measures.ENDPOINT_MEASUREMENTS;
+
 import java.io.IOException;
 
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
@@ -48,7 +50,7 @@ public abstract class AbstractRmtRdbVisitor extends BaseRdbVisitor {
 		this.replace = replace;
 		this.flush = configure.isMigrateFlush();
 		this.manager = new MonitorManager(configure);
-		this.manager.open();
+		this.manager.open(ENDPOINT_MEASUREMENTS);
 		this.valueVisitor = new DumpRdbValueVisitor(replicator, configure.getDumpRdbVersion(), configure.getOutputBufferSize());
 	}
 	

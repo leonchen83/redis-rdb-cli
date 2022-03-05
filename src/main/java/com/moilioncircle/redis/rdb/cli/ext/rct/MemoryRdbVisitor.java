@@ -16,6 +16,12 @@
 
 package com.moilioncircle.redis.rdb.cli.ext.rct;
 
+import static com.moilioncircle.redis.rdb.cli.glossary.Measures.MEMORY_DB_EXPIRES;
+import static com.moilioncircle.redis.rdb.cli.glossary.Measures.MEMORY_DB_NUMBERS;
+import static com.moilioncircle.redis.rdb.cli.glossary.Measures.MEMORY_MEASUREMENTS;
+import static com.moilioncircle.redis.rdb.cli.glossary.Measures.MEMORY_TOTAL_MEMORY;
+import static com.moilioncircle.redis.rdb.cli.glossary.Measures.MEMORY_TYPE_COUNT;
+import static com.moilioncircle.redis.rdb.cli.glossary.Measures.MEMORY_TYPE_MEMORY;
 import static com.moilioncircle.redis.rdb.cli.glossary.DataType.parse;
 import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAINER_PACKED;
 import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAINER_PLAIN;
@@ -68,11 +74,10 @@ import com.moilioncircle.redis.replicator.util.type.Tuple2;
 /**
  * @author Baoyi Chen
  */
-public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTuple2>, EventListener {
+public class MemoryRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTuple2>, EventListener {
 	
 	private static final Monitor MONITOR = MonitorFactory.getMonitor("memory");
 	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
-	private static final String[] MEASUREMENTS = new String[] { "type_count", "type_memory", "dbnum", "dbexp", "total_memory" };
 	
 	private final long bytes;
 	private MemoryCalculator calc;
@@ -84,11 +89,11 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
 	private boolean rdb6 = true;
 	private Map<Long, Tuple2<Long, Long>> dbInfo = new LinkedHashMap<>();
 	
-	public MemRdbVisitor(Replicator replicator, Configure configure, Args.RctArgs args, Escaper escaper) {
+	public MemoryRdbVisitor(Replicator replicator, Configure configure, Args.RctArgs args, Escaper escaper) {
 		super(replicator, configure, args, escaper);
 		this.bytes = args.bytes;
 		this.manager = new MonitorManager(configure);
-		this.manager.open(MEASUREMENTS);
+		this.manager.open(MEMORY_MEASUREMENTS);
 		this.heap = new MaximHeap<>(args.largest);
 		this.heap.setConsumer(this);
 		this.replicator.addEventListener(this);
@@ -155,11 +160,11 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
 			}
 			
 			if (rdb6) {
-				MONITOR.set("total_memory", totalMemory);
+				MONITOR.set(MEMORY_TOTAL_MEMORY, totalMemory);
 				for (Map.Entry<Long, Tuple2<Long, Long>> entry : dbInfo.entrySet()) {
 					String property = "db" + entry.getKey();
-					MONITOR.set("dbnum", property, entry.getValue().getV1());
-					MONITOR.set("dbexp", property, entry.getValue().getV2());
+					MONITOR.set(MEMORY_DB_NUMBERS, property, entry.getValue().getV1());
+					MONITOR.set(MEMORY_DB_EXPIRES, property, entry.getValue().getV2());
 				}
 			}
 			
@@ -184,12 +189,12 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
 			Outputs.write("expiry".getBytes(), out);
 			Outputs.write('\n', out);
 			
-			manager.reset(MEASUREMENTS);
+			manager.reset(MEMORY_MEASUREMENTS);
 			// 
 		} else if (event instanceof AuxField) {
 			AuxField aux = (AuxField) event;
 			if (aux.getAuxKey().equals("used-mem")) {
-				MONITOR.set("total_memory", Long.parseLong(aux.getAuxValue()));
+				MONITOR.set(MEMORY_TOTAL_MEMORY, Long.parseLong(aux.getAuxValue()));
 			}
 		}
 	}
@@ -206,8 +211,8 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
 	public DB applyResizeDB(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
 		DB db = super.applyResizeDB(in, version, context);
 		String property = "db" + db.getDbNumber();
-		MONITOR.set("dbnum", property, db.getDbsize());
-		MONITOR.set("dbexp", property, db.getExpires());
+		MONITOR.set(MEMORY_DB_NUMBERS, property, db.getDbsize());
+		MONITOR.set(MEMORY_DB_EXPIRES, property, db.getExpires());
 		return db;
 	}
 	
@@ -223,8 +228,8 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
 		kv.setContains(true);
 		kv.setLength(1);
 		kv.setMax(calc.calcElement(val));
-		MONITOR.add("type_count", "string", 1, System.nanoTime() - mark);
-		MONITOR.add("type_memory", "string", kv.getValue());
+		MONITOR.add(MEMORY_TYPE_COUNT, "string", 1, System.nanoTime() - mark);
+		MONITOR.add(MEMORY_TYPE_MEMORY, "string", kv.getValue());
 		return context.valueOf(kv);
 	}
 	
@@ -250,8 +255,8 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
 		kv.setContains(true);
 		kv.setLength(length);
 		kv.setMax(max);
-		MONITOR.add("type_count", "list", 1, System.nanoTime() - mark);
-		MONITOR.add("type_memory", "list", kv.getValue());
+		MONITOR.add(MEMORY_TYPE_COUNT, "list", 1, System.nanoTime() - mark);
+		MONITOR.add(MEMORY_TYPE_MEMORY, "list", kv.getValue());
 		return context.valueOf(kv);
 	}
 	
@@ -277,8 +282,8 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
 		kv.setContains(true);
 		kv.setLength(length);
 		kv.setMax(max);
-		MONITOR.add("type_count", "set", 1, System.nanoTime() - mark);
-		MONITOR.add("type_memory", "set", kv.getValue());
+		MONITOR.add(MEMORY_TYPE_COUNT, "set", 1, System.nanoTime() - mark);
+		MONITOR.add(MEMORY_TYPE_MEMORY, "set", kv.getValue());
 		return context.valueOf(kv);
 	}
 	
@@ -306,8 +311,8 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
 		kv.setContains(true);
 		kv.setLength(length);
 		kv.setMax(max);
-		MONITOR.add("type_count", "zset", 1, System.nanoTime() - mark);
-		MONITOR.add("type_memory", "zset", kv.getValue());
+		MONITOR.add(MEMORY_TYPE_COUNT, "zset", 1, System.nanoTime() - mark);
+		MONITOR.add(MEMORY_TYPE_MEMORY, "zset", kv.getValue());
 		return context.valueOf(kv);
 	}
 	
@@ -335,8 +340,8 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
 		kv.setContains(true);
 		kv.setLength(length);
 		kv.setMax(max);
-		MONITOR.add("type_count", "zset", 1, System.nanoTime() - mark);
-		MONITOR.add("type_memory", "zset", kv.getValue());
+		MONITOR.add(MEMORY_TYPE_COUNT, "zset", 1, System.nanoTime() - mark);
+		MONITOR.add(MEMORY_TYPE_MEMORY, "zset", kv.getValue());
 		return context.valueOf(kv);
 	}
 	
@@ -365,8 +370,8 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
 		kv.setContains(true);
 		kv.setLength(length);
 		kv.setMax(max);
-		MONITOR.add("type_count", "hash", 1, System.nanoTime() - mark);
-		MONITOR.add("type_memory", "hash", kv.getValue());
+		MONITOR.add(MEMORY_TYPE_COUNT, "hash", 1, System.nanoTime() - mark);
+		MONITOR.add(MEMORY_TYPE_MEMORY, "hash", kv.getValue());
 		return context.valueOf(kv);
 	}
 	
@@ -389,8 +394,8 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
 				kv.setContains(true);
 				kv.setLength(length);
 				kv.setMax(max);
-				MONITOR.add("type_count", "hash", 1, System.nanoTime() - mark);
-				MONITOR.add("type_memory", "hash", kv.getValue());
+				MONITOR.add(MEMORY_TYPE_COUNT, "hash", 1, System.nanoTime() - mark);
+				MONITOR.add(MEMORY_TYPE_MEMORY, "hash", kv.getValue());
 				return context.valueOf(kv);
 			}
 			byte[] field = BaseRdbParser.StringHelper.bytes(stream, zmEleLen);
@@ -404,8 +409,8 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
 				kv.setContains(true);
 				kv.setLength(length);
 				kv.setMax(max);
-				MONITOR.add("type_count", "hash", 1, System.nanoTime() - mark);
-				MONITOR.add("type_memory", "hash", kv.getValue());
+				MONITOR.add(MEMORY_TYPE_COUNT, "hash", 1, System.nanoTime() - mark);
+				MONITOR.add(MEMORY_TYPE_MEMORY, "hash", kv.getValue());
 				return context.valueOf(kv);
 			}
 			int free = BaseRdbParser.LenHelper.free(stream);
@@ -442,8 +447,8 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
 		kv.setContains(true);
 		kv.setLength(length);
 		kv.setMax(max);
-		MONITOR.add("type_count", "list", 1, System.nanoTime() - mark);
-		MONITOR.add("type_memory", "list", kv.getValue());
+		MONITOR.add(MEMORY_TYPE_COUNT, "list", 1, System.nanoTime() - mark);
+		MONITOR.add(MEMORY_TYPE_MEMORY, "list", kv.getValue());
 		return context.valueOf(kv);
 	}
 	
@@ -480,8 +485,8 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
 		kv.setContains(true);
 		kv.setLength(length);
 		kv.setMax(max);
-		MONITOR.add("type_count", "set", 1, System.nanoTime() - mark);
-		MONITOR.add("type_memory", "set", kv.getValue());
+		MONITOR.add(MEMORY_TYPE_COUNT, "set", 1, System.nanoTime() - mark);
+		MONITOR.add(MEMORY_TYPE_MEMORY, "set", kv.getValue());
 		return context.valueOf(kv);
 	}
 	
@@ -515,8 +520,8 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
 		kv.setContains(true);
 		kv.setLength(length);
 		kv.setMax(max);
-		MONITOR.add("type_count", "zset", 1, System.nanoTime() - mark);
-		MONITOR.add("type_memory", "zset", kv.getValue());
+		MONITOR.add(MEMORY_TYPE_COUNT, "zset", 1, System.nanoTime() - mark);
+		MONITOR.add(MEMORY_TYPE_MEMORY, "zset", kv.getValue());
 		return context.valueOf(kv);
 	}
 	
@@ -549,8 +554,8 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
 		kv.setContains(true);
 		kv.setLength(length);
 		kv.setMax(max);
-		MONITOR.add("type_count", "zset", 1, System.nanoTime() - mark);
-		MONITOR.add("type_memory", "zset", kv.getValue());
+		MONITOR.add(MEMORY_TYPE_COUNT, "zset", 1, System.nanoTime() - mark);
+		MONITOR.add(MEMORY_TYPE_MEMORY, "zset", kv.getValue());
 		return context.valueOf(kv);
 	}
 	
@@ -585,8 +590,8 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
 		kv.setContains(true);
 		kv.setLength(length);
 		kv.setMax(max);
-		MONITOR.add("type_count", "hash", 1, System.nanoTime() - mark);
-		MONITOR.add("type_memory", "hash", kv.getValue());
+		MONITOR.add(MEMORY_TYPE_COUNT, "hash", 1, System.nanoTime() - mark);
+		MONITOR.add(MEMORY_TYPE_MEMORY, "hash", kv.getValue());
 		return context.valueOf(kv);
 	}
 	
@@ -620,8 +625,8 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
 		kv.setContains(true);
 		kv.setLength(length);
 		kv.setMax(max);
-		MONITOR.add("type_count", "hash", 1, System.nanoTime() - mark);
-		MONITOR.add("type_memory", "hash", kv.getValue());
+		MONITOR.add(MEMORY_TYPE_COUNT, "hash", 1, System.nanoTime() - mark);
+		MONITOR.add(MEMORY_TYPE_MEMORY, "hash", kv.getValue());
 		return context.valueOf(kv);
 	}
 	
@@ -658,8 +663,8 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
 		kv.setContains(true);
 		kv.setLength(length);
 		kv.setMax(max);
-		MONITOR.add("type_count", "list", 1, System.nanoTime() - mark);
-		MONITOR.add("type_memory", "list", kv.getValue());
+		MONITOR.add(MEMORY_TYPE_COUNT, "list", 1, System.nanoTime() - mark);
+		MONITOR.add(MEMORY_TYPE_MEMORY, "list", kv.getValue());
 		return context.valueOf(kv);
 	}
 	
@@ -703,8 +708,8 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
 		kv.setContains(true);
 		kv.setLength(length);
 		kv.setMax(max);
-		MONITOR.add("type_count", "list", 1, System.nanoTime() - mark);
-		MONITOR.add("type_memory", "list", kv.getValue());
+		MONITOR.add(MEMORY_TYPE_COUNT, "list", 1, System.nanoTime() - mark);
+		MONITOR.add(MEMORY_TYPE_MEMORY, "list", kv.getValue());
 		return context.valueOf(kv);
 	}
 	
@@ -725,8 +730,8 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
 		kv.setContains(true);
 		kv.setLength(1);
 		kv.setMax(listener.getLength());
-		MONITOR.add("type_count", "module", 1, System.nanoTime() - mark);
-		MONITOR.add("type_memory", "module", kv.getValue());
+		MONITOR.add(MEMORY_TYPE_COUNT, "module", 1, System.nanoTime() - mark);
+		MONITOR.add(MEMORY_TYPE_MEMORY, "module", kv.getValue());
 		return context.valueOf(kv);
 	}
 	
@@ -747,8 +752,8 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
 		kv.setContains(true);
 		kv.setLength(1);
 		kv.setMax(listener.getLength());
-		MONITOR.add("type_count", "module", 1, System.nanoTime() - mark);
-		MONITOR.add("type_memory", "module", kv.getValue());
+		MONITOR.add(MEMORY_TYPE_COUNT, "module", 1, System.nanoTime() - mark);
+		MONITOR.add(MEMORY_TYPE_MEMORY, "module", kv.getValue());
 		return context.valueOf(kv);
 	}
 	
@@ -842,8 +847,8 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
 		kv.setContains(true);
 		kv.setLength(length);
 		kv.setMax(max);
-		MONITOR.add("type_count", "stream", 1, System.nanoTime() - mark);
-		MONITOR.add("type_memory", "stream", kv.getValue());
+		MONITOR.add(MEMORY_TYPE_COUNT, "stream", 1, System.nanoTime() - mark);
+		MONITOR.add(MEMORY_TYPE_MEMORY, "stream", kv.getValue());
 		return context.valueOf(kv);
 	}
 	
@@ -943,8 +948,8 @@ public class MemRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTu
 		kv.setContains(true);
 		kv.setLength(length);
 		kv.setMax(max);
-		MONITOR.add("type_count", "stream", 1, System.nanoTime() - mark);
-		MONITOR.add("type_memory", "stream", kv.getValue());
+		MONITOR.add(MEMORY_TYPE_COUNT, "stream", 1, System.nanoTime() - mark);
+		MONITOR.add(MEMORY_TYPE_MEMORY, "stream", kv.getValue());
 		return context.valueOf(kv);
 	}
 }

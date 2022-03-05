@@ -16,6 +16,10 @@
 
 package com.moilioncircle.redis.rdb.cli.net.impl;
 
+import static com.moilioncircle.redis.rdb.cli.glossary.Measures.ENDPOINT_FAILURE;
+import static com.moilioncircle.redis.rdb.cli.glossary.Measures.ENDPOINT_RECONNECT;
+import static com.moilioncircle.redis.rdb.cli.glossary.Measures.ENDPOINT_SEND;
+import static com.moilioncircle.redis.rdb.cli.glossary.Measures.ENDPOINT_SUCCESS;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.AUTH;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.PING;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.SELECT;
@@ -50,6 +54,7 @@ import com.moilioncircle.redis.replicator.net.RedisSocketFactory;
 public class XEndpoint extends AbstractEndpoint implements Closeable {
     
     private static final Logger logger = LoggerFactory.getLogger(XEndpoint.class);
+    private static final Monitor MONITOR = MonitorFactory.getMonitor("endpoint");
     
     private static final int BUFFER = 64 * 1024;
     
@@ -63,8 +68,6 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
     private final Configuration conf;
     private final boolean statistics;
     private final RedisInputStream in;
-
-    private final Monitor monitor;
     
     public XEndpoint(String host, int port, Configuration conf) {
         this(host, port, 0, 1, false, conf);
@@ -76,7 +79,6 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
         this.pipe = pipe;
         this.conf = conf;
         this.statistics = statistics;
-        this.monitor = MonitorFactory.getMonitor("endpoint");
         try {
             RedisSocketFactory factory = new RedisSocketFactory(conf);
             this.socket = factory.createSocket(host, port, conf.getConnectionTimeout());
@@ -146,7 +148,7 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
             protocol.emit(command, args);
             if (force) {
                 out.flush();
-                if (statistics) monitor.add("send", address, 1, System.nanoTime() - mark);
+                if (statistics) MONITOR.add(ENDPOINT_SEND, address, 1, System.nanoTime() - mark);
             }
             count++;
             if (count == pipe) flush();
@@ -161,7 +163,7 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
             protocol.emit(command, args);
             if (force) {
                 out.flush();
-                if (statistics) monitor.add("send", address, 1, System.nanoTime() - mark);
+                if (statistics) MONITOR.add(ENDPOINT_SEND, address, 1, System.nanoTime() - mark);
             }
             count++;
             if (count == pipe) flush();
@@ -186,9 +188,9 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
                 RedisObject r = protocol.parse();
                 if (r != null && r.type.isError()) {
                     logger.error(r.getString());
-                    if (statistics) monitor.add("failure_respond", address, 1);
+                    if (statistics) MONITOR.add(ENDPOINT_FAILURE, "respond", 1);
                 } else {
-                    if (statistics) monitor.add("success_respond", address, 1);
+                    if (statistics) MONITOR.add(ENDPOINT_SUCCESS, "respond", 1);
                 }
             }
             count = 0;
@@ -252,7 +254,7 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
 
     public static XEndpoint valueOf(String host, int port, int db, XEndpoint endpoint) {
         if (endpoint.statistics) {
-            endpoint.monitor.add("reconnect", endpoint.address, 1);
+            MONITOR.add(ENDPOINT_RECONNECT, endpoint.address, 1);
         }
         closeQuietly(endpoint);
         XEndpoint v = new XEndpoint(host, port, db, endpoint.pipe, endpoint.statistics, endpoint.conf);

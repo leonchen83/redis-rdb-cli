@@ -22,6 +22,7 @@ import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.REPL
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.RESTORE;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.RESTORE_ASKING;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.ZERO;
+import static com.moilioncircle.redis.rdb.cli.glossary.Measures.ENDPOINT_FAILURE;
 
 import java.io.IOException;
 import java.util.List;
@@ -87,7 +88,7 @@ import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
 public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ClusterRdbVisitor.class);
-    private static final Monitor monitor = MonitorFactory.getMonitor("endpoint");
+    private static final Monitor MONITOR = MonitorFactory.getMonitor("endpoint");
 
     private int db;
     private long ping = 0;
@@ -155,7 +156,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
             if (dkv.getExpiredMs() != null) {
                 long ms = dkv.getExpiredMs() - System.currentTimeMillis();
                 if (ms <= 0) {
-                    monitor.add("failure_expired", 1);
+                    MONITOR.add(ENDPOINT_FAILURE, "expired", 1);
                     logger.error("failure[expired] [{}]", new String(dkv.getKey()));
                     return;
                 }
@@ -174,7 +175,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
                 this.endpoints.get().updateQuietly(slot);
                 retry(dkv, times);
             } else {
-                monitor.add("failure_failed", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "failed", 1);
                 logger.error("failure[failed] [{}], reason: {}", new String(dkv.getKey()), e.getMessage());
             }
         }
@@ -196,7 +197,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
                 this.endpoints.get().updateQuietly(prev);
                 broadcast(dfn, times);
             } else {
-                monitor.add("failure_failed", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "failed", 1);
                 logger.error("failure[failed] [function], reason: {}", e.getMessage());
             }
         }
@@ -214,7 +215,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
                 this.endpoints.get().updateQuietly(prev);
                 broadcast(command, times);
             } else {
-                monitor.add("failure_failed", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "failed", 1);
                 logger.error("failure[failed] [{}], reason: {}", command, e.getMessage());
             }
         }
@@ -230,7 +231,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
                 this.endpoints.get().updateQuietly(slot);
                 retry(command, slot, times);
             } else {
-                monitor.add("failure_failed", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "failed", 1);
                 logger.error("failure[failed] [{}], reason: {}", command, e.getMessage());
             }
         }
@@ -261,7 +262,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                monitor.add("failure_slot", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "slot", 1);
                 logger.error("failure[slot] [{}]", command);
             }
         } else if (parsedCommand instanceof RenameNxCommand) {
@@ -270,7 +271,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                monitor.add("failure_slot", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "slot", 1);
                 logger.error("failure[slot] [{}]", command);
             }
         } else if (parsedCommand instanceof PFMergeCommand) {
@@ -279,7 +280,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                monitor.add("failure_slot", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "slot", 1);
                 logger.error("failure[slot] [{}]", command);
             }
         } else if (parsedCommand instanceof PFCountCommand) {
@@ -288,7 +289,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                monitor.add("failure_slot", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "slot", 1);
                 logger.error("failure[slot] [{}]", command);
             }
         } else if (parsedCommand instanceof MSetNxCommand) {
@@ -298,7 +299,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                monitor.add("failure_slot", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "slot", 1);
                 logger.error("failure[slot] [{}]", command);
             }
         } else if (parsedCommand instanceof BRPopLPushCommand) {
@@ -307,7 +308,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                monitor.add("failure_slot", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "slot", 1);
                 logger.error("failure[slot] [{}]", command);
             }
         } else if (parsedCommand instanceof BitOpCommand) {
@@ -316,7 +317,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                monitor.add("failure_slot", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "slot", 1);
                 logger.error("failure[slot] [{}]", command);
             }
         } else if (parsedCommand instanceof MSetCommand) {
@@ -326,7 +327,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                monitor.add("failure_slot", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "slot", 1);
                 logger.error("failure[slot] [{}]", command);
             }
         } else if (parsedCommand instanceof UnLinkCommand) {
@@ -335,7 +336,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
             if (slot != -1) {
                 retry(command, slot(cmd.getKeys()[0]), times);
             } else {
-                monitor.add("failure_slot", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "slot", 1);
                 logger.error("failure[slot] [{}]", command);
             }
         } else if (parsedCommand instanceof DelCommand) {
@@ -344,7 +345,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
             if (slot != -1) {
                 retry(command, slot(cmd.getKeys()[0]), times);
             } else {
-                monitor.add("failure_slot", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "slot", 1);
                 logger.error("failure[slot] [{}]", command);
             }
         } else if (parsedCommand instanceof ZUnionStoreCommand) {
@@ -353,7 +354,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                monitor.add("failure_slot", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "slot", 1);
                 logger.error("failure[slot] [{}]", command);
             }
         } else if (parsedCommand instanceof ZInterStoreCommand) {
@@ -362,7 +363,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                monitor.add("failure_slot", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "slot", 1);
                 logger.error("failure[slot] [{}]", command);
             }
         } else if (parsedCommand instanceof SMoveCommand) {
@@ -371,7 +372,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                monitor.add("failure_slot", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "slot", 1);
                 logger.error("failure[slot] [{}]", command);
             }
         } else if (parsedCommand instanceof SInterStoreCommand) {
@@ -380,7 +381,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                monitor.add("failure_slot", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "slot", 1);
                 logger.error("failure[slot] [{}]", command);
             }
         } else if (parsedCommand instanceof SDiffStoreCommand) {
@@ -389,7 +390,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                monitor.add("failure_slot", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "slot", 1);
                 logger.error("failure[slot] [{}]", command);
             }
         } else if (parsedCommand instanceof RPopLPushCommand) {
@@ -398,7 +399,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                monitor.add("failure_slot", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "slot", 1);
                 logger.error("failure[slot] [{}]", command);
             }
         } else if (parsedCommand instanceof CopyCommand) {
@@ -407,7 +408,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                monitor.add("failure_slot", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "slot", 1);
                 logger.error("failure[slot] [{}]", command);
             }
         } else if (parsedCommand instanceof BLMoveCommand) {
@@ -416,7 +417,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                monitor.add("failure_slot", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "slot", 1);
                 logger.error("failure[slot] [{}]", command);
             }
         } else if (parsedCommand instanceof LMoveCommand) {
@@ -425,7 +426,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                monitor.add("failure_slot", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "slot", 1);
                 logger.error("failure[slot] [{}]", command);
             }
         } else if (parsedCommand instanceof ZDiffStoreCommand) {
@@ -434,7 +435,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                monitor.add("failure_slot", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "slot", 1);
                 logger.error("failure[slot] [{}]", command);
             }
         } else if (parsedCommand instanceof GeoSearchStoreCommand) {
@@ -443,7 +444,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
             if (slot != -1) {
                 retry(command, slot, times);
             } else {
-                monitor.add("failure_slot", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "slot", 1);
                 logger.error("failure[slot] [{}]", command);
             }
         } else if (parsedCommand instanceof SPublishCommand) {
@@ -468,7 +469,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
             // script load
             // eval
             // evalsha
-            monitor.add("failure_unsupported", 1);
+            MONITOR.add(ENDPOINT_FAILURE, "unsupported", 1);
             logger.error("failure[unsupported] [{}]", command);
         }
     }

@@ -26,6 +26,7 @@ import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.REST
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.SCRIPT;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.SELECT;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.ZERO;
+import static com.moilioncircle.redis.rdb.cli.glossary.Measures.ENDPOINT_FAILURE;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +64,7 @@ import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
 public class SingleRdbVisitor extends AbstractRstRdbVisitor implements EventListener {
 
     private static final Logger logger = LoggerFactory.getLogger(SingleRdbVisitor.class);
-    private static final Monitor monitor = MonitorFactory.getMonitor("endpoint");
+    private static final Monitor MONITOR = MonitorFactory.getMonitor("endpoint");
 
     private int db;
     private long ping = 0;
@@ -154,7 +155,7 @@ public class SingleRdbVisitor extends AbstractRstRdbVisitor implements EventList
                 if (next != null) endpoint.set(next);
                 retry(command, times);
             } else {
-                monitor.add("failure_failed", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "failed", 1);
                 logger.error("failure[failed] [{}], reason: {}", CombineCommand.toString(command), e.getMessage());
             }
         }
@@ -174,7 +175,7 @@ public class SingleRdbVisitor extends AbstractRstRdbVisitor implements EventList
             if (dkv.getExpiredMs() != null) {
                 long ms = dkv.getExpiredMs() - System.currentTimeMillis();
                 if (ms <= 0) {
-                    monitor.add("failure_expired", 1);
+                    MONITOR.add(ENDPOINT_FAILURE, "expired", 1);
                     logger.error("failure[expired] [{}]", new String(dkv.getKey()));
                     return;
                 }
@@ -196,7 +197,7 @@ public class SingleRdbVisitor extends AbstractRstRdbVisitor implements EventList
                 if (next != null) endpoint.set(next);
                 retry(dkv, times);
             } else {
-                monitor.add("failure_failed", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "failed", 1);
                 logger.error("failure[failed] [{}], reason: {}", new String(dkv.getKey()), e.getMessage());
             }
         }
@@ -218,7 +219,7 @@ public class SingleRdbVisitor extends AbstractRstRdbVisitor implements EventList
                 if (next != null) endpoint.set(next);
                 retry(dfn, times);
             } else {
-                monitor.add("failure_failed", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "failed", 1);
                 logger.error("failure[failed] [function], reason: {}", e.getMessage());
             }
         }

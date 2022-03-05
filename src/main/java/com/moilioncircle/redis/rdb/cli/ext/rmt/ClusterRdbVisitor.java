@@ -22,6 +22,7 @@ import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.REPL
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.RESTORE;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.RESTORE_ASKING;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.ZERO;
+import static com.moilioncircle.redis.rdb.cli.glossary.Measures.ENDPOINT_FAILURE;
 
 import java.io.IOException;
 import java.util.List;
@@ -55,7 +56,7 @@ import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
 public class ClusterRdbVisitor extends AbstractRmtRdbVisitor implements EventListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ClusterRdbVisitor.class);
-    private static final Monitor monitor = MonitorFactory.getMonitor("endpoint");
+    private static final Monitor MONITOR = MonitorFactory.getMonitor("endpoint");
 
     private final List<String> lines;
     private final Configuration configuration;
@@ -109,7 +110,7 @@ public class ClusterRdbVisitor extends AbstractRmtRdbVisitor implements EventLis
             if (dkv.getExpiredMs() != null) {
                 long ms = dkv.getExpiredMs() - System.currentTimeMillis();
                 if (ms <= 0) {
-                    monitor.add("failure_expired", 1);
+                    MONITOR.add(ENDPOINT_FAILURE, "expired", 1);
                     logger.error("failure[expired] [{}]", new String(dkv.getKey()));
                     return;
                 }
@@ -128,7 +129,7 @@ public class ClusterRdbVisitor extends AbstractRmtRdbVisitor implements EventLis
                 this.endpoints.get().updateQuietly(slot);
                 retry(dkv, times);
             } else {
-                monitor.add("failure_failed", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "failed", 1);
                 logger.error("failure[failed] [{}], reason: {}", new String(dkv.getKey()), e.getMessage());
             }
         }
@@ -150,7 +151,7 @@ public class ClusterRdbVisitor extends AbstractRmtRdbVisitor implements EventLis
                 this.endpoints.get().updateQuietly(prev);
                 retry(dfn, times);
             } else {
-                monitor.add("failure_failed", 1);
+                MONITOR.add(ENDPOINT_FAILURE, "failed", 1);
                 logger.error("failure[failed] [function], reason: {}", e.getMessage());
             }
         }
