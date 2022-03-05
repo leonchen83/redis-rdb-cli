@@ -62,14 +62,14 @@ public class RedisSentinelReplicator implements Replicator, SentinelListener {
 
     public RedisSentinelReplicator(RedisSentinelURI uri, Configuration configuration) {
         Objects.requireNonNull(uri);
-        initialize(uri, Objects.requireNonNull(uri.getParameters().get("master")), configuration);
+        initialize(uri, configuration);
     }
 
-    private void initialize(RedisSentinelURI uri, String name, Configuration configuration) {
+    private void initialize(RedisSentinelURI uri, Configuration configuration) {
         Objects.requireNonNull(uri);
         Objects.requireNonNull(configuration);
         this.replicator = new RedisSocketReplicator("", 1, configuration);
-        this.sentinel = new DefaultSentinel(uri, name, configuration);
+        this.sentinel = new DefaultSentinel(uri, configuration);
         this.sentinel.addSentinelListener(this);
     }
 
