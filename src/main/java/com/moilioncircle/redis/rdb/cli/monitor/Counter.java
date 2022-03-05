@@ -14,29 +14,16 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.glossary;
+package com.moilioncircle.redis.rdb.cli.monitor;
+
+import com.moilioncircle.redis.replicator.util.type.Tuple3;
 
 /**
  * @author Baoyi Chen
  */
-public enum MonitorType {
-    GAUGE(1), COUNTER(2);
-    private int value;
-
-    MonitorType(int value) {
-        this.value = value;
-    }
-
-    public int getValue() {
-        return value;
-    }
+public interface Counter<T> {
     
-    public static MonitorType valueOf(int value) {
-        switch (value) {
-            case 1 : return GAUGE;
-            case 2 : return COUNTER;
-            default:
-                throw new UnsupportedOperationException(String.valueOf(value));
-        }
-    }
+    Counter<T> reset();
+    
+    Tuple3<T, String, Long> getCounter();
 }

@@ -22,6 +22,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -32,12 +33,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
-import com.moilioncircle.redis.rdb.cli.monitor.entity.Counter;
-import com.moilioncircle.redis.rdb.cli.monitor.entity.Gauge;
-import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
 import com.moilioncircle.redis.rdb.cli.monitor.gateway.MetricGateway;
 import com.moilioncircle.redis.rdb.cli.monitor.gateway.MetricGatewayFactory;
+import com.moilioncircle.redis.rdb.cli.monitor.points.CounterPoint;
+import com.moilioncircle.redis.rdb.cli.monitor.points.GaugePoint;
 import com.moilioncircle.redis.rdb.cli.util.XThreadFactory;
+import com.moilioncircle.redis.replicator.util.type.Tuple2;
 
 /**
  * @author Baoyi Chen
@@ -60,35 +61,55 @@ public class MonitorManager implements Closeable {
     }
 
     public void report() {
-        List<MonitorPoint> points = new ArrayList<>();
+        List<GaugePoint<?>> gauges = new ArrayList<>();
+        List<CounterPoint<?>> counters = new ArrayList<>();
         try {
             for (Monitor monitor : MonitorFactory.getAllMonitors().values()) {
-                for (final Map.Entry<String, ? extends Gauge> e : monitor.getGauges().entrySet()) {
-                    final Gauge gauge = e.getValue().reset();
+                for (final Map.Entry<Tuple2<String, String>, ? extends Gauge<Long>> e : monitor.getLongGauges().entrySet()) {
+                    final Gauge<Long> gauge = e.getValue().reset();
                     if (gauge == null) continue;
-                    points.add(MonitorPoint.valueOf(monitor, e.getKey(), gauge));
+                    gauges.add(GaugePoint.valueOf(monitor, e.getKey().getV1(), gauge));
                 }
-
-                for (final Map.Entry<String, ? extends Counter> e : monitor.getCounters().entrySet()) {
-                    final Counter counter = e.getValue().reset();
+    
+                for (final Map.Entry<Tuple2<String, String>, ? extends Gauge<String>> e : monitor.getStringGauges().entrySet()) {
+                    final Gauge<String> gauge = e.getValue().reset();
+                    if (gauge == null) continue;
+                    gauges.add(GaugePoint.valueOf(monitor, e.getKey().getV1(), gauge));
+                }
+    
+                for (final Map.Entry<Tuple2<String, String>, ? extends Gauge<Double>> e : monitor.getDoubleGauges().entrySet()) {
+                    final Gauge<Double> gauge = e.getValue().reset();
+                    if (gauge == null) continue;
+                    gauges.add(GaugePoint.valueOf(monitor, e.getKey().getV1(), gauge));
+                }
+    
+                for (final Map.Entry<Tuple2<String, String>, ? extends Counter<Long>> e : monitor.getLongCounters().entrySet()) {
+                    final Counter<Long> counter = e.getValue().reset();
                     if (counter == null) continue;
-                    points.add(MonitorPoint.valueOf(monitor, e.getKey(), counter));
+                    counters.add(CounterPoint.valueOf(monitor, e.getKey().getV1(), counter));
+                }
+    
+                for (final Map.Entry<Tuple2<String, String>, ? extends Counter<Double>> e : monitor.getDoubleCounters().entrySet()) {
+                    final Counter<Double> counter = e.getValue().reset();
+                    if (counter == null) continue;
+                    counters.add(CounterPoint.valueOf(monitor, e.getKey().getV1(), counter));
                 }
             }
-            metricGateway.save(points);
+            metricGateway.save(gauges, counters);
         } catch (Throwable e) {
-            logger.error("failed to report points {}.", points, e);
+            logger.error("failed to report points.", e);
         }
     }
     
-    public void reset(String measurement) {
-        logger.debug("reset measurement {}", measurement);
-        metricGateway.reset(measurement);
+    public void reset(String... measurements) {
+        if (measurements == null || measurements.length == 0) return;
+        logger.debug("reset measurement {}", Arrays.toString(measurements));
+        for (String measurement : measurements) metricGateway.reset(measurement);
     }
-
-    public void open(String measurement) {
+    
+    public void open(String... measurements) {
+        reset(measurements);
         logger.debug("open monitor manager");
-        reset(measurement);
         executor.scheduleWithFixedDelay(this::report, timeout, timeout, TimeUnit.MILLISECONDS);
     }
 

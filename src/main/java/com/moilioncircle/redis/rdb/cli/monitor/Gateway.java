@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 Leon Chen
+ * Copyright 2018-2019 Baoyi Chen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,34 +14,31 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.monitor.entity;
-
-import java.util.Map;
+package com.moilioncircle.redis.rdb.cli.monitor;
 
 /**
  * @author Baoyi Chen
  */
-public interface Monitor {
-    interface Factory {
-        Monitor create(String name);
+public enum Gateway {
+
+    LOG("log"),
+    NONE("none"),
+    INFLUXDB("influxdb");
+
+    private String value;
+
+    Gateway(String value) {
+        this.value = value;
     }
 
-    String getName();
-    
-    Map<String, ? extends Gauge> getGauges();
+    public String getValue() {
+        return this.value;
+    }
 
-    Map<String, ? extends Counter> getCounters();
-
-    /**
-     * Gauge
-     */
-    void set(String key, long value);
-
-    /**
-     * Counter
-     */
-    void add(String key, long count);
-
-    void add(String key, long count, long time);
-
+    public static Gateway parse(String value) {
+        if (value.equals("none")) return NONE;
+        else if (value.equals("log")) return LOG;
+        else if (value.equals("influxdb")) return INFLUXDB;
+        else throw new UnsupportedOperationException(value);
+    }
 }

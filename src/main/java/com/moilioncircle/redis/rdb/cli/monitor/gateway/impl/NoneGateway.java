@@ -19,8 +19,10 @@ package com.moilioncircle.redis.rdb.cli.monitor.gateway.impl;
 import java.io.IOException;
 import java.util.List;
 
-import com.moilioncircle.redis.rdb.cli.monitor.MonitorPoint;
 import com.moilioncircle.redis.rdb.cli.monitor.gateway.MetricGateway;
+import com.moilioncircle.redis.rdb.cli.monitor.points.CounterPoint;
+import com.moilioncircle.redis.rdb.cli.monitor.points.GaugePoint;
+
 
 /**
  * @author Baoyi Chen
@@ -33,7 +35,7 @@ public class NoneGateway implements MetricGateway {
     }
 
     @Override
-    public boolean save(List<MonitorPoint> points) {
+    public boolean save(List<GaugePoint<?>> gauges, List<CounterPoint<?>> counters) {
         return true;
     }
 

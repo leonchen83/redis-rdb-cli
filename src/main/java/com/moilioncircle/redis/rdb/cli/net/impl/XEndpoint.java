@@ -32,8 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.moilioncircle.redis.rdb.cli.io.BufferedOutputStream;
+import com.moilioncircle.redis.rdb.cli.monitor.Monitor;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorFactory;
-import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
 import com.moilioncircle.redis.rdb.cli.net.AbstractEndpoint;
 import com.moilioncircle.redis.rdb.cli.net.protocol.Protocol;
 import com.moilioncircle.redis.rdb.cli.net.protocol.RedisObject;
@@ -76,7 +76,7 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
         this.pipe = pipe;
         this.conf = conf;
         this.statistics = statistics;
-        this.monitor = MonitorFactory.getMonitor("endpoint_statistics");
+        this.monitor = MonitorFactory.getMonitor("endpoint");
         try {
             RedisSocketFactory factory = new RedisSocketFactory(conf);
             this.socket = factory.createSocket(host, port, conf.getConnectionTimeout());
@@ -146,7 +146,7 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
             protocol.emit(command, args);
             if (force) {
                 out.flush();
-                if (statistics) monitor.add("send_" + address, 1, System.nanoTime() - mark);
+                if (statistics) monitor.add("send", address, 1, System.nanoTime() - mark);
             }
             count++;
             if (count == pipe) flush();
@@ -161,7 +161,7 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
             protocol.emit(command, args);
             if (force) {
                 out.flush();
-                if (statistics) monitor.add("send_" + address, 1, System.nanoTime() - mark);
+                if (statistics) monitor.add("send", address, 1, System.nanoTime() - mark);
             }
             count++;
             if (count == pipe) flush();
@@ -252,7 +252,7 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
 
     public static XEndpoint valueOf(String host, int port, int db, XEndpoint endpoint) {
         if (endpoint.statistics) {
-            endpoint.monitor.add("reconnect_" + endpoint.address, 1);
+            endpoint.monitor.add("reconnect", endpoint.address, 1);
         }
         closeQuietly(endpoint);
         XEndpoint v = new XEndpoint(host, port, db, endpoint.pipe, endpoint.statistics, endpoint.conf);

@@ -34,9 +34,9 @@ import com.moilioncircle.redis.rdb.cli.api.sink.cmd.ClosingCommand;
 import com.moilioncircle.redis.rdb.cli.api.sink.listener.AsyncEventListener;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.filter.Filter;
+import com.moilioncircle.redis.rdb.cli.monitor.Monitor;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorFactory;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
-import com.moilioncircle.redis.rdb.cli.monitor.entity.Monitor;
 import com.moilioncircle.redis.rdb.cli.net.impl.XEndpoint;
 import com.moilioncircle.redis.rdb.cli.net.impl.XEndpoints;
 import com.moilioncircle.redis.rdb.cli.util.XThreadFactory;
@@ -55,7 +55,7 @@ import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
 public class ClusterRdbVisitor extends AbstractRmtRdbVisitor implements EventListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ClusterRdbVisitor.class);
-    private static final Monitor monitor = MonitorFactory.getMonitor("endpoint_statistics");
+    private static final Monitor monitor = MonitorFactory.getMonitor("endpoint");
 
     private final List<String> lines;
     private final Configuration configuration;

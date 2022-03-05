@@ -19,12 +19,14 @@ package com.moilioncircle.redis.rdb.cli.monitor.gateway;
 import java.io.Closeable;
 import java.util.List;
 
-import com.moilioncircle.redis.rdb.cli.monitor.MonitorPoint;
+import com.moilioncircle.redis.rdb.cli.monitor.points.CounterPoint;
+import com.moilioncircle.redis.rdb.cli.monitor.points.GaugePoint;
 
 /**
  * @author Baoyi Chen
  */
 public interface MetricGateway extends Closeable {
+    
     void reset(String measurement);
-    boolean save(List<MonitorPoint> points);
+    boolean save(List<GaugePoint<?>> gauges, List<CounterPoint<?>> counters);
 }

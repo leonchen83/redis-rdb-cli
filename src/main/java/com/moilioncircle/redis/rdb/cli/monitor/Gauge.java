@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.monitor.entity;
+package com.moilioncircle.redis.rdb.cli.monitor;
+
+import com.moilioncircle.redis.replicator.util.type.Tuple2;
 
 /**
- * 
- * @author Jingqi Xu
+ * @author Baoyi Chen
  */
-public interface Gauge {
-    
-    Gauge reset();
-    
-    long getGauge();
+public interface Gauge<T> {
+	
+	Gauge<T> reset();
+	
+	Tuple2<T, String> getGauge();
 }

@@ -48,7 +48,7 @@ public abstract class AbstractRmtRdbVisitor extends BaseRdbVisitor {
 		this.replace = replace;
 		this.flush = configure.isMigrateFlush();
 		this.manager = new MonitorManager(configure);
-		this.manager.open("endpoint_statistics");
+		this.manager.open();
 		this.valueVisitor = new DumpRdbValueVisitor(replicator, configure.getDumpRdbVersion(), configure.getOutputBufferSize());
 	}
 	

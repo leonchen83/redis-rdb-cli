@@ -22,8 +22,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.moilioncircle.redis.rdb.cli.monitor.MonitorPoint;
 import com.moilioncircle.redis.rdb.cli.monitor.gateway.MetricGateway;
+import com.moilioncircle.redis.rdb.cli.monitor.points.CounterPoint;
+import com.moilioncircle.redis.rdb.cli.monitor.points.GaugePoint;
 
 /**
  * @author Baoyi Chen
@@ -38,8 +39,11 @@ public class LogGateway implements MetricGateway {
     }
 
     @Override
-    public boolean save(List<MonitorPoint> points) {
-        for (MonitorPoint point : points) {
+    public boolean save(List<GaugePoint<?>> gauges, List<CounterPoint<?>> counters) {
+        for (GaugePoint<?> point : gauges) {
+            logger.info(point.toString());
+        }
+        for (CounterPoint<?> point : counters) {
             logger.info(point.toString());
         }
         return true;
