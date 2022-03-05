@@ -37,8 +37,12 @@ public class XLongGauge implements Gauge<Long> {
 	
 	@Override
 	public XLongGauge reset() {
-		long v = gauge.getAndSet(0); String p = property.getAndSet(null);
-		if (v == 0) return null; else return new ImmutableXLongGauge(v, p);
+		long v = gauge.getAndSet(0);
+		if (v == 0) {
+			return null;
+		} else {
+			return new ImmutableXLongGauge(v, property.get());
+		}
 	}
 	
 	void set(long value) {
@@ -46,7 +50,7 @@ public class XLongGauge implements Gauge<Long> {
 	}
 	
 	void setProperty(String value) {
-		this.property.set(value);
+		property.compareAndSet(null, value);
 	}
 	
 	private static class ImmutableXLongGauge extends XLongGauge {

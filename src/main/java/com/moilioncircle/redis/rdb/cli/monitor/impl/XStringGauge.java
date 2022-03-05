@@ -36,8 +36,12 @@ public class XStringGauge implements Gauge<String> {
 	
 	@Override
 	public XStringGauge reset() {
-		String v = gauge.getAndSet(null); String p = property.getAndSet(null);
-		if (v == null) return null; else return new ImmutableXStringGauge(v, p);
+		String v = gauge.getAndSet(null);
+		if (v == null) {
+			return null;
+		} else {
+			return new ImmutableXStringGauge(v, property.get());
+		}
 	}
 	
 	void set(String value) {
@@ -45,7 +49,7 @@ public class XStringGauge implements Gauge<String> {
 	}
 	
 	void setProperty(String value) {
-		property.set(value);
+		property.compareAndSet(null, value);
 	}
 	
 	private static class ImmutableXStringGauge extends XStringGauge {

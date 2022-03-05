@@ -22,7 +22,7 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": 3,
-  "iteration": 1646482396672,
+  "iteration": 1646482804849,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -969,23 +969,22 @@
     "list": [
       {
         "current": {
-          "isNone": true,
           "selected": false,
-          "text": "None",
-          "value": ""
+          "text": "instance0",
+          "value": "instance0"
         },
         "datasource": {
           "type": "influxdb",
           "uid": "P3C6603E967DC8568"
         },
-        "definition": "",
+        "definition": "show tag values with key = \"instance\"",
         "hide": 0,
         "includeAll": false,
         "label": "instance",
         "multi": false,
         "name": "instance",
         "options": [],
-        "query": "show tag values from memory_statistics with key = \"instance\"",
+        "query": "show tag values with key = \"instance\"",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -1029,6 +1028,6 @@
   "timezone": "",
   "title": "memory",
   "uid": "memory",
-  "version": 1,
+  "version": 4,
   "weekStart": ""
 }

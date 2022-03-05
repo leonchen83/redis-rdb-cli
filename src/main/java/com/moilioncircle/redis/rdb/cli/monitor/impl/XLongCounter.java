@@ -27,7 +27,6 @@ import com.moilioncircle.redis.replicator.util.type.Tuple3;
  * @author Baoyi Chen
  */
 public class XLongCounter implements Counter<Long> {
-	private Slot next = new Slot();
 	private final AtomicReference<Slot> slot = new AtomicReference<>(new Slot());
 	
 	@Override
@@ -37,14 +36,8 @@ public class XLongCounter implements Counter<Long> {
 	
 	@Override
 	public synchronized Counter<Long> reset() {
-		Slot prev = this.slot.getAndSet(this.next);
-		try {
-			Tuple3<Long, String, Long> v = prev.getCounter(true);
-			return new ImmutableCounter(v);
-		} finally {
-			prev.reset();
-			this.next = prev;
-		}
+		Tuple3<Long, String, Long> v = slot.get().getCounter(true);
+		return new ImmutableCounter(v);
 	}
 	
 	void add(long count, long time) {
@@ -59,7 +52,8 @@ public class XLongCounter implements Counter<Long> {
 	
 	private static final class Slot {
 		private final AtomicReference<String> v = new AtomicReference<>();
-		private final LongAdder v1 = new LongAdder(), v2 = new LongAdder();
+		private final LongAdder v1 = new LongAdder();
+		private final LongAdder v2 = new LongAdder();
 		
 		private void reset() {
 			v1.reset();
@@ -69,8 +63,7 @@ public class XLongCounter implements Counter<Long> {
 		private Tuple3<Long, String, Long> getCounter(boolean reset) {
 			long n = reset ? v1.sumThenReset() : v1.sum();
 			long t = reset ? v2.sumThenReset() : v2.sum();
-			String p = reset ? v.getAndSet(null) : v.get();
-			Tuple3<Long, String, Long> r = Tuples.of(n, p, t);
+			Tuple3<Long, String, Long> r = Tuples.of(n, v.get(), t);
 			return r;
 		}
 		

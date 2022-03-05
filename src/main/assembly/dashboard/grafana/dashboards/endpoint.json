@@ -21,8 +21,8 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 2,
-  "iteration": 1646482470279,
+  "id": 4,
+  "iteration": 1646482998296,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -630,23 +630,22 @@
     "list": [
       {
         "current": {
-          "isNone": true,
           "selected": false,
-          "text": "None",
-          "value": ""
+          "text": "instance0",
+          "value": "instance0"
         },
         "datasource": {
           "type": "influxdb",
           "uid": "P3C6603E967DC8568"
         },
-        "definition": "",
+        "definition": "show tag values with key = \"instance\"",
         "hide": 0,
         "includeAll": false,
         "label": "instance",
         "multi": false,
         "name": "instance",
         "options": [],
-        "query": "show tag values from endpoint_statistics with key = \"instance\"",
+        "query": "show tag values with key = \"instance\"",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -690,6 +689,6 @@
   "timezone": "",
   "title": "endpoint",
   "uid": "endpoint",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }

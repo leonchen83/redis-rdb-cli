@@ -36,8 +36,12 @@ public class XDoubleGauge implements Gauge<Double> {
 	
 	@Override
 	public XDoubleGauge reset() {
-		Double v = gauge.getAndSet(0d); String p = property.getAndSet(null);
-		if (v == 0) return null; else return new ImmutableXDoubleGauge(v, p);
+		Double v = gauge.getAndSet(0d);
+		if (v == 0) {
+			return null;
+		} else {
+			return new ImmutableXDoubleGauge(v, property.get());
+		}
 	}
 	
 	void set(double value) {
@@ -45,7 +49,7 @@ public class XDoubleGauge implements Gauge<Double> {
 	}
 	
 	void setProperty(String value) {
-		property.set(value);
+		property.compareAndSet(null, value);
 	}
 	
 	private static class ImmutableXDoubleGauge extends XDoubleGauge {

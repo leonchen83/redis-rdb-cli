@@ -28,7 +28,6 @@ import com.moilioncircle.redis.replicator.util.type.Tuple3;
  * @author Baoyi Chen
  */
 public class XDoubleCounter implements Counter<Double> {
-	private Slot next = new Slot();
 	private final AtomicReference<Slot> slot = new AtomicReference<>(new Slot());
 	
 	@Override
@@ -38,14 +37,8 @@ public class XDoubleCounter implements Counter<Double> {
 	
 	@Override
 	public synchronized Counter<Double> reset() {
-		Slot prev = this.slot.getAndSet(this.next);
-		try {
-			Tuple3<Double, String, Long> v = prev.getCounter(true);
-			return new ImmutableCounter(v);
-		} finally {
-			prev.reset();
-			this.next = prev;
-		}
+		Tuple3<Double, String, Long> v = slot.get().getCounter(true);
+		return new ImmutableCounter(v);
 	}
 	
 	void add(double count, long time) {
@@ -71,8 +64,7 @@ public class XDoubleCounter implements Counter<Double> {
 		private Tuple3<Double, String, Long> getCounter(boolean reset) {
 			double n = reset ? v1.sumThenReset() : v1.sum();
 			long t = reset ? v2.sumThenReset() : v2.sum();
-			String p = reset ? v.getAndSet(null) : v.get();
-			Tuple3<Double, String, Long> r = Tuples.of(n, p, t);
+			Tuple3<Double, String, Long> r = Tuples.of(n, v.get(), t);
 			return r;
 		}
 		
