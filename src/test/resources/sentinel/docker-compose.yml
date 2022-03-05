@@ -1,0 +1,25 @@
+version: '2'
+    
+services:
+  target:
+    image: 'bitnami/redis:latest'
+    environment:
+      - REDIS_PORT_NUMBER=6381
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - '6381:6381'
+  redis:
+    image: 'bitnami/redis:latest'
+    environment:
+      - REDIS_REPLICATION_MODE=master
+      - REDIS_PASSWORD=password
+      - REDIS_PORT_NUMBER=6379
+    ports:
+      - '6379:6379'
+  redis-sentinel:
+    image: 'bitnami/redis-sentinel:latest'
+    environment:
+      - REDIS_MASTER_PASSWORD=password
+      - REDIS_MASTER_HOST=127.0.0.1
+    ports:
+      - '26379-26381:26379'
