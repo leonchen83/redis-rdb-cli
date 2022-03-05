@@ -73,11 +73,6 @@ public class InfluxdbGateway implements MetricGateway {
                 this.influxdb.query(new Query("drop series from \"" + measurement + "\" where instance = '" + instance + "'", database));
             } catch (Throwable e) {
                 logger.error("failed to reset measurement [{}]. cause {}", measurement, e.getMessage());
-                if (e instanceof ConnectException) {
-                    System.err.println("failed to reset measurement [" + measurement + "]. cause " + e.getMessage());
-                    System.err.println("run `cd /path/to/tair-cli/dashboard & docker-compose up -d` to start dashboard");
-                    System.exit(-1);
-                }
             }
         }
     }
