@@ -16,13 +16,13 @@
 
 package com.moilioncircle.redis.rdb.cli.net.impl;
 
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.AUTH;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.PING;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.SELECT;
 import static com.moilioncircle.redis.rdb.cli.glossary.Measures.ENDPOINT_FAILURE;
 import static com.moilioncircle.redis.rdb.cli.glossary.Measures.ENDPOINT_RECONNECT;
 import static com.moilioncircle.redis.rdb.cli.glossary.Measures.ENDPOINT_SEND;
 import static com.moilioncircle.redis.rdb.cli.glossary.Measures.ENDPOINT_SUCCESS;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.AUTH;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.PING;
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.SELECT;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -190,7 +190,7 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
                     logger.error(r.getString());
                     if (statistics) MONITOR.add(ENDPOINT_FAILURE, "respond", 1);
                 } else {
-                    if (statistics) MONITOR.add(ENDPOINT_SUCCESS, "respond", 1);
+                    if (statistics) MONITOR.add(ENDPOINT_SUCCESS, address, 1);
                 }
             }
             count = 0;
