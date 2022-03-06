@@ -158,13 +158,12 @@ public class MemoryRdbVisitor extends AbstractRctRdbVisitor implements Consumer<
 			
 			for (XTuple2 tuple : heap.get(true)) {
 				accept(tuple);
-				
 				//
 				DummyKeyValuePair kv = tuple.getV2();
 				String[] properties = new String[3];
 				properties[0] = new String(kv.getKey());
 				properties[1] = parse(kv.getValueRdbType()).getValue();
-				properties[2] = String.valueOf(kv.getDb().getDbNumber());
+				properties[2] = "db" + kv.getDb().getDbNumber();
 				MONITOR.set(MEMORY_BIG_KEY, properties, tuple.getV1());
 			}
 			
