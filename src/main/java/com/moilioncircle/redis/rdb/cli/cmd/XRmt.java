@@ -119,7 +119,7 @@ public class XRmt implements Callable<Integer> {
 				throw new ParameterException(spec.commandLine(), "Invalid options: '--migrate=<uri>'");
 			}
 			
-			try (ProgressBar bar = new ProgressBar(-1)) {
+			try (ProgressBar bar = ProgressBar.bar(-1, configure.isEnableProgressBar())) {
 				
 				Replicator r = new XRedisReplicator(source, configure, DefaultReplFilter.RDB);
 				r.setRdbVisitor(getRdbVisitor(r, configure, uri));
@@ -147,7 +147,7 @@ public class XRmt implements Callable<Integer> {
 				throw new ParameterException(spec.commandLine(), "Invalid options: '--config=<config>'");
 			}
 			
-			try (ProgressBar bar = new ProgressBar(-1)) {
+			try (ProgressBar bar = ProgressBar.bar(-1, configure.isEnableProgressBar())) {
 				
 				Replicator r = new XRedisReplicator(source, configure, DefaultReplFilter.RDB);
 				r.setRdbVisitor(new ClusterRdbVisitor(r, configure, cluster(regexs, type), null, readAllLines(path), replace));

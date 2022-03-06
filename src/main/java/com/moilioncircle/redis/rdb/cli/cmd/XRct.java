@@ -100,7 +100,7 @@ public class XRct implements Callable<Integer> {
 	public Integer call() throws Exception {
 		source = normalize(source, FileType.RDB, spec, "Invalid options: '--source=<source>'");
 		Configure configure = Configure.bind();
-		try (ProgressBar bar = new ProgressBar(-1)) {
+		try (ProgressBar bar = ProgressBar.bar(-1, configure.isEnableProgressBar())) {
 			// bind args
 			Args.RctArgs args = new Args.RctArgs();
 			args.bytes = bytes;

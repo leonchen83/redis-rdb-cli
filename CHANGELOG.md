@@ -8,6 +8,8 @@ To export jsonl file need to edit `/path/to/redis-rdb-cli/conf/redis-rdb-cli.con
 Optimize grafana dashboard and add `top N key` metric to grafana.  
 To show `top N key` need to add `--largest` option in `rct` command.  
 
+Support for `enable_progress_bar` config. the value is `true` by default.  
+
 ### 0.8.2
 
 Support for redis 7.0-RC2.  

@@ -271,6 +271,11 @@ public class Configure {
      */
     private FileType exportFileFormat = FileType.CSV;
     
+    /**
+     * progress bar setting
+     */
+    private boolean enableProgressBar = true;
+    
     public int getBatchSize() {
         return batchSize;
     }
@@ -590,7 +595,15 @@ public class Configure {
     public void setTargetDefaultTruststore(boolean targetDefaultTruststore) {
         this.targetDefaultTruststore = targetDefaultTruststore;
     }
-
+    
+    public boolean isEnableProgressBar() {
+        return enableProgressBar;
+    }
+    
+    public void setEnableProgressBar(boolean enableProgressBar) {
+        this.enableProgressBar = enableProgressBar;
+    }
+    
     public Configuration merge(RedisURI uri, boolean source) {
         Configuration base;
         if (uri != null) {
@@ -680,6 +693,8 @@ public class Configure {
         conf.metricDatabase = getString(conf, "metric_database", "redis_rdb_cli", true);
         conf.metricRetentionPolicy = getString(conf, "metric_retention_policy", "30days", true);
         conf.metricInstance = getString(conf, "metric_instance", "instance0", true);
+    
+        conf.enableProgressBar = getBool(conf, "enable_progress_bar", true, true);
         
         // export
         conf.quote = (byte) getString(conf, "quote", "\"", true).charAt(0);
@@ -891,6 +906,7 @@ public class Configure {
                 ", metricDatabase='" + metricDatabase + '\'' +
                 ", metricRetentionPolicy='" + metricRetentionPolicy + '\'' +
                 ", metricInstance='" + metricInstance + '\'' +
+                ", enableProgressBar=" + enableProgressBar +
                 ", sourceDefaultTruststore=" + sourceDefaultTruststore +
                 ", sourceKeystorePath='" + sourceKeystorePath + '\'' +
                 ", sourceKeystorePass='" + sourceKeystorePass + '\'' +
