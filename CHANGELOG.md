@@ -1,6 +1,12 @@
 ### 0.8.3
 
 Fix `redis sentinel` auth and ssl bug.  
+  
+Support export `jsonl` for `rct -f mem` and `rct -f count`.  
+To export jsonl file need to edit `/path/to/redis-rdb-cli/conf/redis-rdb-cli.conf` and change `export_file_format` from `csv` to `jsonl`.  
+  
+Optimize grafana dashboard and add `top N key` metric to grafana.  
+To show `top N key` need to add `--largest` option in `rct` command.  
 
 ### 0.8.2
 
