@@ -1,4 +1,4 @@
-### 0.8.3
+### 0.9.0
 
 Fix `redis sentinel` auth and ssl bug.  
   
