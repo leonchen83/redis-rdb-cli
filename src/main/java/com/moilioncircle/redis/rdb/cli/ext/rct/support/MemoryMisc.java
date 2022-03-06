@@ -16,7 +16,11 @@
 
 package com.moilioncircle.redis.rdb.cli.ext.rct.support;
 
+import static java.time.Instant.ofEpochMilli;
+import static java.time.ZoneId.systemDefault;
 import static java.util.concurrent.ThreadLocalRandom.current;
+
+import java.time.format.DateTimeFormatter;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.util.Strings;
@@ -25,6 +29,8 @@ import com.moilioncircle.redis.rdb.cli.util.Strings;
  * @author Baoyi Chen
  */
 public class MemoryMisc {
+	
+	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 	
 	public static long power(long size) {
 		long p = 1;
@@ -80,11 +86,19 @@ public class MemoryMisc {
 		return Math.min(level, 32);
 	}
 	
-	public static String pretty(long value, Configure configure) {
+	public static String prettySize(long value, Configure configure) {
 		if (!configure.isExportUnit()) {
 			return String.valueOf(value);
 		} else {
 			return Strings.pretty(value);
+		}
+	}
+	
+	public static String prettyDate(long value, Configure configure) {
+		if (!configure.isExportFormatDate()) {
+			return String.valueOf(value);
+		} else {
+			return FORMATTER.format(ofEpochMilli(value).atZone(systemDefault()));
 		}
 	}
 }

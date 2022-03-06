@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
+import com.moilioncircle.redis.rdb.cli.glossary.FileType;
 import com.moilioncircle.redis.rdb.cli.glossary.Gateway;
 import com.moilioncircle.redis.rdb.cli.sentinel.RedisSentinelURI;
 import com.moilioncircle.redis.rdb.cli.util.Strings;
@@ -74,26 +75,6 @@ public class Configure {
      * rct --format resp batch size
      */
     private int batchSize = 128;
-    
-    /**
-     * rct quote
-     */
-    private byte quote = '"';
-    
-    /**
-     * rct delimiter
-     */
-    private byte delimiter = ',';
-    
-    /**
-     * rct export meta
-     */
-    private boolean exportMeta = true;
-
-    /**
-     * rct export meta
-     */
-    private boolean exportUnit = true;
     
     /**
      * rmt --migrate
@@ -260,6 +241,36 @@ public class Configure {
      */
     private String targetKeystoreType;
     
+    /**
+     * rct quote
+     */
+    private byte quote = '"';
+    
+    /**
+     * rct delimiter
+     */
+    private byte delimiter = ',';
+    
+    /**
+     * rct export meta
+     */
+    private boolean exportMeta = true;
+    
+    /**
+     * rct export meta
+     */
+    private boolean exportUnit = true;
+    
+    /**
+     * rct export format date
+     */
+    private boolean exportFormatDate = true;
+    
+    /**
+     * rct export file format
+     */
+    private FileType exportFileFormat = FileType.CSV;
+    
     public int getBatchSize() {
         return batchSize;
     }
@@ -299,7 +310,23 @@ public class Configure {
     public void setExportUnit(boolean exportUnit) {
         this.exportUnit = exportUnit;
     }
-
+    
+    public boolean isExportFormatDate() {
+        return exportFormatDate;
+    }
+    
+    public void setExportFormatDate(boolean exportFormatDate) {
+        this.exportFormatDate = exportFormatDate;
+    }
+    
+    public FileType getExportFileFormat() {
+        return exportFileFormat;
+    }
+    
+    public void setExportFileFormat(FileType exportFileFormat) {
+        this.exportFileFormat = exportFileFormat;
+    }
+    
     public int getTimeout() {
         return timeout;
     }
@@ -633,10 +660,6 @@ public class Configure {
         conf.migrateRetries = getInt(conf, "migrate_retries", 1, true);
         conf.migrateFlush = getBool(conf, "migrate_flush", true, true);
         conf.dumpRdbVersion = getInt(conf, "dump_rdb_version", -1, true);
-        conf.quote = (byte) getString(conf, "quote", "\"", true).charAt(0);
-        conf.delimiter = (byte) getString(conf, "delimiter", ",", true).charAt(0);
-        conf.exportMeta = getBool(conf, "export_meta", true, true);
-        conf.exportUnit = getBool(conf, "export_unit", true, true);
         conf.retries = getInt(conf, "retries", 5, true);
         conf.retryInterval = getInt(conf, "retry_interval", 1000, true);
         conf.timeout = getInt(conf, "timeout", 60000, true);
@@ -657,6 +680,14 @@ public class Configure {
         conf.metricDatabase = getString(conf, "metric_database", "redis_rdb_cli", true);
         conf.metricRetentionPolicy = getString(conf, "metric_retention_policy", "30days", true);
         conf.metricInstance = getString(conf, "metric_instance", "instance0", true);
+        
+        // export
+        conf.quote = (byte) getString(conf, "quote", "\"", true).charAt(0);
+        conf.delimiter = (byte) getString(conf, "delimiter", ",", true).charAt(0);
+        conf.exportMeta = getBool(conf, "export_meta", true, true);
+        conf.exportUnit = getBool(conf, "export_unit", true, true);
+        conf.exportFormatDate = getBool(conf, "export_format_date", true, true);
+        conf.exportFileFormat = FileType.parse(getString(conf, "export_file_format", "csv", true));
         
         // ssl
         conf.sourceKeystorePath = getString(conf, "source_keystore_path", null, true);
@@ -830,15 +861,11 @@ public class Configure {
             return null;
         return Arrays.stream(v.split(",")).map(e -> e.trim()).collect(Collectors.toList());
     }
-
+    
     @Override
     public String toString() {
         return "Configure{" +
                 "batchSize=" + batchSize +
-                ", quote=" + quote +
-                ", delimiter=" + delimiter +
-                ", exportMeta=" + exportMeta +
-                ", exportUnit=" + exportUnit +
                 ", migrateBatchSize=" + migrateBatchSize +
                 ", migrateThreads=" + migrateThreads +
                 ", migrateRetries=" + migrateRetries +
@@ -872,6 +899,12 @@ public class Configure {
                 ", targetKeystorePath='" + targetKeystorePath + '\'' +
                 ", targetKeystorePass='" + targetKeystorePass + '\'' +
                 ", targetKeystoreType='" + targetKeystoreType + '\'' +
+                ", quote=" + quote +
+                ", delimiter=" + delimiter +
+                ", exportMeta=" + exportMeta +
+                ", exportUnit=" + exportUnit +
+                ", exportFormatDate=" + exportFormatDate +
+                ", exportFileFormat=" + exportFileFormat +
                 '}';
     }
 }

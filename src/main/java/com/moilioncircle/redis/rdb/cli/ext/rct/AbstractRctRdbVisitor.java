@@ -73,6 +73,44 @@ public abstract class AbstractRctRdbVisitor extends BaseRdbVisitor {
 		Outputs.write(configure.getQuote(), out);
 	}
 	
+	protected void emitField(String field, long value) {
+		emitString(field.getBytes());
+		Outputs.write(':', out);
+		escaper.encode(String.valueOf(value).getBytes(), out);
+	}
+	
+	protected void emitField(String field, byte[] value) {
+		emitField(field.getBytes(), value);
+	}
+	
+	protected void emitField(String field, String value) {
+		emitField(field.getBytes(), value.getBytes());
+	}
+	
+	protected void emitField(byte[] field, byte[] value) {
+		emitString(field);
+		Outputs.write(':', out);
+		emitString(value);
+	}
+	
+	protected void emitNull(byte[] field) {
+		emitString(field);
+		Outputs.write(':', out);
+		escaper.encode("null".getBytes(), out);
+	}
+	
+	protected void emitZSet(byte[] field, double value) {
+		emitString(field);
+		Outputs.write(':', out);
+		escaper.encode(value, out);
+	}
+	
+	protected void emitString(byte[] str) {
+		Outputs.write('"', out);
+		escaper.encode(str, out);
+		Outputs.write('"', out);
+	}
+	
 	protected Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context, RawByteListener listener) throws IOException {
 		SkipRdbParser skipParser = new SkipRdbParser(in);
 		long listPacks = skipParser.rdbLoadLen().len;

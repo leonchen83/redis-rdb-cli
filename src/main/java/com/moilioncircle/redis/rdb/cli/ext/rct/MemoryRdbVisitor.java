@@ -30,13 +30,11 @@ import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
 import static com.moilioncircle.redis.replicator.Constants.STREAM_ITEM_FLAG_DELETED;
 import static com.moilioncircle.redis.replicator.Constants.STREAM_ITEM_FLAG_SAMEFIELDS;
 import static com.moilioncircle.redis.replicator.rdb.BaseRdbParser.StringHelper.listPackEntry;
+import static com.moilioncircle.redis.replicator.rdb.datatype.ExpiredType.MS;
 import static com.moilioncircle.redis.replicator.rdb.datatype.ExpiredType.NONE;
 import static java.lang.System.currentTimeMillis;
-import static java.time.Instant.ofEpochMilli;
-import static java.time.ZoneId.systemDefault;
 
 import java.io.IOException;
-import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -45,11 +43,13 @@ import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.cmd.Args;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.datatype.DummyKeyValuePair;
+import com.moilioncircle.redis.rdb.cli.ext.escape.JsonEscaper;
 import com.moilioncircle.redis.rdb.cli.ext.rct.support.MemoryCalculator;
 import com.moilioncircle.redis.rdb.cli.ext.rct.support.MemoryMisc;
 import com.moilioncircle.redis.rdb.cli.ext.rct.support.MemoryRawByteListener;
 import com.moilioncircle.redis.rdb.cli.ext.rct.support.XTuple2;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
+import com.moilioncircle.redis.rdb.cli.glossary.FileType;
 import com.moilioncircle.redis.rdb.cli.monitor.Monitor;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorFactory;
 import com.moilioncircle.redis.rdb.cli.monitor.MonitorManager;
@@ -78,12 +78,12 @@ import com.moilioncircle.redis.replicator.util.type.Tuple2;
 public class MemoryRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTuple2>, EventListener {
 	
 	private static final Monitor MONITOR = MonitorFactory.getMonitor("memory");
-	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 	
 	private final long bytes;
 	private MemoryCalculator calc;
 	private MonitorManager manager;
 	private final MaximHeap<XTuple2> heap;
+	private Escaper jsonEscaper = new JsonEscaper();
 	
 	//
 	private long totalMemory = 0;
@@ -100,8 +100,54 @@ public class MemoryRdbVisitor extends AbstractRctRdbVisitor implements Consumer<
 		this.replicator.addEventListener(this);
 	}
 	
-	@Override
-	public void accept(XTuple2 tuple) {
+	private void exportJsonl(XTuple2 tuple) {
+		DummyKeyValuePair kv = tuple.getV2();
+		Outputs.write('{', out);
+		emitString("key".getBytes());
+		Outputs.write(':', out);
+		Outputs.write('"', out);
+		jsonEscaper.encode(kv.getKey(), out);
+		Outputs.write('"', out);
+		Outputs.write(',', out);
+		emitField("type", parse(kv.getValueRdbType()).getValue().getBytes());
+		Outputs.write(',', out);
+		emitField("number_elements", kv.getLength());
+		Outputs.write(',', out);
+		emitField("database", kv.getDb().getDbNumber());
+		Outputs.write(',', out);
+		emitField("used_memory", MemoryMisc.prettySize(tuple.getV1(), configure));
+		if (kv.getExpiredType() != NONE) {
+			if (kv.getExpiredType() == MS) {
+				Outputs.write(',', out);
+				emitField("expiry", MemoryMisc.prettyDate(kv.getExpiredValue(), configure));
+			} else {
+				Outputs.write(',', out);
+				emitField("expiry", MemoryMisc.prettyDate(kv.getExpiredValue() * 1000, configure));
+			}
+		}
+		Outputs.write('}', out);
+		Outputs.write('\n', out);
+	}
+	
+	private void exportCsvHeader() {
+		Outputs.write("database".getBytes(), out);
+		delimiter(out);
+		Outputs.write("type".getBytes(), out);
+		delimiter(out);
+		Outputs.write("key".getBytes(), out);
+		delimiter(out);
+		Outputs.write("size_in_bytes".getBytes(), out);
+		delimiter(out);
+		Outputs.write("encoding".getBytes(), out);
+		delimiter(out);
+		Outputs.write("num_elements".getBytes(), out);
+		delimiter(out);
+		Outputs.write("len_largest_element".getBytes(), out);
+		delimiter(out);
+		Outputs.write("expiry".getBytes(), out);
+		Outputs.write('\n', out);
+	}
+	private void exportCsvLine(XTuple2 tuple) {
 		DummyKeyValuePair kv = tuple.getV2();
 		Outputs.write(String.valueOf(kv.getDb().getDbNumber()).getBytes(), out);
 		delimiter(out);
@@ -109,20 +155,33 @@ public class MemoryRdbVisitor extends AbstractRctRdbVisitor implements Consumer<
 		delimiter(out);
 		quote(kv.getKey(), out);
 		delimiter(out);
-		quote(MemoryMisc.pretty(tuple.getV1(), configure).getBytes(), out, false);
+		quote(MemoryMisc.prettySize(tuple.getV1(), configure).getBytes(), out, false);
 		delimiter(out);
 		Outputs.write(DataType.type(kv.getValueRdbType()).getBytes(), out);
 		delimiter(out);
 		Outputs.write(String.valueOf(kv.getLength()).getBytes(), out);
 		delimiter(out);
-		quote(MemoryMisc.pretty(kv.getMax(), configure).getBytes(), out, false);
+		quote(MemoryMisc.prettySize(kv.getMax(), configure).getBytes(), out, false);
 		delimiter(out);
 		if (kv.getExpiredType() != NONE) {
-			quote(FORMATTER.format(ofEpochMilli(kv.getExpiredValue()).atZone(systemDefault())).getBytes(), out, false);
+			if (kv.getExpiredType() == MS) {
+				quote(MemoryMisc.prettyDate(kv.getExpiredValue(), configure).getBytes(), out, false);
+			} else {
+				quote(MemoryMisc.prettyDate(kv.getExpiredValue() * 1000, configure).getBytes(), out, false);
+			}
 		} else {
 			quote("".getBytes(), out, false);
 		}
 		Outputs.write('\n', out);
+	}
+	
+	@Override
+	public void accept(XTuple2 tuple) {
+		if (configure.getExportFileFormat() == FileType.CSV) {
+			exportCsvLine(tuple);
+		} else if (configure.getExportFileFormat() == FileType.JSONL) {
+			exportJsonl(tuple);
+		}
 	}
 	
 	@Override
@@ -179,27 +238,12 @@ public class MemoryRdbVisitor extends AbstractRctRdbVisitor implements Consumer<
 			
 			MonitorManager.closeQuietly(manager);
 		} else if (event instanceof PreRdbSyncEvent) {
-			// header
-			// database,type,key,size_in_bytes,encoding,num_elements,len_largest_element
-			Outputs.write("database".getBytes(), out);
-			delimiter(out);
-			Outputs.write("type".getBytes(), out);
-			delimiter(out);
-			Outputs.write("key".getBytes(), out);
-			delimiter(out);
-			Outputs.write("size_in_bytes".getBytes(), out);
-			delimiter(out);
-			Outputs.write("encoding".getBytes(), out);
-			delimiter(out);
-			Outputs.write("num_elements".getBytes(), out);
-			delimiter(out);
-			Outputs.write("len_largest_element".getBytes(), out);
-			delimiter(out);
-			Outputs.write("expiry".getBytes(), out);
-			Outputs.write('\n', out);
-			
+			if (configure.getExportFileFormat() == FileType.CSV) {
+				// csv header
+				exportCsvHeader();
+			}
+			//
 			manager.reset(MEMORY_MEASUREMENTS);
-			// 
 		} else if (event instanceof AuxField) {
 			AuxField aux = (AuxField) event;
 			if (aux.getAuxKey().equals("used-mem")) {

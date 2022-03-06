@@ -26,6 +26,7 @@ import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.cmd.Args;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.glossary.DataType;
+import com.moilioncircle.redis.rdb.cli.glossary.FileType;
 import com.moilioncircle.redis.rdb.cli.util.Outputs;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.event.Event;
@@ -46,26 +47,48 @@ public class CountRdbVisitor extends AbstractRctRdbVisitor implements EventListe
         super(replicator, configure, args, escaper);
         replicator.addEventListener(this);
     }
-
+    
+    private void exportCsv(Map<String, Long> counter) {
+        List<String> keys = new ArrayList<>(counter.keySet());
+        for (String key : keys) {
+            Outputs.write(key.getBytes(), out);
+            delimiter(out);
+        }
+        Outputs.write("summary".getBytes(), out);
+        Outputs.write('\n', out);
+        long total = 0;
+        for (String key : keys) {
+            long t = counter.get(key);
+            total += t;
+            Outputs.write(String.valueOf(t).getBytes(), out);
+            delimiter(out);
+        }
+        Outputs.write(String.valueOf(total).getBytes(), out);
+        Outputs.write('\n', out);
+    }
+    
+    private void exportJsonl(Map<String, Long> counter) {
+        Outputs.write('{', out);
+        long total = 0L;
+        for (Map.Entry<String, Long> entry : counter.entrySet()) {
+            long count = entry.getValue();
+            emitField(entry.getKey(), count);
+            Outputs.write(',', out);
+            total += count;
+        }
+        emitField("summary", total);
+        Outputs.write('}', out);
+        Outputs.write('\n', out);
+    }
+    
     @Override
     public void onEvent(Replicator replicator, Event event) {
         if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
-            List<String> keys = new ArrayList<>(counter.keySet());
-            for (String key : keys) {
-                Outputs.write(key.getBytes(), out);
-                delimiter(out);
+            if (configure.getExportFileFormat() == FileType.CSV) {
+                exportCsv(counter);
+            } else if (configure.getExportFileFormat() == FileType.JSONL) {
+                exportJsonl(counter);
             }
-            Outputs.write("summary".getBytes(), out);
-            Outputs.write('\n', out);
-            long total = 0;
-            for (String key : keys) {
-                long t = counter.get(key);
-                total += t;
-                Outputs.write(String.valueOf(t).getBytes(), out);
-                delimiter(out);
-            }
-            Outputs.write(String.valueOf(total).getBytes(), out);
-            Outputs.write('\n', out);
         }
     }
 

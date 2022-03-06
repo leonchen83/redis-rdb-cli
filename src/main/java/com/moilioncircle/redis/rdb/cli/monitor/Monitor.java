@@ -21,7 +21,7 @@ import java.util.Map;
 /**
  * @author Baoyi Chen
  */
-public interface Monitor {
+public interface Monitor { 
     interface Factory {
         Monitor create(String name);
     }

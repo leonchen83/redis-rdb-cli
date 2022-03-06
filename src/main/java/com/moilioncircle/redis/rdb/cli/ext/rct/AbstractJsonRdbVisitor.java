@@ -54,44 +54,6 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
         this.redis = new RedisEscaper(configure.getDelimiter(), configure.getQuote());
     }
 
-    private void emitString(byte[] str) {
-        Outputs.write('"', out);
-        escaper.encode(str, out);
-        Outputs.write('"', out);
-    }
-
-    private void emitField(String field, byte[] value) {
-        emitField(field.getBytes(), value);
-    }
-
-    private void emitField(String field, String value) {
-        emitField(field.getBytes(), value.getBytes());
-    }
-
-    private void emitField(byte[] field, byte[] value) {
-        emitString(field);
-        Outputs.write(':', out);
-        emitString(value);
-    }
-
-    private void emitNull(byte[] field) {
-        emitString(field);
-        Outputs.write(':', out);
-        escaper.encode("null".getBytes(), out);
-    }
-
-    private void emitZSet(byte[] field, double value) {
-        emitString(field);
-        Outputs.write(':', out);
-        escaper.encode(value, out);
-    }
-
-    private void emitField(String field, long value) {
-        emitString(field.getBytes());
-        Outputs.write(':', out);
-        escaper.encode(String.valueOf(value).getBytes(), out);
-    }
-    
     /**
      * 
      */
