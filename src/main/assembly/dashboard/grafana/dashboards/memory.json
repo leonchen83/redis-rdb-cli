@@ -22,7 +22,7 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": 3,
-  "iteration": 1646549063184,
+  "iteration": 1646549063190,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -633,7 +633,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "continuous-YlBl"
+            "mode": "continuous-BlPu"
           },
           "mappings": [],
           "thresholds": {
@@ -735,7 +735,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "continuous-YlBl"
+            "mode": "continuous-BlPu"
           },
           "mappings": [],
           "thresholds": {
@@ -890,7 +890,7 @@
             "properties": [
               {
                 "id": "custom.displayMode",
-                "value": "gradient-gauge"
+                "value": "lcd-gauge"
               },
               {
                 "id": "unit",
@@ -902,7 +902,7 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "green",
+                      "color": "semi-dark-blue",
                       "value": null
                     },
                     {
@@ -1062,6 +1062,6 @@
   "timezone": "",
   "title": "memory",
   "uid": "memory",
-  "version": 5,
+  "version": 1,
   "weekStart": ""
 }
