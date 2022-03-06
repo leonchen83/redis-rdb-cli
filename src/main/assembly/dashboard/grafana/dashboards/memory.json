@@ -22,7 +22,7 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": 3,
-  "iteration": 1646535518477,
+  "iteration": 1646546964480,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -1072,7 +1072,7 @@
           "measurement": "big_key",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT \"property0\" as \"key name\", \"property1\" as \"key type\", \"property2\" as \"db\", \"value\" as \"size\" FROM \"30days\".\"big_key\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter",
+          "query": "SELECT \"property0\" as \"key name\", \"property1\" as \"key type\", \"property2\" as \"db\", \"property3\" as \"elements in key\",\"value\" as \"size\" FROM \"30days\".\"big_key\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
