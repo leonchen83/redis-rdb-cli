@@ -18,8 +18,6 @@ package com.moilioncircle.redis.rdb.cli.monitor;
 
 import java.util.Map;
 
-import com.moilioncircle.redis.replicator.util.type.Tuple2;
-
 /**
  * @author Baoyi Chen
  */
@@ -30,34 +28,42 @@ public interface Monitor {
 
     String getName();
     
-    Map<Tuple2<String, String>, ? extends Counter<Long>> getLongCounters();
+    Map<MonitorKey, ? extends Counter<Long>> getLongCounters();
     
-    Map<Tuple2<String, String>, ? extends Counter<Double>> getDoubleCounters();
+    Map<MonitorKey, ? extends Counter<Double>> getDoubleCounters();
     
-    Map<Tuple2<String, String>, ? extends Gauge<Long>> getLongGauges();
+    Map<MonitorKey, ? extends Gauge<Long>> getLongGauges();
     
-    Map<Tuple2<String, String>, ? extends Gauge<Double>> getDoubleGauges();
+    Map<MonitorKey, ? extends Gauge<Double>> getDoubleGauges();
     
-    Map<Tuple2<String, String>, ? extends Gauge<String>> getStringGauges();
+    Map<MonitorKey, ? extends Gauge<String>> getStringGauges();
 
     /**
      * Counter
      */
-    void add(String measurement, long value);
+    void add(String measurement, long count);
 
-    void add(String measurement, long value, long time);
+    void add(String measurement, long count, long time);
     
-    void add(String measurement, String property, long value);
+    void add(String measurement, String property, long count);
     
-    void add(String measurement, String property, long value, long time);
+    void add(String measurement, String property, long count, long time);
     
-    void add(String measurement, double value);
+    void add(String measurement, String[] properties, long count);
     
-    void add(String measurement, double value, long time);
+    void add(String measurement, String[] properties, long count, long time);
     
-    void add(String measurement, String property, double value);
+    void add(String measurement, double count);
     
-    void add(String measurement, String property, double value, long time);
+    void add(String measurement, double count, long time);
+    
+    void add(String measurement, String property, double count);
+    
+    void add(String measurement, String property, double count, long time);
+    
+    void add(String measurement, String[] properties, double count);
+    
+    void add(String measurement, String[] properties, double count, long time);
     
     /**
      * Gauge
@@ -73,5 +79,11 @@ public interface Monitor {
     void set(String measurement, String property, double value);
     
     void set(String measurement, String property, String value);
+    
+    void set(String measurement, String[] properties, long value);
+    
+    void set(String measurement, String[] properties, double value);
+    
+    void set(String measurement, String[] properties, String value);
 
 }

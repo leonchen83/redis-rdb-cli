@@ -19,19 +19,16 @@ package com.moilioncircle.redis.rdb.cli.monitor.impl;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.moilioncircle.redis.rdb.cli.monitor.Gauge;
-import com.moilioncircle.redis.replicator.util.Tuples;
-import com.moilioncircle.redis.replicator.util.type.Tuple2;
 
 /**
  * @author Baoyi Chen
  */
 public class XStringGauge implements Gauge<String> {
 	private final AtomicReference<String> gauge = new AtomicReference<>();
-	private final AtomicReference<String> property = new AtomicReference<>();
 	
 	@Override
-	public Tuple2<String, String> getGauge() {
-		return Tuples.of(this.gauge.get(), this.property.get());
+	public String getGauge() {
+		return this.gauge.get();
 	}
 	
 	@Override
@@ -40,7 +37,7 @@ public class XStringGauge implements Gauge<String> {
 		if (v == null) {
 			return null;
 		} else {
-			return new ImmutableXStringGauge(v, property.get());
+			return new ImmutableXStringGauge(v);
 		}
 	}
 	
@@ -48,17 +45,11 @@ public class XStringGauge implements Gauge<String> {
 		gauge.set(value);
 	}
 	
-	void setProperty(String value) {
-		property.compareAndSet(null, value);
-	}
-	
 	private static class ImmutableXStringGauge extends XStringGauge {
 		private final String value;
-		private final String property;
 		
-		public ImmutableXStringGauge(String v, String p) {
+		public ImmutableXStringGauge(String v) {
 			this.value = v;
-			this.property = p;
 		}
 		
 		@Override
@@ -67,8 +58,8 @@ public class XStringGauge implements Gauge<String> {
 		}
 		
 		@Override
-		public Tuple2<String, String> getGauge() {
-			return Tuples.of(value, property);
+		public String getGauge() {
+			return value;
 		}
 	}
 }

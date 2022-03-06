@@ -16,8 +16,6 @@
 
 package com.moilioncircle.redis.rdb.cli.monitor;
 
-import com.moilioncircle.redis.replicator.util.type.Tuple2;
-
 /**
  * @author Baoyi Chen
  */
@@ -25,5 +23,5 @@ public interface Gauge<T> {
 	
 	Gauge<T> reset();
 	
-	Tuple2<T, String> getGauge();
+	T getGauge();
 }

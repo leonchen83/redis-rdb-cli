@@ -22,8 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.moilioncircle.redis.rdb.cli.monitor.Counter;
 import com.moilioncircle.redis.rdb.cli.monitor.Gauge;
 import com.moilioncircle.redis.rdb.cli.monitor.Monitor;
-import com.moilioncircle.redis.replicator.util.Tuples;
-import com.moilioncircle.redis.replicator.util.type.Tuple2;
+import com.moilioncircle.redis.rdb.cli.monitor.MonitorKey;
 
 
 /**
@@ -33,12 +32,12 @@ public class XMonitor implements Monitor {
 	//
 	protected final String name;
 	//
-	private final Map<Tuple2<String, String>, XLongCounter> longCounters = new ConcurrentHashMap<>(8);
-	private final Map<Tuple2<String, String>, XDoubleCounter> doubleCounters = new ConcurrentHashMap<>(8);
+	private final Map<MonitorKey, XLongCounter> longCounters = new ConcurrentHashMap<>(8);
+	private final Map<MonitorKey, XDoubleCounter> doubleCounters = new ConcurrentHashMap<>(8);
 	//
-	private final Map<Tuple2<String, String>, XLongGauge> longGauges = new ConcurrentHashMap<>(8);
-	private final Map<Tuple2<String, String>, XDoubleGauge> doubleGauges = new ConcurrentHashMap<>(8);
-	private final Map<Tuple2<String, String>, XStringGauge> stringGauges = new ConcurrentHashMap<>(8);
+	private final Map<MonitorKey, XLongGauge> longGauges = new ConcurrentHashMap<>(8);
+	private final Map<MonitorKey, XDoubleGauge> doubleGauges = new ConcurrentHashMap<>(8);
+	private final Map<MonitorKey, XStringGauge> stringGauges = new ConcurrentHashMap<>(8);
 	
 	public XMonitor(String name) {
 		this.name = name;
@@ -66,17 +65,32 @@ public class XMonitor implements Monitor {
 	
 	@Override
 	public void set(String measurement, String property, long value) {
-		this.doSetLong(measurement, property, value);
+		this.doSetLong(measurement, new String[]{property}, value);
 	}
 	
 	@Override
 	public void set(String measurement, String property, double value) {
-		this.doSetDouble(measurement, property, value);
+		this.doSetDouble(measurement, new String[]{property}, value);
 	}
 	
 	@Override
 	public void set(String measurement, String property, String value) {
-		this.doSetString(measurement, property, value);
+		this.doSetString(measurement, new String[]{property}, value);
+	}
+	
+	@Override
+	public void set(String measurement, String[] properties, long value) {
+		this.doSetLong(measurement, properties, value);
+	}
+	
+	@Override
+	public void set(String measurement, String[] properties, double value) {
+		this.doSetDouble(measurement, properties, value);
+	}
+	
+	@Override
+	public void set(String measurement, String[] properties, String value) {
+		this.doSetString(measurement, properties, value);
 	}
 	
 	@Override
@@ -91,12 +105,22 @@ public class XMonitor implements Monitor {
 	
 	@Override
 	public final void add(String measurement, String property, long count) {
-		this.doAddLong(measurement, property, count, 0);
+		this.doAddLong(measurement, new String[]{property}, count, 0);
 	}
 	
 	@Override
 	public final void add(String measurement, String property, long count, long time) {
-		this.doAddLong(measurement, property, count, time);
+		this.doAddLong(measurement, new String[]{property}, count, time);
+	}
+	
+	@Override
+	public void add(String measurement, String[] properties, long count) {
+		this.doAddLong(measurement, properties, count, 0);
+	}
+	
+	@Override
+	public void add(String measurement, String[] properties, long count, long time) {
+		this.doAddLong(measurement, properties, count, time);
 	}
 	
 	@Override
@@ -111,36 +135,46 @@ public class XMonitor implements Monitor {
 	
 	@Override
 	public final void add(String measurement, String property, double count) {
-		this.doAddDouble(measurement, property, count, 0);
+		this.doAddDouble(measurement, new String[]{property}, count, 0);
 	}
 	
 	@Override
 	public final void add(String measurement, String property, double count, long time) {
-		this.doAddDouble(measurement, property, count, time);
+		this.doAddDouble(measurement, new String[]{property}, count, time);
 	}
 	
 	@Override
-	public Map<Tuple2<String, String>, ? extends Counter<Long>> getLongCounters() {
+	public void add(String measurement, String[] properties, double count) {
+		this.doAddDouble(measurement, properties, count, 0);
+	}
+	
+	@Override
+	public void add(String measurement, String[] properties, double count, long time) {
+		this.doAddDouble(measurement, properties, count, time);
+	}
+	
+	@Override
+	public Map<MonitorKey, ? extends Counter<Long>> getLongCounters() {
 		return this.longCounters;
 	}
 	
 	@Override
-	public Map<Tuple2<String, String>, ? extends Counter<Double>> getDoubleCounters() {
+	public Map<MonitorKey, ? extends Counter<Double>> getDoubleCounters() {
 		return this.doubleCounters;
 	}
 	
 	@Override
-	public Map<Tuple2<String, String>, ? extends Gauge<Long>> getLongGauges() {
+	public Map<MonitorKey, ? extends Gauge<Long>> getLongGauges() {
 		return this.longGauges;
 	}
 	
 	@Override
-	public Map<Tuple2<String, String>, ? extends Gauge<Double>> getDoubleGauges() {
+	public Map<MonitorKey, ? extends Gauge<Double>> getDoubleGauges() {
 		return this.doubleGauges;
 	}
 	
 	@Override
-	public Map<Tuple2<String, String>, ? extends Gauge<String>> getStringGauges() {
+	public Map<MonitorKey, ? extends Gauge<String>> getStringGauges() {
 		return this.stringGauges;
 	}
 	
@@ -151,42 +185,39 @@ public class XMonitor implements Monitor {
 		}
 	}
 	
-	protected void doAddLong(String k, String p, long c, long t) {
-		Tuple2<String, String> key = Tuples.of(k, p);
+	protected void doAddLong(String k, String[] p, long c, long t) {
+		MonitorKey key = MonitorKey.key(k, p);
 		XLongCounter x = longCounters.get(key);
 		if (x == null) x = putIfAbsent(longCounters, key, new XLongCounter());
-		x.add(c, p, t);
+		x.add(c, t);
 	}
 	
-	protected void doAddDouble(String k, String p, double c, long t) {
-		Tuple2<String, String> key = Tuples.of(k, p);
+	protected void doAddDouble(String k, String[] p, double c, long t) {
+		MonitorKey key = MonitorKey.key(k, p);
 		XDoubleCounter x = doubleCounters.get(key);
 		if (x == null) x = putIfAbsent(doubleCounters, key, new XDoubleCounter());
-		x.add(c, p, t);
+		x.add(c, t);
 	}
 	
-	protected void doSetLong(String k, String p, final long v) {
-		Tuple2<String, String> key = Tuples.of(k, p);
+	protected void doSetLong(String k, String[] p, final long v) {
+		MonitorKey key = MonitorKey.key(k, p);
 		XLongGauge x = this.longGauges.get(key);
 		if (x == null) x = putIfAbsent(longGauges, key, new XLongGauge());
 		x.set(v);
-		if (p != null) x.setProperty(p);
 	}
 	
-	protected void doSetDouble(String k, String p, final double v) {
-		Tuple2<String, String> key = Tuples.of(k, p);
+	protected void doSetDouble(String k, String[] p, final double v) {
+		MonitorKey key = MonitorKey.key(k, p);
 		XDoubleGauge x = this.doubleGauges.get(key);
 		if (x == null) x = putIfAbsent(doubleGauges, key, new XDoubleGauge());
 		x.set(v);
-		if (p != null) x.setProperty(p);
 	}
 	
-	protected void doSetString(String k, String p, final String v) {
-		Tuple2<String, String> key = Tuples.of(k, p);
+	protected void doSetString(String k, String[] p, final String v) {
+		MonitorKey key = MonitorKey.key(k, p);
 		XStringGauge x = this.stringGauges.get(key);
 		if (x == null) x = putIfAbsent(stringGauges, key, new XStringGauge());
 		x.set(v);
-		if (p != null) x.setProperty(p);
 	}
 	
 	private static final <K, V> V putIfAbsent(Map<K, V> m, K k, V v) {

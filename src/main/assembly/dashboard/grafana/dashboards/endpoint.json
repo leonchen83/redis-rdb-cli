@@ -73,7 +73,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "$tag_property",
+          "alias": "$tag_property0",
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
@@ -101,7 +101,7 @@
           "measurement": "endpoint_statistics",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT sum(\"value\") FROM \"30days\".\"success\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY time($__interval), \"property\" fill(null)",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"success\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY time($__interval), \"property0\" fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -226,7 +226,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "$tag_property",
+          "alias": "$tag_property0",
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
@@ -254,7 +254,7 @@
           "measurement": "endpoint_statistics",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT sum(\"value\") FROM \"30days\".\"failure\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY time($__interval), \"property\" fill(null)",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"failure\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY time($__interval), \"property0\" fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -379,7 +379,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "$tag_property",
+          "alias": "$tag_property0",
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
@@ -393,7 +393,7 @@
             },
             {
               "params": [
-                "property"
+                "property0"
               ],
               "type": "tag"
             },
@@ -407,7 +407,7 @@
           "measurement": "send",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT sum(\"value\") FROM \"30days\".\"send\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY time($__interval), \"property\" fill(null)",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"send\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY time($__interval), \"property0\" fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -543,7 +543,7 @@
           "measurement": "endpoint_statistics",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT sum(\"value\") FROM \"30days\".\"reconnect\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY time($__interval), \"property\" fill(null)",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"reconnect\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY time($__interval), \"property0\" fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",

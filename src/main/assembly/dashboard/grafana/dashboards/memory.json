@@ -316,7 +316,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "$tag_property",
+          "alias": "$tag_property0",
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
@@ -338,7 +338,7 @@
           "measurement": "memory_statistics",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT sum(\"value\") FROM \"30days\".\"dbnum\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY \"property\" fill(null)",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"dbnum\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY \"property0\" fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -460,7 +460,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "$tag_property",
+          "alias": "$tag_property0",
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
@@ -482,7 +482,7 @@
           "measurement": "memory_statistics",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT sum(\"value\") FROM \"30days\".\"dbexp\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY \"property\" fill(null)",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"dbexp\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY \"property0\" fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -727,7 +727,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "$tag_property",
+          "alias": "$tag_property0",
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
@@ -741,7 +741,7 @@
             },
             {
               "params": [
-                "property"
+                "property0"
               ],
               "type": "tag"
             },
@@ -756,7 +756,7 @@
           "measurement": "type_count",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT sum(\"value\") FROM \"30days\".\"type_count\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY \"property\" fill(null)",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"type_count\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY \"property0\" fill(null)",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -860,7 +860,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "$tag_property",
+          "alias": "$tag_property0",
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
@@ -882,7 +882,7 @@
           "measurement": "memory_statistics",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT sum(\"value\") FROM \"30days\".\"type_memory\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY \"property\" fill(null)",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"type_memory\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY \"property0\" fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",

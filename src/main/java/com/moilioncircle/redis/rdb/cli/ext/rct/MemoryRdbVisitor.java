@@ -16,13 +16,14 @@
 
 package com.moilioncircle.redis.rdb.cli.ext.rct;
 
+import static com.moilioncircle.redis.rdb.cli.glossary.DataType.parse;
+import static com.moilioncircle.redis.rdb.cli.glossary.Measures.MEMORY_BIG_KEY;
 import static com.moilioncircle.redis.rdb.cli.glossary.Measures.MEMORY_DB_EXPIRES;
 import static com.moilioncircle.redis.rdb.cli.glossary.Measures.MEMORY_DB_NUMBERS;
 import static com.moilioncircle.redis.rdb.cli.glossary.Measures.MEMORY_MEASUREMENTS;
 import static com.moilioncircle.redis.rdb.cli.glossary.Measures.MEMORY_TOTAL_MEMORY;
 import static com.moilioncircle.redis.rdb.cli.glossary.Measures.MEMORY_TYPE_COUNT;
 import static com.moilioncircle.redis.rdb.cli.glossary.Measures.MEMORY_TYPE_MEMORY;
-import static com.moilioncircle.redis.rdb.cli.glossary.DataType.parse;
 import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAINER_PACKED;
 import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAINER_PLAIN;
 import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
@@ -157,6 +158,7 @@ public class MemoryRdbVisitor extends AbstractRctRdbVisitor implements Consumer<
 			
 			for (XTuple2 tuple : heap.get(true)) {
 				accept(tuple);
+				MONITOR.set(MEMORY_BIG_KEY, new String(tuple.getV2().getKey()), tuple.getV1());
 			}
 			
 			if (rdb6) {

@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.LongAdder;
 
 import com.moilioncircle.redis.rdb.cli.monitor.Counter;
 import com.moilioncircle.redis.replicator.util.Tuples;
-import com.moilioncircle.redis.replicator.util.type.Tuple3;
+import com.moilioncircle.redis.replicator.util.type.Tuple2;
 
 /**
  * @author Baoyi Chen
@@ -30,28 +30,22 @@ public class XLongCounter implements Counter<Long> {
 	private final AtomicReference<Slot> slot = new AtomicReference<>(new Slot());
 	
 	@Override
-	public Tuple3<Long, String, Long> getCounter() {
+	public Tuple2<Long, Long> getCounter() {
 		return this.slot.get().getCounter(false);
 	}
 	
 	@Override
 	public synchronized Counter<Long> reset() {
-		Tuple3<Long, String, Long> v = slot.get().getCounter(true);
+		Tuple2<Long, Long> v = slot.get().getCounter(true);
 		return new ImmutableCounter(v);
 	}
 	
 	void add(long count, long time) {
 		Slot v = slot.get();
-		v.add(count, null, time);
-	}
-	
-	void add(long count, String property, long time) {
-		Slot v = slot.get();
-		v.add(count, property, time);
+		v.add(count, time);
 	}
 	
 	private static final class Slot {
-		private final AtomicReference<String> v = new AtomicReference<>();
 		private final LongAdder v1 = new LongAdder();
 		private final LongAdder v2 = new LongAdder();
 		
@@ -60,24 +54,23 @@ public class XLongCounter implements Counter<Long> {
 			v2.reset();
 		}
 		
-		private Tuple3<Long, String, Long> getCounter(boolean reset) {
+		private Tuple2<Long, Long> getCounter(boolean reset) {
 			long n = reset ? v1.sumThenReset() : v1.sum();
 			long t = reset ? v2.sumThenReset() : v2.sum();
-			Tuple3<Long, String, Long> r = Tuples.of(n, v.get(), t);
+			Tuple2<Long, Long> r = Tuples.of(n, t);
 			return r;
 		}
 		
-		private void add(long n, String p, long t) {
+		private void add(long n, long t) {
 			if (n > 0L) this.v1.add(n);
 			if (t > 0L) this.v2.add(t);
-			if (p != null) this.v.set(p);
 		}
 	}
 	
 	private static class ImmutableCounter implements Counter<Long> {
-		private final Tuple3<Long, String, Long> value;
+		private final Tuple2<Long, Long> value;
 		
-		private ImmutableCounter(Tuple3<Long, String, Long> value) {
+		private ImmutableCounter(Tuple2<Long, Long> value) {
 			this.value = value;
 		}
 		
@@ -87,8 +80,8 @@ public class XLongCounter implements Counter<Long> {
 		}
 		
 		@Override
-		public Tuple3<Long, String, Long> getCounter() {
-			return Tuples.of(value.getV1(), value.getV2(), value.getV3());
+		public Tuple2<Long, Long> getCounter() {
+			return Tuples.of(value.getV1(), value.getV2());
 		}
 	}
 }

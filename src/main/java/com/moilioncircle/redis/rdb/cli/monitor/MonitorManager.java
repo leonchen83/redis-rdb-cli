@@ -38,7 +38,6 @@ import com.moilioncircle.redis.rdb.cli.monitor.gateway.MetricGatewayFactory;
 import com.moilioncircle.redis.rdb.cli.monitor.points.CounterPoint;
 import com.moilioncircle.redis.rdb.cli.monitor.points.GaugePoint;
 import com.moilioncircle.redis.rdb.cli.util.XThreadFactory;
-import com.moilioncircle.redis.replicator.util.type.Tuple2;
 
 /**
  * @author Baoyi Chen
@@ -65,34 +64,34 @@ public class MonitorManager implements Closeable {
         List<CounterPoint<?>> counters = new ArrayList<>();
         try {
             for (Monitor monitor : MonitorFactory.getAllMonitors().values()) {
-                for (final Map.Entry<Tuple2<String, String>, ? extends Gauge<Long>> e : monitor.getLongGauges().entrySet()) {
+                for (final Map.Entry<MonitorKey, ? extends Gauge<Long>> e : monitor.getLongGauges().entrySet()) {
                     final Gauge<Long> gauge = e.getValue().reset();
                     if (gauge == null) continue;
-                    gauges.add(GaugePoint.valueOf(monitor, e.getKey().getV1(), gauge));
+                    gauges.add(GaugePoint.valueOf(monitor, e.getKey(), gauge));
                 }
     
-                for (final Map.Entry<Tuple2<String, String>, ? extends Gauge<String>> e : monitor.getStringGauges().entrySet()) {
+                for (final Map.Entry<MonitorKey, ? extends Gauge<String>> e : monitor.getStringGauges().entrySet()) {
                     final Gauge<String> gauge = e.getValue().reset();
                     if (gauge == null) continue;
-                    gauges.add(GaugePoint.valueOf(monitor, e.getKey().getV1(), gauge));
+                    gauges.add(GaugePoint.valueOf(monitor, e.getKey(), gauge));
                 }
     
-                for (final Map.Entry<Tuple2<String, String>, ? extends Gauge<Double>> e : monitor.getDoubleGauges().entrySet()) {
+                for (final Map.Entry<MonitorKey, ? extends Gauge<Double>> e : monitor.getDoubleGauges().entrySet()) {
                     final Gauge<Double> gauge = e.getValue().reset();
                     if (gauge == null) continue;
-                    gauges.add(GaugePoint.valueOf(monitor, e.getKey().getV1(), gauge));
+                    gauges.add(GaugePoint.valueOf(monitor, e.getKey(), gauge));
                 }
     
-                for (final Map.Entry<Tuple2<String, String>, ? extends Counter<Long>> e : monitor.getLongCounters().entrySet()) {
+                for (final Map.Entry<MonitorKey, ? extends Counter<Long>> e : monitor.getLongCounters().entrySet()) {
                     final Counter<Long> counter = e.getValue().reset();
                     if (counter == null) continue;
-                    counters.add(CounterPoint.valueOf(monitor, e.getKey().getV1(), counter));
+                    counters.add(CounterPoint.valueOf(monitor, e.getKey(), counter));
                 }
     
-                for (final Map.Entry<Tuple2<String, String>, ? extends Counter<Double>> e : monitor.getDoubleCounters().entrySet()) {
+                for (final Map.Entry<MonitorKey, ? extends Counter<Double>> e : monitor.getDoubleCounters().entrySet()) {
                     final Counter<Double> counter = e.getValue().reset();
                     if (counter == null) continue;
-                    counters.add(CounterPoint.valueOf(monitor, e.getKey().getV1(), counter));
+                    counters.add(CounterPoint.valueOf(monitor, e.getKey(), counter));
                 }
             }
             metricGateway.save(gauges, counters);

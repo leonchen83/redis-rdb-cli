@@ -17,31 +17,27 @@
 package com.moilioncircle.redis.rdb.cli.monitor.impl;
 
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 
 import com.moilioncircle.redis.rdb.cli.monitor.Gauge;
-import com.moilioncircle.redis.replicator.util.Tuples;
-import com.moilioncircle.redis.replicator.util.type.Tuple2;
 
 /**
  * @author Baoyi Chen
  */
 public class XLongGauge implements Gauge<Long> {
 	private final AtomicLong gauge = new AtomicLong(0);
-	private final AtomicReference<String> property = new AtomicReference<>();
 	
 	@Override
-	public Tuple2<Long, String> getGauge() {
-		return Tuples.of(this.gauge.get(), this.property.get());
+	public Long getGauge() {
+		return this.gauge.get();
 	}
 	
 	@Override
 	public XLongGauge reset() {
-		long v = gauge.getAndSet(0);
+		Long v = gauge.getAndSet(0);
 		if (v == 0) {
 			return null;
 		} else {
-			return new ImmutableXLongGauge(v, property.get());
+			return new ImmutableXLongGauge(v);
 		}
 	}
 	
@@ -49,17 +45,11 @@ public class XLongGauge implements Gauge<Long> {
 		gauge.set(value);
 	}
 	
-	void setProperty(String value) {
-		property.compareAndSet(null, value);
-	}
-	
 	private static class ImmutableXLongGauge extends XLongGauge {
 		private final Long value;
-		private final String property;
 		
-		public ImmutableXLongGauge(Long v, String p) {
+		public ImmutableXLongGauge(Long v) {
 			this.value = v;
-			this.property = p;
 		}
 		
 		@Override
@@ -68,8 +58,8 @@ public class XLongGauge implements Gauge<Long> {
 		}
 		
 		@Override
-		public Tuple2<Long, String> getGauge() {
-			return Tuples.of(value, property);
+		public Long getGauge() {
+			return value;
 		}
 	}
 }

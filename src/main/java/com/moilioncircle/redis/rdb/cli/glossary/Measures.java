@@ -28,6 +28,7 @@ public class Measures {
 	
 	public static final String[] ENDPOINT_MEASUREMENTS = new String[] {ENDPOINT_SEND, ENDPOINT_RECONNECT, ENDPOINT_FAILURE, ENDPOINT_SUCCESS};
 	
+	public static final String MEMORY_BIG_KEY = "big_key";
 	public static final String MEMORY_DB_NUMBERS = "dbnum";
 	public static final String MEMORY_DB_EXPIRES = "dbexp";
 	public static final String MEMORY_TYPE_COUNT = "type_count";
