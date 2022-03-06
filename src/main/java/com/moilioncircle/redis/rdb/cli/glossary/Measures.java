@@ -35,5 +35,5 @@ public class Measures {
 	public static final String MEMORY_TYPE_MEMORY = "type_memory";
 	public static final String MEMORY_TOTAL_MEMORY = "total_memory";
 	
-	public static final String[] MEMORY_MEASUREMENTS = new String[] {MEMORY_DB_NUMBERS, MEMORY_DB_EXPIRES, MEMORY_TYPE_COUNT, MEMORY_TYPE_MEMORY, MEMORY_TOTAL_MEMORY};
+	public static final String[] MEMORY_MEASUREMENTS = new String[] {MEMORY_DB_NUMBERS, MEMORY_DB_EXPIRES, MEMORY_TYPE_COUNT, MEMORY_TYPE_MEMORY, MEMORY_TOTAL_MEMORY, MEMORY_BIG_KEY};
 }
