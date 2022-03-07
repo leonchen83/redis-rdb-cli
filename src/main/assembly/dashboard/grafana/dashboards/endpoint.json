@@ -112,13 +112,13 @@
           "groupBy": [
             {
               "params": [
-                "5s"
+                "$__interval"
               ],
               "type": "time"
             },
             {
               "params": [
-                "facade"
+                "property0"
               ],
               "type": "tag"
             },
@@ -129,7 +129,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "endpoint_statistics",
+          "measurement": "success",
           "orderByTime": "ASC",
           "policy": "30days",
           "query": "SELECT sum(\"value\") FROM \"30days\".\"success\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY time($__interval), \"property0\" fill(null)",
@@ -152,27 +152,9 @@
           ],
           "tags": [
             {
-              "key": "facade",
-              "operator": "=",
-              "value": "success_respond"
-            },
-            {
-              "condition": "AND",
               "key": "instance",
               "operator": "=~",
               "value": "/^$instance$/"
-            },
-            {
-              "condition": "AND",
-              "key": "module",
-              "operator": "=",
-              "value": "endpoint"
-            },
-            {
-              "condition": "AND",
-              "key": "type",
-              "operator": "=",
-              "value": "COUNTER"
             }
           ]
         }
@@ -266,13 +248,13 @@
           "groupBy": [
             {
               "params": [
-                "5s"
+                "$__interval"
               ],
               "type": "time"
             },
             {
               "params": [
-                "facade"
+                "property0"
               ],
               "type": "tag"
             },
@@ -283,7 +265,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "endpoint_statistics",
+          "measurement": "failure",
           "orderByTime": "ASC",
           "policy": "30days",
           "query": "SELECT sum(\"value\") FROM \"30days\".\"failure\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY time($__interval), \"property0\" fill(null)",
@@ -306,27 +288,9 @@
           ],
           "tags": [
             {
-              "key": "facade",
-              "operator": "=~",
-              "value": "/^failure_*/"
-            },
-            {
-              "condition": "AND",
               "key": "instance",
               "operator": "=~",
               "value": "/^$instance$/"
-            },
-            {
-              "condition": "AND",
-              "key": "module",
-              "operator": "=",
-              "value": "endpoint"
-            },
-            {
-              "condition": "AND",
-              "key": "type",
-              "operator": "=",
-              "value": "COUNTER"
             }
           ]
         }
@@ -557,7 +521,7 @@
           "groupBy": [
             {
               "params": [
-                "5s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -574,7 +538,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "endpoint_statistics",
+          "measurement": "reconnect",
           "orderByTime": "ASC",
           "policy": "30days",
           "query": "SELECT sum(\"value\") FROM \"30days\".\"reconnect\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY time($__interval), \"property0\" fill(null)",
@@ -597,27 +561,9 @@
           ],
           "tags": [
             {
-              "key": "facade",
-              "operator": "=~",
-              "value": "/^reconnect_*/"
-            },
-            {
-              "condition": "AND",
               "key": "instance",
               "operator": "=~",
               "value": "/^$instance$/"
-            },
-            {
-              "condition": "AND",
-              "key": "module",
-              "operator": "=",
-              "value": "endpoint"
-            },
-            {
-              "condition": "AND",
-              "key": "type",
-              "operator": "=",
-              "value": "COUNTER"
             }
           ]
         }
