@@ -98,10 +98,10 @@
               "type": "fill"
             }
           ],
-          "measurement": "dbnum",
+          "measurement": "memory_dbnum",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT sum(\"value\") FROM \"30days\".\"dbnum\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter fill(null)",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"memory_dbnum\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -203,10 +203,10 @@
               "type": "fill"
             }
           ],
-          "measurement": "dbexp",
+          "measurement": "memory_dbexp",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT sum(\"value\") FROM \"30days\".\"dbexp\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter fill(null)",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"memory_dbexp\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -302,10 +302,10 @@
               "type": "fill"
             }
           ],
-          "measurement": "dbnum",
+          "measurement": "memory_dbnum",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT sum(\"value\") FROM \"30days\".\"dbnum\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY \"property0\" fill(null)",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"memory_dbnum\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY \"property0\" fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -401,10 +401,10 @@
               "type": "fill"
             }
           ],
-          "measurement": "dbexp",
+          "measurement": "memory_dbexp",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT sum(\"value\") FROM \"30days\".\"dbexp\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY \"property0\" fill(null)",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"memory_dbexp\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY \"property0\" fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -506,10 +506,10 @@
               "type": "fill"
             }
           ],
-          "measurement": "total_memory",
+          "measurement": "memory_total_memory",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT last(\"value\") FROM \"30days\".\"total_memory\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter fill(null)",
+          "query": "SELECT last(\"value\") FROM \"30days\".\"memory_total_memory\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -602,10 +602,10 @@
             }
           ],
           "hide": false,
-          "measurement": "type_count",
+          "measurement": "memory_type_count",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT sum(\"value\") FROM \"30days\".\"type_count\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY \"property0\" fill(null)",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"memory_type_count\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY \"property0\" fill(null)",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -697,10 +697,10 @@
               "type": "fill"
             }
           ],
-          "measurement": "type_memory",
+          "measurement": "memory_type_memory",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT sum(\"value\") FROM \"30days\".\"type_memory\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY \"property0\" fill(null)",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"memory_type_memory\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY \"property0\" fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -899,10 +899,10 @@
             "uid": "P3C6603E967DC8568"
           },
           "groupBy": [],
-          "measurement": "big_key",
+          "measurement": "memory_big_key",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT \"property0\" as \"key name\", \"property1\" as \"key type\", \"property2\" as \"db\", \"property3\" as \"elements in key\",\"value\" as \"size\" FROM \"30days\".\"big_key\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter",
+          "query": "SELECT \"property0\" as \"key name\", \"property1\" as \"key type\", \"property2\" as \"db\", \"property3\" as \"elements in key\",\"value\" as \"size\" FROM \"30days\".\"memory_big_key\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",

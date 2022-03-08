@@ -21,19 +21,19 @@ package com.moilioncircle.redis.rdb.cli.glossary;
  */
 public class Measures {
 	
-	public static final String ENDPOINT_SEND = "send";
-	public static final String ENDPOINT_RECONNECT = "reconnect";
-	public static final String ENDPOINT_FAILURE = "failure";
-	public static final String ENDPOINT_SUCCESS = "success";
+	public static final String ENDPOINT_SEND = "endpoint_send";
+	public static final String ENDPOINT_RECONNECT = "endpoint_reconnect";
+	public static final String ENDPOINT_FAILURE = "endpoint_failure";
+	public static final String ENDPOINT_SUCCESS = "endpoint_success";
 	
 	public static final String[] ENDPOINT_MEASUREMENTS = new String[] {ENDPOINT_SEND, ENDPOINT_RECONNECT, ENDPOINT_FAILURE, ENDPOINT_SUCCESS};
 	
-	public static final String MEMORY_BIG_KEY = "big_key";
-	public static final String MEMORY_DB_NUMBERS = "dbnum";
-	public static final String MEMORY_DB_EXPIRES = "dbexp";
-	public static final String MEMORY_TYPE_COUNT = "type_count";
-	public static final String MEMORY_TYPE_MEMORY = "type_memory";
-	public static final String MEMORY_TOTAL_MEMORY = "total_memory";
+	public static final String MEMORY_BIG_KEY = "memory_big_key";
+	public static final String MEMORY_DB_NUMBERS = "memory_dbnum";
+	public static final String MEMORY_DB_EXPIRES = "memory_dbexp";
+	public static final String MEMORY_TYPE_COUNT = "memory_type_count";
+	public static final String MEMORY_TYPE_MEMORY = "memory_type_memory";
+	public static final String MEMORY_TOTAL_MEMORY = "memory_total_memory";
 	
 	public static final String[] MEMORY_MEASUREMENTS = new String[] {MEMORY_DB_NUMBERS, MEMORY_DB_EXPIRES, MEMORY_TYPE_COUNT, MEMORY_TYPE_MEMORY, MEMORY_TOTAL_MEMORY, MEMORY_BIG_KEY};
 }

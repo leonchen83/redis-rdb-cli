@@ -129,10 +129,10 @@
               "type": "fill"
             }
           ],
-          "measurement": "success",
+          "measurement": "endpoint_success",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT sum(\"value\") FROM \"30days\".\"success\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY time($__interval), \"property0\" fill(null)",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"endpoint_success\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY time($__interval), \"property0\" fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -265,10 +265,10 @@
               "type": "fill"
             }
           ],
-          "measurement": "failure",
+          "measurement": "endpoint_failure",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT sum(\"value\") FROM \"30days\".\"failure\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY time($__interval), \"property0\" fill(null)",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"endpoint_failure\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY time($__interval), \"property0\" fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -401,10 +401,10 @@
               "type": "fill"
             }
           ],
-          "measurement": "send",
+          "measurement": "endpoint_send",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT sum(\"value\") FROM \"30days\".\"send\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY time($__interval), \"property0\" fill(null)",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"endpoint_send\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY time($__interval), \"property0\" fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -538,10 +538,10 @@
               "type": "fill"
             }
           ],
-          "measurement": "reconnect",
+          "measurement": "endpoint_reconnect",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT sum(\"value\") FROM \"30days\".\"reconnect\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY time($__interval), \"property0\" fill(null)",
+          "query": "SELECT sum(\"value\") FROM \"30days\".\"endpoint_reconnect\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY time($__interval), \"property0\" fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
