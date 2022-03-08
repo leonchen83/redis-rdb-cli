@@ -222,7 +222,7 @@ public class MemoryRdbVisitor extends AbstractRctRdbVisitor implements Consumer<
 				String[] properties = new String[4];
 				properties[0] = new String(kv.getKey());
 				properties[1] = parse(kv.getValueRdbType()).getValue();
-				properties[2] = "db" + kv.getDb().getDbNumber();
+				properties[2] = String.valueOf(kv.getDb().getDbNumber());
 				properties[3] = String.valueOf(kv.getLength());
 				MONITOR.set(MEMORY_BIG_KEY, properties, tuple.getV1());
 			}
@@ -230,7 +230,7 @@ public class MemoryRdbVisitor extends AbstractRctRdbVisitor implements Consumer<
 			if (rdb6) {
 				MONITOR.set(MEMORY_TOTAL_MEMORY, totalMemory);
 				for (Map.Entry<Long, Tuple2<Long, Long>> entry : dbInfo.entrySet()) {
-					String property = "db" + entry.getKey();
+					String property = String.valueOf(entry.getKey());
 					MONITOR.set(MEMORY_DB_NUMBERS, property, entry.getValue().getV1());
 					MONITOR.set(MEMORY_DB_EXPIRES, property, entry.getValue().getV2());
 				}
@@ -263,7 +263,7 @@ public class MemoryRdbVisitor extends AbstractRctRdbVisitor implements Consumer<
 	@Override
 	public DB applyResizeDB(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
 		DB db = super.applyResizeDB(in, version, context);
-		String property = "db" + db.getDbNumber();
+		String property = String.valueOf(db.getDbNumber());
 		MONITOR.set(MEMORY_DB_NUMBERS, property, db.getDbsize());
 		MONITOR.set(MEMORY_DB_EXPIRES, property, db.getExpires());
 		return db;

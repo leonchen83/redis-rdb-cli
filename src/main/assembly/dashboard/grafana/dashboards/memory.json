@@ -22,7 +22,7 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": 3,
-  "iteration": 1646661588839,
+  "iteration": 1646709953611,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -242,6 +242,7 @@
           "color": {
             "mode": "continuous-YlBl"
           },
+          "displayName": "db${__field.displayName}",
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -341,6 +342,7 @@
           "color": {
             "mode": "continuous-YlBl"
           },
+          "displayName": "db${__field.displayName}",
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
