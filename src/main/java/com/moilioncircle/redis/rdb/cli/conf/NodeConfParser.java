@@ -133,8 +133,9 @@ public class NodeConfParser<T> {
             }
         }
 
-        if (result.size() != 16384)
+        if (result.size() != 16384) {
             throw new UnsupportedOperationException("slots size : " + map.size() + ", expected 16384.");
+        }
     }
 
     public static List<String> parseLine(String line) {

@@ -32,6 +32,7 @@ public class CommandConstants {
     
     public static final byte[] AUTH = "auth".getBytes();
     public static final byte[] PING = "ping".getBytes();
+    public static final byte[] ROLE = "role".getBytes();
     public static final byte[] DEL = "del".getBytes();
     
     public static final byte[] SET = "set".getBytes();

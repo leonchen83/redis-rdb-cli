@@ -183,18 +183,17 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
     
     public void broadcast(DumpFunction dfn, int times) {
         logger.trace("sync rdb event [function], times {}", times);
-        XEndpoint prev = null;
         try {
+            boolean result = false;
             if (!replace) {
-                prev = endpoints.get().batch(flush, FUNCTION, RESTORE, dfn.getSerialized());
+                result = endpoints.get().broadcast(FUNCTION, RESTORE, dfn.getSerialized());
             } else {
-                prev = endpoints.get().batch(flush, FUNCTION, RESTORE, dfn.getSerialized(), REPLACE);
+                result = endpoints.get().broadcast(FUNCTION, RESTORE, dfn.getSerialized(), REPLACE);
             }
-            if (prev != null) throw new RuntimeException("failover");
+            if (!result) throw new RuntimeException("failover");
         } catch (Throwable e) {
             times--;
-            if (times >= 0 && flush) {
-                this.endpoints.get().updateQuietly(prev);
+            if (times >= 0) {
                 broadcast(dfn, times);
             } else {
                 MONITOR.add(ENDPOINT_FAILURE, "failed", 1);
@@ -204,15 +203,13 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
     }
     
     public void broadcast(CombineCommand command, int times) {
-        XEndpoint prev = null;
         try {
             DefaultCommand dcmd = command.getDefaultCommand();
-            prev = endpoints.get().batch(flush, dcmd.getCommand(), dcmd.getArgs());
-            if (prev != null) throw new RuntimeException("failover");
+            boolean result = endpoints.get().broadcast(dcmd.getCommand(), dcmd.getArgs());
+            if (!result) throw new RuntimeException("failover");
         } catch (Throwable e) {
             times--;
-            if (times >= 0 && flush) {
-                this.endpoints.get().updateQuietly(prev);
+            if (times >= 0) {
                 broadcast(command, times);
             } else {
                 MONITOR.add(ENDPOINT_FAILURE, "failed", 1);

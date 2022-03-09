@@ -137,18 +137,17 @@ public class ClusterRdbVisitor extends AbstractRmtRdbVisitor implements EventLis
     
     public void retry(DumpFunction dfn, int times) {
         logger.trace("sync rdb event [function], times {}", times);
-        XEndpoint prev = null;
         try {
+            boolean result = false;
             if (!replace) {
-                prev = endpoints.get().batch(flush, FUNCTION, RESTORE, dfn.getSerialized());
+                result = endpoints.get().broadcast(FUNCTION, RESTORE, dfn.getSerialized());
             } else {
-                prev = endpoints.get().batch(flush, FUNCTION, RESTORE, dfn.getSerialized(), REPLACE);
+                result = endpoints.get().broadcast(FUNCTION, RESTORE, dfn.getSerialized(), REPLACE);
             }
-            if (prev != null) throw new RuntimeException("failover");
+            if (!result) throw new RuntimeException("failover");
         } catch (Throwable e) {
             times--;
-            if (times >= 0 && flush) {
-                this.endpoints.get().updateQuietly(prev);
+            if (times >= 0) {
                 retry(dfn, times);
             } else {
                 MONITOR.add(ENDPOINT_FAILURE, "failed", 1);

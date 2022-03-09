@@ -41,4 +41,12 @@ public class DummyEndpoint extends AbstractEndpoint {
         v.setSlots(new ArrayList<>(dummy.getSlots()));
         return v;
     }
+    
+    public static XEndpoint valueOfQuietly(DummyEndpoint dummy, Configuration conf, int pipe) {
+        try {
+            return valueOf(dummy, conf, pipe);
+        } catch (Throwable e) {
+            return null;
+        }
+    }
 }

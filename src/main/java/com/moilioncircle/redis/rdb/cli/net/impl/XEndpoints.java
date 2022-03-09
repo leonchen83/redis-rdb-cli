@@ -19,6 +19,8 @@ package com.moilioncircle.redis.rdb.cli.net.impl;
 import static com.moilioncircle.redis.rdb.cli.conf.NodeConfParser.slot;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.CLUSTER;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.NODES;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.PING;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.ROLE;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -70,7 +72,7 @@ public class XEndpoints implements Closeable {
     public void ping(boolean force) {
         for (XEndpoint prev : new HashSet<>(index1)) {
             try {
-                prev.batch(force, "PING".getBytes());
+                prev.batch(force, PING);
             } catch (Throwable e) {
                 updateQuietly(prev);
                 break;
@@ -83,15 +85,17 @@ public class XEndpoints implements Closeable {
         return index2.get(slot).send(command, args);
     }
     
-    public XEndpoint batch(boolean force, byte[] command, byte[]... args) {
+    public boolean broadcast(byte[] command, byte[]... args) {
+        boolean result = true;
         for (XEndpoint prev : new HashSet<>(index1)) {
             try {
-                prev.batch(force, command, args);
+                prev.send(command, args);
             } catch (Throwable e) {
-                return prev;
+                updateQuietly(prev);
+                result = false;
             }
         }
-        return null;
+        return result;
     }
 
     public void batch(boolean force, short slot, byte[] command, byte[]... args) {
@@ -137,7 +141,7 @@ public class XEndpoints implements Closeable {
         logger.debug("update cluster view. failed node {}:{}, prev {}", endpoint.getHost(), endpoint.getPort(), index1);
         try {
             XEndpoint next = XEndpoint.valueOf(endpoint, 0);
-            RedisObject r= next.send("role".getBytes());
+            RedisObject r= next.send(ROLE);
             RedisObject[] array = r.getArray();
             if (array[0].getString().equals("master")) {
                 // master
@@ -150,77 +154,98 @@ public class XEndpoints implements Closeable {
                 replace(endpoint.getSlots(), endpoint, next);
             }
         } catch (Throwable e) {
-            // FAILOVER PROCESS
-            logger.debug("FAILOVER PROCESS!");
-            
-            // when all above failover mechanism failed.
-            // need update all cluster nodes view
-            
-            // 1 get cluster nodes view
-            List<String> lines = null;
-            for (XEndpoint prev : index1) {
-                try {
-                    RedisObject r = prev.send(CLUSTER, NODES);
-                    if (r.type.isError()) {
-                        // try next endpoint
-                        continue;
-                    }
-                    String config = r.getString();
-                    lines = Collections.ofList(config.split("\n"));
-                    break;
-                } catch (Throwable error) {
-                }
-            }
-            
-            // 2 if all endpoints failed exit.
-            if (lines == null) {
-                logger.error("can't connect to any of cluster nodes");
-                return;
-            }
-            
-            // 3 parse nodes info
-            Set<DummyEndpoint> next1 = new HashSet<>();
-            Map<Short, DummyEndpoint> next2 = new HashMap<>(16384);
-            try {
-                new NodeConfParser<DummyEndpoint>(tuple -> {
-                    return new DummyEndpoint(tuple.getV1(), tuple.getV2());
-                }).parse(lines, next1, next2);
-            } catch (Throwable cause) {
-                return;
-            }
-            
-            // 4 update all cluster nodes view
-            merge(next1, next2, lines);
-            logger.debug("merged cluster view. next {}", index1);
+            failover();
         }
     }
-
-    private void merge(Set<DummyEndpoint> next1, Map<Short, DummyEndpoint> next2, List<String> lines) {
+    
+    private void failover() {
+        // FAILOVER PROCESS
+        logger.debug("FAILOVER PROCESS!");
+        
+        // when all above failover mechanism failed.
+        // need update all cluster nodes view
+        
+        // 1 get cluster nodes view
+        String config = null;
+        List<String> lines = null;
+        for (XEndpoint prev : index1) {
+            try {
+                RedisObject r = prev.send(CLUSTER, NODES);
+                if (r.type.isError()) {
+                    // try next endpoint
+                    continue;
+                }
+                config = r.getString();
+                lines = Collections.ofList(config.split("\n"));
+                break;
+            } catch (Throwable error) {
+            }
+        }
+        
+        // 2 if all endpoints failed exit.
+        if (lines == null) {
+            logger.error("can't connect to any of cluster nodes");
+            return;
+        }
+        
+        // 3 parse nodes info
+        Set<DummyEndpoint> next1 = new HashSet<>();
+        Map<Short, DummyEndpoint> next2 = new HashMap<>(16384);
+        try {
+            new NodeConfParser<DummyEndpoint>(tuple -> {
+                return new DummyEndpoint(tuple.getV1(), tuple.getV2());
+            }).parse(lines, next1, next2);
+        } catch (Throwable cause) {
+            return;
+        }
+        
+        // 4 update all cluster nodes view
+        merge(next1, next2, lines, config);
+        logger.debug("merged cluster view. next {}", index1);
+    }
+    
+    private void merge(Set<DummyEndpoint> next1, Map<Short, DummyEndpoint> next2, List<String> lines, String config) {
         Set<XEndpoint> n1 = new HashSet<>();
         Map<Short, XEndpoint> n2 = new HashMap<>(16384);
-        
+        // 1. close broken endpoint
         for (XEndpoint endpoint : index1) {
-            if (next1.contains(endpoint)) {
-                n1.add(endpoint); // reuse old endpoint
-            } else {
+            if (!next1.contains(endpoint)) {
+                XEndpoint.closeQuietly(endpoint);
+                continue;
+            }
+            
+            try {
+                RedisObject r = endpoint.send(PING);
+                if (r.type.isError()) {
+                    XEndpoint.closeQuietly(endpoint);
+                } else {
+                    n1.add(endpoint); // reuse old endpoint
+                }
+            } catch (Throwable e) {
                 XEndpoint.closeQuietly(endpoint);
             }
         }
+        
+        // 2. create connection for new endpoint
         for (DummyEndpoint dummy : next1) {
             if (!n1.contains(dummy)) {
-                n1.add(DummyEndpoint.valueOf(dummy, configuration, pipe)); // new endpoint
+                XEndpoint endpoint = DummyEndpoint.valueOfQuietly(dummy, configuration, pipe);
+                if (endpoint != null) n1.add(endpoint); // new endpoint
             }
         }
         
+        // 3. create slot index
         for (XEndpoint endpoint : n1) {
             for(Short slot : endpoint.getSlots()) {
                 n2.put(slot, endpoint);
             }
         }
         
+        // 4. validate slot
         if (n2.size() != 16384) {
             // unrecoverable error
-            System.out.println("unsupported migrating importing slot");
+            logger.error("unsupported migrating importing slot. covered slots: [{}], cluster config: [{}]", n2.size(), config);
+            System.out.println("unsupported migrating importing slot. covered slots:" + n2.size());
             System.exit(-1);
         }
         
