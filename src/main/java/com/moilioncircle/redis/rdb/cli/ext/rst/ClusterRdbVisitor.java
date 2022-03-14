@@ -84,7 +84,6 @@ import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
 /**
  * @author Baoyi Chen
  */
-@SuppressWarnings("ThisEscapedInObjectConstruction")
 public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ClusterRdbVisitor.class);
@@ -96,6 +95,7 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
     private final Configuration configuration;
     private ThreadLocal<XEndpoints> endpoints = new ThreadLocal<>();
     
+    //noinspection ThisEscapedInObjectConstruction
     public ClusterRdbVisitor(Replicator replicator, Configure configure, Filter filter, RedisURI uri, List<String> lines, boolean replace) throws IOException {
         super(replicator, configure, filter, replace);
         this.lines = lines;

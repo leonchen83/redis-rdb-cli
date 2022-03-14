@@ -39,11 +39,11 @@ import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
 /**
  * @author Baoyi Chen
  */
-@SuppressWarnings("ThisEscapedInObjectConstruction")
 public class CountRdbVisitor extends AbstractRctRdbVisitor implements EventListener {
 
     private Map<String, Long> counter = new HashMap<>();
-
+    
+    //noinspection ThisEscapedInObjectConstruction
     public CountRdbVisitor(Replicator replicator, Configure configure, Args.RctArgs args, Escaper escaper) {
         super(replicator, configure, args, escaper);
         replicator.addEventListener(this);

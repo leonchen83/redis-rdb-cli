@@ -32,7 +32,6 @@ import com.moilioncircle.redis.replicator.io.RawByteListener;
 /**
  * @author Baoyi Chen
  */
-@SuppressWarnings("ThisEscapedInObjectConstruction")
 public class DumpRawByteListener implements RawByteListener, Closeable {
     private final int version;
     private final boolean listener;
@@ -43,12 +42,13 @@ public class DumpRawByteListener implements RawByteListener, Closeable {
         this(replicator, version, out, escaper, true);
     }
     
+    //noinspection ThisEscapedInObjectConstruction
     public DumpRawByteListener(Replicator replicator, int version, OutputStream out, Escaper escaper, boolean listener) {
         this.version = version;
         this.listener = listener;
         this.replicator = replicator;
-        if (listener) this.replicator.addRawByteListener(this);
         this.out = new CRCOutputStream(out, escaper);
+        if (listener) this.replicator.addRawByteListener(this);
     }
     
     public void write(byte type) throws IOException {

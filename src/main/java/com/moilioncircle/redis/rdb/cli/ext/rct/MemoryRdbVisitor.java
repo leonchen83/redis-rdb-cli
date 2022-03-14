@@ -75,7 +75,6 @@ import com.moilioncircle.redis.replicator.util.type.Tuple2;
 /**
  * @author Baoyi Chen
  */
-@SuppressWarnings("ThisEscapedInObjectConstruction")
 public class MemoryRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTuple2>, EventListener {
 	
 	private static final Monitor MONITOR = MonitorFactory.getMonitor("memory");
@@ -91,6 +90,7 @@ public class MemoryRdbVisitor extends AbstractRctRdbVisitor implements Consumer<
 	private boolean rdb6 = true;
 	private Map<Long, Tuple2<Long, Long>> dbInfo = new LinkedHashMap<>();
 	
+	//noinspection ThisEscapedInObjectConstruction
 	public MemoryRdbVisitor(Replicator replicator, Configure configure, Args.RctArgs args, Escaper escaper) {
 		super(replicator, configure, args, escaper);
 		this.bytes = args.bytes;
