@@ -39,6 +39,7 @@ public class SkipRdbValueVisitor extends RdbValueVisitor {
 		this.replicator = replicator;
 	}
 	
+	@Override
 	public <T> T applyFunction(RedisInputStream in, int version) throws IOException {
 		SkipRdbParser parser = new SkipRdbParser(in);
 		parser.rdbGenericLoadStringObject(); // name
@@ -51,12 +52,14 @@ public class SkipRdbValueVisitor extends RdbValueVisitor {
 		return null;
 	}
 	
+	@Override
 	public <T> T applyString(RedisInputStream in, int version) throws IOException {
 		SkipRdbParser parser = new SkipRdbParser(in);
 		parser.rdbLoadEncodedStringObject();
 		return null;
 	}
 	
+	@Override
 	public <T> T applyList(RedisInputStream in, int version) throws IOException {
 		SkipRdbParser skip = new SkipRdbParser(in);
 		long len = skip.rdbLoadLen().len;
@@ -67,6 +70,7 @@ public class SkipRdbValueVisitor extends RdbValueVisitor {
 		return null;
 	}
 	
+	@Override
 	public <T> T applySet(RedisInputStream in, int version) throws IOException {
 		SkipRdbParser skip = new SkipRdbParser(in);
 		long len = skip.rdbLoadLen().len;
@@ -77,6 +81,7 @@ public class SkipRdbValueVisitor extends RdbValueVisitor {
 		return null;
 	}
 	
+	@Override
 	public <T> T applyZSet(RedisInputStream in, int version) throws IOException {
 		SkipRdbParser skip = new SkipRdbParser(in);
 		long len = skip.rdbLoadLen().len;
@@ -88,6 +93,7 @@ public class SkipRdbValueVisitor extends RdbValueVisitor {
 		return null;
 	}
 	
+	@Override
 	public <T> T applyZSet2(RedisInputStream in, int version) throws IOException {
 		SkipRdbParser skip = new SkipRdbParser(in);
 		long len = skip.rdbLoadLen().len;
@@ -99,6 +105,7 @@ public class SkipRdbValueVisitor extends RdbValueVisitor {
 		return null;
 	}
 	
+	@Override
 	public <T> T applyHash(RedisInputStream in, int version) throws IOException {
 		SkipRdbParser skip = new SkipRdbParser(in);
 		long len = skip.rdbLoadLen().len;
@@ -110,48 +117,56 @@ public class SkipRdbValueVisitor extends RdbValueVisitor {
 		return null;
 	}
 	
+	@Override
 	public <T> T applyHashZipMap(RedisInputStream in, int version) throws IOException {
 		SkipRdbParser skip = new SkipRdbParser(in);
 		skip.rdbLoadPlainStringObject();
 		return null;
 	}
 	
+	@Override
 	public <T> T applyListZipList(RedisInputStream in, int version) throws IOException {
 		SkipRdbParser skip = new SkipRdbParser(in);
 		skip.rdbLoadPlainStringObject();
 		return null;
 	}
 	
+	@Override
 	public <T> T applySetIntSet(RedisInputStream in, int version) throws IOException {
 		SkipRdbParser skip = new SkipRdbParser(in);
 		skip.rdbLoadPlainStringObject();
 		return null;
 	}
 	
+	@Override
 	public <T> T applyZSetZipList(RedisInputStream in, int version) throws IOException {
 		SkipRdbParser skip = new SkipRdbParser(in);
 		skip.rdbLoadPlainStringObject();
 		return null;
 	}
 	
+	@Override
 	public <T> T applyZSetListPack(RedisInputStream in, int version) throws IOException {
 		SkipRdbParser skip = new SkipRdbParser(in);
 		skip.rdbLoadPlainStringObject();
 		return null;
 	}
 	
+	@Override
 	public <T> T applyHashZipList(RedisInputStream in, int version) throws IOException {
 		SkipRdbParser skip = new SkipRdbParser(in);
 		skip.rdbLoadPlainStringObject();
 		return null;
 	}
 	
+	@Override
 	public <T> T applyHashListPack(RedisInputStream in, int version) throws IOException {
 		SkipRdbParser skip = new SkipRdbParser(in);
 		skip.rdbLoadPlainStringObject();
 		return null;
 	}
 	
+	@Override
 	public <T> T applyListQuickList(RedisInputStream in, int version) throws IOException {
 		SkipRdbParser skip = new SkipRdbParser(in);
 		long len = skip.rdbLoadLen().len;
@@ -161,6 +176,7 @@ public class SkipRdbValueVisitor extends RdbValueVisitor {
 		return null;
 	}
 	
+	@Override
 	public <T> T applyListQuickList2(RedisInputStream in, int version) throws IOException {
 		SkipRdbParser skip = new SkipRdbParser(in);
 		long len = skip.rdbLoadLen().len;
@@ -171,6 +187,7 @@ public class SkipRdbValueVisitor extends RdbValueVisitor {
 		return null;
 	}
 	
+	@Override
 	public <T> T applyModule(RedisInputStream in, int version) throws IOException {
 		SkipRdbParser skip = new SkipRdbParser(in);
 		char[] c = new char[9];
@@ -188,6 +205,7 @@ public class SkipRdbValueVisitor extends RdbValueVisitor {
 		return null;
 	}
 	
+	@Override
 	public <T> T applyModule2(RedisInputStream in, int version) throws IOException {
 		SkipRdbParser skip = new SkipRdbParser(in);
 		skip.rdbLoadLen();
@@ -196,6 +214,7 @@ public class SkipRdbValueVisitor extends RdbValueVisitor {
 		return null;
 	}
 	
+	@Override
 	public <T> T applyStreamListPacks(RedisInputStream in, int version) throws IOException {
 		SkipRdbParser skip = new SkipRdbParser(in);
 		long listPacks = skip.rdbLoadLen().len;
@@ -230,6 +249,7 @@ public class SkipRdbValueVisitor extends RdbValueVisitor {
 		return null;
 	}
 	
+	@Override
 	public <T> T applyStreamListPacks2(RedisInputStream in, int version) throws IOException {
 		SkipRdbParser skip = new SkipRdbParser(in);
 		long listPacks = skip.rdbLoadLen().len;
