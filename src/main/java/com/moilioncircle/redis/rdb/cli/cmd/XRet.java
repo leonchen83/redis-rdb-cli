@@ -46,6 +46,7 @@ import picocli.CommandLine.Spec;
 /**
  * @author Baoyi Chen
  */
+@SuppressWarnings("unused")
 @Command(name = "ret",
 		separator = " ",
 		usageHelpWidth = 80,

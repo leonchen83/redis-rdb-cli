@@ -24,6 +24,7 @@ import java.util.Set;
 /**
  * @author Baoyi Chen
  */
+@SuppressWarnings("unchecked")
 public class Collections {
 	
 	private static final List<?> EMPTY_LIST = new ArrayList<>(0);

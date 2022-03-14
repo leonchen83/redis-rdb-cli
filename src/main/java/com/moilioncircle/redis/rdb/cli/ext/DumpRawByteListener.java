@@ -32,6 +32,7 @@ import com.moilioncircle.redis.replicator.io.RawByteListener;
 /**
  * @author Baoyi Chen
  */
+@SuppressWarnings("ThisEscapedInObjectConstruction")
 public class DumpRawByteListener implements RawByteListener, Closeable {
     private final int version;
     private final boolean listener;

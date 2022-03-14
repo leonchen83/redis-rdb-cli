@@ -146,6 +146,7 @@ import picocli.CommandLine.Spec;
 /**
  * @author Baoyi Chen
  */
+@SuppressWarnings("unused")
 @Command(name = "rst",
 		separator = " ",
 		usageHelpWidth = 80,
@@ -167,6 +168,7 @@ public class XRst implements Callable<Integer> {
 	@ArgGroup(exclusive = true, multiplicity = "1")
 	public RstExclusive exclusive;
 	
+	@SuppressWarnings("unused")
 	private static class RstExclusive {
 		@Option(names = {"-m", "--migrate"}, required = true, paramLabel = "<uri>", description = {"Migrate to uri. eg:", "redis://host:port?authPassword=foobar."})
 		private String migrate;

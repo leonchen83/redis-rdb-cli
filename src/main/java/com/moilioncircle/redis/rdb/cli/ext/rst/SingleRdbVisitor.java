@@ -61,6 +61,7 @@ import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
 /**
  * @author Baoyi Chen
  */
+@SuppressWarnings("ThisEscapedInObjectConstruction")
 public class SingleRdbVisitor extends AbstractRstRdbVisitor implements EventListener {
 
     private static final Logger logger = LoggerFactory.getLogger(SingleRdbVisitor.class);

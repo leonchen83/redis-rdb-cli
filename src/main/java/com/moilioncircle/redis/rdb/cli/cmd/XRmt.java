@@ -58,6 +58,7 @@ import picocli.CommandLine.Spec;
 /**
  * @author Baoyi Chen
  */
+@SuppressWarnings("unused")
 @Command(name = "rmt",
 		separator = " ",
 		usageHelpWidth = 80,
@@ -81,6 +82,7 @@ public class XRmt implements Callable<Integer> {
 	@ArgGroup(exclusive = true, multiplicity = "1")
 	private RmtExclusive exclusive;
 	
+	@SuppressWarnings("unused")
 	private static class RmtExclusive {
 		@Option(names = {"-m", "--migrate"}, required = true, paramLabel = "<uri>", description = {"Migrate to uri. eg:", "redis://host:port?authPassword=foobar."})
 		private String migrate;

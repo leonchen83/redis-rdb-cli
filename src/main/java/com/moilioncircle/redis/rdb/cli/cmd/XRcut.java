@@ -45,6 +45,7 @@ import picocli.CommandLine;
 /**
  * @author Baoyi Chen
  */
+@SuppressWarnings("unused")
 @CommandLine.Command(name = "rcut",
 		separator = " ",
 		usageHelpWidth = 80,

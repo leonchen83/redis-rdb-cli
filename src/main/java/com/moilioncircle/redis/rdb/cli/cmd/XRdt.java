@@ -47,6 +47,7 @@ import picocli.CommandLine.Spec;
 /**
  * @author Baoyi Chen
  */
+@SuppressWarnings("unused")
 @Command(name = "rdt",
 		separator = " ",
 		usageHelpWidth = 80,

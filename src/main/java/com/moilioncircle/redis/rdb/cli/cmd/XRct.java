@@ -44,6 +44,7 @@ import picocli.CommandLine.Spec;
 /**
  * @author Baoyi Chen
  */
+@SuppressWarnings("unused")
 @Command(name = "rct",
 		separator = " ",
 		usageHelpWidth = 80,

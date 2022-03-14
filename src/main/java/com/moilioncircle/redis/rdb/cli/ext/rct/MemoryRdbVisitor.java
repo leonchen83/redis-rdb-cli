@@ -75,6 +75,7 @@ import com.moilioncircle.redis.replicator.util.type.Tuple2;
 /**
  * @author Baoyi Chen
  */
+@SuppressWarnings("ThisEscapedInObjectConstruction")
 public class MemoryRdbVisitor extends AbstractRctRdbVisitor implements Consumer<XTuple2>, EventListener {
 	
 	private static final Monitor MONITOR = MonitorFactory.getMonitor("memory");
