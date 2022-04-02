@@ -41,14 +41,18 @@ public class FilesOutputStream extends OutputStream {
     private byte[] key;
 
     private final Set<CRCOutputStream> set = new HashSet<>();
-    private final Map<Short, CRCOutputStream> map = new HashMap<>();
+    private final Map<Short, CRCOutputStream> map = new HashMap<>(32768);
 
     public FilesOutputStream(File path, List<String> lines, Configure configure) {
         Function<Tuple3<String, Integer, String>, CRCOutputStream> mapper = t -> {
             File file = Paths.get(path.getAbsolutePath(), t.getV3() + ".rdb").toFile();
             return Outputs.newCRCOutput(file, configure.getOutputBufferSize());
         };
-        new NodeConfParser<>(mapper).parse(lines, set, map);
+        NodeConfParser.parse(lines, set, map, mapper);
+    
+        if (map.size() != 16384) {
+            throw new UnsupportedOperationException("slots size : " + map.size() + ", expected 16384.");
+        }
     }
 
     public void shard(byte[] key) {

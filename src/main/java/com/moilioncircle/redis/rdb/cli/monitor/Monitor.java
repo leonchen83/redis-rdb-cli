@@ -21,28 +21,28 @@ import java.util.Map;
 /**
  * @author Baoyi Chen
  */
-public interface Monitor { 
+public interface Monitor {
     interface Factory {
         Monitor create(String name);
     }
-
+    
     String getName();
-    
-    Map<MonitorKey, ? extends Counter<Long>> getLongCounters();
-    
-    Map<MonitorKey, ? extends Counter<Double>> getDoubleCounters();
     
     Map<MonitorKey, ? extends Gauge<Long>> getLongGauges();
     
     Map<MonitorKey, ? extends Gauge<Double>> getDoubleGauges();
     
     Map<MonitorKey, ? extends Gauge<String>> getStringGauges();
-
+    
+    Map<MonitorKey, ? extends Counter<Long>> getLongCounters();
+    
+    Map<MonitorKey, ? extends Counter<Double>> getDoubleCounters();
+    
     /**
      * Counter
      */
     void add(String measurement, long count);
-
+    
     void add(String measurement, long count, long time);
     
     void add(String measurement, String property, long count);
@@ -65,6 +65,54 @@ public interface Monitor {
     
     void add(String measurement, String[] properties, double count, long time);
     
+    default void add(String measurement, String property0, String property1, long count) {
+        add(measurement, new String[]{property0, property1}, count);
+    }
+    
+    default void add(String measurement, String property0, String property1, long count, long time) {
+        add(measurement, new String[]{property0, property1}, count, time);
+    }
+    
+    default void add(String measurement, String property0, String property1, double count) {
+        add(measurement, new String[]{property0, property1}, count);
+    }
+    
+    default void add(String measurement, String property0, String property1, double count, long time) {
+        add(measurement, new String[]{property0, property1}, count, time);
+    }
+    
+    default void add(String measurement, String property0, String property1, String property2, long count) {
+        add(measurement, new String[]{property0, property1, property2}, count);
+    }
+    
+    default void add(String measurement, String property0, String property1, String property2, long count, long time) {
+        add(measurement, new String[]{property0, property1, property2}, count, time);
+    }
+    
+    default void add(String measurement, String property0, String property1, String property2, double count) {
+        add(measurement, new String[]{property0, property1, property2}, count);
+    }
+    
+    default void add(String measurement, String property0, String property1, String property2, double count, long time) {
+        add(measurement, new String[]{property0, property1, property2}, count, time);
+    }
+    
+    default void add(String measurement, String property0, String property1, String property2, String property3, long count) {
+        add(measurement, new String[]{property0, property1, property2, property3}, count);
+    }
+    
+    default void add(String measurement, String property0, String property1, String property2, String property3, long count, long time) {
+        add(measurement, new String[]{property0, property1, property2, property3}, count, time);
+    }
+    
+    default void add(String measurement, String property0, String property1, String property2, String property3, double count) {
+        add(measurement, new String[]{property0, property1, property2, property3}, count);
+    }
+    
+    default void add(String measurement, String property0, String property1, String property2, String property3, double count, long time) {
+        add(measurement, new String[]{property0, property1, property2, property3}, count, time);
+    }
+    
     /**
      * Gauge
      */
@@ -85,5 +133,40 @@ public interface Monitor {
     void set(String measurement, String[] properties, double value);
     
     void set(String measurement, String[] properties, String value);
-
+    
+    default void set(String measurement, String property0, String property1, long value) {
+        set(measurement, new String[]{property0, property1}, value);
+    }
+    
+    default void set(String measurement, String property0, String property1, double value) {
+        set(measurement, new String[]{property0, property1}, value);
+    }
+    
+    default void set(String measurement, String property0, String property1, String value) {
+        set(measurement, new String[]{property0, property1}, value);
+    }
+    
+    default void set(String measurement, String property0, String property1, String property2, long value) {
+        set(measurement, new String[]{property0, property1, property2}, value);
+    }
+    
+    default void set(String measurement, String property0, String property1, String property2, double value) {
+        set(measurement, new String[]{property0, property1, property2}, value);
+    }
+    
+    default void set(String measurement, String property0, String property1, String property2, String value) {
+        set(measurement, new String[]{property0, property1, property2}, value);
+    }
+    
+    default void set(String measurement, String property0, String property1, String property2, String property3, long value) {
+        set(measurement, new String[]{property0, property1, property2, property3}, value);
+    }
+    
+    default void set(String measurement, String property0, String property1, String property2, String property3, double value) {
+        set(measurement, new String[]{property0, property1, property2, property3}, value);
+    }
+    
+    default void set(String measurement, String property0, String property1, String property2, String property3, String value) {
+        set(measurement, new String[]{property0, property1, property2, property3}, value);
+    }
 }

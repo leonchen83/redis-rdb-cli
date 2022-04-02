@@ -28,225 +28,240 @@ import java.util.function.Function;
 
 import com.moilioncircle.redis.rdb.cli.glossary.Slotable;
 import com.moilioncircle.redis.rdb.cli.util.CRC16;
+import com.moilioncircle.redis.rdb.cli.util.Collections;
 import com.moilioncircle.redis.replicator.util.Tuples;
 import com.moilioncircle.redis.replicator.util.type.Tuple3;
 
 /**
  * @author Baoyi Chen
  */
-public class NodeConfParser<T> {
-
-    private final Function<Tuple3<String, Integer, String>, T> mapper;
-
-    public NodeConfParser(Function<Tuple3<String, Integer, String>, T> mapper) {
-        this.mapper = mapper;
-    }
-
-    public void parse(List<String> conf, Set<T> set, Map<Short, T> result) {
-        Map<String, T> map = new HashMap<>();
-        for (String line : conf) {
-            List<String> args = parseLine(line);
-            if (isEmpty(args)) continue;
-            if (args.get(0).equals("vars")) {
-                for (int i = 1; i < args.size(); i += 2) {
-                    switch (args.get(i)) {
-                        case "currentEpoch":
-                            // pass
-                            break;
-                        case "lastVoteEpoch":
-                            // pass
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            } else if (args.size() < 8) {
-                // pass
-            } else {
-                String name = args.get(0);
-                String hostAndPort = args.get(1);
-                int cIdx = hostAndPort.indexOf(":");
-                int aIdx = hostAndPort.indexOf("@");
-                String host = hostAndPort.substring(0, cIdx); // ip
-                int port = parseInt(hostAndPort.substring(cIdx + 1, aIdx == -1 ? hostAndPort.length() : aIdx));
-
-                boolean master = false;
-                boolean serving = true;
-                for (String role : args.get(2).split(",")) {
-                    switch (role) {
-                        case "noflags":
-                        case "fail":
-                        case "fail?":
-                        case "slave":
-                        case "noaddr":
-                        case "handshake":
-                            serving = false;
-                            break;
-                        case "master":
-                            master = true;
-                            break;
-                        case "myself":
-                            // pass
-                            // pass
-                            break;
-                        default:
-                            serving = false;
-                    }
-                }
-
-                if (!map.containsKey(name) && master && serving) {
-                    T v = mapper.apply(Tuples.of(host, port, name));
-                    map.put(name, v);
-                    set.add(v);
-                }
-
-                if (!args.get(3).equals("-")) {
-                    args.get(3); // slave
-                    // pass
-                }
-
-                // args.get(4); pingTime
-                // args.get(5); pongTime
-                // args.get(6); configEpoch
-
-                for (int i = 8; i < args.size(); i++) {
-                    int st, ed;
-                    String arg = args.get(i);
-                    if (arg.startsWith("[")) {
-                        int idx = arg.indexOf("-");
-                        arg.substring(1, idx); // slot
-                        arg.substring(idx + 3, idx + 3 + 40); // migrate
-                        throw new UnsupportedOperationException("must not contains migrating slot.");
-                    } else if (arg.contains("-")) {
-                        int idx = arg.indexOf("-");
-                        st = parseInt(arg.substring(0, idx));
-                        ed = parseInt(arg.substring(idx + 1));
-                    } else st = ed = parseInt(arg);
-                    for (; st <= ed; st++) {
-                        T v = map.get(name);
-                        result.put((short) st, v);
-                        if (v instanceof Slotable) {
-                            ((Slotable) v).addSlot((short)st);
-                        }
-                    }
-                }
-            }
-        }
-
-        if (result.size() != 16384) {
-            throw new UnsupportedOperationException("slots size : " + map.size() + ", expected 16384.");
-        }
-    }
-
-    public static List<String> parseLine(String line) {
-        List<String> args = new ArrayList<>();
-        if (line.length() == 0 || line.equals("\n")) return args;
-        char[] ary = line.toCharArray();
-        StringBuilder s = new StringBuilder();
-        boolean dq = false, q = false;
-        for (int i = 0; i < ary.length; i++) {
-            char c = ary[i];
-            switch (c) {
-                case ' ':
-                    if (dq || q) s.append(' ');
-                    else if (s.length() > 0) {
-                        args.add(s.toString());
-                        s.setLength(0);
-                    }
-                    break;
-                case '"':
-                    if (!dq && !q) {
-                        dq = true;
-                    } else if (q) {
-                        s.append('"');
-                    } else {
-                        args.add(s.toString());
-                        s.setLength(0);
-                        dq = false;
-                        if (i + 1 < ary.length && ary[i + 1] != ' ')
-                            throw new UnsupportedOperationException("parse config error.");
-                    }
-                    break;
-                case '\'':
-                    if (!dq && !q) {
-                        q = true;
-                    } else if (dq) {
-                        s.append('\'');
-                    } else {
-                        args.add(s.toString());
-                        s.setLength(0);
-                        q = false;
-                        if (i + 1 < ary.length && ary[i + 1] != ' ')
-                            throw new UnsupportedOperationException("parse config error.");
-                    }
-                    break;
-                case '\\':
-                    if (!dq) s.append('\\');
-                    else {
-                        i++;
-                        if (i < ary.length) {
-                            switch (ary[i]) {
-                                case 'n':
-                                    s.append('\n');
-                                    break;
-                                case 'r':
-                                    s.append('\r');
-                                    break;
-                                case 't':
-                                    s.append('\t');
-                                    break;
-                                case 'b':
-                                    s.append('\b');
-                                    break;
-                                case 'f':
-                                    s.append('\f');
-                                    break;
-                                case 'a':
-                                    s.append((byte) 7);
-                                    break;
-                                case 'x':
-                                    if (i + 2 >= ary.length) s.append("\\x");
-                                    else {
-                                        char high = ary[++i];
-                                        char low = ary[++i];
-                                        try {
-                                            s.append(parseInt(new String(new char[]{high, low}), 16));
-                                        } catch (Exception e) {
-                                            s.append("\\x");
-                                            s.append(high);
-                                            s.append(low);
-                                        }
-                                    }
-                                    break;
-                                default:
-                                    s.append(ary[i]);
-                                    break;
-                            }
-                        }
-                    }
-                    break;
-                default:
-                    s.append(c);
-                    break;
-            }
-        }
-        if (dq || q) throw new UnsupportedOperationException("parse line[" + line + "] error.");
-        if (s.length() > 0) args.add(s.toString());
-        return args;
-    }
-
-    public static short slot(byte[] key) {
-        if (key == null) return 0;
-        int st = -1, ed = -1;
-        for (int i = 0, len = key.length; i < len; i++) {
-            if (key[i] == '{' && st == -1) st = i;
-            if (key[i] == '}' && st >= 0) {
-                ed = i;
-                break;
-            }
-        }
-        if (st >= 0 && ed >= 0 && ed > st + 1)
-            return (short) (CRC16.crc16(key, st + 1, ed) & 16383);
-        return (short) (CRC16.crc16(key) & 16383);
-    }
+public class NodeConfParser {
+	
+	public static List<XClusterNodes> parse(String clusterNodes) {
+		return parse(Collections.ofList(clusterNodes.split("\n")), Collections.ofSet(), new HashMap<>(), null);
+	}
+	
+	public static <T> List<XClusterNodes> parse(List<String> conf, Set<T> set, Map<Short, T> result, Function<Tuple3<String, Integer, String>, T> mapper) {
+		List<XClusterNodes> list = new ArrayList<>(conf.size());
+		Map<String, T> map = new HashMap<>();
+		for (String line : conf) {
+			List<String> args = parseLine(line);
+			if (isEmpty(args)) continue;
+			if (args.get(0).equals("vars")) {
+				for (int i = 1; i < args.size(); i += 2) {
+					switch (args.get(i)) {
+						case "currentEpoch":
+							// pass
+							break;
+						case "lastVoteEpoch":
+							// pass
+							break;
+						default:
+							break;
+					}
+				}
+			} else if (args.size() < 8) {
+				// pass
+			} else {
+				XClusterNodes node = new XClusterNodes();
+				list.add(node);
+				String name = args.get(0);
+				node.setName(name);
+				String hostAndPort = args.get(1);
+				int cIdx = hostAndPort.indexOf(":");
+				int aIdx = hostAndPort.indexOf("@");
+				String host = hostAndPort.substring(0, cIdx); // ip
+				int port = parseInt(hostAndPort.substring(cIdx + 1, aIdx == -1 ? hostAndPort.length() : aIdx));
+				node.setHostAndPort(host + ":" + port);
+				boolean master = false;
+				boolean serving = true;
+				for (String role : args.get(2).split(",")) {
+					switch (role) {
+						case "noflags":
+						case "fail":
+						case "fail?":
+						case "noaddr":
+						case "handshake":
+							node.setState(role);
+							serving = false;
+							break;
+						case "slave":
+							node.setMaster(false);
+							serving = false;
+							break;
+						case "master":
+							node.setMaster(true);
+							master = true;
+							break;
+						case "myself":
+							node.setMyself(true);
+							break;
+						default:
+							serving = false;
+					}
+				}
+				
+				if (!map.containsKey(name) && master && serving) {
+					if (mapper != null) {
+						T v = mapper.apply(Tuples.of(host, port, name));
+						map.put(name, v);
+						set.add(v);
+					}
+				}
+				
+				if (!args.get(3).equals("-")) {
+					args.get(3); // slave
+					// pass
+				}
+				
+				String pingTime = args.get(4);
+				node.setPingTime(Long.parseLong(pingTime));
+				String pongTime = args.get(5);
+				node.setPongTime(Long.parseLong(pongTime));
+				String configEpoch = args.get(6);
+				node.setConfigEpoch(Long.parseLong(configEpoch));
+				String connect = args.get(7);
+				node.setLink(connect);
+				
+				for (int i = 8; i < args.size(); i++) {
+					int st = 0, ed = 0;
+					String arg = args.get(i);
+					if (arg.startsWith("[")) {
+						int idx = arg.indexOf("-");
+						String slot = arg.substring(1, idx); // slot
+						arg.substring(idx + 3, idx + 3 + 40); // migrate
+						node.getMigratingSlots().add(Short.parseShort(slot));
+					} else if (arg.contains("-")) {
+						int idx = arg.indexOf("-");
+						st = parseInt(arg.substring(0, idx));
+						ed = parseInt(arg.substring(idx + 1));
+					} else {
+						st = ed = parseInt(arg);
+					}
+					for (; st <= ed; st++) {
+						T v = map.get(name);
+						result.put((short) st, v);
+						node.getSlots().add((short) st);
+						if (v instanceof Slotable) {
+							((Slotable) v).addSlot((short) st);
+						}
+					}
+				}
+			}
+		}
+		
+		return list;
+	}
+	
+	public static List<String> parseLine(String line) {
+		List<String> args = new ArrayList<>();
+		if (line.length() == 0 || line.equals("\n")) return args;
+		char[] ary = line.toCharArray();
+		StringBuilder s = new StringBuilder();
+		boolean dq = false, q = false;
+		for (int i = 0; i < ary.length; i++) {
+			char c = ary[i];
+			switch (c) {
+				case ' ':
+					if (dq || q) s.append(' ');
+					else if (s.length() > 0) {
+						args.add(s.toString());
+						s.setLength(0);
+					}
+					break;
+				case '"':
+					if (!dq && !q) {
+						dq = true;
+					} else if (q) {
+						s.append('"');
+					} else {
+						args.add(s.toString());
+						s.setLength(0);
+						dq = false;
+						if (i + 1 < ary.length && ary[i + 1] != ' ')
+							throw new UnsupportedOperationException("parse config error.");
+					}
+					break;
+				case '\'':
+					if (!dq && !q) {
+						q = true;
+					} else if (dq) {
+						s.append('\'');
+					} else {
+						args.add(s.toString());
+						s.setLength(0);
+						q = false;
+						if (i + 1 < ary.length && ary[i + 1] != ' ')
+							throw new UnsupportedOperationException("parse config error.");
+					}
+					break;
+				case '\\':
+					if (!dq) s.append('\\');
+					else {
+						i++;
+						if (i < ary.length) {
+							switch (ary[i]) {
+								case 'n':
+									s.append('\n');
+									break;
+								case 'r':
+									s.append('\r');
+									break;
+								case 't':
+									s.append('\t');
+									break;
+								case 'b':
+									s.append('\b');
+									break;
+								case 'f':
+									s.append('\f');
+									break;
+								case 'a':
+									s.append((byte) 7);
+									break;
+								case 'x':
+									if (i + 2 >= ary.length) s.append("\\x");
+									else {
+										char high = ary[++i];
+										char low = ary[++i];
+										try {
+											s.append(parseInt(new String(new char[]{high, low}), 16));
+										} catch (Exception e) {
+											s.append("\\x");
+											s.append(high);
+											s.append(low);
+										}
+									}
+									break;
+								default:
+									s.append(ary[i]);
+									break;
+							}
+						}
+					}
+					break;
+				default:
+					s.append(c);
+					break;
+			}
+		}
+		if (dq || q) throw new UnsupportedOperationException("parse line[" + line + "] error.");
+		if (s.length() > 0) args.add(s.toString());
+		return args;
+	}
+	
+	public static short slot(byte[] key) {
+		if (key == null) return 0;
+		int st = -1, ed = -1;
+		for (int i = 0, len = key.length; i < len; i++) {
+			if (key[i] == '{' && st == -1) st = i;
+			if (key[i] == '}' && st >= 0) {
+				ed = i;
+				break;
+			}
+		}
+		if (st >= 0 && ed >= 0 && ed > st + 1)
+			return (short) (CRC16.crc16(key, st + 1, ed) & 16383);
+		return (short) (CRC16.crc16(key) & 16383);
+	}
 }

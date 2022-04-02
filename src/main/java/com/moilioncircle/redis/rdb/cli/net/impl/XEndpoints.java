@@ -53,7 +53,7 @@ public class XEndpoints implements Closeable {
     private final Configuration configuration;
     private Set<XEndpoint> index1 = new HashSet<>();
     private List<String> clusterNodes = new ArrayList<>();
-    private Map<Short, XEndpoint> index2 = new HashMap<>(16384);
+    private Map<Short, XEndpoint> index2 = new HashMap<>(32768);
 
     public XEndpoints(List<String> lines, int pipe, boolean statistics, Configuration configuration) {
         this.pipe = pipe;
@@ -62,7 +62,11 @@ public class XEndpoints implements Closeable {
         Function<Tuple3<String, Integer, String>, XEndpoint> mapper = t -> {
             return new XEndpoint(t.getV1(), t.getV2(), 0, pipe, statistics, configuration);
         };
-        new NodeConfParser<>(mapper).parse(lines, index1, index2);
+        NodeConfParser.parse(lines, index1, index2, mapper);
+    
+        if (index2.size() != 16384) {
+            throw new UnsupportedOperationException("slots size : " + index2.size() + ", expected 16384.");
+        }
     }
     
     public List<String> getClusterNodes() {
@@ -190,11 +194,15 @@ public class XEndpoints implements Closeable {
         
         // 3 parse nodes info
         Set<DummyEndpoint> next1 = new HashSet<>();
-        Map<Short, DummyEndpoint> next2 = new HashMap<>(16384);
+        Map<Short, DummyEndpoint> next2 = new HashMap<>(32768);
         try {
-            new NodeConfParser<DummyEndpoint>(tuple -> {
+            NodeConfParser.parse(lines, next1, next2, tuple -> {
                 return new DummyEndpoint(tuple.getV1(), tuple.getV2());
-            }).parse(lines, next1, next2);
+            });
+    
+            if (next2.size() != 16384) {
+                throw new UnsupportedOperationException("slots size : " + next2.size() + ", expected 16384.");
+            }
         } catch (Throwable cause) {
             return;
         }
