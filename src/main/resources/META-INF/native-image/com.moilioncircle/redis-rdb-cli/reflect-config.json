@@ -9,6 +9,11 @@
   "name":"char[]"
 },
 {
+  "name":"com.moilioncircle.redis.rdb.cli.cmd.XRMonitor",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true
+},
+{
   "name":"com.moilioncircle.redis.rdb.cli.cmd.XRct",
   "allDeclaredFields":true,
   "allDeclaredMethods":true

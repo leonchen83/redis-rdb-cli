@@ -93,92 +93,94 @@ public class XMonitorCommand implements Runnable, Closeable {
 			
 			// server
 			long now = System.currentTimeMillis();
-			setLong("monitor", now);
-			setLong("uptime_in_seconds", next.getUptimeInSeconds());
-			setString("redis_version", next.getRedisVersion());
-			setString("role", next.getRole());
+			setLong("monitor", hostAndPort, name, now);
+			setLong("uptime_in_seconds", hostAndPort, name, next.getUptimeInSeconds());
+			setString("redis_version", hostAndPort, name, next.getRedisVersion());
+			setString("role", hostAndPort, name, next.getRole());
 			
 			// clients
-			setLong("connected_clients", next.getConnectedClients());
-			setLong("blocked_clients", next.getBlockedClients());
-			setLong("tracking_clients", next.getTrackingClients());
-			setLong("maxclients", next.getMaxclients());
+			setLong("connected_clients", hostAndPort, name, next.getConnectedClients());
+			setLong("blocked_clients", hostAndPort, name, next.getBlockedClients());
+			setLong("tracking_clients", hostAndPort, name, next.getTrackingClients());
+			setLong("maxclients", hostAndPort, name, next.getMaxclients());
 			
 			// memory
-			setLong("maxmemory", next.getMaxmemory());
-			setLong("used_memory", next.getUsedMemory());
-			setLong("used_memory_rss", next.getUsedMemoryRss());
-			setLong("used_memory_peak", next.getUsedMemoryPeak());
-			setLong("used_memory_dataset", next.getUsedMemoryDataset());
-			setLong("used_memory_lua", next.getUsedMemoryLua());
-			setLong("used_memory_functions", next.getUsedMemoryFunctions());
-			setLong("used_memory_scripts", next.getUsedMemoryScripts());
-			setLong("total_system_memory", next.getTotalSystemMemory()); // ?
-			setDouble("mem_fragmentation_ratio", next.getMemFragmentationRatio());
-			setLong("mem_fragmentation_bytes", next.getMemFragmentationBytes());
+			setLong("maxmemory", hostAndPort, name, next.getMaxmemory());
+			setLong("used_memory", hostAndPort, name, next.getUsedMemory());
+			setLong("used_memory_rss", hostAndPort, name, next.getUsedMemoryRss());
+			setLong("used_memory_peak", hostAndPort, name, next.getUsedMemoryPeak());
+			setLong("used_memory_dataset", hostAndPort, name, next.getUsedMemoryDataset());
+			setLong("used_memory_lua", hostAndPort, name, next.getUsedMemoryLua());
+			setLong("used_memory_functions", hostAndPort, name, next.getUsedMemoryFunctions());
+			setLong("used_memory_scripts", hostAndPort, name, next.getUsedMemoryScripts());
+			setLong("total_system_memory", hostAndPort, name, next.getTotalSystemMemory()); // ?
+			setDouble("mem_fragmentation_ratio", hostAndPort, name, next.getMemFragmentationRatio());
+			setLong("mem_fragmentation_bytes", hostAndPort, name, next.getMemFragmentationBytes());
 
 			// command
-			setLong("total_connections_received", next.getTotalConnectionsReceived());
-			setLong("total_commands_processed", next.getTotalCommandsProcessed());
+			setLong("total_connections_received", hostAndPort, name, next.getTotalConnectionsReceived());
+			setLong("total_commands_processed", hostAndPort, name, next.getTotalCommandsProcessed());
 			
-			setLong("total_reads_processed", next.getTotalReadsProcessed());
-			setLong("total_writes_processed", next.getTotalWritesProcessed());
-			setLong("total_error_replies", next.getTotalErrorReplies());
+			setLong("total_reads_processed", hostAndPort, name, next.getTotalReadsProcessed());
+			setLong("total_writes_processed", hostAndPort, name, next.getTotalWritesProcessed());
+			setLong("total_error_replies", hostAndPort, name, next.getTotalErrorReplies());
 			
 			Long hits = next.getKeyspaceHits();
 			Long misses = next.getKeyspaceMisses();
 			if (hits != null && misses != null) {
-				monitor.set("keyspace_hit_rate", hits * 1d / (hits + misses));
+				monitor.set("keyspace_hit_rate", hostAndPort, name, hits * 1d / (hits + misses));
 			}
 			
 			// ops
-			setLong("total_net_input_bytes", next.getTotalNetInputBytes());
-			setLong("total_net_output_bytes", next.getTotalNetOutputBytes());
-			setDouble("evicted_keys_per_sec", next.getEvictedKeysPerSec());
-			setDouble("instantaneous_ops_per_sec", next.getInstantaneousOpsPerSec());
-			setDouble("instantaneous_write_ops_per_sec", next.getInstantaneousWriteOpsPerSec());
-			setDouble("instantaneous_read_ops_per_sec", next.getInstantaneousReadOpsPerSec());
-			setDouble("instantaneous_other_ops_per_sec", next.getInstantaneousOtherOpsPerSec());
-			setDouble("instantaneous_sync_write_ops_per_sec", next.getInstantaneousSyncWriteOpsPerSec());
-			setDouble("instantaneous_input_kbps", next.getInstantaneousInputKbps());
-			setDouble("instantaneous_output_kbps", next.getInstantaneousOutputKbps());
+			setLong("total_net_input_bytes", hostAndPort, name, next.getTotalNetInputBytes());
+			setLong("total_net_output_bytes", hostAndPort, name, next.getTotalNetOutputBytes());
+			setDouble("evicted_keys_per_sec", hostAndPort, name, next.getEvictedKeysPerSec());
+			setDouble("instantaneous_ops_per_sec", hostAndPort, name, next.getInstantaneousOpsPerSec());
+			setDouble("instantaneous_write_ops_per_sec", hostAndPort, name, next.getInstantaneousWriteOpsPerSec());
+			setDouble("instantaneous_read_ops_per_sec", hostAndPort, name, next.getInstantaneousReadOpsPerSec());
+			setDouble("instantaneous_other_ops_per_sec", hostAndPort, name, next.getInstantaneousOtherOpsPerSec());
+			setDouble("instantaneous_sync_write_ops_per_sec", hostAndPort, name, next.getInstantaneousSyncWriteOpsPerSec());
+			setDouble("instantaneous_input_kbps", hostAndPort, name, next.getInstantaneousInputKbps());
+			setDouble("instantaneous_output_kbps", hostAndPort, name, next.getInstantaneousOutputKbps());
 			
 			// cpu
-			setDouble("used_cpu_sys", next.getUsedCpuSys());
-			setDouble("used_cpu_user", next.getUsedCpuUser());
-			setDouble("used_cpu_sys_children", next.getUsedCpuSysChildren());
-			setDouble("used_cpu_user_children", next.getUsedCpuUserChildren());
+			setDouble("used_cpu_sys", hostAndPort, name, next.getUsedCpuSys());
+			setDouble("used_cpu_user", hostAndPort, name, next.getUsedCpuUser());
+			setDouble("used_cpu_sys_children", hostAndPort, name, next.getUsedCpuSysChildren());
+			setDouble("used_cpu_user_children", hostAndPort, name, next.getUsedCpuUserChildren());
 			
 			// db
 			for (Map.Entry<String, Long> entry : next.getDbInfo().entrySet()) {
-				monitor.set("dbnum", entry.getKey(), entry.getValue());
+				monitor.set("dbnum", hostAndPort, name, entry.getKey(), entry.getValue());
 			}
 			for (Map.Entry<String, Long> entry : next.getDbExpireInfo().entrySet()) {
-				monitor.set("dbexp", entry.getKey(), entry.getValue());
+				monitor.set("dbexp", hostAndPort, name, entry.getKey(), entry.getValue());
 			}
 			
 			// diff
-			setLong("expired_keys", next.getExpiredKeys());
-			setLong("evicted_keys", next.getEvictedKeys());
+			setLong("expired_keys", hostAndPort, name, next.getExpiredKeys());
+			setLong("evicted_keys", hostAndPort, name, next.getEvictedKeys());
 			
 			// slow log
-			setLong("total_slow_log", next.getTotalSlowLog());
+			setLong("total_slow_log", hostAndPort, name, next.getTotalSlowLog());
 			
 			List<XSlowLog> slowLogs = next.getDiffSlowLogs();
 			for (XSlowLog slowLog : slowLogs) {
 				String[] properties = new String[5];
-				properties[0] = String.valueOf(slowLog.getId());
-				properties[1] = slowLog.getTimestamp();
-				properties[2] = slowLog.getCommand();
-				properties[3] = slowLog.getClientName();
-				properties[4] = slowLog.getHostAndPort();
+				properties[0] = hostAndPort;
+				properties[1] = name;
+				properties[2] = String.valueOf(slowLog.getId());
+				properties[3] = slowLog.getTimestamp();
+				properties[4] = slowLog.getCommand();
+				properties[5] = slowLog.getClientName();
+				properties[6] = slowLog.getHostAndPort();
 				monitor.set("slow_log", properties, slowLog.getExecutionTime());
 			}
 			
 			if (next.getDiffTotalSlowLog() > 0) {
-				monitor.set("slow_log_latency", (next.getDiffTotalSlowLogExecutionTime() / (next.getDiffTotalSlowLog() * 1d)));
+				monitor.set("slow_log_latency", hostAndPort, name, (next.getDiffTotalSlowLogExecutionTime() / (next.getDiffTotalSlowLog() * 1d)));
 			} else {
-				monitor.set("slow_log_latency", 0d);
+				monitor.set("slow_log_latency", hostAndPort, name, 0d);
 			}
 			
 			prev = next;
@@ -188,19 +190,19 @@ public class XMonitorCommand implements Runnable, Closeable {
 		}
 	}
 	
-	private void setLong(String field, Long value) {
+	private void setLong(String field, String hostAndPort, String name, Long value) {
 		if (value != null) {
 			monitor.set(field, hostAndPort, name, value);
 		}
 	}
 	
-	private void setDouble(String field, Double value) {
+	private void setDouble(String field, String hostAndPort, String name, Double value) {
 		if (value != null) {
 			monitor.set(field, hostAndPort, name, value);
 		}
 	}
 	
-	private void setString(String field, String value) {
+	private void setString(String field, String hostAndPort, String name, String value) {
 		if (value != null) {
 			monitor.set(field, hostAndPort, name, value);
 		}
