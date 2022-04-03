@@ -55,9 +55,9 @@ public class XMonitorCommand implements Runnable, Closeable {
 	private final String host;
 	private final int port;
 	private String name;
+	private String hostAndPort;
 	private Configure configure;
 	private MonitorManager manager;
-	private HostAndPort hostAndPort;
 	private volatile XEndpoint endpoint;
 	private final Configuration configuration;
 	private XStandaloneRedisInfo prev = EMPTY;
@@ -69,8 +69,8 @@ public class XMonitorCommand implements Runnable, Closeable {
 		this.manager.open();
 		this.host = uri.getHost();
 		this.port = uri.getPort();
-		this.hostAndPort = new HostAndPort(host, port);
 		this.configuration = configure.merge(uri, true);
+		this.hostAndPort = new HostAndPort(host, port).toString();
 		this.endpoint = new XEndpoint(this.host, this.port, 0, -1, false, this.configuration);
 	}
 	
@@ -90,12 +90,12 @@ public class XMonitorCommand implements Runnable, Closeable {
 			Long len = list.get(3).getNumber();
 			RedisObject[] binaryLogs = list.get(4).getArray();
 			
-			XStandaloneRedisInfo next = XStandaloneRedisInfo.valueOf(info, commandstats, maxclients, len, binaryLogs, hostAndPort.toString());
+			XStandaloneRedisInfo next = XStandaloneRedisInfo.valueOf(info, commandstats, maxclients, len, binaryLogs, hostAndPort);
 			next = XStandaloneRedisInfo.diff(prev, next);
 			
 			// server
 			long now = System.currentTimeMillis();
-			monitor.set("monitor", next.getHostAndPort(), name, now);
+			setLong("monitor", now);
 			setLong("uptime_in_seconds", next.getUptimeInSeconds());
 			setString("redis_version", next.getRedisVersion());
 			setString("role", next.getRole());
@@ -192,19 +192,19 @@ public class XMonitorCommand implements Runnable, Closeable {
 	
 	private void setLong(String field, Long value) {
 		if (value != null) {
-			monitor.set(field, value);
+			monitor.set(field, hostAndPort, name, value);
 		}
 	}
 	
 	private void setDouble(String field, Double value) {
 		if (value != null) {
-			monitor.set(field, value);
+			monitor.set(field, hostAndPort, name, value);
 		}
 	}
 	
 	private void setString(String field, String value) {
 		if (value != null) {
-			monitor.set(field, value);
+			monitor.set(field, hostAndPort, name, value);
 		}
 	}
 	
@@ -218,10 +218,7 @@ public class XMonitorCommand implements Runnable, Closeable {
 	
 	@Override
 	public void close() {
-		try {
-			XEndpoint.closeQuietly(endpoint);
-		} catch (Throwable e) {
-		}
+		XEndpoint.closeQuietly(endpoint);
 		MonitorManager.closeQuietly(manager);
 	}
 }
