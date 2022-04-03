@@ -79,6 +79,7 @@ public class XStandaloneRedisInfo {
 	private List<XSlowLog> slowLogs = new ArrayList<>();
 	private Map<String, Long> dbInfo = new HashMap<>();
 	private Map<String, Long> dbExpireInfo = new HashMap<>();
+	private Map<String, Long> commandStats = new HashMap<>(); 
 	
 	private Long diffTotalSlowLog;
 	private Long diffTotalSlowLogExecutionTime;
@@ -468,6 +469,14 @@ public class XStandaloneRedisInfo {
 		this.dbExpireInfo = dbExpireInfo;
 	}
 	
+	public Map<String, Long> getCommandStats() {
+		return commandStats;
+	}
+	
+	public void setCommandStats(Map<String, Long> commandStats) {
+		this.commandStats = commandStats;
+	}
+	
 	public Long getDiffTotalSlowLogExecutionTime() {
 		return diffTotalSlowLogExecutionTime;
 	}
@@ -532,6 +541,7 @@ public class XStandaloneRedisInfo {
 		xinfo.usedCpuUserChildren = getDouble("CPU", "used_cpu_user_children", nextInfo);
 		
 		dbInfo(nextInfo, xinfo);
+		commandStatInfo(nextInfo, xinfo);
 		xinfo.slowLogLen = slowLogLen;
 		xinfo.slowLogs = XSlowLog.valueOf(binaryLogs, hostAndPort);
 		xinfo.totalSlowLog = isEmpty(xinfo.slowLogs) ? 0 : xinfo.slowLogs.get(0).getId();
@@ -626,6 +636,21 @@ public class XStandaloneRedisInfo {
 			}
 			info.dbInfo = dbInfo;
 			info.dbExpireInfo = dbExpireInfo;
+		} catch (NumberFormatException e) {
+		}
+	}
+	
+	private static void commandStatInfo(Map<String, Map<String, String>> map, XStandaloneRedisInfo info) {
+		try {
+			Map<String, String> value = map.get("Commandstats");
+			Map<String, Long> commandStats = new HashMap<>(256);
+			for (Map.Entry<String, String> entry : value.entrySet()) {
+				String key = entry.getKey().split("_")[1];
+				String[] ary = entry.getValue().split(",");
+				long calls = Long.parseLong(ary[0].split("=")[1]);
+				commandStats.put(key, calls);
+			}
+			info.commandStats = commandStats;
 		} catch (NumberFormatException e) {
 		}
 	}
