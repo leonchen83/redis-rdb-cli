@@ -484,7 +484,7 @@ public class XStandaloneRedisInfo {
 		this.diffTotalSlowLog = diffTotalSlowLog;
 	}
 	
-	public static XStandaloneRedisInfo valueOf(String info, String commandstats, String maxclients, long slowLogLen, RedisObject[] binaryLogs, String hostAndPort) {
+	public static XStandaloneRedisInfo valueOf(String info, String maxclients, long slowLogLen, RedisObject[] binaryLogs, String hostAndPort) {
 		Map<String, Map<String, String>> nextInfo = convert(info);
 		XStandaloneRedisInfo xinfo = new XStandaloneRedisInfo();
 		xinfo.hostAndPort = hostAndPort;

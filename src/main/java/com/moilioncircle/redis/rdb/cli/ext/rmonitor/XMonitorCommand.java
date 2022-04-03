@@ -17,7 +17,7 @@
 package com.moilioncircle.redis.rdb.cli.ext.rmonitor;
 
 
-import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.COMMANDSTATS;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.ALL;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.CONFIG;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.GET;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.INFO;
@@ -77,20 +77,18 @@ public class XMonitorCommand implements Runnable, Closeable {
 	@Override
 	public void run() {
 		try {
-			endpoint.batch(true, INFO);
-			endpoint.batch(true, INFO, COMMANDSTATS);
+			endpoint.batch(true, INFO, ALL);
 			endpoint.batch(true, CONFIG, GET, MAXCLIENTS);
 			endpoint.batch(true, SLOWLOG, LEN);
 			endpoint.batch(true, SLOWLOG, GET, "128".getBytes());
 			List<RedisObject> list = endpoint.sync();
 			
 			String info = list.get(0).getString();
-			String commandstats = list.get(1).getString();
-			String maxclients = list.get(2).getArray()[1].getString();
-			Long len = list.get(3).getNumber();
-			RedisObject[] binaryLogs = list.get(4).getArray();
+			String maxclients = list.get(1).getArray()[1].getString();
+			Long len = list.get(2).getNumber();
+			RedisObject[] binaryLogs = list.get(3).getArray();
 			
-			XStandaloneRedisInfo next = XStandaloneRedisInfo.valueOf(info, commandstats, maxclients, len, binaryLogs, hostAndPort);
+			XStandaloneRedisInfo next = XStandaloneRedisInfo.valueOf(info, maxclients, len, binaryLogs, hostAndPort);
 			next = XStandaloneRedisInfo.diff(prev, next);
 			
 			// server

@@ -63,12 +63,12 @@ public class CommandConstants {
     
     // monitor
     public static final byte[] INFO = "info".getBytes();
+    public static final byte[] ALL = "all".getBytes();
     public static final byte[] CONFIG = "config".getBytes();
     public static final byte[] GET = "get".getBytes();
     public static final byte[] SLOWLOG = "slowlog".getBytes();
     public static final byte[] LEN = "len".getBytes();
     public static final byte[] MAXCLIENTS = "maxclients".getBytes();
-    public static final byte[] COMMANDSTATS = "commandstats".getBytes();
     
     public static final ByteBuffer ZERO_BUF = ByteBuffer.wrap(ZERO);
     public static final ByteBuffer LOAD_BUF = ByteBuffer.wrap(LOAD);
