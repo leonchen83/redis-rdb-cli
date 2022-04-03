@@ -453,6 +453,10 @@
   "allPublicMethods":true
 },
 {
+  "name":"kotlin.internal.jdk8.JDK8PlatformImplementations",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"long[]"
 },
 {
@@ -1308,6 +1312,11 @@
 {
   "name":"org.apache.logging.log4j.util.internal.DefaultObjectInputFilter",
   "allPublicMethods":true
+},
+{
+  "name":"org.influxdb.InfluxDBException$ErrorMessage",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"org.influxdb.dto.QueryResult",

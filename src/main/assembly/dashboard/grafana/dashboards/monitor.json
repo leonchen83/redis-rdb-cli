@@ -109,7 +109,7 @@
           "measurement": "redis_version",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT last(\"value\") FROM \"30days\".\"memory_statistics\" WHERE (\"instance\" =~ /^$instance$/ AND \"module\" = 'memory' AND \"type\" = 'GAUGE' AND \"facade\" = 'last_update') AND $timeFilter fill(null)",
+          "query": "",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "table",
@@ -131,7 +131,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -203,7 +203,7 @@
           "measurement": "role",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT last(\"value\") FROM \"30days\".\"memory_statistics\" WHERE (\"instance\" =~ /^$instance$/ AND \"module\" = 'memory' AND \"type\" = 'GAUGE' AND \"facade\" = 'last_update') AND $timeFilter fill(null)",
+          "query": "",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "table",
@@ -225,7 +225,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -308,7 +308,7 @@
           "measurement": "uptime_in_seconds",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT last(\"value\") FROM \"30days\".\"memory_statistics\" WHERE (\"instance\" =~ /^$instance$/ AND \"module\" = 'memory' AND \"type\" = 'GAUGE' AND \"facade\" = 'total_memory') AND $timeFilter fill(null)",
+          "query": "",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -330,7 +330,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -414,7 +414,7 @@
           "measurement": "total_connections_received",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT last(\"value\") FROM \"30days\".\"memory_statistics\" WHERE (\"instance\" =~ /^$instance$/ AND \"module\" = 'memory' AND \"type\" = 'GAUGE' AND \"facade\" = 'total_memory') AND $timeFilter fill(null)",
+          "query": "",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -436,7 +436,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -520,7 +520,7 @@
           "measurement": "total_commands_processed",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT last(\"value\") FROM \"30days\".\"memory_statistics\" WHERE (\"instance\" =~ /^$instance$/ AND \"module\" = 'memory' AND \"type\" = 'GAUGE' AND \"facade\" = 'total_memory') AND $timeFilter fill(null)",
+          "query": "",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -542,7 +542,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -626,7 +626,7 @@
           "measurement": "total_net_input_bytes",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT last(\"value\") FROM \"30days\".\"memory_statistics\" WHERE (\"instance\" =~ /^$instance$/ AND \"module\" = 'memory' AND \"type\" = 'GAUGE' AND \"facade\" = 'total_memory') AND $timeFilter fill(null)",
+          "query": "",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -648,7 +648,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -732,7 +732,7 @@
           "measurement": "total_net_output_bytes",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT last(\"value\") FROM \"30days\".\"memory_statistics\" WHERE (\"instance\" =~ /^$instance$/ AND \"module\" = 'memory' AND \"type\" = 'GAUGE' AND \"facade\" = 'total_memory') AND $timeFilter fill(null)",
+          "query": "",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -754,7 +754,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -900,7 +900,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -953,7 +953,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -1092,7 +1092,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -1145,7 +1145,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -1208,7 +1208,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -1265,7 +1265,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -1393,7 +1393,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -1521,7 +1521,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -1578,7 +1578,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -1631,7 +1631,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -1685,7 +1685,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -1812,7 +1812,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -1865,7 +1865,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -1918,7 +1918,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -1972,7 +1972,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -2026,7 +2026,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -2080,7 +2080,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -2134,7 +2134,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -2188,7 +2188,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -2316,7 +2316,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -2369,7 +2369,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -2422,7 +2422,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -2475,7 +2475,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -2608,7 +2608,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -2667,7 +2667,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -2794,7 +2794,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -2847,7 +2847,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -2900,7 +2900,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -2953,7 +2953,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -3007,7 +3007,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -3067,7 +3067,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -3195,7 +3195,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -3323,7 +3323,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -3431,7 +3431,7 @@
           "measurement": "total_commands_processed",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "SELECT derivative(last(\"value\"), 1s) FROM \"30days\".\"total_commands_processed\" WHERE (\"instance\" =~ /^$instance$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "query": "",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -3457,7 +3457,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -3515,7 +3515,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -3573,7 +3573,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -3631,7 +3631,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -3689,7 +3689,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -3817,7 +3817,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -4055,7 +4055,7 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$instance$/"
+              "value": "/^$host$/"
             },
             {
               "condition": "AND",
@@ -4090,9 +4090,9 @@
         "definition": "",
         "hide": 0,
         "includeAll": false,
-        "label": "instance",
+        "label": "host",
         "multi": false,
-        "name": "instance",
+        "name": "host",
         "options": [],
         "query": "show tag values from monitor with key = \"property0\"",
         "refresh": 2,
