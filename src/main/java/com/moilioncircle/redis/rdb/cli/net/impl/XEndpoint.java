@@ -30,6 +30,7 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import org.slf4j.Logger;
@@ -42,6 +43,7 @@ import com.moilioncircle.redis.rdb.cli.net.AbstractEndpoint;
 import com.moilioncircle.redis.rdb.cli.net.protocol.Protocol;
 import com.moilioncircle.redis.rdb.cli.net.protocol.RedisObject;
 import com.moilioncircle.redis.rdb.cli.util.ByteBuffers;
+import com.moilioncircle.redis.rdb.cli.util.Collections;
 import com.moilioncircle.redis.rdb.cli.util.Outputs;
 import com.moilioncircle.redis.rdb.cli.util.Sockets;
 import com.moilioncircle.redis.replicator.Configuration;
@@ -60,7 +62,7 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
     
     private int db;
     private int count = 0;
-    private final int pipe;
+    private int pipe = -1;
     private final Socket socket;
     private final String address;
     private final OutputStream out;
@@ -151,7 +153,7 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
                 if (statistics) MONITOR.add(ENDPOINT_SEND, address, 1, System.nanoTime() - mark);
             }
             count++;
-            if (count == pipe) flush();
+            if (count == pipe && pipe != -1) flush();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -166,7 +168,33 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
                 if (statistics) MONITOR.add(ENDPOINT_SEND, address, 1, System.nanoTime() - mark);
             }
             count++;
-            if (count == pipe) flush();
+            if (count == pipe && pipe != -1) flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public List<RedisObject> syncQuietly() {
+        try {
+            return sync();
+        } catch (Throwable e) {
+            logger.error("failed to sync. host:{}, port:{}, reason:{}", host, port, e.getMessage());
+            return Collections.ofList();
+        }
+    }
+    
+    public List<RedisObject> sync() {
+        try {
+            if (count <= 0) {
+                return Collections.ofList();
+            }
+            Outputs.flush(out);
+            List<RedisObject> result = new ArrayList<>();
+            for (int i = 0; i < count; i++) {
+                result.add(protocol.parse());
+            }
+            count = 0;
+            return result;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

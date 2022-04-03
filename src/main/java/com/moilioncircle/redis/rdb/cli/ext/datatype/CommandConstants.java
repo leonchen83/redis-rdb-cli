@@ -61,6 +61,15 @@ public class CommandConstants {
     public static final byte[] CLUSTER = "cluster".getBytes();
     public static final byte[] NODES = "nodes".getBytes();
     
+    // monitor
+    public static final byte[] INFO = "info".getBytes();
+    public static final byte[] CONFIG = "config".getBytes();
+    public static final byte[] GET = "get".getBytes();
+    public static final byte[] SLOWLOG = "slowlog".getBytes();
+    public static final byte[] LEN = "len".getBytes();
+    public static final byte[] MAXCLIENTS = "maxclients".getBytes();
+    public static final byte[] COMMANDSTATS = "commandstats".getBytes();
+    
     public static final ByteBuffer ZERO_BUF = ByteBuffer.wrap(ZERO);
     public static final ByteBuffer LOAD_BUF = ByteBuffer.wrap(LOAD);
     public static final ByteBuffer REPLACE_BUF = ByteBuffer.wrap(REPLACE);

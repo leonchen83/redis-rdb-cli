@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.ext.rmonitor;
+package com.moilioncircle.redis.rdb.cli.ext.rmonitor.support;
 
-import static com.moilioncircle.redis.rdb.cli.ext.rmonitor.XStandaloneRedisInfo.EMPTY;
+import static com.moilioncircle.redis.rdb.cli.ext.rmonitor.support.XStandaloneRedisInfo.EMPTY;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,7 +25,6 @@ import java.util.Map;
 
 import com.moilioncircle.redis.rdb.cli.conf.NodeConfParser;
 import com.moilioncircle.redis.rdb.cli.conf.XClusterNodes;
-import com.moilioncircle.redis.rdb.cli.ext.rmonitor.support.XClusterInfo;
 
 /**
  * @author Baoyi Chen

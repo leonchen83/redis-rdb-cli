@@ -21,12 +21,13 @@ import static java.time.ZoneId.systemDefault;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.moilioncircle.redis.rdb.cli.net.protocol.RedisObject;
+import com.moilioncircle.redis.rdb.cli.util.Collections;
 import com.moilioncircle.redis.replicator.cmd.RedisCodec;
-
-import redis.clients.jedis.util.SafeEncoder;
 
 /**
  * @author Baoyi Chen
@@ -100,30 +101,31 @@ public class XSlowLog {
 		this.executionTime = executionTime;
 	}
 	
-	private XSlowLog(List<Object> properties, String server) {
+	private XSlowLog(RedisObject[] properties, String server) {
 		super();
 		this.server = server;
-		this.id = (Long) properties.get(0);
-		long timestamp = (Long) properties.get(1);
+		this.id = properties[0].getNumber();
+		long timestamp = properties[1].getNumber();
 		this.timestamp = FORMATTER.format(ofEpochMilli(timestamp * 1000).atZone(systemDefault()));
-		this.executionTime = (Long) properties.get(2);
+		this.executionTime = properties[2].getNumber();
 		
-		List<byte[]> bargs = (List<byte[]>) properties.get(3);
-		this.command = bargs.stream().map(e -> quote(new String(codec.encode(e)))).collect(Collectors.joining(" "));
-		if (properties.size() == 4) return;
+		RedisObject[] bargs = properties[3].getArray();
+		this.command = Arrays.stream(bargs).map(e -> quote(new String(codec.encode(e.getBytes())))).collect(Collectors.joining(" "));
+		if (properties.length == 4) return;
 		
-		this.hostAndPort = SafeEncoder.encode((byte[]) properties.get(4));
-		this.clientName = SafeEncoder.encode((byte[]) properties.get(5));
+		this.hostAndPort = properties[4].getString();
+		this.clientName = properties[5].getString();
 	}
 	
 	private String quote(String name) {
 		return new StringBuilder().append('"').append(name).append('"').toString();
 	}
 	
-	public static List<XSlowLog> valueOf(List<Object> binaryLogs, String server) {
-		List<XSlowLog> logs = new ArrayList<>(binaryLogs.size());
-		for (Object object : binaryLogs) {
-			List<Object> properties = (List<Object>) object;
+	public static List<XSlowLog> valueOf(RedisObject[] binaryLogs, String server) {
+		if (binaryLogs == null) return Collections.ofList();
+		List<XSlowLog> logs = new ArrayList<>(binaryLogs.length);
+		for (RedisObject object : binaryLogs) {
+			RedisObject[] properties = object.getArray();
 			logs.add(new XSlowLog(properties, server));
 		}
 		return logs;

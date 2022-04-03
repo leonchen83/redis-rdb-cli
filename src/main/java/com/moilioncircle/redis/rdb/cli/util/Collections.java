@@ -31,7 +31,7 @@ public class Collections {
 	private static final Set<?> EMPTY_SET = new HashSet<>(0);
 	
 	public static <T> List<T> ofList(T...values) {
-		if (values == null) {
+		if (values == null || values.length == 0) {
 			return (List<T>) EMPTY_LIST;
 		}
 		List<T> list = new ArrayList<>(values.length);
@@ -42,7 +42,7 @@ public class Collections {
 	}
 	
 	public static <T> Set<T> ofSet(T...values) {
-		if (values == null) {
+		if (values == null || values.length == 0) {
 			return (Set<T>) EMPTY_SET;
 		}
 		Set<T> set = new HashSet<>(values.length);

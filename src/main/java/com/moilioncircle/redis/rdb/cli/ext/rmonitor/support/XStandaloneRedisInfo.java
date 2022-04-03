@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.moilioncircle.redis.rdb.cli.ext.rmonitor;
+package com.moilioncircle.redis.rdb.cli.ext.rmonitor.support;
 
 import static com.moilioncircle.redis.rdb.cli.util.Collections.isEmpty;
 
@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.moilioncircle.redis.rdb.cli.ext.rmonitor.support.XSlowLog;
+import com.moilioncircle.redis.rdb.cli.net.protocol.RedisObject;
 
 /**
  * @author Baoyi Chen
@@ -484,7 +484,7 @@ public class XStandaloneRedisInfo {
 		this.diffTotalSlowLog = diffTotalSlowLog;
 	}
 	
-	public static XStandaloneRedisInfo valueOf(String info, List<String> maxclients, long slowLogLen, List<Object> binaryLogs, String hostAndPort) {
+	public static XStandaloneRedisInfo valueOf(String info, String commandstats, String maxclients, long slowLogLen, RedisObject[] binaryLogs, String hostAndPort) {
 		Map<String, Map<String, String>> nextInfo = convert(info);
 		XStandaloneRedisInfo xinfo = new XStandaloneRedisInfo();
 		xinfo.hostAndPort = hostAndPort;
@@ -494,9 +494,7 @@ public class XStandaloneRedisInfo {
 		xinfo.connectedClients = getLong("Clients", "connected_clients", nextInfo);
 		xinfo.blockedClients = getLong("Clients", "blocked_clients", nextInfo);
 		xinfo.trackingClients = getLong("Clients", "tracking_clients", nextInfo);
-		if (!isEmpty(maxclients) && maxclients.size() == 2) {
-			xinfo.maxclients = Long.parseLong(maxclients.get(1));
-		}
+		xinfo.maxclients = Long.parseLong(maxclients);
 		xinfo.maxmemory = getLong("Memory", "maxmemory", nextInfo);
 		xinfo.usedMemory = getLong("Memory", "used_memory", nextInfo);
 		xinfo.usedMemoryRss = getLong("Memory", "used_memory_rss", nextInfo);

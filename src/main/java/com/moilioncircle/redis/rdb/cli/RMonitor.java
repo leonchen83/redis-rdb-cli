@@ -16,35 +16,16 @@
 
 package com.moilioncircle.redis.rdb.cli;
 
-import java.util.Arrays;
+import com.moilioncircle.redis.rdb.cli.cmd.XRMonitor;
+
+import picocli.CommandLine;
 
 /**
  * @author Baoyi Chen
  */
-public class Main {
+public class RMonitor {
 	public static void main(String[] args) {
-		if (args.length == 0) {
-			return;
-		}
-		String command = args[0];
-		if (command == null) {
-			return;
-		}
-		String[] ary = Arrays.copyOfRange(args, 1, args.length);
-		if (command.equals("rct")) {
-			Rct.main(ary);
-		} else if (command.equals("rdt")) {
-			Rdt.main(ary);
-		} else if (command.equals("ret")) {
-			Ret.main(ary);
-		} else if (command.equals("rmt")) {
-			Rmt.main(ary);
-		} else if (command.equals("rst")) {
-			Rst.main(ary);
-		} else if (command.equals("rcut")) {
-			Rcut.main(ary);
-		} else if (command.equals("rmonitor")) {
-			RMonitor.main(ary);
-		}
+		int r = new CommandLine(new XRMonitor()).execute(args);
+		if (r != 0) System.exit(r);
 	}
 }
