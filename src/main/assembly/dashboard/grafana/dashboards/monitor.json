@@ -22,7 +22,7 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": 4,
-  "iteration": 1649070445968,
+  "iteration": 1649074964508,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -4103,20 +4103,6 @@
             [
               {
                 "params": [
-                  "property4"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [
-                  "command"
-                ],
-                "type": "alias"
-              }
-            ],
-            [
-              {
-                "params": [
                   "property5"
                 ],
                 "type": "field"
@@ -4152,6 +4138,20 @@
               {
                 "params": [
                   "execution time"
+                ],
+                "type": "alias"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "property4"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [
+                  "command"
                 ],
                 "type": "alias"
               }
@@ -4260,6 +4260,6 @@
   "timezone": "",
   "title": "monitor",
   "uid": "monitor",
-  "version": 13,
+  "version": 14,
   "weekStart": ""
 }

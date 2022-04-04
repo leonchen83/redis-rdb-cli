@@ -80,6 +80,18 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
+  "name":"com.moilioncircle.redis.rdb.cli.ext.rmonitor.XMonitorCommand"
+},
+{
+  "name":"com.moilioncircle.redis.rdb.cli.ext.rmonitor.impl.XMonitorMasterSlave"
+},
+{
+  "name":"com.moilioncircle.redis.rdb.cli.ext.rmonitor.impl.XMonitorStandalone"
+},
+{
+  "name":"com.moilioncircle.redis.rdb.cli.util.CloseableThread"
+},
+{
   "name":"com.moilioncircle.redis.replicator.RedisSocketReplicator",
   "fields":[
     {"name":"host", "allowWrite":true}, 
