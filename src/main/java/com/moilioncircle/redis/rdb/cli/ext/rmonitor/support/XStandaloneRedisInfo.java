@@ -37,6 +37,7 @@ public class XStandaloneRedisInfo {
 	
 	private HostAndPort master;
 	private List<HostAndPort> slaves = new ArrayList<>();
+	private String masterStatus;
 	private String hostAndPort;
 	private String role;
 	private Long uptimeInSeconds;
@@ -104,6 +105,14 @@ public class XStandaloneRedisInfo {
 	
 	public void setSlaves(List<HostAndPort> slaves) {
 		this.slaves = slaves;
+	}
+	
+	public String getMasterStatus() {
+		return masterStatus;
+	}
+	
+	public void setMasterStatus(String masterStatus) {
+		this.masterStatus = masterStatus;
 	}
 	
 	public String getHostAndPort() {
@@ -520,6 +529,7 @@ public class XStandaloneRedisInfo {
 		xinfo.hostAndPort = hostAndPort;
 		xinfo.uptimeInSeconds = getLong("Server", "uptime_in_seconds", nextInfo);
 		xinfo.redisVersion = getString("Server", "redis_version", nextInfo);
+		xinfo.masterStatus = getString("Replication", "master_link_status", nextInfo);
 		xinfo.role = getString("Replication", "role", nextInfo);
 		xinfo.connectedClients = getLong("Clients", "connected_clients", nextInfo);
 		xinfo.blockedClients = getLong("Clients", "blocked_clients", nextInfo);

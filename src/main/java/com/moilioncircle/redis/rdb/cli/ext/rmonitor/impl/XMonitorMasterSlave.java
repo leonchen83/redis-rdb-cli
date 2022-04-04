@@ -21,10 +21,11 @@ import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.REPL
 import static com.moilioncircle.redis.rdb.cli.ext.rmonitor.support.XStandaloneRedisInfo.extract;
 
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.rmonitor.MonitorCommand;
@@ -40,6 +41,8 @@ import redis.clients.jedis.HostAndPort;
  * @author Baoyi Chen
  */
 public class XMonitorMasterSlave implements MonitorCommand, StandaloneListener {
+	
+	private static final Logger logger = LoggerFactory.getLogger(XMonitorMasterSlave.class);
 	
 	private volatile String host;
 	private volatile int port;
@@ -106,35 +109,28 @@ public class XMonitorMasterSlave implements MonitorCommand, StandaloneListener {
 	}
 	
 	@Override
-	public void onHosts(List<HostAndPort> hosts) {
-		// diff
+	public void onUp(HostAndPort host) {
 		// add
-		for (HostAndPort hostAndPort : hosts) {
-			if (commands.containsKey(hostAndPort)) {
-				continue;
-			}
-			
-			XMonitorStandalone slave = new XMonitorStandalone(hostAndPort.getHost(), hostAndPort.getPort(), name, monitor, configuration);
-			slave.addListener(this);
-			XMonitorStandalone prev = commands.put(hostAndPort, slave);
-			if (prev != null) {
-				MonitorCommand.closeQuietly(prev);
-			}
+		if (commands.containsKey(host)) {
+			return;
 		}
-		
-		// remove
-		Iterator<Map.Entry<HostAndPort, XMonitorStandalone>> it = commands.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry<HostAndPort, XMonitorStandalone> entry = it.next();
-			if (!hosts.contains(entry.getKey())) {
-				XMonitorStandalone command = entry.getValue();
-				if (command.isMaster()) {
-					continue;
-				}
-				command.delListener(this);
-				MonitorCommand.closeQuietly(command);
-				it.remove();
-			}
+		logger.info("master-slave add monitor host [{}]", host);
+		XMonitorStandalone slave = new XMonitorStandalone(host.getHost(), host.getPort(), name, monitor, configuration);
+		slave.addListener(this);
+		XMonitorStandalone prev = commands.put(host, slave);
+		if (prev != null) {
+			prev.delListener(this);
+			MonitorCommand.closeQuietly(prev);
+		}
+	}
+	
+	@Override
+	public void onDown(HostAndPort host) {
+		logger.info("master-slave del monitor host [{}]", host);
+		XMonitorStandalone prev = commands.remove(host);
+		if (prev != null) {
+			prev.delListener(this);
+			MonitorCommand.closeQuietly(prev);
 		}
 	}
 }

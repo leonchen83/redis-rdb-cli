@@ -26,7 +26,6 @@ import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.MAXC
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.SLOWLOG;
 import static com.moilioncircle.redis.rdb.cli.ext.rmonitor.support.XStandaloneRedisInfo.EMPTY;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -72,10 +71,18 @@ public class XMonitorStandalone implements MonitorCommand {
 		listeners.remove(listener);
 	}
 	
-	public void notify(List<HostAndPort> hosts) {
+	public void notifyUp(HostAndPort host) {
 		for (StandaloneListener listener : listeners) {
-			listener.onHosts(hosts);
+			listener.onUp(host);
 		}
+		monitor.set("redis_status", host.toString(), name, "ok");
+	}
+	
+	public void notifyDown(HostAndPort host) {
+		for (StandaloneListener listener : listeners) {
+			listener.onDown(host);
+		}
+		monitor.set("redis_status", host.toString(), name, "down");
 	}
 	
 	public XMonitorStandalone(String host, int port, String name, Monitor monitor, Configuration configuration) {
@@ -200,16 +207,32 @@ public class XMonitorStandalone implements MonitorCommand {
 				monitor.set("slow_log_latency", hostAndPort, name, 0d);
 			}
 			
-			prev = next;
-			
 			if (Strings.isEquals(next.getRole(), "master")) {
 				this.master = true;
-				List<HostAndPort> hosts = new ArrayList<>(next.getSlaves());
-				hosts.add(0, new HostAndPort(this.host, this.port));
-				notify(hosts);
+				List<HostAndPort> prevs = prev.getSlaves();
+				List<HostAndPort> nexts = next.getSlaves();
+				
+				for (HostAndPort hp : nexts) {
+					if(!prevs.contains(hp)) {
+						notifyUp(hp);
+					}
+				}
+				
+				for (HostAndPort hp : prevs) {
+					if (!nexts.contains(hp)) {
+						notifyDown(hp);
+					}
+				}
 			} else {
 				this.master = false;
+				if (Strings.isEquals(next.getMasterStatus(), "down")) {
+					notifyDown(next.getMaster());
+				} else {
+					notifyUp(next.getMaster());
+				}
 			}
+			
+			prev = next;
 		} catch (Throwable e) {
 			try {
 				this.endpoint = XEndpoint.valueOf(this.endpoint, 0);

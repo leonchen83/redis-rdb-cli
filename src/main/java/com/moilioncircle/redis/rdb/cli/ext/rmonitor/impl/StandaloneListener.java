@@ -16,13 +16,13 @@
 
 package com.moilioncircle.redis.rdb.cli.ext.rmonitor.impl;
 
-import java.util.List;
-
 import redis.clients.jedis.HostAndPort;
 
 /**
  * @author Baoyi Chen
  */
 public interface StandaloneListener {
-	void onHosts(List<HostAndPort> hosts);
+	void onUp(HostAndPort host);
+	
+	void onDown(HostAndPort host);
 }
