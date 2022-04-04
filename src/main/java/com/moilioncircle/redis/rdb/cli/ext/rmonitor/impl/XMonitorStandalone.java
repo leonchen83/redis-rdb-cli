@@ -47,13 +47,15 @@ import redis.clients.jedis.HostAndPort;
  */
 public class XMonitorStandalone implements MonitorCommand {
 	
-	private boolean master;
 	private final String host;
 	private final int port;
 	private final String name;
 	private final Monitor monitor;
 	private final String hostAndPort;
+	
+	private volatile boolean master;
 	private volatile XEndpoint endpoint;
+	
 	private final Configuration configuration;
 	private XStandaloneRedisInfo prev = EMPTY;
 	private List<StandaloneListener> listeners = new CopyOnWriteArrayList<>();
