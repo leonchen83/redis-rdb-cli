@@ -233,7 +233,9 @@ public class XMonitorStandalone implements MonitorCommand {
 			}
 			
 			prev = next;
+			monitor.set("redis_status", hostAndPort, name, "ok");
 		} catch (Throwable e) {
+			monitor.set("redis_status", hostAndPort, name, "down");
 			try {
 				this.endpoint = XEndpoint.valueOf(this.endpoint, 0);
 			} catch (Throwable ignore) {
