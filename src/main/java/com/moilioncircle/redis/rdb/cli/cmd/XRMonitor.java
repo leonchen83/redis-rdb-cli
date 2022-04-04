@@ -49,8 +49,8 @@ public class XRMonitor implements Callable<Integer> {
 	@CommandLine.Option(names = {"-s", "--source"}, paramLabel = "<uri>", required = true, description = {"Source uri. eg: redis://host:port?authPassword=foobar."})
 	private String source;
 	
-	@CommandLine.Option(names = {"-n", "--name"}, required = false, description = {"Monitor name. default value is standalone."})
-	private String name = "standalone";
+	@CommandLine.Option(names = {"-n", "--name"}, required = true, description = {"Monitor name."})
+	private String name;
 	
 	@Override
 	public Integer call() throws Exception {

@@ -22,7 +22,7 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": 4,
-  "iteration": 1648985391105,
+  "iteration": 1649046938979,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -4087,25 +4087,6 @@
     "list": [
       {
         "current": {},
-        "definition": "",
-        "hide": 0,
-        "includeAll": false,
-        "label": "host",
-        "multi": false,
-        "name": "host",
-        "options": [],
-        "query": "show tag values from monitor with key = \"property0\"",
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 1,
-        "tagValuesQuery": "",
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "current": {},
         "definition": "show tag values from monitor with key = \"property1\"",
         "hide": 0,
         "includeAll": false,
@@ -4119,6 +4100,25 @@
         "skipUrlSync": false,
         "sort": 0,
         "type": "query"
+      },
+      {
+        "current": {},
+        "definition": "show tag values from monitor with key = \"property0\" where \"property1\" = '$name';",
+        "hide": 0,
+        "includeAll": false,
+        "label": "host",
+        "multi": false,
+        "name": "host",
+        "options": [],
+        "query": "show tag values from monitor with key = \"property0\" where \"property1\" = '$name';",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },
@@ -4154,6 +4154,6 @@
   "timezone": "",
   "title": "monitor",
   "uid": "monitor",
-  "version": 6,
+  "version": 1,
   "weekStart": ""
 }

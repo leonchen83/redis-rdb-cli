@@ -63,6 +63,7 @@ public class CommandConstants {
     
     // monitor
     public static final byte[] INFO = "info".getBytes();
+    public static final byte[] REPLICATION = "replication".getBytes();
     public static final byte[] ALL = "all".getBytes();
     public static final byte[] CONFIG = "config".getBytes();
     public static final byte[] GET = "get".getBytes();
