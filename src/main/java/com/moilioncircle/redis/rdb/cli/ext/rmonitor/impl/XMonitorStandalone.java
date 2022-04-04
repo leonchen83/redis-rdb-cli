@@ -26,8 +26,10 @@ import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.MAXC
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.SLOWLOG;
 import static com.moilioncircle.redis.rdb.cli.ext.rmonitor.support.XStandaloneRedisInfo.EMPTY;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.moilioncircle.redis.rdb.cli.ext.rmonitor.MonitorCommand;
 import com.moilioncircle.redis.rdb.cli.ext.rmonitor.support.XSlowLog;
@@ -36,6 +38,7 @@ import com.moilioncircle.redis.rdb.cli.monitor.Monitor;
 import com.moilioncircle.redis.rdb.cli.net.impl.XEndpoint;
 import com.moilioncircle.redis.rdb.cli.net.protocol.RedisObject;
 import com.moilioncircle.redis.replicator.Configuration;
+import com.moilioncircle.redis.replicator.util.Strings;
 
 import redis.clients.jedis.HostAndPort;
 
@@ -44,6 +47,7 @@ import redis.clients.jedis.HostAndPort;
  */
 public class XMonitorStandalone implements MonitorCommand {
 	
+	private boolean master;
 	private final String host;
 	private final int port;
 	private final String name;
@@ -52,6 +56,25 @@ public class XMonitorStandalone implements MonitorCommand {
 	private volatile XEndpoint endpoint;
 	private final Configuration configuration;
 	private XStandaloneRedisInfo prev = EMPTY;
+	private List<StandaloneListener> listeners = new CopyOnWriteArrayList<>();
+	
+	public boolean isMaster() {
+		return master;
+	}
+	
+	public void addListener(StandaloneListener listener) {
+		listeners.add(listener);
+	}
+	
+	public void delListener(StandaloneListener listener) {
+		listeners.remove(listener);
+	}
+	
+	public void notify(List<HostAndPort> hosts) {
+		for (StandaloneListener listener : listeners) {
+			listener.onHosts(hosts);
+		}
+	}
 	
 	public XMonitorStandalone(String host, int port, String name, Monitor monitor, Configuration configuration) {
 		this.name = name;
@@ -68,6 +91,7 @@ public class XMonitorStandalone implements MonitorCommand {
 			if (endpoint == null) {
 				this.endpoint = new XEndpoint(this.host, this.port, 0, -1, false, configuration);
 			}
+			
 			endpoint.batch(true, INFO, ALL);
 			endpoint.batch(true, CONFIG, GET, MAXCLIENTS);
 			endpoint.batch(true, SLOWLOG, LEN);
@@ -175,6 +199,15 @@ public class XMonitorStandalone implements MonitorCommand {
 			}
 			
 			prev = next;
+			
+			if (Strings.isEquals(next.getRole(), "master")) {
+				this.master = true;
+				List<HostAndPort> hosts = new ArrayList<>(next.getSlaves());
+				hosts.add(0, new HostAndPort(this.host, this.port));
+				notify(hosts);
+			} else {
+				this.master = false;
+			}
 		} catch (Throwable e) {
 			try {
 				this.endpoint = XEndpoint.valueOf(this.endpoint, 0);

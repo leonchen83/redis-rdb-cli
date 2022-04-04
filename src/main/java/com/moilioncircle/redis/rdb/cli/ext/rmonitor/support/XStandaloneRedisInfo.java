@@ -24,6 +24,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.moilioncircle.redis.rdb.cli.net.protocol.RedisObject;
+import com.moilioncircle.redis.replicator.util.Strings;
+
+import redis.clients.jedis.HostAndPort;
 
 /**
  * @author Baoyi Chen
@@ -32,6 +35,8 @@ public class XStandaloneRedisInfo {
 	
 	public static XStandaloneRedisInfo EMPTY = new XStandaloneRedisInfo();
 	
+	private HostAndPort master;
+	private List<HostAndPort> slaves = new ArrayList<>();
 	private String hostAndPort;
 	private String role;
 	private Long uptimeInSeconds;
@@ -84,6 +89,22 @@ public class XStandaloneRedisInfo {
 	private Long diffTotalSlowLog;
 	private Long diffTotalSlowLogExecutionTime;
 	private List<XSlowLog> diffSlowLogs = new ArrayList<>();
+	
+	public HostAndPort getMaster() {
+		return master;
+	}
+	
+	public void setMaster(HostAndPort master) {
+		this.master = master;
+	}
+	
+	public List<HostAndPort> getSlaves() {
+		return slaves;
+	}
+	
+	public void setSlaves(List<HostAndPort> slaves) {
+		this.slaves = slaves;
+	}
 	
 	public String getHostAndPort() {
 		return hostAndPort;
@@ -494,7 +515,7 @@ public class XStandaloneRedisInfo {
 	}
 	
 	public static XStandaloneRedisInfo valueOf(String info, String maxclients, long slowLogLen, RedisObject[] binaryLogs, String hostAndPort) {
-		Map<String, Map<String, String>> nextInfo = convert(info);
+		Map<String, Map<String, String>> nextInfo = extract(info);
 		XStandaloneRedisInfo xinfo = new XStandaloneRedisInfo();
 		xinfo.hostAndPort = hostAndPort;
 		xinfo.uptimeInSeconds = getLong("Server", "uptime_in_seconds", nextInfo);
@@ -542,6 +563,21 @@ public class XStandaloneRedisInfo {
 		
 		dbInfo(nextInfo, xinfo);
 		commandStatInfo(nextInfo, xinfo);
+		
+		if (Strings.isEquals(xinfo.getRole(), "master")) {
+			int slaves = getInt("Replication", "connected_slaves", nextInfo);
+			for (int i = 0; i < slaves; i++) {
+				String[] slaveInfo = getString("Replication", "slave" + i, nextInfo).split(",");
+				String slaveHost = slaveInfo[0].split("=")[1];
+				int slavePort = Integer.parseInt(slaveInfo[1].split("=")[1]);
+				xinfo.slaves.add(new HostAndPort(slaveHost, slavePort));
+			}
+		} else {
+			String masterHost = getString("Replication", "master_host", nextInfo);
+			int masterPort = getInt("Replication", "master_port", nextInfo);
+			xinfo.master = new HostAndPort(masterHost, masterPort);
+		}
+		
 		xinfo.slowLogLen = slowLogLen;
 		xinfo.slowLogs = XSlowLog.valueOf(binaryLogs, hostAndPort);
 		xinfo.totalSlowLog = isEmpty(xinfo.slowLogs) ? 0 : xinfo.slowLogs.get(0).getId();
@@ -601,7 +637,19 @@ public class XStandaloneRedisInfo {
 		return null;
 	}
 	
-	private static Map<String, Map<String, String>> convert(String info) {
+	private static Integer getInt(String key, String field, Map<String, Map<String, String>> map) {
+		if (map == null) return null;
+		if (map.containsKey(key) && map.get(key).containsKey(field)) {
+			String value = map.get(key).get(field);
+			try {
+				return Integer.valueOf(value);
+			} catch (NumberFormatException e) {
+			}
+		}
+		return null;
+	}
+	
+	public static Map<String, Map<String, String>> extract(String info) {
 		Map<String, Map<String, String>> map = new HashMap<>(16);
 		String[] lines = info.split("\n");
 		Map<String, String> value = null;

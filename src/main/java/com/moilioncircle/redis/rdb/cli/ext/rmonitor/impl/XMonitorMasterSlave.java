@@ -18,9 +18,11 @@ package com.moilioncircle.redis.rdb.cli.ext.rmonitor.impl;
 
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.INFO;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.REPLICATION;
+import static com.moilioncircle.redis.rdb.cli.ext.rmonitor.support.XStandaloneRedisInfo.extract;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -37,20 +39,21 @@ import redis.clients.jedis.HostAndPort;
 /**
  * @author Baoyi Chen
  */
-public class XMonitorMasterSlave implements MonitorCommand {
+public class XMonitorMasterSlave implements MonitorCommand, StandaloneListener {
 	
 	private volatile String host;
 	private volatile int port;
 	private String name;
 	private Monitor monitor;
-	private Map<HostAndPort, MonitorCommand> commands = new ConcurrentHashMap<>();
+	private Configuration configuration;
+	private Map<HostAndPort, XMonitorStandalone> commands = new ConcurrentHashMap<>();
 	
 	public XMonitorMasterSlave(RedisURI uri, String name, Monitor monitor, Configure configure) {
 		this.name = name;
 		this.host = uri.getHost();
 		this.port = uri.getPort();
 		this.monitor = monitor;
-		Configuration configuration = configure.merge(uri, true);
+		this.configuration = configure.merge(uri, true);
 		createMonitorCommands(host, port, configuration);
 	}
 	
@@ -64,15 +67,19 @@ public class XMonitorMasterSlave implements MonitorCommand {
 			String role = map.get("role");
 			if (Strings.isEquals(role, "master")) {
 				// master
-				commands.put(new HostAndPort(host, port), new XMonitorStandalone(host, port, name, monitor, configuration));
+				XMonitorStandalone master = new XMonitorStandalone(host, port, name, monitor, configuration);
+				master.addListener(this);
+				commands.put(new HostAndPort(host, port), master);
 				
 				// slave
 				int slaves = Integer.parseInt(map.get("connected_slaves"));
 				for (int i = 0; i < slaves; i++) {
-					String[] slave = map.get("slave" + i).split(",");
-					String slaveHost = slave[0].split("=")[1];
-					int slavePort = Integer.parseInt(slave[1].split("=")[1]);
-					commands.put(new HostAndPort(slaveHost, slavePort), new XMonitorStandalone(slaveHost, slavePort, name, monitor, configuration));
+					String[] info = map.get("slave" + i).split(",");
+					String slaveHost = info[0].split("=")[1];
+					int slavePort = Integer.parseInt(info[1].split("=")[1]);
+					XMonitorStandalone slave = new XMonitorStandalone(slaveHost, slavePort, name, monitor, configuration);
+					slave.addListener(this);
+					commands.put(new HostAndPort(slaveHost, slavePort), slave);
 				}
 			} else {
 				this.host = map.get("master_host");
@@ -84,37 +91,50 @@ public class XMonitorMasterSlave implements MonitorCommand {
 		}
 	}
 	
-	protected Map<String, Map<String, String>> extract(String info) {
-		Map<String, Map<String, String>> map = new HashMap<>(16);
-		String[] lines = info.split("\n");
-		Map<String, String> value = null;
-		for (String line : lines) {
-			line = line == null ? "" : line.trim();
-			if (line.startsWith("#")) {
-				String key = line.substring(1).trim();
-				value = new HashMap<>(128);
-				map.put(key, value);
-			} else if (line.length() != 0) {
-				String[] ary = line.split(":");
-				if (ary.length == 2) {
-					if (value != null) value.put(ary[0], ary[1]);
-				}
-			}
-		}
-		return map;
-	}
-	
 	@Override
 	public void close() throws IOException {
-		for (Map.Entry<HostAndPort, MonitorCommand> entry : commands.entrySet()) {
+		for (Map.Entry<HostAndPort, XMonitorStandalone> entry : commands.entrySet()) {
 			MonitorCommand.closeQuietly(entry.getValue());
 		}
 	}
 	
 	@Override
 	public void run() {
-		for (Map.Entry<HostAndPort, MonitorCommand> entry : commands.entrySet()) {
+		for (Map.Entry<HostAndPort, XMonitorStandalone> entry : commands.entrySet()) {
 			entry.getValue().run();
+		}
+	}
+	
+	@Override
+	public void onHosts(List<HostAndPort> hosts) {
+		// diff
+		// add
+		for (HostAndPort hostAndPort : hosts) {
+			if (commands.containsKey(hostAndPort)) {
+				continue;
+			}
+			
+			XMonitorStandalone slave = new XMonitorStandalone(hostAndPort.getHost(), hostAndPort.getPort(), name, monitor, configuration);
+			slave.addListener(this);
+			XMonitorStandalone prev = commands.put(hostAndPort, slave);
+			if (prev != null) {
+				MonitorCommand.closeQuietly(prev);
+			}
+		}
+		
+		// remove
+		Iterator<Map.Entry<HostAndPort, XMonitorStandalone>> it = commands.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry<HostAndPort, XMonitorStandalone> entry = it.next();
+			if (!hosts.contains(entry.getKey())) {
+				XMonitorStandalone command = entry.getValue();
+				if (command.isMaster()) {
+					continue;
+				}
+				command.delListener(this);
+				MonitorCommand.closeQuietly(command);
+				it.remove();
+			}
 		}
 	}
 }
