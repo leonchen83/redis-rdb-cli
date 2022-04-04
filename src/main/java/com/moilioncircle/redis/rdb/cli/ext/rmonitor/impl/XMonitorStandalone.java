@@ -30,6 +30,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.moilioncircle.redis.rdb.cli.ext.rmonitor.MonitorCommand;
 import com.moilioncircle.redis.rdb.cli.ext.rmonitor.support.XSlowLog;
 import com.moilioncircle.redis.rdb.cli.ext.rmonitor.support.XStandaloneRedisInfo;
@@ -46,22 +49,19 @@ import redis.clients.jedis.HostAndPort;
  */
 public class XMonitorStandalone implements MonitorCommand {
 	
+	private static final Logger logger = LoggerFactory.getLogger(XMonitorStandalone.class);
+	
 	private final String host;
 	private final int port;
 	private final String name;
 	private final Monitor monitor;
 	private final String hostAndPort;
 	
-	private volatile boolean master;
 	private volatile XEndpoint endpoint;
 	
 	private final Configuration configuration;
 	private XStandaloneRedisInfo prev = EMPTY;
 	private List<StandaloneListener> listeners = new CopyOnWriteArrayList<>();
-	
-	public boolean isMaster() {
-		return master;
-	}
 	
 	public void addListener(StandaloneListener listener) {
 		listeners.add(listener);
@@ -190,7 +190,7 @@ public class XMonitorStandalone implements MonitorCommand {
 			
 			List<XSlowLog> slowLogs = next.getDiffSlowLogs();
 			for (XSlowLog slowLog : slowLogs) {
-				String[] properties = new String[5];
+				String[] properties = new String[7];
 				properties[0] = hostAndPort;
 				properties[1] = name;
 				properties[2] = String.valueOf(slowLog.getId());
@@ -208,7 +208,6 @@ public class XMonitorStandalone implements MonitorCommand {
 			}
 			
 			if (Strings.isEquals(next.getRole(), "master")) {
-				this.master = true;
 				List<HostAndPort> prevs = prev.getSlaves();
 				List<HostAndPort> nexts = next.getSlaves();
 				
@@ -224,7 +223,6 @@ public class XMonitorStandalone implements MonitorCommand {
 					}
 				}
 			} else {
-				this.master = false;
 				if (Strings.isEquals(next.getMasterStatus(), "down")) {
 					notifyDown(next.getMaster());
 				} else {
@@ -235,6 +233,7 @@ public class XMonitorStandalone implements MonitorCommand {
 			prev = next;
 			monitor.set("redis_status", hostAndPort, name, "ok");
 		} catch (Throwable e) {
+			logger.error("error", e);
 			monitor.set("redis_status", hostAndPort, name, "down");
 			try {
 				this.endpoint = XEndpoint.valueOf(this.endpoint, 0);
