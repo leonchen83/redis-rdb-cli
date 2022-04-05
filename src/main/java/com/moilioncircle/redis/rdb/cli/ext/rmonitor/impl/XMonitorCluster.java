@@ -83,17 +83,14 @@ public class XMonitorCluster implements MonitorCommand {
 	public void run() {
 		List<XClusterNodes> clusterNodes = new ArrayList<>();
 		List<XClusterInfo> clusterInfos = new ArrayList<>();
-		List<XStandaloneRedisInfo> infos = new ArrayList<>();
 		for (Map.Entry<HostAndPort, XMonitorStandalone> entry : commands.entrySet()) {
 			Tuple3<XClusterNodes, XClusterInfo, XStandaloneRedisInfo> tuple = entry.getValue().execute();
 			if (tuple != null) {
 				clusterNodes.add(tuple.getV1());
 				clusterInfos.add(tuple.getV2());
-				infos.add(tuple.getV3());
 			}
 		}
-		XClusterRedisInfo next = XClusterRedisInfo.valueOf(infos, clusterNodes, clusterInfos);
-		next = XClusterRedisInfo.diff(prev, next);
+		XClusterRedisInfo next = XClusterRedisInfo.valueOf(clusterNodes, clusterInfos);
 		
 		XClusterNodes prevNodes = prev.getClusterNodes();
 		XClusterNodes nextNodes = next.getClusterNodes();
@@ -127,12 +124,6 @@ public class XMonitorCluster implements MonitorCommand {
 		setLong("cluster_current_epoch", name, next.getClusterInfo().getClusterCurrentEpoch());
 		setLong("cluster_stats_messages_received", name, next.getClusterInfo().getClusterStatsMessagesReceived());
 		setLong("cluster_stats_messages_sent", name, next.getClusterInfo().getClusterStatsMessagesSent());
-		
-		// server
-		setLong("cluster_uptime_in_seconds", name, next.getMaster().getUptimeInSeconds());
-		setString("cluster_redis_version", name, next.getMaster().getRedisVersion());
-		setLong("cluster_maxclients", name, next.getMaster().getMaxclients());
-		setLong("cluster_total_system_memory", name, next.getMaster().getTotalSystemMemory());
 		
 		for (XClusterNode node : next.getClusterNodes().getNodes()) {
 			if (node.isMaster()) {

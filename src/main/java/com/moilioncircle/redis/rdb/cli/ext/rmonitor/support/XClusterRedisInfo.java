@@ -16,12 +16,7 @@
 
 package com.moilioncircle.redis.rdb.cli.ext.rmonitor.support;
 
-import static com.moilioncircle.redis.rdb.cli.ext.rmonitor.support.XStandaloneRedisInfo.EMPTY;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.moilioncircle.redis.rdb.cli.conf.XClusterNodes;
 
@@ -35,15 +30,6 @@ public class XClusterRedisInfo {
 	//
 	private XClusterNodes clusterNodes = new XClusterNodes();
 	private XClusterInfo clusterInfo = new XClusterInfo();
-	private List<XClusterInfo> clusterInfos = new ArrayList<>();
-	
-	//
-	private XStandaloneRedisInfo master = new XStandaloneRedisInfo();
-	private XStandaloneRedisInfo slave = new XStandaloneRedisInfo();
-	
-	//
-	private Map<String, XStandaloneRedisInfo> masters = new HashMap<>();
-	private Map<String, XStandaloneRedisInfo> slaves = new HashMap<>();
 	
 	public XClusterInfo getClusterInfo() {
 		return clusterInfo;
@@ -51,14 +37,6 @@ public class XClusterRedisInfo {
 	
 	public void setClusterInfo(XClusterInfo clusterInfo) {
 		this.clusterInfo = clusterInfo;
-	}
-	
-	public List<XClusterInfo> getClusterInfos() {
-		return clusterInfos;
-	}
-	
-	public void setClusterInfos(List<XClusterInfo> clusterInfos) {
-		this.clusterInfos = clusterInfos;
 	}
 	
 	public XClusterNodes getClusterNodes() {
@@ -69,60 +47,16 @@ public class XClusterRedisInfo {
 		this.clusterNodes = clusterNodes;
 	}
 	
-	public XStandaloneRedisInfo getMaster() {
-		return master;
-	}
-	
-	public void setMaster(XStandaloneRedisInfo master) {
-		this.master = master;
-	}
-	
-	public XStandaloneRedisInfo getSlave() {
-		return slave;
-	}
-	
-	public void setSlave(XStandaloneRedisInfo slave) {
-		this.slave = slave;
-	}
-	
-	public Map<String, XStandaloneRedisInfo> getMasters() {
-		return masters;
-	}
-	
-	public void setMasters(Map<String, XStandaloneRedisInfo> masters) {
-		this.masters = masters;
-	}
-	
-	public Map<String, XStandaloneRedisInfo> getSlaves() {
-		return slaves;
-	}
-	
-	public void setSlaves(Map<String, XStandaloneRedisInfo> slaves) {
-		this.slaves = slaves;
-	}
-	
-	public static XClusterRedisInfo valueOf(List<XStandaloneRedisInfo> infos, List<XClusterNodes> clusterNodes, List<XClusterInfo> clusterInfos) {
+	public static XClusterRedisInfo valueOf(List<XClusterNodes> clusterNodes, List<XClusterInfo> clusterInfos) {
 		XClusterRedisInfo xinfo = new XClusterRedisInfo();
 		// 
-		xinfo.clusterInfos = clusterInfos;
-		
 		for (XClusterNodes temp : clusterNodes) {
 			if (xinfo.clusterNodes.getCurrentEpoch() < temp.getCurrentEpoch()) {
 				xinfo.clusterNodes = temp;
 			}
 		}
 		
-		for (XStandaloneRedisInfo info : infos) {
-			if (info.getRole().equals("master")) {
-				xinfo.masters.put(info.getHostAndPort(), info);
-				calculate(xinfo.master, info);
-			} else if (info.getRole().equals("slave")) {
-				xinfo.slaves.put(info.getHostAndPort(), info);
-				calculate(xinfo.slave, info);
-			}
-		}
-		
-		for (XClusterInfo clusterInfo : xinfo.clusterInfos) {
+		for (XClusterInfo clusterInfo : clusterInfos) {
 			if (xinfo.clusterInfo.getClusterCurrentEpoch() < clusterInfo.getClusterCurrentEpoch()) {
 				xinfo.clusterInfo.copy(clusterInfo);
 			}
@@ -130,107 +64,6 @@ public class XClusterRedisInfo {
 			xinfo.clusterInfo.setClusterStatsMessagesReceived(add(xinfo.clusterInfo.getClusterStatsMessagesReceived(), clusterInfo.getClusterStatsMessagesReceived()));
 		}
 		return xinfo;
-	}
-	
-	public static XClusterRedisInfo diff(XClusterRedisInfo prev, XClusterRedisInfo next) {
-		Map<String, XStandaloneRedisInfo> pmmap = prev.masters;
-		Map<String, XStandaloneRedisInfo> nmmap = next.masters;
-		next.masters = diff(pmmap, nmmap);
-		
-		Map<String, XStandaloneRedisInfo> psmap = prev.slaves;
-		Map<String, XStandaloneRedisInfo> nsmap = next.slaves;
-		next.slaves = diff(psmap, nsmap);
-		
-		for (Map.Entry<String, XStandaloneRedisInfo> entry : next.masters.entrySet()) {
-			calculateDiff(next.master, entry.getValue());
-		}
-		
-		for (Map.Entry<String, XStandaloneRedisInfo> entry : next.slaves.entrySet()) {
-			calculateDiff(next.slave, entry.getValue());
-		}
-		
-		return next;
-	}
-	
-	private static Map<String, XStandaloneRedisInfo> diff(Map<String, XStandaloneRedisInfo> prev, Map<String, XStandaloneRedisInfo> next) {
-		for (Map.Entry<String, XStandaloneRedisInfo> entry : next.entrySet()) {
-			if (prev.containsKey(entry.getKey())) {
-				XStandaloneRedisInfo.diff(prev.get(entry.getKey()), entry.getValue());
-			} else {
-				XStandaloneRedisInfo.diff(EMPTY, entry.getValue());
-			}
-		}
-		return next;
-	}
-	
-	private static void calculateDiff(XStandaloneRedisInfo result, XStandaloneRedisInfo info) {
-		// diffTotalSlowLogExecutionTime
-		// diffTotalSlowLog
-		// diffSlowLogs
-		result.setDiffTotalSlowLog(add(result.getDiffTotalSlowLog(), info.getDiffTotalSlowLog()));
-		result.setDiffTotalSlowLogExecutionTime(add(result.getDiffTotalSlowLogExecutionTime(), info.getDiffTotalSlowLogExecutionTime()));
-		result.getDiffSlowLogs().addAll(info.getDiffSlowLogs());
-	}
-	
-	private static void calculate(XStandaloneRedisInfo result, XStandaloneRedisInfo info) {
-		// uptimeInSeconds
-		// String redisVersion
-		// connectedClients
-		// blockedClients
-		// trackingClients
-		// maxclients
-		// maxmemory
-		// usedMemory
-		// usedMemoryRss
-		// usedMemoryPeak
-		// usedMemoryDataset
-		// usedMemoryLua
-		// usedMemoryFunctions
-		// usedMemoryScripts
-		// totalSystemMemory
-		// memFragmentationBytes
-		// totalConnectionsReceived
-		// totalCommandsProcessed
-		// totalReadsProcessed
-		// totalWritesProcessed
-		// totalErrorReplies
-		// keyspaceHits
-		// keyspaceMisses
-		// totalNetInputBytes
-		// totalNetOutputBytes
-		// expiredKeys
-		// evictedKeys
-		// totalSlowLog
-		// slowLogLen
-		result.setRedisVersion(info.getRedisVersion());
-		result.setUptimeInSeconds(max(result.getUptimeInSeconds(), info.getUptimeInSeconds()));
-		result.setConnectedClients(add(result.getConnectedClients(), info.getConnectedClients()));
-		result.setBlockedClients(add(result.getBlockedClients(), info.getBlockedClients()));
-		result.setTrackingClients(add(result.getTrackingClients(), info.getTrackingClients()));
-		result.setMaxclients(info.getMaxclients());
-		result.setMaxmemory(add(result.getMaxmemory(), info.getMaxmemory()));
-		result.setUsedMemory(add(result.getUsedMemory(), info.getUsedMemory()));
-		result.setUsedMemoryRss(add(result.getUsedMemoryRss(), info.getUsedMemoryRss()));
-		result.setUsedMemoryPeak(add(result.getUsedMemoryPeak(), info.getUsedMemoryPeak()));
-		result.setUsedMemoryDataset(add(result.getUsedMemoryDataset(), info.getUsedMemoryDataset()));
-		result.setUsedMemoryLua(add(result.getUsedMemoryLua(), info.getUsedMemoryLua()));
-		result.setUsedMemoryFunctions(add(result.getUsedMemoryFunctions(), info.getUsedMemoryFunctions()));
-		result.setUsedMemoryScripts(add(result.getUsedMemoryScripts(), info.getUsedMemoryScripts()));
-		result.setTotalSystemMemory(add(result.getTotalSystemMemory(), info.getTotalSystemMemory()));
-		result.setMemFragmentationBytes(add(result.getMemFragmentationBytes(), info.getMemFragmentationBytes()));
-		result.setTotalConnectionsReceived(add(result.getTotalConnectionsReceived(), info.getTotalConnectionsReceived()));
-		result.setTotalCommandsProcessed(add(result.getTotalCommandsProcessed(), info.getTotalCommandsProcessed()));
-		result.setTotalReadsProcessed(add(result.getTotalReadsProcessed(), info.getTotalReadsProcessed()));
-		result.setTotalWritesProcessed(add(result.getTotalWritesProcessed(), info.getTotalWritesProcessed()));
-		result.setTotalErrorReplies(add(result.getTotalErrorReplies(), info.getTotalErrorReplies()));
-		result.setKeyspaceHits(add(result.getKeyspaceHits(), info.getKeyspaceHits()));
-		result.setKeyspaceMisses(add(result.getKeyspaceMisses(), info.getKeyspaceMisses()));
-		result.setTotalNetInputBytes(add(result.getTotalNetInputBytes(), info.getTotalNetInputBytes()));
-		result.setTotalNetOutputBytes(add(result.getTotalNetOutputBytes(), info.getTotalNetOutputBytes()));
-		result.setExpiredKeys(add(result.getExpiredKeys(), info.getExpiredKeys()));
-		result.setEvictedKeys(add(result.getEvictedKeys(), info.getEvictedKeys()));
-		result.setTotalSlowLog(add(result.getTotalSlowLog(), info.getTotalSlowLog()));
-		result.setSlowLogLen(info.getSlowLogLen());
 	}
 	
 	private static long add(Long v1, Long v2) {
@@ -267,12 +100,7 @@ public class XClusterRedisInfo {
 	public String toString() {
 		return "XClusterRedisInfo{" +
 				"clusterInfo=" + clusterInfo +
-				", clusterInfos=" + clusterInfos +
 				", clusterNodes=" + clusterNodes +
-				", master=" + master +
-				", slave=" + slave +
-				", masters=" + masters +
-				", slaves=" + slaves +
 				'}';
 	}
 }

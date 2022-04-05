@@ -21,8 +21,8 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 6,
-  "iteration": 1649156685036,
+  "id": 2,
+  "iteration": 1649163265598,
   "links": [
     {
       "asDropdown": true,
@@ -98,7 +98,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.4.3",
+      "pluginVersion": "8.4.5",
       "targets": [
         {
           "datasource": {
@@ -106,7 +106,7 @@
             "uid": "P3C6603E967DC8568"
           },
           "groupBy": [],
-          "measurement": "cluster_redis_version",
+          "measurement": "redis_version",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "A",
@@ -127,9 +127,15 @@
           ],
           "tags": [
             {
-              "key": "property0",
+              "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
             }
           ]
         }
@@ -182,7 +188,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.4.3",
+      "pluginVersion": "8.4.5",
       "targets": [
         {
           "datasource": {
@@ -190,7 +196,7 @@
             "uid": "P3C6603E967DC8568"
           },
           "groupBy": [],
-          "measurement": "cluster_uptime_in_seconds",
+          "measurement": "uptime_in_seconds",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "A",
@@ -211,9 +217,15 @@
           ],
           "tags": [
             {
-              "key": "property0",
+              "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
             }
           ]
         }
@@ -945,7 +957,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.4.3",
+      "pluginVersion": "8.4.5",
       "targets": [
         {
           "datasource": {
@@ -1029,7 +1041,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.4.3",
+      "pluginVersion": "8.4.5",
       "targets": [
         {
           "datasource": {
@@ -1970,9 +1982,15 @@
           ],
           "tags": [
             {
-              "key": "property0",
+              "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
             }
           ]
         },
@@ -2305,15 +2323,21 @@
               },
               {
                 "params": [],
-                "type": "last"
+                "type": "sum"
               }
             ]
           ],
           "tags": [
             {
-              "key": "property0",
+              "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
             }
           ]
         },
