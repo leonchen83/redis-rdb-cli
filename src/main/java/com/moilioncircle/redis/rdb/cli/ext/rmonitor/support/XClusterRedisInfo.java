@@ -76,26 +76,6 @@ public class XClusterRedisInfo {
 		return v1 + v2;
 	}
 	
-	private static Long max(Long v1, Long v2) {
-		if (v1 == null) {
-			v1 = 0L;
-		}
-		if (v2 == null) {
-			v2 = 0L;
-		}
-		return Math.max(v1, v2);
-	}
-	
-	private static Long min(Long v1, Long v2) {
-		if (v1 == null) {
-			v1 = 0L;
-		}
-		if (v2 == null) {
-			v2 = 0L;
-		}
-		return Math.min(v1, v2);
-	}
-	
 	@Override
 	public String toString() {
 		return "XClusterRedisInfo{" +
