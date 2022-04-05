@@ -21,12 +21,13 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 5,
-  "iteration": 1649144018476,
+  "id": 6,
+  "iteration": 1649154841235,
   "links": [],
   "liveNow": false,
   "panels": [
     {
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -34,7 +35,8 @@
         "y": 0
       },
       "id": 13,
-      "title": "Row title",
+      "panels": [],
+      "title": "base info",
       "type": "row"
     },
     {
@@ -1059,7 +1061,7 @@
         "y": 7
       },
       "id": 4,
-      "title": "base info",
+      "title": "monitor info",
       "type": "row"
     },
     {
@@ -1521,7 +1523,7 @@
             }
           ],
           "hide": false,
-          "measurement": "cluster_dbnum",
+          "measurement": "cluster_evicted_keys",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "D",
@@ -3912,6 +3914,7 @@
       "type": "timeseries"
     }
   ],
+  "refresh": "30s",
   "schemaVersion": 35,
   "style": "dark",
   "tags": [],
