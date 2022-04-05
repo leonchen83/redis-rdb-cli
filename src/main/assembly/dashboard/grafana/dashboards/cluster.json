@@ -22,7 +22,7 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": 2,
-  "iteration": 1649163265598,
+  "iteration": 1649165917938,
   "links": [
     {
       "asDropdown": true,
@@ -267,8 +267,8 @@
               "mode": "off"
             }
           },
+          "decimals": 0,
           "mappings": [],
-          "min": -2,
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -396,6 +396,126 @@
           "tags": [
             {
               "key": "property0",
+              "operator": "=~",
+              "value": "/^$name$/"
+            }
+          ]
+        },
+        {
+          "alias": "$tag_property0:$tag_property2 fail",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P3C6603E967DC8568"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "property0"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "property2"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "cluster_node_fail",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "C",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "property1",
+              "operator": "=~",
+              "value": "/^$name$/"
+            }
+          ]
+        },
+        {
+          "alias": "$tag_property0:$tag_property2 pfail",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P3C6603E967DC8568"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "property0"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "property2"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "cluster_node_pfail",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "D",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
             }
@@ -2641,6 +2761,7 @@
           },
           "decimals": 2,
           "mappings": [],
+          "min": 0,
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -2972,6 +3093,7 @@
           },
           "decimals": 2,
           "mappings": [],
+          "min": 0,
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -3506,6 +3628,7 @@
             }
           },
           "mappings": [],
+          "min": 0,
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",

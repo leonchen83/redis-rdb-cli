@@ -37,6 +37,7 @@ import com.moilioncircle.redis.rdb.cli.ext.rmonitor.support.XClusterRedisInfo;
 import com.moilioncircle.redis.rdb.cli.ext.rmonitor.support.XStandaloneRedisInfo;
 import com.moilioncircle.redis.rdb.cli.monitor.Monitor;
 import com.moilioncircle.redis.replicator.Configuration;
+import com.moilioncircle.redis.replicator.util.Strings;
 import com.moilioncircle.redis.replicator.util.type.Tuple3;
 
 import redis.clients.jedis.HostAndPort;
@@ -132,9 +133,11 @@ public class XMonitorCluster implements MonitorCommand {
 				setLong("cluster_node_migrating_slot", properties, (long) node.getMigratingSlots().size());
 			}
 			if (node.getState() != null) {
-				setString("cluster_node_state", properties, node.getState());
-			} else {
-				setString("cluster_node_state", properties, "serving");
+				if (Strings.isEquals(node.getState(), "fail")) {
+					setLong("cluster_node_fail", properties, 1L);
+				} else if (Strings.isEquals(node.getState(), "fail?")) {
+					setLong("cluster_node_pfail", properties, 1L);
+				}
 			}
 		}
 		
