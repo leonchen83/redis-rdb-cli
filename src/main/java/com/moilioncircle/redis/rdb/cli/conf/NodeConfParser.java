@@ -81,12 +81,14 @@ public class NodeConfParser {
 				boolean serving = true;
 				for (String role : args.get(2).split(",")) {
 					switch (role) {
-						case "noflags":
 						case "fail":
 						case "fail?":
+							node.setState(role);
+							serving = false;
+							break;
+						case "noflags":
 						case "noaddr":
 						case "handshake":
-							node.setState(role);
 							serving = false;
 							break;
 						case "slave":

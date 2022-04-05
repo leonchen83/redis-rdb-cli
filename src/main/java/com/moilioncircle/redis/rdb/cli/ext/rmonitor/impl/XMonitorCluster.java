@@ -126,10 +126,15 @@ public class XMonitorCluster implements MonitorCommand {
 		setLong("cluster_stats_messages_sent", name, next.getClusterInfo().getClusterStatsMessagesSent());
 		
 		for (XClusterNode node : next.getClusterNodes().getNodes()) {
+			String[] properties = new String[]{node.getHostAndPort().toString(), name, node.isMaster() ? "master" : "slave"};
 			if (node.isMaster()) {
-				String[] properties = new String[]{node.getHostAndPort().toString(), name, "master"};
 				setLong("cluster_node_slot", properties, (long) node.getSlots().size());
 				setLong("cluster_node_migrating_slot", properties, (long) node.getMigratingSlots().size());
+			}
+			if (node.getState() != null) {
+				setString("cluster_node_state", properties, node.getState());
+			} else {
+				setString("cluster_node_state", properties, "serving");
 			}
 		}
 		

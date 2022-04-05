@@ -22,7 +22,7 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": 5,
-  "iteration": 1649164423726,
+  "iteration": 1649165754356,
   "links": [
     {
       "asDropdown": true,
@@ -1213,7 +1213,7 @@
       "pluginVersion": "8.4.3",
       "targets": [
         {
-          "alias": "$tag_property2",
+          "alias": "$tag_property3",
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
@@ -4479,7 +4479,11 @@
   "templating": {
     "list": [
       {
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "erebor",
+          "value": "erebor"
+        },
         "definition": "show tag values from monitor with key = \"property1\"",
         "hide": 0,
         "includeAll": false,
@@ -4495,7 +4499,11 @@
         "type": "query"
       },
       {
-        "current": {},
+        "current": {
+          "selected": false,
+          "text": "master",
+          "value": "master"
+        },
         "definition": "show tag values from monitor with key = \"property2\" where \"property1\" = '$name';",
         "hide": 0,
         "includeAll": false,
@@ -4511,7 +4519,11 @@
         "type": "query"
       },
       {
-        "current": {},
+        "current": {
+          "selected": false,
+          "text": "192.168.1.233:6379",
+          "value": "192.168.1.233:6379"
+        },
         "definition": "show tag values from monitor with key = \"property0\" where \"property1\" = '$name' and \"property2\" = '$role'",
         "hide": 0,
         "includeAll": false,
