@@ -22,8 +22,23 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": 4,
-  "iteration": 1649144070790,
-  "links": [],
+  "iteration": 1649156623149,
+  "links": [
+    {
+      "asDropdown": true,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [
+        "cluster"
+      ],
+      "targetBlank": false,
+      "title": "cluster",
+      "tooltip": "",
+      "type": "dashboards",
+      "url": ""
+    }
+  ],
   "liveNow": false,
   "panels": [
     {
@@ -4188,7 +4203,9 @@
   "refresh": "30s",
   "schemaVersion": 35,
   "style": "dark",
-  "tags": [],
+  "tags": [
+    "details"
+  ],
   "templating": {
     "list": [
       {
