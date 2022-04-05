@@ -117,7 +117,7 @@ public class XMonitorStandalone implements MonitorCommand {
 			
 			// server
 			long now = System.currentTimeMillis();
-			setLong("monitor", hostAndPort, name, now);
+			monitor.set("monitor", hostAndPort, name, next.getRole(), now);
 			setLong("uptime_in_seconds", hostAndPort, name, next.getUptimeInSeconds());
 			setString("redis_version", hostAndPort, name, next.getRedisVersion());
 			setString("role", hostAndPort, name, next.getRole());
