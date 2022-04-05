@@ -34,9 +34,9 @@ public class XClusterRedisInfo {
 	public static XClusterRedisInfo EMPTY_CLUSTER = new XClusterRedisInfo();
 	
 	//
+	private XClusterNodes clusterNodes;
 	private XClusterInfo clusterInfo = new XClusterInfo();
 	private List<XClusterInfo> clusterInfos = new ArrayList<>();
-	private List<XClusterNodes> clusterNodes = new ArrayList<>();
 	
 	//
 	private XStandaloneRedisInfo master = new XStandaloneRedisInfo();
@@ -62,11 +62,11 @@ public class XClusterRedisInfo {
 		this.clusterInfos = clusterInfos;
 	}
 	
-	public List<XClusterNodes> getClusterNodes() {
+	public XClusterNodes getClusterNodes() {
 		return clusterNodes;
 	}
 	
-	public void setClusterNodes(List<XClusterNodes> clusterNodes) {
+	public void setClusterNodes(XClusterNodes clusterNodes) {
 		this.clusterNodes = clusterNodes;
 	}
 	

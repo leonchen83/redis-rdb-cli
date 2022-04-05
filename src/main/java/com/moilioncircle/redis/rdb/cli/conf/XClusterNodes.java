@@ -23,121 +23,40 @@ import java.util.List;
  * @author Baoyi Chen
  */
 public class XClusterNodes {
+	private long currentEpoch;
+	private long lastVoteEpoch;
+	private List<XClusterNode> nodes = new ArrayList<>();
 	
-	private long pingTime;
-	private long pongTime;
-	private boolean master;
-	private boolean myself;
-	private String state;
-	private long configEpoch;
-	private List<Short> slots = new ArrayList<>(8192);
-	private List<Short> migratingSlots = new ArrayList<>(8192);
-	private String hostAndPort;
-	private String name;
-	private String link;
-	
-	public long getPingTime() {
-		return pingTime;
+	public long getCurrentEpoch() {
+		return currentEpoch;
 	}
 	
-	public void setPingTime(long pingTime) {
-		this.pingTime = pingTime;
+	public void setCurrentEpoch(long currentEpoch) {
+		this.currentEpoch = currentEpoch;
 	}
 	
-	public long getPongTime() {
-		return pongTime;
+	public long getLastVoteEpoch() {
+		return lastVoteEpoch;
 	}
 	
-	public void setPongTime(long pongTime) {
-		this.pongTime = pongTime;
+	public void setLastVoteEpoch(long lastVoteEpoch) {
+		this.lastVoteEpoch = lastVoteEpoch;
 	}
 	
-	public boolean isMaster() {
-		return master;
+	public List<XClusterNode> getNodes() {
+		return nodes;
 	}
 	
-	public void setMaster(boolean master) {
-		this.master = master;
-	}
-	
-	public boolean isMyself() {
-		return myself;
-	}
-	
-	public void setMyself(boolean myself) {
-		this.myself = myself;
-	}
-	
-	public String getState() {
-		return state;
-	}
-	
-	public void setState(String state) {
-		this.state = state;
-	}
-	
-	public long getConfigEpoch() {
-		return configEpoch;
-	}
-	
-	public void setConfigEpoch(long configEpoch) {
-		this.configEpoch = configEpoch;
-	}
-	
-	public List<Short> getSlots() {
-		return slots;
-	}
-	
-	public void setSlots(List<Short> slots) {
-		this.slots = slots;
-	}
-	
-	public List<Short> getMigratingSlots() {
-		return migratingSlots;
-	}
-	
-	public void setMigratingSlots(List<Short> migratingSlots) {
-		this.migratingSlots = migratingSlots;
-	}
-	
-	public String getHostAndPort() {
-		return hostAndPort;
-	}
-	
-	public void setHostAndPort(String hostAndPort) {
-		this.hostAndPort = hostAndPort;
-	}
-	
-	public String getName() {
-		return name;
-	}
-	
-	public void setName(String name) {
-		this.name = name;
-	}
-	
-	public String getLink() {
-		return link;
-	}
-	
-	public void setLink(String link) {
-		this.link = link;
+	public void setNodes(List<XClusterNode> nodes) {
+		this.nodes = nodes;
 	}
 	
 	@Override
 	public String toString() {
 		return "XClusterNodes{" +
-				"pingTime=" + pingTime +
-				", pongTime=" + pongTime +
-				", master=" + master +
-				", myself=" + myself +
-				", state='" + state + '\'' +
-				", configEpoch=" + configEpoch +
-				", slots=" + slots +
-				", migratingSlots=" + migratingSlots +
-				", hostAndPort=" + hostAndPort +
-				", name='" + name + '\'' +
-				", link='" + link + '\'' +
+				"currentEpoch=" + currentEpoch +
+				", lastVoteEpoch=" + lastVoteEpoch +
+				", nodes=" + nodes +
 				'}';
 	}
 }

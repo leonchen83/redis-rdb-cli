@@ -89,6 +89,12 @@
   "name":"com.moilioncircle.redis.rdb.cli.ext.rmonitor.impl.XMonitorStandalone"
 },
 {
+  "name":"com.moilioncircle.redis.rdb.cli.net.impl.XEndpoint"
+},
+{
+  "name":"com.moilioncircle.redis.rdb.cli.net.protocol.Protocol"
+},
+{
   "name":"com.moilioncircle.redis.rdb.cli.util.CloseableThread"
 },
 {
@@ -97,6 +103,9 @@
     {"name":"host", "allowWrite":true}, 
     {"name":"port", "allowWrite":true}
   ]
+},
+{
+  "name":"com.moilioncircle.redis.replicator.io.RedisInputStream"
 },
 {
   "name":"com.sun.management.GarbageCollectorMXBean",
@@ -287,6 +296,9 @@
 },
 {
   "name":"java.math.BigInteger"
+},
+{
+  "name":"java.net.SocketInputStream"
 },
 {
   "name":"java.nio.file.Path"

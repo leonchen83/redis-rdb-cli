@@ -37,12 +37,14 @@ import com.moilioncircle.redis.replicator.util.type.Tuple3;
  */
 public class NodeConfParser {
 	
-	public static List<XClusterNodes> parse(String clusterNodes) {
+	public static XClusterNodes parse(String clusterNodes) {
 		return parse(Collections.ofList(clusterNodes.split("\n")), Collections.ofSet(), new HashMap<>(), null);
 	}
 	
-	public static <T> List<XClusterNodes> parse(List<String> conf, Set<T> set, Map<Short, T> result, Function<Tuple3<String, Integer, String>, T> mapper) {
-		List<XClusterNodes> list = new ArrayList<>(conf.size());
+	public static <T> XClusterNodes parse(List<String> conf, Set<T> set, Map<Short, T> result, Function<Tuple3<String, Integer, String>, T> mapper) {
+		XClusterNodes nodes = new XClusterNodes();
+		List<XClusterNode> list = new ArrayList<>(conf.size());
+		nodes.setNodes(list);
 		Map<String, T> map = new HashMap<>();
 		for (String line : conf) {
 			List<String> args = parseLine(line);
@@ -51,10 +53,10 @@ public class NodeConfParser {
 				for (int i = 1; i < args.size(); i += 2) {
 					switch (args.get(i)) {
 						case "currentEpoch":
-							// pass
+							nodes.setCurrentEpoch(Long.parseLong(args.get(i + 1)));
 							break;
 						case "lastVoteEpoch":
-							// pass
+							nodes.setLastVoteEpoch(Long.parseLong(args.get(i + 1)));
 							break;
 						default:
 							break;
@@ -63,7 +65,7 @@ public class NodeConfParser {
 			} else if (args.size() < 8) {
 				// pass
 			} else {
-				XClusterNodes node = new XClusterNodes();
+				XClusterNode node = new XClusterNode();
 				list.add(node);
 				String name = args.get(0);
 				node.setName(name);
@@ -150,7 +152,7 @@ public class NodeConfParser {
 			}
 		}
 		
-		return list;
+		return nodes;
 	}
 	
 	public static List<String> parseLine(String line) {
