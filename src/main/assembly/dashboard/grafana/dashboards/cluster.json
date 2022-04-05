@@ -1178,7 +1178,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "cluster_dbnum",
+          "measurement": "dbnum",
           "orderByTime": "ASC",
           "policy": "30days",
           "query": "",
@@ -1210,6 +1210,12 @@
               "key": "property2",
               "operator": "=",
               "value": "master"
+            },
+            {
+              "condition": "AND",
+              "key": "property3",
+              "operator": "=",
+              "value": "db0"
             }
           ]
         },
@@ -1234,7 +1240,7 @@
             }
           ],
           "hide": false,
-          "measurement": "cluster_dbnum",
+          "measurement": "dbnum",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "B",
@@ -1264,6 +1270,12 @@
               "key": "property2",
               "operator": "=",
               "value": "master"
+            },
+            {
+              "condition": "AND",
+              "key": "property3",
+              "operator": "=",
+              "value": "db0"
             }
           ]
         }
@@ -1370,7 +1382,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "cluster_dbexp",
+          "measurement": "dbexp",
           "orderByTime": "ASC",
           "policy": "30days",
           "query": "",
@@ -1402,6 +1414,12 @@
               "key": "property2",
               "operator": "=",
               "value": "master"
+            },
+            {
+              "condition": "AND",
+              "key": "property3",
+              "operator": "=",
+              "value": "db0"
             }
           ]
         },
@@ -1426,7 +1444,7 @@
             }
           ],
           "hide": false,
-          "measurement": "cluster_dbexp",
+          "measurement": "dbexp",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "B",
@@ -1456,6 +1474,12 @@
               "key": "property2",
               "operator": "=",
               "value": "master"
+            },
+            {
+              "condition": "AND",
+              "key": "property3",
+              "operator": "=",
+              "value": "db0"
             }
           ]
         },
@@ -1480,7 +1504,7 @@
             }
           ],
           "hide": false,
-          "measurement": "cluster_expired_keys",
+          "measurement": "expired_keys",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "C",
@@ -1538,7 +1562,7 @@
             }
           ],
           "hide": false,
-          "measurement": "cluster_evicted_keys",
+          "measurement": "evicted_keys",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "D",
@@ -1678,7 +1702,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "cluster_keyspace_hit_rate",
+          "measurement": "keyspace_hit_rate",
           "orderByTime": "ASC",
           "policy": "30days",
           "query": "",
@@ -1815,7 +1839,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "cluster_connected_clients",
+          "measurement": "connected_clients",
           "orderByTime": "ASC",
           "policy": "30days",
           "query": "",
@@ -1871,7 +1895,7 @@
             }
           ],
           "hide": false,
-          "measurement": "cluster_connected_clients",
+          "measurement": "connected_clients",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "B",
@@ -1925,7 +1949,7 @@
             }
           ],
           "hide": false,
-          "measurement": "cluster_maxclients",
+          "measurement": "maxclients",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "C",
@@ -1973,7 +1997,7 @@
             }
           ],
           "hide": false,
-          "measurement": "cluster_blocked_clients",
+          "measurement": "blocked_clients",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "D",
@@ -2027,7 +2051,7 @@
             }
           ],
           "hide": false,
-          "measurement": "cluster_tracking_clients",
+          "measurement": "tracking_clients",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "E",
@@ -2081,7 +2105,7 @@
             }
           ],
           "hide": false,
-          "measurement": "cluster_total_connections_received",
+          "measurement": "total_connections_received",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "F",
@@ -2210,7 +2234,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "cluster_used_memory",
+          "measurement": "used_memory",
           "orderByTime": "ASC",
           "policy": "30days",
           "query": "",
@@ -2266,7 +2290,7 @@
             }
           ],
           "hide": false,
-          "measurement": "cluster_total_system_memory",
+          "measurement": "total_system_memory",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "I",
@@ -2320,7 +2344,7 @@
             }
           ],
           "hide": false,
-          "measurement": "cluster_used_memory",
+          "measurement": "used_memory",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "B",
@@ -2457,7 +2481,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "cluster_used_cpu_sys",
+          "measurement": "used_cpu_sys",
           "orderByTime": "ASC",
           "policy": "30days",
           "query": "",
@@ -2519,7 +2543,7 @@
             }
           ],
           "hide": false,
-          "measurement": "cluster_used_cpu_user",
+          "measurement": "used_cpu_user",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "B",
@@ -2656,7 +2680,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "cluster_total_net_input_bytes",
+          "measurement": "total_net_input_bytes",
           "orderByTime": "ASC",
           "policy": "30days",
           "query": "",
@@ -2724,7 +2748,7 @@
             }
           ],
           "hide": false,
-          "measurement": "cluster_total_net_output_bytes",
+          "measurement": "total_net_output_bytes",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "B",
@@ -2784,7 +2808,7 @@
             }
           ],
           "hide": false,
-          "measurement": "cluster_total_net_output_bytes",
+          "measurement": "total_net_output_bytes",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "C",
@@ -2844,7 +2868,7 @@
             }
           ],
           "hide": false,
-          "measurement": "cluster_total_net_input_bytes",
+          "measurement": "total_net_input_bytes",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "D",
@@ -2981,7 +3005,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "cluster_total_commands_processed",
+          "measurement": "total_commands_processed",
           "orderByTime": "ASC",
           "policy": "30days",
           "query": "",
@@ -3043,7 +3067,7 @@
             }
           ],
           "hide": false,
-          "measurement": "cluster_total_reads_processed",
+          "measurement": "total_reads_processed",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "B",
@@ -3103,7 +3127,7 @@
             }
           ],
           "hide": false,
-          "measurement": "cluster_total_writes_processed",
+          "measurement": "total_writes_processed",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "C",
@@ -3245,7 +3269,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "cluster_mem_fragmentation_bytes",
+          "measurement": "mem_fragmentation_bytes",
           "orderByTime": "ASC",
           "policy": "30days",
           "query": "",
@@ -3383,7 +3407,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "cluster_mem_fragmentation_ratio",
+          "measurement": "mem_fragmentation_ratio",
           "orderByTime": "ASC",
           "policy": "30days",
           "query": "",
@@ -3515,7 +3539,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "cluster_total_commands_processed",
+          "measurement": "total_commands_processed",
           "orderByTime": "ASC",
           "policy": "30days",
           "query": "",
@@ -3575,7 +3599,7 @@
             }
           ],
           "hide": false,
-          "measurement": "cluster_total_reads_processed",
+          "measurement": "total_reads_processed",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "B",
@@ -3633,7 +3657,7 @@
             }
           ],
           "hide": false,
-          "measurement": "cluster_total_writes_processed",
+          "measurement": "total_writes_processed",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "C",
@@ -3691,7 +3715,7 @@
             }
           ],
           "hide": false,
-          "measurement": "cluster_total_error_replies",
+          "measurement": "total_error_replies",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "D",
@@ -3749,7 +3773,7 @@
             }
           ],
           "hide": false,
-          "measurement": "cluster_total_slow_log",
+          "measurement": "total_slow_log",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "E",
@@ -3889,7 +3913,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "cluster_slow_log_latency",
+          "measurement": "slow_log_latency",
           "orderByTime": "ASC",
           "policy": "30days",
           "query": "",

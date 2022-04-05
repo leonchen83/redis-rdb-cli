@@ -21,8 +21,8 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 4,
-  "iteration": 1649156623149,
+  "id": 5,
+  "iteration": 1649162117730,
   "links": [
     {
       "asDropdown": true,
@@ -112,7 +112,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.4.3",
+      "pluginVersion": "8.4.5",
       "targets": [
         {
           "datasource": {
@@ -153,6 +153,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         }
@@ -218,7 +224,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.4.3",
+      "pluginVersion": "8.4.5",
       "targets": [
         {
           "datasource": {
@@ -312,7 +318,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.4.3",
+      "pluginVersion": "8.4.5",
       "targets": [
         {
           "datasource": {
@@ -418,7 +424,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.4.3",
+      "pluginVersion": "8.4.5",
       "targets": [
         {
           "datasource": {
@@ -458,6 +464,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         }
@@ -517,7 +529,7 @@
         },
         "showUnfilled": true
       },
-      "pluginVersion": "8.4.3",
+      "pluginVersion": "8.4.5",
       "targets": [
         {
           "datasource": {
@@ -564,6 +576,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         }
@@ -623,7 +641,7 @@
         },
         "showUnfilled": true
       },
-      "pluginVersion": "8.4.3",
+      "pluginVersion": "8.4.5",
       "targets": [
         {
           "datasource": {
@@ -670,6 +688,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         }
@@ -729,7 +753,7 @@
         },
         "showUnfilled": true
       },
-      "pluginVersion": "8.4.3",
+      "pluginVersion": "8.4.5",
       "targets": [
         {
           "datasource": {
@@ -776,6 +800,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         }
@@ -835,7 +865,7 @@
         },
         "showUnfilled": true
       },
-      "pluginVersion": "8.4.3",
+      "pluginVersion": "8.4.5",
       "targets": [
         {
           "datasource": {
@@ -882,6 +912,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         }
@@ -973,7 +1009,7 @@
       "pluginVersion": "8.4.3",
       "targets": [
         {
-          "alias": "$tag_property2",
+          "alias": "$tag_property3",
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
@@ -987,7 +1023,7 @@
             },
             {
               "params": [
-                "property2"
+                "property3"
               ],
               "type": "tag"
             },
@@ -1028,6 +1064,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         },
@@ -1078,7 +1120,7 @@
             },
             {
               "condition": "AND",
-              "key": "property2",
+              "key": "property3",
               "operator": "=~",
               "value": "/^db.*/"
             },
@@ -1087,6 +1129,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         }
@@ -1179,7 +1227,7 @@
             },
             {
               "params": [
-                "property2"
+                "property3"
               ],
               "type": "tag"
             },
@@ -1220,6 +1268,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         },
@@ -1270,7 +1324,7 @@
             },
             {
               "condition": "AND",
-              "key": "property2",
+              "key": "property3",
               "operator": "=~",
               "value": "/^db.*/"
             },
@@ -1279,6 +1333,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         },
@@ -1336,6 +1396,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         },
@@ -1393,6 +1459,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         }
@@ -1521,6 +1593,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         }
@@ -1649,6 +1727,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         },
@@ -1706,6 +1790,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         },
@@ -1759,6 +1849,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         },
@@ -1813,6 +1909,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         }
@@ -1940,6 +2042,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         },
@@ -1993,6 +2101,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         },
@@ -2046,6 +2160,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         },
@@ -2100,6 +2220,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         },
@@ -2208,6 +2334,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         },
@@ -2262,6 +2394,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         },
@@ -2316,6 +2454,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         }
@@ -2444,6 +2588,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         },
@@ -2497,6 +2647,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         },
@@ -2550,6 +2706,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         },
@@ -2603,6 +2765,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         }
@@ -2736,6 +2904,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         },
@@ -2795,6 +2969,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         }
@@ -2922,6 +3102,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         },
@@ -2975,6 +3161,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         },
@@ -3028,6 +3220,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         },
@@ -3081,6 +3279,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         },
@@ -3135,6 +3339,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         },
@@ -3195,6 +3405,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         }
@@ -3323,6 +3539,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         }
@@ -3451,6 +3673,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         }
@@ -3585,6 +3813,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         },
@@ -3643,6 +3877,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         },
@@ -3701,6 +3941,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         },
@@ -3759,6 +4005,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         },
@@ -3817,6 +4069,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         }
@@ -3945,6 +4203,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         }
@@ -4070,7 +4334,7 @@
         },
         "showHeader": true
       },
-      "pluginVersion": "8.4.3",
+      "pluginVersion": "8.4.5",
       "targets": [
         {
           "datasource": {
@@ -4090,7 +4354,7 @@
             [
               {
                 "params": [
-                  "property2"
+                  "property3"
                 ],
                 "type": "field"
               },
@@ -4104,7 +4368,7 @@
             [
               {
                 "params": [
-                  "property3"
+                  "property4"
                 ],
                 "type": "field"
               },
@@ -4118,7 +4382,7 @@
             [
               {
                 "params": [
-                  "property5"
+                  "property6"
                 ],
                 "type": "field"
               },
@@ -4132,7 +4396,7 @@
             [
               {
                 "params": [
-                  "property6"
+                  "property7"
                 ],
                 "type": "field"
               },
@@ -4160,7 +4424,7 @@
             [
               {
                 "params": [
-                  "property4"
+                  "property5"
                 ],
                 "type": "field"
               },
@@ -4183,6 +4447,12 @@
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=~",
+              "value": "/^$role$/"
             }
           ]
         }

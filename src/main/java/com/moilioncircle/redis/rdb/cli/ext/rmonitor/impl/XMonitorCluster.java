@@ -86,9 +86,11 @@ public class XMonitorCluster implements MonitorCommand {
 		List<XStandaloneRedisInfo> infos = new ArrayList<>();
 		for (Map.Entry<HostAndPort, XMonitorStandalone> entry : commands.entrySet()) {
 			Tuple3<XClusterNodes, XClusterInfo, XStandaloneRedisInfo> tuple = entry.getValue().execute();
-			clusterNodes.add(tuple.getV1());
-			clusterInfos.add(tuple.getV2());
-			infos.add(tuple.getV3());
+			if (tuple != null) {
+				clusterNodes.add(tuple.getV1());
+				clusterInfos.add(tuple.getV2());
+				infos.add(tuple.getV3());
+			}
 		}
 		XClusterRedisInfo next = XClusterRedisInfo.valueOf(infos, clusterNodes, clusterInfos);
 		next = XClusterRedisInfo.diff(prev, next);
@@ -140,59 +142,7 @@ public class XMonitorCluster implements MonitorCommand {
 			}
 		}
 		
-		for (Map.Entry<String, XStandaloneRedisInfo> entry : next.getMasters().entrySet()) {
-			String ip = entry.getKey();
-			XStandaloneRedisInfo value = entry.getValue();
-			setMonitor(value, ip, name, "master");
-		}
-		
-		for (Map.Entry<String, XStandaloneRedisInfo> entry : next.getSlaves().entrySet()) {
-			String ip = entry.getKey();
-			XStandaloneRedisInfo value = entry.getValue();
-			setMonitor(value, ip, name, "slave");
-		}
-		
 		prev = next;
-	}
-	
-	private void setMonitor(XStandaloneRedisInfo value, String ip, String name, String role) {
-		String[] properties = new String[]{ip, name, role};
-		setLong("cluster_nodes", properties, (long)1);
-		setLong("cluster_connected_clients", properties, value.getConnectedClients());
-		setLong("cluster_blocked_clients", properties, value.getBlockedClients());
-		setLong("cluster_tracking_clients", properties, value.getTrackingClients());
-		setLong("cluster_maxmemory", properties, value.getMaxmemory());
-		setLong("cluster_used_memory", properties, value.getUsedMemory());
-		setLong("cluster_mem_fragmentation_bytes", properties, value.getMemFragmentationBytes());
-		setDouble("cluster_mem_fragmentation_ratio", properties, value.getMemFragmentationRatio());
-		setLong("cluster_total_connections_received", properties, value.getTotalConnectionsReceived());
-		setLong("cluster_total_commands_processed", properties, value.getTotalCommandsProcessed());
-		setLong("cluster_total_reads_processed", properties, value.getTotalReadsProcessed());
-		setLong("cluster_total_writes_processed", properties, value.getTotalWritesProcessed());
-		setLong("cluster_total_error_replies", properties, value.getTotalErrorReplies());
-		Long hits = value.getKeyspaceHits();
-		Long misses = value.getKeyspaceMisses();
-		if (hits != null && misses != null) {
-			monitor.set("cluster_keyspace_hit_rate", properties, hits * 1d / (hits + misses));
-		}
-		
-		setDouble("cluster_used_cpu_sys", properties, value.getUsedCpuSys());
-		setDouble("cluster_used_cpu_user", properties, value.getUsedCpuUser());
-		setDouble("cluster_used_cpu_sys_children", properties, value.getUsedCpuSysChildren());
-		setDouble("cluster_used_cpu_user_children", properties, value.getUsedCpuUserChildren());
-		setLong("cluster_dbnum", properties, value.getDbInfo().get("db0"));
-		setLong("cluster_dbexp", properties, value.getDbExpireInfo().get("db0"));
-		setLong("cluster_total_net_input_bytes", properties, value.getTotalNetInputBytes());
-		setLong("cluster_total_net_output_bytes", properties, value.getTotalNetOutputBytes());
-		setLong("cluster_expired_keys", properties, value.getExpiredKeys());
-		setLong("cluster_evicted_keys", properties, value.getEvictedKeys());
-		setLong("cluster_total_slow_log", properties, value.getTotalSlowLog());
-		
-		if (value.getDiffTotalSlowLog() > 0) {
-			monitor.set("cluster_slow_log_latency", properties, (value.getDiffTotalSlowLogExecutionTime() / (value.getDiffTotalSlowLog() * 1d)));
-		} else {
-			monitor.set("cluster_slow_log_latency", properties, 0d);
-		}
 	}
 	
 	private void setLong(String field, String property, Long value) {

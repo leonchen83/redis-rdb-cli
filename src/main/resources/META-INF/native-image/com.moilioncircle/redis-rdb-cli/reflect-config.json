@@ -95,6 +95,9 @@
   "name":"com.moilioncircle.redis.rdb.cli.ext.rmonitor.support.XClusterRedisInfo"
 },
 {
+  "name":"com.moilioncircle.redis.rdb.cli.io.BufferedOutputStream"
+},
+{
   "name":"com.moilioncircle.redis.rdb.cli.net.impl.XEndpoint"
 },
 {
@@ -112,6 +115,9 @@
 },
 {
   "name":"com.moilioncircle.redis.replicator.io.RedisInputStream"
+},
+{
+  "name":"com.moilioncircle.redis.replicator.net.RedisSocketFactory"
 },
 {
   "name":"com.sun.management.GarbageCollectorMXBean",
@@ -304,7 +310,22 @@
   "name":"java.math.BigInteger"
 },
 {
+  "name":"java.net.AbstractPlainSocketImpl"
+},
+{
+  "name":"java.net.PlainSocketImpl"
+},
+{
+  "name":"java.net.Socket"
+},
+{
   "name":"java.net.SocketInputStream"
+},
+{
+  "name":"java.net.SocketOutputStream"
+},
+{
+  "name":"java.net.SocksSocketImpl"
 },
 {
   "name":"java.nio.file.Path"

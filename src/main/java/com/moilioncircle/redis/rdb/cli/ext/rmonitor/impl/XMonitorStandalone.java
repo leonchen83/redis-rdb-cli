@@ -147,94 +147,96 @@ public class XMonitorStandalone implements MonitorCommand {
 			
 			// server
 			long now = System.currentTimeMillis();
-			monitor.set("monitor", hostAndPort, name, next.getRole(), now);
-			setLong("uptime_in_seconds", hostAndPort, name, next.getUptimeInSeconds());
-			setString("redis_version", hostAndPort, name, next.getRedisVersion());
-			setString("role", hostAndPort, name, next.getRole());
+			String role = next.getRole();
+			setLong("monitor", hostAndPort, name, role, now);
+			setLong("uptime_in_seconds", hostAndPort, name, role, next.getUptimeInSeconds());
+			setString("redis_version", hostAndPort, name, role, next.getRedisVersion());
+			monitor.set("role", hostAndPort, name, next.getRole());
 			
 			// clients
-			setLong("connected_clients", hostAndPort, name, next.getConnectedClients());
-			setLong("blocked_clients", hostAndPort, name, next.getBlockedClients());
-			setLong("tracking_clients", hostAndPort, name, next.getTrackingClients());
-			setLong("maxclients", hostAndPort, name, next.getMaxclients());
+			setLong("connected_clients", hostAndPort, name, role, next.getConnectedClients());
+			setLong("blocked_clients", hostAndPort, name, role, next.getBlockedClients());
+			setLong("tracking_clients", hostAndPort, name, role, next.getTrackingClients());
+			setLong("maxclients", hostAndPort, name, role, next.getMaxclients());
 			
 			// memory
-			setLong("maxmemory", hostAndPort, name, next.getMaxmemory());
-			setLong("used_memory", hostAndPort, name, next.getUsedMemory());
-			setLong("used_memory_rss", hostAndPort, name, next.getUsedMemoryRss());
-			setLong("used_memory_peak", hostAndPort, name, next.getUsedMemoryPeak());
-			setLong("used_memory_dataset", hostAndPort, name, next.getUsedMemoryDataset());
-			setLong("used_memory_lua", hostAndPort, name, next.getUsedMemoryLua());
-			setLong("used_memory_functions", hostAndPort, name, next.getUsedMemoryFunctions());
-			setLong("used_memory_scripts", hostAndPort, name, next.getUsedMemoryScripts());
-			setLong("total_system_memory", hostAndPort, name, next.getTotalSystemMemory()); // ?
-			setDouble("mem_fragmentation_ratio", hostAndPort, name, next.getMemFragmentationRatio());
-			setLong("mem_fragmentation_bytes", hostAndPort, name, next.getMemFragmentationBytes());
+			setLong("maxmemory", hostAndPort, name, role, next.getMaxmemory());
+			setLong("used_memory", hostAndPort, name, role, next.getUsedMemory());
+			setLong("used_memory_rss", hostAndPort, name, role, next.getUsedMemoryRss());
+			setLong("used_memory_peak", hostAndPort, name, role, next.getUsedMemoryPeak());
+			setLong("used_memory_dataset", hostAndPort, name, role, next.getUsedMemoryDataset());
+			setLong("used_memory_lua", hostAndPort, name, role, next.getUsedMemoryLua());
+			setLong("used_memory_functions", hostAndPort, name, role, next.getUsedMemoryFunctions());
+			setLong("used_memory_scripts", hostAndPort, name, role, next.getUsedMemoryScripts());
+			setLong("total_system_memory", hostAndPort, name, role, next.getTotalSystemMemory()); // ?
+			setDouble("mem_fragmentation_ratio", hostAndPort, name, role, next.getMemFragmentationRatio());
+			setLong("mem_fragmentation_bytes", hostAndPort, name, role, next.getMemFragmentationBytes());
 			
 			// command
-			setLong("total_connections_received", hostAndPort, name, next.getTotalConnectionsReceived());
-			setLong("total_commands_processed", hostAndPort, name, next.getTotalCommandsProcessed());
+			setLong("total_connections_received", hostAndPort, name, role, next.getTotalConnectionsReceived());
+			setLong("total_commands_processed", hostAndPort, name, role, next.getTotalCommandsProcessed());
 			
-			setLong("total_reads_processed", hostAndPort, name, next.getTotalReadsProcessed());
-			setLong("total_writes_processed", hostAndPort, name, next.getTotalWritesProcessed());
-			setLong("total_error_replies", hostAndPort, name, next.getTotalErrorReplies());
+			setLong("total_reads_processed", hostAndPort, name, role, next.getTotalReadsProcessed());
+			setLong("total_writes_processed", hostAndPort, name, role, next.getTotalWritesProcessed());
+			setLong("total_error_replies", hostAndPort, name, role, next.getTotalErrorReplies());
 			
 			Long hits = next.getKeyspaceHits();
 			Long misses = next.getKeyspaceMisses();
 			if (hits != null && misses != null && (hits + misses) > 0) {
-				monitor.set("keyspace_hit_rate", hostAndPort, name, hits * 1d / (hits + misses));
+				setDouble("keyspace_hit_rate", hostAndPort, name, role, hits * 1d / (hits + misses));
 			}
 			
 			// ops
-			setLong("total_net_input_bytes", hostAndPort, name, next.getTotalNetInputBytes());
-			setLong("total_net_output_bytes", hostAndPort, name, next.getTotalNetOutputBytes());
-			setDouble("evicted_keys_per_sec", hostAndPort, name, next.getEvictedKeysPerSec());
-			setDouble("instantaneous_ops_per_sec", hostAndPort, name, next.getInstantaneousOpsPerSec());
-			setDouble("instantaneous_write_ops_per_sec", hostAndPort, name, next.getInstantaneousWriteOpsPerSec());
-			setDouble("instantaneous_read_ops_per_sec", hostAndPort, name, next.getInstantaneousReadOpsPerSec());
-			setDouble("instantaneous_other_ops_per_sec", hostAndPort, name, next.getInstantaneousOtherOpsPerSec());
-			setDouble("instantaneous_sync_write_ops_per_sec", hostAndPort, name, next.getInstantaneousSyncWriteOpsPerSec());
-			setDouble("instantaneous_input_kbps", hostAndPort, name, next.getInstantaneousInputKbps());
-			setDouble("instantaneous_output_kbps", hostAndPort, name, next.getInstantaneousOutputKbps());
+			setLong("total_net_input_bytes", hostAndPort, name, role, next.getTotalNetInputBytes());
+			setLong("total_net_output_bytes", hostAndPort, name, role, next.getTotalNetOutputBytes());
+			setDouble("evicted_keys_per_sec", hostAndPort, name, role, next.getEvictedKeysPerSec());
+			setDouble("instantaneous_ops_per_sec", hostAndPort, name, role, next.getInstantaneousOpsPerSec());
+			setDouble("instantaneous_write_ops_per_sec", hostAndPort, name, role, next.getInstantaneousWriteOpsPerSec());
+			setDouble("instantaneous_read_ops_per_sec", hostAndPort, name, role, next.getInstantaneousReadOpsPerSec());
+			setDouble("instantaneous_other_ops_per_sec", hostAndPort, name, role, next.getInstantaneousOtherOpsPerSec());
+			setDouble("instantaneous_sync_write_ops_per_sec", hostAndPort, name, role, next.getInstantaneousSyncWriteOpsPerSec());
+			setDouble("instantaneous_input_kbps", hostAndPort, name, role, next.getInstantaneousInputKbps());
+			setDouble("instantaneous_output_kbps", hostAndPort, name, role, next.getInstantaneousOutputKbps());
 			
 			// cpu
-			setDouble("used_cpu_sys", hostAndPort, name, next.getUsedCpuSys());
-			setDouble("used_cpu_user", hostAndPort, name, next.getUsedCpuUser());
-			setDouble("used_cpu_sys_children", hostAndPort, name, next.getUsedCpuSysChildren());
-			setDouble("used_cpu_user_children", hostAndPort, name, next.getUsedCpuUserChildren());
+			setDouble("used_cpu_sys", hostAndPort, name, role, next.getUsedCpuSys());
+			setDouble("used_cpu_user", hostAndPort, name, role, next.getUsedCpuUser());
+			setDouble("used_cpu_sys_children", hostAndPort, name, role, next.getUsedCpuSysChildren());
+			setDouble("used_cpu_user_children", hostAndPort, name, role, next.getUsedCpuUserChildren());
 			
 			// db
 			for (Map.Entry<String, Long> entry : next.getDbInfo().entrySet()) {
-				monitor.set("dbnum", hostAndPort, name, entry.getKey(), entry.getValue());
+				monitor.set("dbnum", hostAndPort, name, role, entry.getKey(), entry.getValue());
 			}
 			for (Map.Entry<String, Long> entry : next.getDbExpireInfo().entrySet()) {
-				monitor.set("dbexp", hostAndPort, name, entry.getKey(), entry.getValue());
+				monitor.set("dbexp", hostAndPort, name, role, entry.getKey(), entry.getValue());
 			}
 			
 			// diff
-			setLong("expired_keys", hostAndPort, name, next.getExpiredKeys());
-			setLong("evicted_keys", hostAndPort, name, next.getEvictedKeys());
+			setLong("expired_keys", hostAndPort, name, role, next.getExpiredKeys());
+			setLong("evicted_keys", hostAndPort, name, role, next.getEvictedKeys());
 			
 			// slow log
-			setLong("total_slow_log", hostAndPort, name, next.getTotalSlowLog());
+			setLong("total_slow_log", hostAndPort, name, role, next.getTotalSlowLog());
 			
 			List<XSlowLog> slowLogs = next.getDiffSlowLogs();
 			for (XSlowLog slowLog : slowLogs) {
-				String[] properties = new String[7];
+				String[] properties = new String[8];
 				properties[0] = hostAndPort;
 				properties[1] = name;
-				properties[2] = String.valueOf(slowLog.getId());
-				properties[3] = slowLog.getTimestamp();
-				properties[4] = slowLog.getCommand();
-				properties[5] = slowLog.getClientName();
-				properties[6] = slowLog.getHostAndPort();
+				properties[2] = role;
+				properties[3] = String.valueOf(slowLog.getId());
+				properties[4] = slowLog.getTimestamp();
+				properties[5] = slowLog.getCommand();
+				properties[6] = slowLog.getClientName();
+				properties[7] = slowLog.getHostAndPort();
 				monitor.set("slow_log", properties, slowLog.getExecutionTime());
 			}
 			
 			if (next.getDiffTotalSlowLog() > 0) {
-				monitor.set("slow_log_latency", hostAndPort, name, (next.getDiffTotalSlowLogExecutionTime() / (next.getDiffTotalSlowLog() * 1d)));
+				setDouble("slow_log_latency", hostAndPort, name, role, (next.getDiffTotalSlowLogExecutionTime() / (next.getDiffTotalSlowLog() * 1d)));
 			} else {
-				monitor.set("slow_log_latency", hostAndPort, name, 0d);
+				setDouble("slow_log_latency", hostAndPort, name, role, 0d);
 			}
 			
 			if (Strings.isEquals(next.getRole(), "master")) {
@@ -272,21 +274,21 @@ public class XMonitorStandalone implements MonitorCommand {
 		}
 	}
 	
-	private void setLong(String field, String hostAndPort, String name, Long value) {
+	private void setLong(String field, String hostAndPort, String name, String role, Long value) {
 		if (value != null) {
-			monitor.set(field, hostAndPort, name, value);
+			monitor.set(field, hostAndPort, name, role, value);
 		}
 	}
 	
-	private void setDouble(String field, String hostAndPort, String name, Double value) {
+	private void setDouble(String field, String hostAndPort, String name, String role, Double value) {
 		if (value != null) {
-			monitor.set(field, hostAndPort, name, value);
+			monitor.set(field, hostAndPort, name, role, value);
 		}
 	}
 	
-	private void setString(String field, String hostAndPort, String name, String value) {
+	private void setString(String field, String hostAndPort, String name, String role, String value) {
 		if (value != null) {
-			monitor.set(field, hostAndPort, name, value);
+			monitor.set(field, hostAndPort, name, role, value);
 		}
 	}
 	
