@@ -27,7 +27,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.rmonitor.MonitorCommand;
 import com.moilioncircle.redis.rdb.cli.monitor.Monitor;
 import com.moilioncircle.redis.rdb.cli.net.impl.XEndpoint;
@@ -51,12 +50,12 @@ public class XMonitorMasterSlave implements MonitorCommand, StandaloneListener {
 	private Configuration configuration;
 	private Map<HostAndPort, XMonitorStandalone> commands = new ConcurrentHashMap<>();
 	
-	public XMonitorMasterSlave(RedisURI uri, String name, Monitor monitor, Configure configure) {
+	public XMonitorMasterSlave(RedisURI uri, String name, Monitor monitor, Configuration configuration) {
 		this.name = name;
 		this.host = uri.getHost();
 		this.port = uri.getPort();
 		this.monitor = monitor;
-		this.configuration = configure.merge(uri, true);
+		this.configuration = configuration;
 		createMonitorCommands(host, port, configuration);
 	}
 	

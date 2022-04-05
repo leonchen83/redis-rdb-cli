@@ -21,235 +21,21 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 4,
-  "iteration": 1649144070790,
+  "id": 5,
+  "iteration": 1649144018476,
   "links": [],
   "liveNow": false,
   "panels": [
     {
-      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
         "y": 0
       },
-      "id": 42,
-      "panels": [],
-      "title": "base info",
+      "id": 13,
+      "title": "Row title",
       "type": "row"
-    },
-    {
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [
-            {
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "N/A"
-                }
-              },
-              "type": "special"
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 3,
-        "x": 0,
-        "y": 1
-      },
-      "id": 11,
-      "links": [],
-      "maxDataPoints": 100,
-      "options": {
-        "colorMode": "none",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "mean"
-          ],
-          "fields": "/^last$/",
-          "values": true
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.4.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "groupBy": [],
-          "hide": false,
-          "measurement": "redis_version",
-          "orderByTime": "ASC",
-          "policy": "30days",
-          "query": "",
-          "rawQuery": false,
-          "refId": "A",
-          "resultFormat": "table",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
-              "value": "/^$name$/"
-            }
-          ]
-        }
-      ],
-      "title": "redis version",
-      "type": "stat"
-    },
-    {
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [
-            {
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "N/A"
-                }
-              },
-              "type": "special"
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 3,
-        "x": 3,
-        "y": 1
-      },
-      "id": 48,
-      "links": [],
-      "maxDataPoints": 100,
-      "options": {
-        "colorMode": "none",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "mean"
-          ],
-          "fields": "/^last$/",
-          "values": true
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.4.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "groupBy": [],
-          "hide": false,
-          "measurement": "redis_status",
-          "orderByTime": "ASC",
-          "policy": "30days",
-          "query": "",
-          "rawQuery": false,
-          "refId": "A",
-          "resultFormat": "table",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
-              "value": "/^$name$/"
-            }
-          ]
-        }
-      ],
-      "title": "status",
-      "type": "stat"
     },
     {
       "fieldConfig": {
@@ -275,22 +61,20 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 3,
-        "x": 6,
+        "x": 0,
         "y": 1
       },
-      "id": 16,
-      "links": [],
-      "maxDataPoints": 100,
+      "id": 2,
       "options": {
         "colorMode": "none",
         "graphMode": "none",
         "justifyMode": "auto",
-        "orientation": "auto",
+        "orientation": "horizontal",
         "reduceOptions": {
           "calcs": [
-            "mean"
+            "lastNotNull"
           ],
           "fields": "/^last$/",
           "values": true
@@ -305,12 +89,9 @@
             "uid": "P3C6603E967DC8568"
           },
           "groupBy": [],
-          "hide": false,
-          "measurement": "role",
+          "measurement": "cluster_redis_version",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "",
-          "rawQuery": false,
           "refId": "A",
           "resultFormat": "table",
           "select": [
@@ -331,18 +112,12 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
               "value": "/^$name$/"
             }
           ]
         }
       ],
-      "title": "role",
+      "title": "cluster redis version",
       "type": "stat"
     },
     {
@@ -351,18 +126,7 @@
           "color": {
             "mode": "thresholds"
           },
-          "decimals": 1,
-          "mappings": [
-            {
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "N/A"
-                }
-              },
-              "type": "special"
-            }
-          ],
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -381,14 +145,12 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 3,
-        "x": 9,
+        "x": 3,
         "y": 1
       },
-      "id": 3,
-      "links": [],
-      "maxDataPoints": 100,
+      "id": 8,
       "options": {
         "colorMode": "none",
         "graphMode": "none",
@@ -396,10 +158,10 @@
         "orientation": "horizontal",
         "reduceOptions": {
           "calcs": [
-            "mean"
+            "lastNotNull"
           ],
-          "fields": "",
-          "values": false
+          "fields": "/^last$/",
+          "values": true
         },
         "textMode": "auto"
       },
@@ -411,13 +173,11 @@
             "uid": "P3C6603E967DC8568"
           },
           "groupBy": [],
-          "measurement": "uptime_in_seconds",
+          "measurement": "cluster_uptime_in_seconds",
           "orderByTime": "ASC",
           "policy": "30days",
-          "query": "",
-          "rawQuery": false,
           "refId": "A",
-          "resultFormat": "time_series",
+          "resultFormat": "table",
           "select": [
             [
               {
@@ -436,456 +196,13 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
               "value": "/^$name$/"
             }
           ]
         }
       ],
-      "title": "uptime in seconds",
+      "title": "cluster up in seconds",
       "type": "stat"
-    },
-    {
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "continuous-BlPu"
-          },
-          "decimals": 0,
-          "mappings": [
-            {
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "N/A"
-                }
-              },
-              "type": "special"
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 2,
-        "w": 6,
-        "x": 12,
-        "y": 1
-      },
-      "id": 19,
-      "links": [],
-      "maxDataPoints": 100,
-      "options": {
-        "displayMode": "lcd",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "mean"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true
-      },
-      "pluginVersion": "8.4.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            }
-          ],
-          "measurement": "total_connections_received",
-          "orderByTime": "ASC",
-          "policy": "30days",
-          "query": "",
-          "rawQuery": false,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
-              "value": "/^$name$/"
-            }
-          ]
-        }
-      ],
-      "title": "total connections received",
-      "type": "bargauge"
-    },
-    {
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "continuous-BlPu"
-          },
-          "decimals": 2,
-          "mappings": [
-            {
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "N/A"
-                }
-              },
-              "type": "special"
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 2,
-        "w": 6,
-        "x": 18,
-        "y": 1
-      },
-      "id": 20,
-      "links": [],
-      "maxDataPoints": 100,
-      "options": {
-        "displayMode": "lcd",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true
-      },
-      "pluginVersion": "8.4.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            }
-          ],
-          "measurement": "total_commands_processed",
-          "orderByTime": "ASC",
-          "policy": "30days",
-          "query": "",
-          "rawQuery": false,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
-              "value": "/^$name$/"
-            }
-          ]
-        }
-      ],
-      "title": "total commands processed",
-      "type": "bargauge"
-    },
-    {
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "continuous-BlPu"
-          },
-          "decimals": 1,
-          "mappings": [
-            {
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "N/A"
-                }
-              },
-              "type": "special"
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "bytes"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 2,
-        "w": 6,
-        "x": 12,
-        "y": 3
-      },
-      "id": 21,
-      "links": [],
-      "maxDataPoints": 100,
-      "options": {
-        "displayMode": "lcd",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "mean"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true
-      },
-      "pluginVersion": "8.4.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            }
-          ],
-          "measurement": "total_net_input_bytes",
-          "orderByTime": "ASC",
-          "policy": "30days",
-          "query": "",
-          "rawQuery": false,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
-              "value": "/^$name$/"
-            }
-          ]
-        }
-      ],
-      "title": "total net input bytes",
-      "type": "bargauge"
-    },
-    {
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "continuous-BlPu"
-          },
-          "decimals": 1,
-          "mappings": [
-            {
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "N/A"
-                }
-              },
-              "type": "special"
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "bytes"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 2,
-        "w": 6,
-        "x": 18,
-        "y": 3
-      },
-      "id": 22,
-      "links": [],
-      "maxDataPoints": 100,
-      "options": {
-        "displayMode": "lcd",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "mean"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true
-      },
-      "pluginVersion": "8.4.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            }
-          ],
-          "measurement": "total_net_output_bytes",
-          "orderByTime": "ASC",
-          "policy": "30days",
-          "query": "",
-          "rawQuery": false,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
-              "value": "/^$name$/"
-            }
-          ]
-        }
-      ],
-      "title": "total net output bytes",
-      "type": "bargauge"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 5
-      },
-      "id": 30,
-      "panels": [],
-      "title": "monitor info",
-      "type": "row"
     },
     {
       "fieldConfig": {
@@ -922,6 +239,7 @@
             }
           },
           "mappings": [],
+          "min": -2,
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -929,21 +247,24 @@
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
           },
-          "unit": "short"
+          "unit": "none"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 6,
         "w": 6,
-        "x": 0,
-        "y": 6
+        "x": 6,
+        "y": 1
       },
-      "id": 13,
-      "links": [],
+      "id": 7,
       "options": {
         "legend": {
           "calcs": [],
@@ -955,10 +276,9 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "8.4.3",
       "targets": [
         {
-          "alias": "$tag_property2",
+          "alias": "known nodes",
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
@@ -972,18 +292,12 @@
             },
             {
               "params": [
-                "property2"
-              ],
-              "type": "tag"
-            },
-            {
-              "params": [
                 "null"
               ],
               "type": "fill"
             }
           ],
-          "measurement": "dbnum",
+          "measurement": "cluster_known_nodes",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "A",
@@ -1006,18 +320,12 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
               "value": "/^$name$/"
             }
           ]
         },
         {
-          "alias": "total",
+          "alias": "master nodes",
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
@@ -1036,7 +344,8 @@
               "type": "fill"
             }
           ],
-          "measurement": "dbnum",
+          "hide": false,
+          "measurement": "cluster_size",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "B",
@@ -1051,7 +360,7 @@
               },
               {
                 "params": [],
-                "type": "sum"
+                "type": "last"
               }
             ]
           ],
@@ -1059,24 +368,12 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "property2",
-              "operator": "=~",
-              "value": "/^db.*/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
               "value": "/^$name$/"
             }
           ]
         }
       ],
-      "title": "count info per db",
+      "title": "cluster nodes",
       "type": "timeseries"
     },
     {
@@ -1114,6 +411,7 @@
             }
           },
           "mappings": [],
+          "min": -2,
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -1121,25 +419,28 @@
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
           },
-          "unit": "short"
+          "unit": "none"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 6,
         "w": 6,
-        "x": 6,
-        "y": 6
+        "x": 12,
+        "y": 1
       },
-      "id": 15,
-      "links": [],
+      "id": 11,
       "options": {
         "legend": {
           "calcs": [],
-          "displayMode": "list",
+          "displayMode": "hidden",
           "placement": "bottom"
         },
         "tooltip": {
@@ -1147,10 +448,9 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "8.4.3",
       "targets": [
         {
-          "alias": "$tag_property2",
+          "alias": "assigned",
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
@@ -1164,18 +464,12 @@
             },
             {
               "params": [
-                "property2"
-              ],
-              "type": "tag"
-            },
-            {
-              "params": [
                 "null"
               ],
               "type": "fill"
             }
           ],
-          "measurement": "dbexp",
+          "measurement": "cluster_slot_assigned",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "A",
@@ -1198,18 +492,12 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
               "value": "/^$name$/"
             }
           ]
         },
         {
-          "alias": "total",
+          "alias": "ok",
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
@@ -1228,7 +516,708 @@
               "type": "fill"
             }
           ],
-          "measurement": "dbexp",
+          "hide": false,
+          "measurement": "cluster_slot_ok",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "property0",
+              "operator": "=~",
+              "value": "/^$name$/"
+            }
+          ]
+        },
+        {
+          "alias": "fail",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P3C6603E967DC8568"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "cluster_slot_fail",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "C",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "property0",
+              "operator": "=~",
+              "value": "/^$name$/"
+            }
+          ]
+        },
+        {
+          "alias": "pfail",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P3C6603E967DC8568"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "cluster_slot_pfail",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "D",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "property0",
+              "operator": "=~",
+              "value": "/^$name$/"
+            }
+          ]
+        },
+        {
+          "alias": "$tag_property0",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P3C6603E967DC8568"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "property0"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "cluster_node_slot",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "E",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "property1",
+              "operator": "=~",
+              "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
+            }
+          ]
+        }
+      ],
+      "title": "cluster slot",
+      "type": "timeseries"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": -2,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 1
+      },
+      "id": 10,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "alias": "received",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P3C6603E967DC8568"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "cluster_stats_messages_received",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              },
+              {
+                "params": [],
+                "type": "difference"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "property0",
+              "operator": "=~",
+              "value": "/^$name$/"
+            }
+          ]
+        },
+        {
+          "alias": "sent",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P3C6603E967DC8568"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "cluster_stats_messages_sent",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              },
+              {
+                "params": [],
+                "type": "difference"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "property0",
+              "operator": "=~",
+              "value": "/^$name$/"
+            }
+          ]
+        }
+      ],
+      "title": "cluster protocol messages",
+      "type": "timeseries"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 0,
+        "y": 4
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^last$/",
+          "values": true
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.4.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P3C6603E967DC8568"
+          },
+          "groupBy": [],
+          "measurement": "cluster_state",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "A",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "property0",
+              "operator": "=~",
+              "value": "/^$name$/"
+            }
+          ]
+        }
+      ],
+      "title": "cluster status",
+      "type": "stat"
+    },
+    {
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 3,
+        "y": 4
+      },
+      "id": 9,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^last$/",
+          "values": true
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.4.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P3C6603E967DC8568"
+          },
+          "groupBy": [],
+          "measurement": "cluster_current_epoch",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "A",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "property0",
+              "operator": "=~",
+              "value": "/^$name$/"
+            }
+          ]
+        }
+      ],
+      "title": "cluster current epoch",
+      "type": "stat"
+    },
+    {
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "id": 4,
+      "title": "base info",
+      "type": "row"
+    },
+    {
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 8
+      },
+      "id": 19,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "hidden",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "alias": "$tag_property0:count",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P3C6603E967DC8568"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "property0"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "cluster_dbnum",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "query": "",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "property1",
+              "operator": "=~",
+              "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
+            }
+          ]
+        },
+        {
+          "alias": "total key count",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P3C6603E967DC8568"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "cluster_dbnum",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "B",
@@ -1249,140 +1238,20 @@
           ],
           "tags": [
             {
-              "key": "property0",
+              "key": "property1",
               "operator": "=~",
-              "value": "/^$host$/"
+              "value": "/^$name$/"
             },
             {
               "condition": "AND",
               "key": "property2",
-              "operator": "=~",
-              "value": "/^db.*/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
-              "value": "/^$name$/"
-            }
-          ]
-        },
-        {
-          "alias": "expired key",
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "expired_keys",
-          "orderByTime": "ASC",
-          "policy": "30days",
-          "refId": "C",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              },
-              {
-                "params": [],
-                "type": "difference"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
-              "value": "/^$name$/"
-            }
-          ]
-        },
-        {
-          "alias": "evicted key",
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "evicted_keys",
-          "orderByTime": "ASC",
-          "policy": "30days",
-          "refId": "D",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              },
-              {
-                "params": [],
-                "type": "difference"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
-              "value": "/^$name$/"
+              "operator": "=",
+              "value": "master"
             }
           ]
         }
       ],
-      "title": "expires info per db",
+      "title": "cluster key count info",
       "type": "timeseries"
     },
     {
@@ -1428,25 +1297,28 @@
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
           },
-          "unit": "percentunit"
+          "unit": "short"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
-        "x": 12,
-        "y": 6
+        "x": 6,
+        "y": 8
       },
-      "id": 47,
-      "links": [],
+      "id": 20,
       "options": {
         "legend": {
           "calcs": [],
-          "displayMode": "list",
+          "displayMode": "hidden",
           "placement": "bottom"
         },
         "tooltip": {
@@ -1454,10 +1326,9 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "8.4.3",
       "targets": [
         {
-          "alias": "hit rate",
+          "alias": "$tag_property0:expiring",
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
@@ -1471,14 +1342,22 @@
             },
             {
               "params": [
+                "property0"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
                 "null"
               ],
               "type": "fill"
             }
           ],
-          "measurement": "keyspace_hit_rate",
+          "measurement": "cluster_dbexp",
           "orderByTime": "ASC",
           "policy": "30days",
+          "query": "",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -1497,20 +1376,328 @@
           ],
           "tags": [
             {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
+            }
+          ]
+        },
+        {
+          "alias": "total expiring keys",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P3C6603E967DC8568"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "cluster_dbexp",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "property1",
+              "operator": "=~",
+              "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
+            }
+          ]
+        },
+        {
+          "alias": "expired keys",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P3C6603E967DC8568"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "cluster_expired_keys",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "C",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              },
+              {
+                "params": [],
+                "type": "difference"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "property1",
+              "operator": "=~",
+              "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
+            }
+          ]
+        },
+        {
+          "alias": "evicted keys",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P3C6603E967DC8568"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "cluster_dbnum",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "D",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              },
+              {
+                "params": [],
+                "type": "difference"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "property1",
+              "operator": "=~",
+              "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
             }
           ]
         }
       ],
-      "title": "hit rate",
+      "title": "cluster key expired info",
+      "type": "timeseries"
+    },
+    {
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 8
+      },
+      "id": 18,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "hidden",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "alias": "$tag_property0",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P3C6603E967DC8568"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "property0"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "cluster_keyspace_hit_rate",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "query": "",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "property1",
+              "operator": "=~",
+              "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
+            }
+          ]
+        }
+      ],
+      "title": "cluster hit rate",
       "type": "timeseries"
     },
     {
@@ -1547,7 +1734,6 @@
               "mode": "off"
             }
           },
-          "decimals": 0,
           "mappings": [],
           "noValue": "0",
           "thresholds": {
@@ -1556,25 +1742,28 @@
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
           },
-          "unit": "none"
+          "unit": "short"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
         "x": 18,
-        "y": 6
+        "y": 8
       },
-      "id": 39,
-      "links": [],
+      "id": 14,
       "options": {
         "legend": {
           "calcs": [],
-          "displayMode": "list",
+          "displayMode": "hidden",
           "placement": "bottom"
         },
         "tooltip": {
@@ -1582,10 +1771,9 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "8.4.3",
       "targets": [
         {
-          "alias": "connected",
+          "alias": "$tag_property0:connected",
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
@@ -1599,14 +1787,22 @@
             },
             {
               "params": [
+                "property0"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
                 "null"
               ],
               "type": "fill"
             }
           ],
-          "measurement": "connected_clients",
+          "measurement": "cluster_connected_clients",
           "orderByTime": "ASC",
           "policy": "30days",
+          "query": "",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -1625,20 +1821,20 @@
           ],
           "tags": [
             {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
             }
           ]
         },
         {
-          "alias": "received",
+          "alias": "total connected",
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
@@ -1657,7 +1853,8 @@
               "type": "fill"
             }
           ],
-          "measurement": "total_connections_received",
+          "hide": false,
+          "measurement": "cluster_connected_clients",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "B",
@@ -1672,30 +1869,26 @@
               },
               {
                 "params": [],
-                "type": "last"
-              },
-              {
-                "params": [],
-                "type": "difference"
+                "type": "sum"
               }
             ]
           ],
           "tags": [
             {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
             }
           ]
         },
         {
-          "alias": "blocked",
+          "alias": "max clients",
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
@@ -1714,7 +1907,8 @@
               "type": "fill"
             }
           ],
-          "measurement": "blocked_clients",
+          "hide": false,
+          "measurement": "cluster_maxclients",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "C",
@@ -1737,18 +1931,12 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
               "value": "/^$name$/"
             }
           ]
         },
         {
-          "alias": "max",
+          "alias": "total blocked",
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
@@ -1768,7 +1956,7 @@
             }
           ],
           "hide": false,
-          "measurement": "maxclients",
+          "measurement": "cluster_blocked_clients",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "D",
@@ -1783,26 +1971,134 @@
               },
               {
                 "params": [],
-                "type": "last"
+                "type": "sum"
               }
             ]
           ],
           "tags": [
             {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
+            }
+          ]
+        },
+        {
+          "alias": "total tracking",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P3C6603E967DC8568"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "cluster_tracking_clients",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "E",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "property1",
+              "operator": "=~",
+              "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
+            }
+          ]
+        },
+        {
+          "alias": "total received",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P3C6603E967DC8568"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "cluster_total_connections_received",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "F",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "property1",
+              "operator": "=~",
+              "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
             }
           ]
         }
       ],
-      "title": "client info",
+      "title": "cluster clients info",
       "type": "timeseries"
     },
     {
@@ -1847,25 +2143,28 @@
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
           },
-          "unit": "decbytes"
+          "unit": "bytes"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
         "x": 0,
-        "y": 12
+        "y": 13
       },
-      "id": 18,
-      "links": [],
+      "id": 15,
       "options": {
         "legend": {
           "calcs": [],
-          "displayMode": "list",
+          "displayMode": "hidden",
           "placement": "bottom"
         },
         "tooltip": {
@@ -1873,7 +2172,6 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "8.4.3",
       "targets": [
         {
           "alias": "used memory",
@@ -1895,10 +2193,66 @@
               "type": "fill"
             }
           ],
-          "measurement": "used_memory",
+          "measurement": "cluster_used_memory",
           "orderByTime": "ASC",
           "policy": "30days",
+          "query": "",
+          "rawQuery": false,
           "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "property1",
+              "operator": "=~",
+              "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
+            }
+          ]
+        },
+        {
+          "alias": "total system memory",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P3C6603E967DC8568"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "cluster_total_system_memory",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "I",
           "resultFormat": "time_series",
           "select": [
             [
@@ -1918,18 +2272,12 @@
             {
               "key": "property0",
               "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
               "value": "/^$name$/"
             }
           ]
         },
         {
-          "alias": "max memory",
+          "alias": "$tag_property0:used",
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
@@ -1943,12 +2291,19 @@
             },
             {
               "params": [
+                "property0"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
                 "null"
               ],
               "type": "fill"
             }
           ],
-          "measurement": "maxmemory",
+          "hide": false,
+          "measurement": "cluster_used_memory",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "B",
@@ -1969,346 +2324,24 @@
           ],
           "tags": [
             {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
-            }
-          ]
-        },
-        {
-          "alias": "used memory lua",
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "used_memory_lua",
-          "orderByTime": "ASC",
-          "policy": "30days",
-          "refId": "C",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
             },
             {
               "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
-              "value": "/^$name$/"
-            }
-          ]
-        },
-        {
-          "alias": "used memory dataset",
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": false,
-          "measurement": "used_memory_dataset",
-          "orderByTime": "ASC",
-          "policy": "30days",
-          "refId": "D",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
-              "value": "/^$name$/"
-            }
-          ]
-        },
-        {
-          "alias": "used memory script",
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": false,
-          "measurement": "used_memory_scripts",
-          "orderByTime": "ASC",
-          "policy": "30days",
-          "refId": "E",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
-              "value": "/^$name$/"
-            }
-          ]
-        },
-        {
-          "alias": "used memory function",
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": false,
-          "measurement": "used_memory_functions",
-          "orderByTime": "ASC",
-          "policy": "30days",
-          "refId": "F",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
-              "value": "/^$name$/"
-            }
-          ]
-        },
-        {
-          "alias": "used memory rss",
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": false,
-          "measurement": "used_memory_rss",
-          "orderByTime": "ASC",
-          "policy": "30days",
-          "refId": "G",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
-              "value": "/^$name$/"
-            }
-          ]
-        },
-        {
-          "alias": "used memory peak",
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": false,
-          "measurement": "used_memory_peak",
-          "orderByTime": "ASC",
-          "policy": "30days",
-          "refId": "H",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
-              "value": "/^$name$/"
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
             }
           ]
         }
       ],
-      "title": "memory info",
+      "title": "cluster memory info",
       "type": "timeseries"
     },
     {
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -2351,6 +2384,10 @@
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
           },
@@ -2359,17 +2396,16 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
         "x": 6,
-        "y": 12
+        "y": 13
       },
-      "id": 23,
-      "links": [],
+      "id": 21,
       "options": {
         "legend": {
           "calcs": [],
-          "displayMode": "list",
+          "displayMode": "hidden",
           "placement": "bottom"
         },
         "tooltip": {
@@ -2377,10 +2413,9 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "8.4.3",
       "targets": [
         {
-          "alias": "used cpu sys",
+          "alias": "$tag_property0:sys",
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
@@ -2394,14 +2429,22 @@
             },
             {
               "params": [
+                "property0"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
                 "null"
               ],
               "type": "fill"
             }
           ],
-          "measurement": "used_cpu_sys",
+          "measurement": "cluster_used_cpu_sys",
           "orderByTime": "ASC",
           "policy": "30days",
+          "query": "",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -2420,20 +2463,20 @@
           ],
           "tags": [
             {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
             }
           ]
         },
         {
-          "alias": "used cpu user",
+          "alias": "$tag_property0:user",
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
@@ -2447,12 +2490,19 @@
             },
             {
               "params": [
+                "property0"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
                 "null"
               ],
               "type": "fill"
             }
           ],
-          "measurement": "used_cpu_user",
+          "hide": false,
+          "measurement": "cluster_used_cpu_user",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "B",
@@ -2473,129 +2523,24 @@
           ],
           "tags": [
             {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
-            }
-          ]
-        },
-        {
-          "alias": "used cpu sys children",
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "used_cpu_sys_children",
-          "orderByTime": "ASC",
-          "policy": "30days",
-          "refId": "C",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
             },
             {
               "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
-              "value": "/^$name$/"
-            }
-          ]
-        },
-        {
-          "alias": "used cpu user children",
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "used_cpu_user_children",
-          "orderByTime": "ASC",
-          "policy": "30days",
-          "refId": "D",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
-              "value": "/^$name$/"
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
             }
           ]
         }
       ],
-      "title": "cpu info",
+      "title": "cluster cpu info",
       "type": "timeseries"
     },
     {
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -2629,6 +2574,7 @@
               "mode": "off"
             }
           },
+          "decimals": 2,
           "mappings": [],
           "noValue": "0",
           "thresholds": {
@@ -2637,6 +2583,10 @@
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
           },
@@ -2645,17 +2595,16 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
         "x": 12,
-        "y": 12
+        "y": 13
       },
-      "id": 38,
-      "links": [],
+      "id": 22,
       "options": {
         "legend": {
           "calcs": [],
-          "displayMode": "list",
+          "displayMode": "hidden",
           "placement": "bottom"
         },
         "tooltip": {
@@ -2663,10 +2612,9 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "8.4.3",
       "targets": [
         {
-          "alias": "inbound",
+          "alias": "$tag_property0:inbound",
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
@@ -2680,14 +2628,22 @@
             },
             {
               "params": [
+                "property0"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
                 "null"
               ],
               "type": "fill"
             }
           ],
-          "measurement": "total_net_input_bytes",
+          "measurement": "cluster_total_net_input_bytes",
           "orderByTime": "ASC",
           "policy": "30days",
+          "query": "",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -2712,15 +2668,81 @@
           ],
           "tags": [
             {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
+            }
+          ]
+        },
+        {
+          "alias": "$tag_property0:outbound",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P3C6603E967DC8568"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "property0"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "cluster_total_net_output_bytes",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              },
+              {
+                "params": [
+                  "1s"
+                ],
+                "type": "derivative"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "property1",
+              "operator": "=~",
+              "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
             }
           ]
         },
@@ -2744,10 +2766,11 @@
               "type": "fill"
             }
           ],
-          "measurement": "total_net_output_bytes",
+          "hide": false,
+          "measurement": "cluster_total_net_output_bytes",
           "orderByTime": "ASC",
           "policy": "30days",
-          "refId": "B",
+          "refId": "C",
           "resultFormat": "time_series",
           "select": [
             [
@@ -2759,7 +2782,7 @@
               },
               {
                 "params": [],
-                "type": "last"
+                "type": "sum"
               },
               {
                 "params": [
@@ -2771,23 +2794,84 @@
           ],
           "tags": [
             {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
+            }
+          ]
+        },
+        {
+          "alias": "inbound",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P3C6603E967DC8568"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "cluster_total_net_input_bytes",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "D",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              },
+              {
+                "params": [
+                  "1s"
+                ],
+                "type": "derivative"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "property1",
+              "operator": "=~",
+              "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
             }
           ]
         }
       ],
-      "title": "net info",
+      "title": "cluster net info",
       "type": "timeseries"
     },
     {
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -2821,6 +2905,7 @@
               "mode": "off"
             }
           },
+          "decimals": 2,
           "mappings": [],
           "noValue": "0",
           "thresholds": {
@@ -2829,6 +2914,10 @@
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
           },
@@ -2837,17 +2926,16 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
         "x": 18,
-        "y": 12
+        "y": 13
       },
-      "id": 24,
-      "links": [],
+      "id": 23,
       "options": {
         "legend": {
           "calcs": [],
-          "displayMode": "list",
+          "displayMode": "hidden",
           "placement": "bottom"
         },
         "tooltip": {
@@ -2855,7 +2943,6 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "8.4.3",
       "targets": [
         {
           "alias": "ops",
@@ -2877,9 +2964,11 @@
               "type": "fill"
             }
           ],
-          "measurement": "instantaneous_ops_per_sec",
+          "measurement": "cluster_total_commands_processed",
           "orderByTime": "ASC",
           "policy": "30days",
+          "query": "",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -2892,74 +2981,27 @@
               },
               {
                 "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
-              "value": "/^$name$/"
-            }
-          ]
-        },
-        {
-          "alias": "write ops",
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "instantaneous_write_ops_per_sec",
-          "orderByTime": "ASC",
-          "policy": "30days",
-          "refId": "B",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
+                "type": "sum"
               },
               {
-                "params": [],
-                "type": "last"
+                "params": [
+                  "1s"
+                ],
+                "type": "derivative"
               }
             ]
           ],
           "tags": [
             {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
             }
           ]
         },
@@ -2983,7 +3025,68 @@
               "type": "fill"
             }
           ],
-          "measurement": "instantaneous_read_ops_per_sec",
+          "hide": false,
+          "measurement": "cluster_total_reads_processed",
+          "orderByTime": "ASC",
+          "policy": "30days",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              },
+              {
+                "params": [
+                  "1s"
+                ],
+                "type": "derivative"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "property1",
+              "operator": "=~",
+              "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
+            }
+          ]
+        },
+        {
+          "alias": "write ops",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P3C6603E967DC8568"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "cluster_total_writes_processed",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "C",
@@ -2998,168 +3101,7 @@
               },
               {
                 "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
-              "value": "/^$name$/"
-            }
-          ]
-        },
-        {
-          "alias": "other ops",
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "instantaneous_other_ops_per_sec",
-          "orderByTime": "ASC",
-          "policy": "30days",
-          "refId": "D",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
-              "value": "/^$name$/"
-            }
-          ]
-        },
-        {
-          "alias": "evicted keys ops",
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": false,
-          "measurement": "evicted_keys_per_sec",
-          "orderByTime": "ASC",
-          "policy": "30days",
-          "refId": "E",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
-              "value": "/^$name$/"
-            }
-          ]
-        },
-        {
-          "alias": "slow log ops",
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": false,
-          "measurement": "total_slow_log",
-          "orderByTime": "ASC",
-          "policy": "30days",
-          "refId": "F",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
+                "type": "sum"
               },
               {
                 "params": [
@@ -3171,20 +3113,20 @@
           ],
           "tags": [
             {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
             }
           ]
         }
       ],
-      "title": "ops info",
+      "title": "cluster ops info",
       "type": "timeseries"
     },
     {
@@ -3230,6 +3172,10 @@
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
           },
@@ -3238,17 +3184,16 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
         "x": 0,
         "y": 18
       },
-      "id": 45,
-      "links": [],
+      "id": 16,
       "options": {
         "legend": {
           "calcs": [],
-          "displayMode": "list",
+          "displayMode": "hidden",
           "placement": "bottom"
         },
         "tooltip": {
@@ -3256,10 +3201,9 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "8.4.3",
       "targets": [
         {
-          "alias": "memory fragment",
+          "alias": "$tag_property0",
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
@@ -3273,14 +3217,22 @@
             },
             {
               "params": [
+                "property0"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
                 "null"
               ],
               "type": "fill"
             }
           ],
-          "measurement": "mem_fragmentation_bytes",
+          "measurement": "cluster_mem_fragmentation_bytes",
           "orderByTime": "ASC",
           "policy": "30days",
+          "query": "",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -3299,20 +3251,20 @@
           ],
           "tags": [
             {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
             }
           ]
         }
       ],
-      "title": "fragment byte",
+      "title": "cluster fragment bytes",
       "type": "timeseries"
     },
     {
@@ -3358,6 +3310,10 @@
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
           },
@@ -3366,17 +3322,16 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
         "x": 6,
         "y": 18
       },
-      "id": 46,
-      "links": [],
+      "id": 17,
       "options": {
         "legend": {
           "calcs": [],
-          "displayMode": "list",
+          "displayMode": "hidden",
           "placement": "bottom"
         },
         "tooltip": {
@@ -3384,10 +3339,9 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "8.4.3",
       "targets": [
         {
-          "alias": "memory fragment rate",
+          "alias": "$tag_property0",
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
@@ -3401,14 +3355,22 @@
             },
             {
               "params": [
+                "property0"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
                 "null"
               ],
               "type": "fill"
             }
           ],
-          "measurement": "mem_fragmentation_ratio",
+          "measurement": "cluster_mem_fragmentation_ratio",
           "orderByTime": "ASC",
           "policy": "30days",
+          "query": "",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -3427,23 +3389,24 @@
           ],
           "tags": [
             {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
             }
           ]
         }
       ],
-      "title": "fragment rate",
+      "title": "cluster fragment rate",
       "type": "timeseries"
     },
     {
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -3477,7 +3440,6 @@
               "mode": "off"
             }
           },
-          "decimals": 0,
           "mappings": [],
           "noValue": "0",
           "thresholds": {
@@ -3486,6 +3448,10 @@
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
           },
@@ -3494,17 +3460,16 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
         "x": 12,
         "y": 18
       },
-      "id": 17,
-      "links": [],
+      "id": 24,
       "options": {
         "legend": {
           "calcs": [],
-          "displayMode": "list",
+          "displayMode": "hidden",
           "placement": "bottom"
         },
         "tooltip": {
@@ -3512,7 +3477,6 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "8.4.3",
       "targets": [
         {
           "alias": "command processed",
@@ -3534,7 +3498,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "total_commands_processed",
+          "measurement": "cluster_total_commands_processed",
           "orderByTime": "ASC",
           "policy": "30days",
           "query": "",
@@ -3551,7 +3515,7 @@
               },
               {
                 "params": [],
-                "type": "last"
+                "type": "sum"
               },
               {
                 "params": [],
@@ -3561,15 +3525,15 @@
           ],
           "tags": [
             {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
             }
           ]
         },
@@ -3594,7 +3558,7 @@
             }
           ],
           "hide": false,
-          "measurement": "total_reads_processed",
+          "measurement": "cluster_total_reads_processed",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "B",
@@ -3609,7 +3573,7 @@
               },
               {
                 "params": [],
-                "type": "last"
+                "type": "sum"
               },
               {
                 "params": [],
@@ -3619,15 +3583,15 @@
           ],
           "tags": [
             {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
             }
           ]
         },
@@ -3652,7 +3616,7 @@
             }
           ],
           "hide": false,
-          "measurement": "total_writes_processed",
+          "measurement": "cluster_total_writes_processed",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "C",
@@ -3667,7 +3631,7 @@
               },
               {
                 "params": [],
-                "type": "last"
+                "type": "sum"
               },
               {
                 "params": [],
@@ -3677,15 +3641,15 @@
           ],
           "tags": [
             {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
             }
           ]
         },
@@ -3710,7 +3674,7 @@
             }
           ],
           "hide": false,
-          "measurement": "total_error_replies",
+          "measurement": "cluster_total_error_replies",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "D",
@@ -3725,7 +3689,7 @@
               },
               {
                 "params": [],
-                "type": "last"
+                "type": "sum"
               },
               {
                 "params": [],
@@ -3735,15 +3699,15 @@
           ],
           "tags": [
             {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
             }
           ]
         },
@@ -3768,7 +3732,7 @@
             }
           ],
           "hide": false,
-          "measurement": "total_slow_log",
+          "measurement": "cluster_total_slow_log",
           "orderByTime": "ASC",
           "policy": "30days",
           "refId": "E",
@@ -3783,7 +3747,7 @@
               },
               {
                 "params": [],
-                "type": "last"
+                "type": "sum"
               },
               {
                 "params": [],
@@ -3793,20 +3757,20 @@
           ],
           "tags": [
             {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
             }
           ]
         }
       ],
-      "title": "command info",
+      "title": "cluster command info",
       "type": "timeseries"
     },
     {
@@ -3852,6 +3816,10 @@
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
           },
@@ -3860,17 +3828,16 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
         "x": 18,
         "y": 18
       },
-      "id": 40,
-      "links": [],
+      "id": 25,
       "options": {
         "legend": {
           "calcs": [],
-          "displayMode": "list",
+          "displayMode": "hidden",
           "placement": "bottom"
         },
         "tooltip": {
@@ -3878,10 +3845,9 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "8.4.3",
       "targets": [
         {
-          "alias": "latency",
+          "alias": "$tag_property0:latency",
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
@@ -3895,14 +3861,22 @@
             },
             {
               "params": [
+                "property0"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
                 "null"
               ],
               "type": "fill"
             }
           ],
-          "measurement": "slow_log_latency",
+          "measurement": "cluster_slow_log_latency",
           "orderByTime": "ASC",
           "policy": "30days",
+          "query": "",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -3921,271 +3895,23 @@
           ],
           "tags": [
             {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
               "key": "property1",
               "operator": "=~",
               "value": "/^$name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "property2",
+              "operator": "=",
+              "value": "master"
             }
           ]
         }
       ],
-      "title": "slow log latency info",
+      "title": "cluster slow log latency info",
       "type": "timeseries"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 24
-      },
-      "id": 28,
-      "panels": [],
-      "title": "slow log",
-      "type": "row"
-    },
-    {
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "auto",
-            "displayMode": "auto",
-            "minWidth": 200,
-            "width": 200
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Time"
-            },
-            "properties": [
-              {
-                "id": "custom.hidden",
-                "value": true
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "command"
-            },
-            "properties": [
-              {
-                "id": "custom.minWidth"
-              },
-              {
-                "id": "custom.width"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "execution time"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "µs"
-              },
-              {
-                "id": "custom.minWidth",
-                "value": 200
-              },
-              {
-                "id": "custom.width",
-                "value": 200
-              },
-              {
-                "id": "custom.displayMode",
-                "value": "auto"
-              },
-              {
-                "id": "thresholds",
-                "value": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": null
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 12,
-        "w": 24,
-        "x": 0,
-        "y": 25
-      },
-      "id": 44,
-      "options": {
-        "footer": {
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
-        },
-        "showHeader": true
-      },
-      "pluginVersion": "8.4.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "groupBy": [],
-          "limit": "128",
-          "measurement": "slow_log",
-          "orderByTime": "DESC",
-          "policy": "30days",
-          "query": "",
-          "rawQuery": false,
-          "refId": "A",
-          "resultFormat": "table",
-          "select": [
-            [
-              {
-                "params": [
-                  "property2"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [
-                  "id"
-                ],
-                "type": "alias"
-              }
-            ],
-            [
-              {
-                "params": [
-                  "property3"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [
-                  "timestamp"
-                ],
-                "type": "alias"
-              }
-            ],
-            [
-              {
-                "params": [
-                  "property5"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [
-                  "client"
-                ],
-                "type": "alias"
-              }
-            ],
-            [
-              {
-                "params": [
-                  "property6"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [
-                  "ip address"
-                ],
-                "type": "alias"
-              }
-            ],
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [
-                  "execution time"
-                ],
-                "type": "alias"
-              }
-            ],
-            [
-              {
-                "params": [
-                  "property4"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [
-                  "command"
-                ],
-                "type": "alias"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "property0",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "property1",
-              "operator": "=~",
-              "value": "/^$name$/"
-            }
-          ]
-        }
-      ],
-      "title": "slow log",
-      "transformations": [
-        {
-          "id": "convertFieldType",
-          "options": {
-            "conversions": [],
-            "fields": {}
-          }
-        }
-      ],
-      "type": "table"
     }
   ],
-  "refresh": "30s",
   "schemaVersion": 35,
   "style": "dark",
   "tags": [],
@@ -4193,54 +3919,19 @@
     "list": [
       {
         "current": {},
-        "definition": "show tag values from monitor with key = \"property1\"",
+        "definition": "show tag values from cluster_monitor with key = \"property0\"",
         "hide": 0,
         "includeAll": false,
         "label": "name",
         "multi": false,
         "name": "name",
         "options": [],
-        "query": "show tag values from monitor with key = \"property1\"",
+        "query": "show tag values from cluster_monitor with key = \"property0\"",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
         "type": "query"
-      },
-      {
-        "current": {},
-        "definition": "show tag values from monitor with key = \"property2\" where \"property1\" = '$name';",
-        "hide": 0,
-        "includeAll": false,
-        "label": "role",
-        "multi": false,
-        "name": "role",
-        "options": [],
-        "query": "show tag values from monitor with key = \"property2\" where \"property1\" = '$name';",
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "type": "query"
-      },
-      {
-        "current": {},
-        "definition": "show tag values from monitor with key = \"property0\" where \"property1\" = '$name' and \"property2\" = '$role'",
-        "hide": 0,
-        "includeAll": false,
-        "label": "host",
-        "multi": false,
-        "name": "host",
-        "options": [],
-        "query": "show tag values from monitor with key = \"property0\" where \"property1\" = '$name' and \"property2\" = '$role'",
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 1,
-        "tagValuesQuery": "",
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
       }
     ]
   },
@@ -4248,34 +3939,10 @@
     "from": "now-30m",
     "to": "now"
   },
-  "timepicker": {
-    "refresh_intervals": [
-      "5s",
-      "10s",
-      "30s",
-      "1m",
-      "5m",
-      "15m",
-      "30m",
-      "1h",
-      "2h",
-      "1d"
-    ],
-    "time_options": [
-      "5m",
-      "15m",
-      "1h",
-      "6h",
-      "12h",
-      "24h",
-      "2d",
-      "7d",
-      "30d"
-    ]
-  },
+  "timepicker": {},
   "timezone": "",
-  "title": "monitor",
-  "uid": "monitor",
+  "title": "cluster",
+  "uid": "cluster",
   "version": 1,
   "weekStart": ""
 }

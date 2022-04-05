@@ -32,6 +32,8 @@ import com.moilioncircle.redis.rdb.cli.util.Collections;
 import com.moilioncircle.redis.replicator.util.Tuples;
 import com.moilioncircle.redis.replicator.util.type.Tuple3;
 
+import redis.clients.jedis.HostAndPort;
+
 /**
  * @author Baoyi Chen
  */
@@ -74,7 +76,7 @@ public class NodeConfParser {
 				int aIdx = hostAndPort.indexOf("@");
 				String host = hostAndPort.substring(0, cIdx); // ip
 				int port = parseInt(hostAndPort.substring(cIdx + 1, aIdx == -1 ? hostAndPort.length() : aIdx));
-				node.setHostAndPort(host + ":" + port);
+				node.setHostAndPort(new HostAndPort(host, port));
 				boolean master = false;
 				boolean serving = true;
 				for (String role : args.get(2).split(",")) {

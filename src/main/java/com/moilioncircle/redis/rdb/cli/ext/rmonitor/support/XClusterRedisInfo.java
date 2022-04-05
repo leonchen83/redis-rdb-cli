@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.moilioncircle.redis.rdb.cli.conf.NodeConfParser;
 import com.moilioncircle.redis.rdb.cli.conf.XClusterNodes;
 
 /**
@@ -34,7 +33,7 @@ public class XClusterRedisInfo {
 	public static XClusterRedisInfo EMPTY_CLUSTER = new XClusterRedisInfo();
 	
 	//
-	private XClusterNodes clusterNodes;
+	private XClusterNodes clusterNodes = new XClusterNodes();
 	private XClusterInfo clusterInfo = new XClusterInfo();
 	private List<XClusterInfo> clusterInfos = new ArrayList<>();
 	
@@ -102,11 +101,16 @@ public class XClusterRedisInfo {
 		this.slaves = slaves;
 	}
 	
-	public static XClusterRedisInfo valueOf(List<XStandaloneRedisInfo> infos, String clusterNodes, List<String> clusterInfos) {
+	public static XClusterRedisInfo valueOf(List<XStandaloneRedisInfo> infos, List<XClusterNodes> clusterNodes, List<XClusterInfo> clusterInfos) {
 		XClusterRedisInfo xinfo = new XClusterRedisInfo();
 		// 
-		xinfo.clusterInfos = XClusterInfo.valueOf(clusterInfos);
-		xinfo.clusterNodes = NodeConfParser.parse(clusterNodes);
+		xinfo.clusterInfos = clusterInfos;
+		
+		for (XClusterNodes temp : clusterNodes) {
+			if (xinfo.clusterNodes.getCurrentEpoch() < temp.getCurrentEpoch()) {
+				xinfo.clusterNodes = temp;
+			}
+		}
 		
 		for (XStandaloneRedisInfo info : infos) {
 			if (info.getRole().equals("master")) {
@@ -117,8 +121,11 @@ public class XClusterRedisInfo {
 				calculate(xinfo.slave, info);
 			}
 		}
+		
 		for (XClusterInfo clusterInfo : xinfo.clusterInfos) {
-			xinfo.clusterInfo.copy(clusterInfo);
+			if (xinfo.clusterInfo.getClusterCurrentEpoch() < clusterInfo.getClusterCurrentEpoch()) {
+				xinfo.clusterInfo.copy(clusterInfo);
+			}
 			xinfo.clusterInfo.setClusterStatsMessagesSent(add(xinfo.clusterInfo.getClusterStatsMessagesSent(), clusterInfo.getClusterStatsMessagesSent()));
 			xinfo.clusterInfo.setClusterStatsMessagesReceived(add(xinfo.clusterInfo.getClusterStatsMessagesReceived(), clusterInfo.getClusterStatsMessagesReceived()));
 		}

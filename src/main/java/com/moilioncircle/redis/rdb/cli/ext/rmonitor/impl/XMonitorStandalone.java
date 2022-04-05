@@ -18,11 +18,13 @@ package com.moilioncircle.redis.rdb.cli.ext.rmonitor.impl;
 
 
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.ALL;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.CLUSTER;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.CONFIG;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.GET;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.INFO;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.LEN;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.MAXCLIENTS;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.NODES;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.SLOWLOG;
 import static com.moilioncircle.redis.rdb.cli.ext.rmonitor.support.XStandaloneRedisInfo.EMPTY;
 
@@ -33,7 +35,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.moilioncircle.redis.rdb.cli.conf.NodeConfParser;
+import com.moilioncircle.redis.rdb.cli.conf.XClusterNodes;
 import com.moilioncircle.redis.rdb.cli.ext.rmonitor.MonitorCommand;
+import com.moilioncircle.redis.rdb.cli.ext.rmonitor.support.XClusterInfo;
 import com.moilioncircle.redis.rdb.cli.ext.rmonitor.support.XSlowLog;
 import com.moilioncircle.redis.rdb.cli.ext.rmonitor.support.XStandaloneRedisInfo;
 import com.moilioncircle.redis.rdb.cli.monitor.Monitor;
@@ -41,6 +46,8 @@ import com.moilioncircle.redis.rdb.cli.net.impl.XEndpoint;
 import com.moilioncircle.redis.rdb.cli.net.protocol.RedisObject;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.util.Strings;
+import com.moilioncircle.redis.replicator.util.Tuples;
+import com.moilioncircle.redis.replicator.util.type.Tuple3;
 
 import redis.clients.jedis.HostAndPort;
 
@@ -54,6 +61,7 @@ public class XMonitorStandalone implements MonitorCommand {
 	private final String host;
 	private final int port;
 	private final String name;
+	private final boolean cluster;
 	private final Monitor monitor;
 	private final String hostAndPort;
 	
@@ -61,6 +69,7 @@ public class XMonitorStandalone implements MonitorCommand {
 	
 	private final Configuration configuration;
 	private XStandaloneRedisInfo prev = EMPTY;
+	private Tuple3<XClusterNodes, XClusterInfo, XStandaloneRedisInfo> info;
 	private List<StandaloneListener> listeners = new CopyOnWriteArrayList<>();
 	
 	public void addListener(StandaloneListener listener) {
@@ -86,12 +95,22 @@ public class XMonitorStandalone implements MonitorCommand {
 	}
 	
 	public XMonitorStandalone(String host, int port, String name, Monitor monitor, Configuration configuration) {
+		this(host, port, name, monitor, configuration, false);
+	}
+	
+	public XMonitorStandalone(String host, int port, String name, Monitor monitor, Configuration configuration, boolean cluster) {
 		this.name = name;
 		this.host = host;
 		this.port = port;
 		this.monitor = monitor;
 		this.configuration = configuration;
+		this.cluster = cluster;
 		this.hostAndPort = new HostAndPort(host, port).toString();
+	}
+	
+	public Tuple3<XClusterNodes, XClusterInfo, XStandaloneRedisInfo> execute() {
+		run();
+		return this.info;
 	}
 	
 	@Override
@@ -105,6 +124,10 @@ public class XMonitorStandalone implements MonitorCommand {
 			endpoint.batch(true, CONFIG, GET, MAXCLIENTS);
 			endpoint.batch(true, SLOWLOG, LEN);
 			endpoint.batch(true, SLOWLOG, GET, "128".getBytes());
+			if (cluster) {
+				endpoint.batch(true, CLUSTER, NODES);
+				endpoint.batch(true, CLUSTER, INFO);
+			}
 			List<RedisObject> list = endpoint.sync();
 			
 			String info = list.get(0).getString();
@@ -114,6 +137,13 @@ public class XMonitorStandalone implements MonitorCommand {
 			
 			XStandaloneRedisInfo next = XStandaloneRedisInfo.valueOf(info, maxclients, len, binaryLogs, hostAndPort);
 			next = XStandaloneRedisInfo.diff(prev, next);
+			
+			if (cluster) {
+				XClusterNodes clusterNodes = NodeConfParser.parse(list.get(4).getString());
+				XClusterInfo clusterInfo = XClusterInfo.valueOf(list.get(5).getString());
+				clusterNodes.setCurrentEpoch(clusterInfo.getClusterCurrentEpoch());
+				this.info = Tuples.of(clusterNodes, clusterInfo, next);
+			}
 			
 			// server
 			long now = System.currentTimeMillis();

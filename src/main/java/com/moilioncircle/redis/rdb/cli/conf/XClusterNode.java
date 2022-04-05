@@ -19,6 +19,8 @@ package com.moilioncircle.redis.rdb.cli.conf;
 import java.util.ArrayList;
 import java.util.List;
 
+import redis.clients.jedis.HostAndPort;
+
 /**
  * @author Baoyi Chen
  */
@@ -32,7 +34,7 @@ public class XClusterNode {
 	private long configEpoch;
 	private List<Short> slots = new ArrayList<>(8192);
 	private List<Short> migratingSlots = new ArrayList<>(8192);
-	private String hostAndPort;
+	private HostAndPort hostAndPort;
 	private String name;
 	private String link;
 	
@@ -100,11 +102,11 @@ public class XClusterNode {
 		this.migratingSlots = migratingSlots;
 	}
 	
-	public String getHostAndPort() {
+	public HostAndPort getHostAndPort() {
 		return hostAndPort;
 	}
 	
-	public void setHostAndPort(String hostAndPort) {
+	public void setHostAndPort(HostAndPort hostAndPort) {
 		this.hostAndPort = hostAndPort;
 	}
 	

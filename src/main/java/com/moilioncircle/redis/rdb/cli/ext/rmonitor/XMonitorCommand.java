@@ -45,9 +45,9 @@ public class XMonitorCommand extends AbstractMonitorCommand {
 		try(XEndpoint endpoint = new XEndpoint(host, port, 0, -1, false, configuration)) {
 			RedisObject r = endpoint.send(CLUSTER, NODES);
 			if (r.type.isError()) {
-				command = new XMonitorMasterSlave(uri, name, monitor, configure);
+				command = new XMonitorMasterSlave(uri, name, monitor, configuration);
 			} else {
-				command = new XMonitorCluster();
+				command = new XMonitorCluster(r.getString(), name, monitor, configuration);
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);

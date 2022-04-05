@@ -26,15 +26,15 @@ import java.util.Map;
  */
 public class XClusterInfo {
 	private String clusterState;
-	private Long clusterSlotsAssigned;
-	private Long clusterSlotsOk;
-	private Long clusterSlotsPfail;
-	private Long clusterSlotsFail;
-	private Long clusterKnownNodes;
-	private Long clusterSize;
-	private Long clusterCurrentEpoch;
-	private Long clusterStatsMessagesSent;
-	private Long clusterStatsMessagesReceived;
+	private long clusterSlotsAssigned;
+	private long clusterSlotsOk;
+	private long clusterSlotsPfail;
+	private long clusterSlotsFail;
+	private long clusterKnownNodes;
+	private long clusterSize;
+	private long clusterCurrentEpoch;
+	private long clusterStatsMessagesSent;
+	private long clusterStatsMessagesReceived;
 	
 	public String getClusterState() {
 		return clusterState;
@@ -44,75 +44,75 @@ public class XClusterInfo {
 		this.clusterState = clusterState;
 	}
 	
-	public Long getClusterSlotsAssigned() {
+	public long getClusterSlotsAssigned() {
 		return clusterSlotsAssigned;
 	}
 	
-	public void setClusterSlotsAssigned(Long clusterSlotsAssigned) {
+	public void setClusterSlotsAssigned(long clusterSlotsAssigned) {
 		this.clusterSlotsAssigned = clusterSlotsAssigned;
 	}
 	
-	public Long getClusterSlotsOk() {
+	public long getClusterSlotsOk() {
 		return clusterSlotsOk;
 	}
 	
-	public void setClusterSlotsOk(Long clusterSlotsOk) {
+	public void setClusterSlotsOk(long clusterSlotsOk) {
 		this.clusterSlotsOk = clusterSlotsOk;
 	}
 	
-	public Long getClusterSlotsPfail() {
+	public long getClusterSlotsPfail() {
 		return clusterSlotsPfail;
 	}
 	
-	public void setClusterSlotsPfail(Long clusterSlotsPfail) {
+	public void setClusterSlotsPfail(long clusterSlotsPfail) {
 		this.clusterSlotsPfail = clusterSlotsPfail;
 	}
 	
-	public Long getClusterSlotsFail() {
+	public long getClusterSlotsFail() {
 		return clusterSlotsFail;
 	}
 	
-	public void setClusterSlotsFail(Long clusterSlotsFail) {
+	public void setClusterSlotsFail(long clusterSlotsFail) {
 		this.clusterSlotsFail = clusterSlotsFail;
 	}
 	
-	public Long getClusterKnownNodes() {
+	public long getClusterKnownNodes() {
 		return clusterKnownNodes;
 	}
 	
-	public void setClusterKnownNodes(Long clusterKnownNodes) {
+	public void setClusterKnownNodes(long clusterKnownNodes) {
 		this.clusterKnownNodes = clusterKnownNodes;
 	}
 	
-	public Long getClusterSize() {
+	public long getClusterSize() {
 		return clusterSize;
 	}
 	
-	public void setClusterSize(Long clusterSize) {
+	public void setClusterSize(long clusterSize) {
 		this.clusterSize = clusterSize;
 	}
 	
-	public Long getClusterCurrentEpoch() {
+	public long getClusterCurrentEpoch() {
 		return clusterCurrentEpoch;
 	}
 	
-	public void setClusterCurrentEpoch(Long clusterCurrentEpoch) {
+	public void setClusterCurrentEpoch(long clusterCurrentEpoch) {
 		this.clusterCurrentEpoch = clusterCurrentEpoch;
 	}
 	
-	public Long getClusterStatsMessagesSent() {
+	public long getClusterStatsMessagesSent() {
 		return clusterStatsMessagesSent;
 	}
 	
-	public void setClusterStatsMessagesSent(Long clusterStatsMessagesSent) {
+	public void setClusterStatsMessagesSent(long clusterStatsMessagesSent) {
 		this.clusterStatsMessagesSent = clusterStatsMessagesSent;
 	}
 	
-	public Long getClusterStatsMessagesReceived() {
+	public long getClusterStatsMessagesReceived() {
 		return clusterStatsMessagesReceived;
 	}
 	
-	public void setClusterStatsMessagesReceived(Long clusterStatsMessagesReceived) {
+	public void setClusterStatsMessagesReceived(long clusterStatsMessagesReceived) {
 		this.clusterStatsMessagesReceived = clusterStatsMessagesReceived;
 	}
 	
@@ -175,20 +175,8 @@ public class XClusterInfo {
 		return null;
 	}
 	
-	private static Double getDouble(String key, Map<String, String> map) {
-		if (map == null) return null;
-		if (map.containsKey(key)) {
-			String value = map.get(key);
-			try {
-				return Double.valueOf(value);
-			} catch (NumberFormatException e) {
-			}
-		}
-		return null;
-	}
-	
-	private static Long getLong(String key, Map<String, String> map) {
-		if (map == null) return null;
+	private static long getLong(String key, Map<String, String> map) {
+		if (map == null) return 0;
 		if (map.containsKey(key)) {
 			String value = map.get(key);
 			try {
@@ -196,7 +184,7 @@ public class XClusterInfo {
 			} catch (NumberFormatException e) {
 			}
 		}
-		return null;
+		return 0;
 	}
 	
 	@Override
