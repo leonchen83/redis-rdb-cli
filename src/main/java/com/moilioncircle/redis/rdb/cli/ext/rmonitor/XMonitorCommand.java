@@ -20,6 +20,7 @@ import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.CLUS
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.NODES;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.concurrent.TimeUnit;
 
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
@@ -27,8 +28,11 @@ import com.moilioncircle.redis.rdb.cli.ext.rmonitor.impl.XMonitorCluster;
 import com.moilioncircle.redis.rdb.cli.ext.rmonitor.impl.XMonitorMasterSlave;
 import com.moilioncircle.redis.rdb.cli.net.impl.XEndpoint;
 import com.moilioncircle.redis.rdb.cli.net.protocol.RedisObject;
+import com.moilioncircle.redis.rdb.cli.sentinel.RedisSentinelURI;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.RedisURI;
+
+import redis.clients.jedis.HostAndPort;
 
 /**
  * @author Baoyi Chen
@@ -37,20 +41,43 @@ public class XMonitorCommand extends AbstractMonitorCommand {
 	
 	private MonitorCommand command;
 	
-	public XMonitorCommand(RedisURI uri, String name, Configure configure) {
+	public XMonitorCommand(String source, String name, Configure configure) throws Exception {
 		super(name, configure);
-		String host = uri.getHost();
-		int port = uri.getPort();
-		Configuration configuration = configure.merge(uri, true);
-		try(XEndpoint endpoint = new XEndpoint(host, port, 0, -1, false, configuration)) {
-			RedisObject r = endpoint.send(CLUSTER, NODES);
-			if (r.type.isError()) {
-				command = new XMonitorMasterSlave(uri, name, monitor, configuration);
-			} else {
-				command = new XMonitorCluster(r.getString(), name, monitor, configuration);
+		try {
+			RedisURI uri = new RedisURI(source);
+			String host = uri.getHost();
+			int port = uri.getPort();
+			Configuration configuration = configure.merge(uri, true);
+			try (XEndpoint endpoint = new XEndpoint(host, port, 0, -1, false, configuration)) {
+				RedisObject r = endpoint.send(CLUSTER, NODES);
+				if (r.type.isError()) {
+					command = new XMonitorMasterSlave(uri.getHost(), uri.getPort(), name, monitor, configuration);
+				} else {
+					command = new XMonitorCluster(r.getString(), name, monitor, configuration);
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+		} catch (URISyntaxException e) {
+			RedisSentinelURI uri = new RedisSentinelURI(source);
+			String masterName = uri.getParameters().get("master");
+			Configuration configuration = configure.merge(uri, true);
+			configuration.setAuthUser(uri.getUser()).setAuthPassword(uri.getPassword());
+			
+			for (HostAndPort sentinel : uri.getHosts()) {
+				try (XEndpoint endpoint = new XEndpoint(sentinel.getHost(), sentinel.getPort(), 0, -1, false, configuration)) {
+					RedisObject r = endpoint.send("SENTINEL".getBytes(), "GET-MASTER-ADDR-BY-NAME".getBytes(), masterName.getBytes());
+					RedisObject[] ary = r.getArray();
+					String host = ary[0].getString();
+					int port = Integer.parseInt(ary[1].getString());
+					command = new XMonitorMasterSlave(host, port, name, monitor, configure.merge(uri, true));
+					break;
+				} catch (IOException ignore) {
+				}
+			}
+			if (command == null) {
+				throw new RuntimeException("failed to connect all sentinel hosts. uri:" + source);
+			}
 		}
 	}
 	

@@ -22,7 +22,6 @@ import com.moilioncircle.redis.rdb.cli.cmd.support.XVersionProvider;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.ext.rmonitor.XMonitorCommand;
 import com.moilioncircle.redis.rdb.cli.util.CloseableThread;
-import com.moilioncircle.redis.replicator.RedisURI;
 
 import picocli.CommandLine;
 
@@ -55,8 +54,7 @@ public class XRMonitor implements Callable<Integer> {
 	@Override
 	public Integer call() throws Exception {
 		Configure configure = Configure.bind();
-		RedisURI uri = new RedisURI(source);
-		XMonitorCommand command = new XMonitorCommand(uri, name, configure);
+		XMonitorCommand command = new XMonitorCommand(source, name, configure);
 		CloseableThread thread = CloseableThread.open("monitor", command, true);
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 			CloseableThread.close(thread);

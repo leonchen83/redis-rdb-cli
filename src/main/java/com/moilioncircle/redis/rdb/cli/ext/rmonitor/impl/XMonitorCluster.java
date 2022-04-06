@@ -101,14 +101,12 @@ public class XMonitorCluster implements MonitorCommand {
 			List<HostAndPort> nextHosts = nextNodes.getNodes().stream().map(e -> e.getHostAndPort()).collect(Collectors.toList());
 			for (HostAndPort hp : nextHosts) {
 				if(!prevHosts.contains(hp)) {
-					monitor.set("cluster_redis_status", hp.toString(), name, "ok");
 					onUp(hp);
 				}
 			}
 			
 			for (HostAndPort hp : prevHosts) {
 				if (!nextHosts.contains(hp)) {
-					monitor.set("cluster_redis_status", hp.toString(), name, "down");
 					onDown(hp);
 				}
 			}
@@ -185,7 +183,7 @@ public class XMonitorCluster implements MonitorCommand {
 		if (commands.containsKey(host)) {
 			return;
 		}
-		logger.info("master-slave add monitor host [{}]", host);
+		logger.info("cluster add monitor host [{}]", host);
 		XMonitorStandalone slave = new XMonitorStandalone(host.getHost(), host.getPort(), name, monitor, configuration);
 		XMonitorStandalone prev = commands.put(host, slave);
 		if (prev != null) {
@@ -194,7 +192,7 @@ public class XMonitorCluster implements MonitorCommand {
 	}
 	
 	public void onDown(HostAndPort host) {
-		logger.info("master-slave del monitor host [{}]", host);
+		logger.info("cluster del monitor host [{}]", host);
 		XMonitorStandalone prev = commands.remove(host);
 		if (prev != null) {
 			MonitorCommand.closeQuietly(prev);

@@ -31,7 +31,6 @@ import com.moilioncircle.redis.rdb.cli.ext.rmonitor.MonitorCommand;
 import com.moilioncircle.redis.rdb.cli.monitor.Monitor;
 import com.moilioncircle.redis.rdb.cli.net.impl.XEndpoint;
 import com.moilioncircle.redis.replicator.Configuration;
-import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.util.Strings;
 
 import redis.clients.jedis.HostAndPort;
@@ -50,10 +49,10 @@ public class XMonitorMasterSlave implements MonitorCommand, StandaloneListener {
 	private Configuration configuration;
 	private Map<HostAndPort, XMonitorStandalone> commands = new ConcurrentHashMap<>();
 	
-	public XMonitorMasterSlave(RedisURI uri, String name, Monitor monitor, Configuration configuration) {
+	public XMonitorMasterSlave(String host, int port, String name, Monitor monitor, Configuration configuration) {
 		this.name = name;
-		this.host = uri.getHost();
-		this.port = uri.getPort();
+		this.host = host;
+		this.port = port;
 		this.monitor = monitor;
 		this.configuration = configuration;
 		createMonitorCommands(host, port, configuration);
