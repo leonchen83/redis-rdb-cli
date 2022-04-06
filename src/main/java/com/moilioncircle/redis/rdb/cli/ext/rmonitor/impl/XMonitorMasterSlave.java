@@ -59,7 +59,7 @@ public class XMonitorMasterSlave implements MonitorCommand, StandaloneListener {
 	}
 	
 	protected void createMonitorCommands(String host, int port, Configuration configuration) {
-		try(XEndpoint endpoint = new XEndpoint(host, port, 0, -1, false, configuration)) {
+		try(XEndpoint endpoint = new XEndpoint(host, port, configuration)) {
 			String replication = endpoint.send(INFO, REPLICATION).getString();
 			Map<String, String> map = extract(replication).get("Replication");
 			if (map == null || map.isEmpty()) {
