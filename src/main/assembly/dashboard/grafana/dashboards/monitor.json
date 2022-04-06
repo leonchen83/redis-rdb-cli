@@ -22,7 +22,7 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": 5,
-  "iteration": 1649165754356,
+  "iteration": 1649253918975,
   "links": [
     {
       "asDropdown": true,
@@ -4479,11 +4479,7 @@
   "templating": {
     "list": [
       {
-        "current": {
-          "selected": true,
-          "text": "erebor",
-          "value": "erebor"
-        },
+        "current": {},
         "definition": "show tag values from monitor with key = \"property1\"",
         "hide": 0,
         "includeAll": false,
@@ -4499,11 +4495,7 @@
         "type": "query"
       },
       {
-        "current": {
-          "selected": false,
-          "text": "master",
-          "value": "master"
-        },
+        "current": {},
         "definition": "show tag values from monitor with key = \"property2\" where \"property1\" = '$name';",
         "hide": 0,
         "includeAll": false,
@@ -4519,19 +4511,15 @@
         "type": "query"
       },
       {
-        "current": {
-          "selected": false,
-          "text": "192.168.1.233:6379",
-          "value": "192.168.1.233:6379"
-        },
-        "definition": "show tag values from monitor with key = \"property0\" where \"property1\" = '$name' and \"property2\" = '$role'",
+        "current": {},
+        "definition": "select \"property0\",value from monitor where \"property1\" = '$name' and \"property2\" = '$role' and $timeFilter",
         "hide": 0,
         "includeAll": false,
         "label": "host",
         "multi": false,
         "name": "host",
         "options": [],
-        "query": "show tag values from monitor with key = \"property0\" where \"property1\" = '$name' and \"property2\" = '$role'",
+        "query": "select \"property0\",value from monitor where \"property1\" = '$name' and \"property2\" = '$role' and $timeFilter",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
