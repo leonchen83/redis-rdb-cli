@@ -65,7 +65,7 @@ public class XMonitorCommand extends AbstractMonitorCommand {
 			configuration.setAuthUser(uri.getUser()).setAuthPassword(uri.getPassword());
 			
 			for (HostAndPort sentinel : uri.getHosts()) {
-				try (XEndpoint endpoint = new XEndpoint(sentinel.getHost(), sentinel.getPort(), configuration)) {
+				try (XEndpoint endpoint = new XEndpoint(sentinel.getHost(), sentinel.getPort(), -1, 1, false, configuration)) {
 					RedisObject r = endpoint.send("SENTINEL".getBytes(), "GET-MASTER-ADDR-BY-NAME".getBytes(), masterName.getBytes());
 					RedisObject[] ary = r.getArray();
 					String host = ary[0].getString();

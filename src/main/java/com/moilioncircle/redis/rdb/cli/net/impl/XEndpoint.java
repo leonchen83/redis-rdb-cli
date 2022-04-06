@@ -100,9 +100,11 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
                 RedisObject r = send(PING);
                 if (r != null && r.type.isError()) throw new RuntimeException(r.getString());
             }
-            RedisObject r = send(SELECT, String.valueOf(db).getBytes());
-            if (r != null && r.type.isError()) throw new RuntimeException(r.getString());
-            this.db = db;
+            if (db >= 0) {
+                RedisObject r = send(SELECT, String.valueOf(db).getBytes());
+                if (r != null && r.type.isError()) throw new RuntimeException(r.getString());
+                this.db = db;
+            }
             this.address = this.toString().replaceAll("\\.", "_").replaceAll(":", "_");
             logger.debug("connected to {}:{}", host, port, db);
         } catch (IOException e) {
