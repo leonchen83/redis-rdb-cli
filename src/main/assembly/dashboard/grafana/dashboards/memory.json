@@ -888,12 +888,7 @@
   "templating": {
     "list": [
       {
-        "current": {
-          "isNone": true,
-          "selected": false,
-          "text": "None",
-          "value": ""
-        },
+        "current": {},
         "datasource": {
           "type": "influxdb",
           "uid": "P3C6603E967DC8568"

@@ -21,8 +21,8 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 2,
-  "iteration": 1649166915069,
+  "id": 5,
+  "iteration": 1649303966393,
   "links": [
     {
       "asDropdown": true,
@@ -58,7 +58,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "mode": "fixed"
           },
           "mappings": [],
           "thresholds": {
@@ -143,7 +143,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "mode": "fixed"
           },
           "mappings": [],
           "thresholds": {
@@ -1017,9 +1017,30 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "mode": "fixed"
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "options": {
+                "fail": {
+                  "color": "red",
+                  "index": 1,
+                  "text": "fail"
+                },
+                "fail?": {
+                  "color": "red",
+                  "index": 2,
+                  "text": "pfail"
+                },
+                "ok": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "ok"
+                }
+              },
+              "type": "value"
+            }
+          ],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1040,7 +1061,7 @@
       },
       "id": 5,
       "options": {
-        "colorMode": "none",
+        "colorMode": "value",
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "horizontal",
@@ -1097,7 +1118,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "mode": "fixed"
           },
           "mappings": [],
           "thresholds": {
@@ -4045,7 +4066,7 @@
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
-        "sort": 0,
+        "sort": 1,
         "type": "query"
       }
     ]

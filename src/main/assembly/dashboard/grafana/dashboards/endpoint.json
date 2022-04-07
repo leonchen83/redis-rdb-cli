@@ -563,11 +563,7 @@
   "templating": {
     "list": [
       {
-        "current": {
-          "selected": false,
-          "text": "instance0",
-          "value": "instance0"
-        },
+        "current": {},
         "datasource": {
           "type": "influxdb",
           "uid": "P3C6603E967DC8568"
