@@ -22,7 +22,7 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": 5,
-  "iteration": 1649253918975,
+  "iteration": 1649299287813,
   "links": [
     {
       "asDropdown": true,
@@ -4491,7 +4491,7 @@
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
-        "sort": 0,
+        "sort": 1,
         "type": "query"
       },
       {
@@ -4507,7 +4507,7 @@
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
-        "sort": 0,
+        "sort": 1,
         "type": "query"
       },
       {
@@ -4563,6 +4563,6 @@
   "timezone": "",
   "title": "monitor",
   "uid": "monitor",
-  "version": 1,
+  "version": 3,
   "weekStart": ""
 }
