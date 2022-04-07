@@ -4110,14 +4110,14 @@
     "list": [
       {
         "current": {},
-        "definition": "show tag values from cluster_monitor with key = \"property0\"",
+        "definition": "select \"property0\",value from cluster_monitor where $timeFilter;",
         "hide": 0,
         "includeAll": false,
         "label": "name",
         "multi": false,
         "name": "name",
         "options": [],
-        "query": "show tag values from cluster_monitor with key = \"property0\"",
+        "query": "select \"property0\",value from cluster_monitor where $timeFilter;",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
