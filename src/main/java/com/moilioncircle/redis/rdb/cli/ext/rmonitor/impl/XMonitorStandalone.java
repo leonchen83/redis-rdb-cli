@@ -44,6 +44,7 @@ import com.moilioncircle.redis.rdb.cli.ext.rmonitor.support.XStandaloneRedisInfo
 import com.moilioncircle.redis.rdb.cli.monitor.Monitor;
 import com.moilioncircle.redis.rdb.cli.net.impl.XEndpoint;
 import com.moilioncircle.redis.rdb.cli.net.protocol.RedisObject;
+import com.moilioncircle.redis.rdb.cli.util.Collections;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.util.Strings;
 import com.moilioncircle.redis.replicator.util.Tuples;
@@ -152,6 +153,17 @@ public class XMonitorStandalone implements MonitorCommand {
 			setLong("uptime_in_seconds", hostAndPort, name, role, next.getUptimeInSeconds());
 			setString("redis_version", hostAndPort, name, role, next.getRedisVersion());
 			monitor.set("role", hostAndPort, name, next.getRole());
+			
+			// replication
+			if (!Collections.isEmpty(next.getSlaves())) {
+				for (HostAndPort hp : next.getSlaves()) {
+					monitor.set("connected_slaves", hostAndPort, name, role, hp.toString(), 1L);
+				}
+			}
+			
+			if (next.getMaster() != null) {
+				monitor.set("connected_master", hostAndPort, name, role, next.getMaster().toString(), 1L);
+			}
 			
 			// clients
 			setLong("connected_clients", hostAndPort, name, role, next.getConnectedClients());
