@@ -444,7 +444,7 @@
           ]
         }
       ],
-      "title": "uptime in seconds",
+      "title": "uptime",
       "type": "stat"
     },
     {

@@ -222,7 +222,7 @@
           ]
         }
       ],
-      "title": "cluster up in seconds",
+      "title": "cluster uptime",
       "type": "stat"
     },
     {
