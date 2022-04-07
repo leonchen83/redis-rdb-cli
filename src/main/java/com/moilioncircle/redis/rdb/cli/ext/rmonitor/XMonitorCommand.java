@@ -90,6 +90,6 @@ public class XMonitorCommand extends AbstractMonitorCommand {
 	@Override
 	public void run() {
 		command.run();
-		delay(15, TimeUnit.SECONDS);
+		delay(configure.getMonitorRefreshInterval(), TimeUnit.MILLISECONDS);
 	}
 }

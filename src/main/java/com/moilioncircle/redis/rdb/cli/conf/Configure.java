@@ -276,6 +276,11 @@ public class Configure {
      */
     private boolean enableProgressBar = true;
     
+    /**
+     * monitor refresh interval setting
+     */
+    private int monitorRefreshInterval = 15000;
+    
     public int getBatchSize() {
         return batchSize;
     }
@@ -604,6 +609,14 @@ public class Configure {
         this.enableProgressBar = enableProgressBar;
     }
     
+    public int getMonitorRefreshInterval() {
+        return monitorRefreshInterval;
+    }
+    
+    public void setMonitorRefreshInterval(int monitorRefreshInterval) {
+        this.monitorRefreshInterval = monitorRefreshInterval;
+    }
+    
     public Configuration merge(RedisURI uri, boolean source) {
         Configuration base;
         if (uri != null) {
@@ -695,6 +708,8 @@ public class Configure {
         conf.metricInstance = getString(conf, "metric_instance", "instance0", true);
     
         conf.enableProgressBar = getBool(conf, "enable_progress_bar", true, true);
+    
+        conf.monitorRefreshInterval = getInt(conf, "monitor_refresh_interval", 15000, true);
         
         // export
         conf.quote = (byte) getString(conf, "quote", "\"", true).charAt(0);
@@ -906,7 +921,6 @@ public class Configure {
                 ", metricDatabase='" + metricDatabase + '\'' +
                 ", metricRetentionPolicy='" + metricRetentionPolicy + '\'' +
                 ", metricInstance='" + metricInstance + '\'' +
-                ", enableProgressBar=" + enableProgressBar +
                 ", sourceDefaultTruststore=" + sourceDefaultTruststore +
                 ", sourceKeystorePath='" + sourceKeystorePath + '\'' +
                 ", sourceKeystorePass='" + sourceKeystorePass + '\'' +
@@ -921,6 +935,8 @@ public class Configure {
                 ", exportUnit=" + exportUnit +
                 ", exportFormatDate=" + exportFormatDate +
                 ", exportFileFormat=" + exportFileFormat +
+                ", enableProgressBar=" + enableProgressBar +
+                ", monitorRefreshInterval=" + monitorRefreshInterval +
                 '}';
     }
 }
