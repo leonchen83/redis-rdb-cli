@@ -22,13 +22,13 @@ A tool that can parse, filter, split, merge rdb and analyze memory usage offline
 
 ## Runtime requirement
 
-```java  
+```text
 jdk 1.8+
 ```
 
 ## Install
 
-```java  
+```shell
 $ wget https://github.com/leonchen83/redis-rdb-cli/releases/download/${version}/redis-rdb-cli-release.zip
 $ unzip redis-rdb-cli-release.zip
 $ cd ./redis-rdb-cli/bin
@@ -37,7 +37,7 @@ $ ./rct -h
 
 ## Compile requirement
 
-```java  
+```text
 
 jdk 1.8+
 maven-3.3.1+
@@ -46,7 +46,7 @@ maven-3.3.1+
 
 ## Compile & run
 
-```java  
+```shell
 $ git clone https://github.com/leonchen83/redis-rdb-cli.git
 $ cd redis-rdb-cli
 $ mvn clean install -Dmaven.test.skip=true
@@ -56,7 +56,7 @@ $ ./rct -h
 
 ## Run in docker
 
-```java  
+```shell
 # run with jvm
 $ docker run -it --rm redisrdbcli/redis-rdb-cli:latest
 $ rct -V
@@ -67,7 +67,7 @@ $ rct -V
 ```
 
 ## Build native image via graalvm in docker
-```
+```shell
 $ docker build -m 8g -f DockerfileNative -t redisrdbcli:redis-rdb-cli .
 $ docker run -it redisrdbcli:redis-rdb-cli bash
 $ bash-5.1# rct -V
@@ -79,7 +79,7 @@ Add `/path/to/redis-rdb-cli/bin` to `Path` environment variable
   
 ## Usage
 
-```java  
+```text
 
 Usage: rmonitor [-hV] -s <uri> [-n <name>]
 
@@ -94,7 +94,7 @@ Examples:
 
 ```
 
-```java  
+```text
 
 Usage: rct [-hV] -f <format> -s <source> -o <file> [-e <escape>]
        [-d <db>...] [-k <regex>...>] [-t <type>...] [-b <bytes>]
@@ -139,7 +139,7 @@ Examples:
 ```
 
 
-```java  
+```text
 
 Usage: rmt [-hV] -s <source> (-m <uri> | -c <conf>) [-d <db>...]
        [-k <regex>...] [-t <type>...] [-rl]
@@ -179,7 +179,7 @@ Examples:
 
 ```
 
-```java  
+```text
 
 Usage: rdt [-hV] (-b <source> [-g <db>] | -s <source> -c <conf>
        | -m <file>...) -o <file> [-d <db>...] [-k <regex>...]
@@ -226,7 +226,7 @@ Examples:
 
 ```
 
-```java  
+```text
 
 Usage: rst [-hV] -s <uri> (-m <uri> | -c <conf>) [-d <db>...] [-rl]
 
@@ -256,7 +256,7 @@ Examples:
 
 ```
 
-```java  
+```text
 
 Usage: ret [-hV] -s <uri> [-c <conf>] [-p <parser>] -n <sink>
 
@@ -279,7 +279,7 @@ Examples:
 
 ```
 
-```java  
+```text
 
 Usage: rcut [-hV] -s <source> -r <file> -a <file>
 
@@ -304,17 +304,17 @@ Examples:
   
 For example:
 
-```java  
+```shell
 
-rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -d 0
-rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -t string hash
-rmt -s /path/to/dump.rdb -m redis://192.168.1.105:6379 -r -d 0 1 -t list
-rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0
+$ rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -d 0
+$ rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -t string hash
+$ rmt -s /path/to/dump.rdb -m redis://192.168.1.105:6379 -r -d 0 1 -t list
+$ rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0
 ```
 
 ### Monitor redis server
 
-```java  
+```shell
 # step1 
 # open file `/path/to/redis-rdb-cli/conf/redis-rdb-cli.conf`
 # change property `metric_gateway from `none` to `influxdb`
@@ -336,7 +336,7 @@ $ rmonitor -s redis-sentinel://sntnl-usr:sntnl-pwd@127.0.0.1:26379?master=mymast
 
 ### Redis mass insertion
 
-```java  
+```shell
 
 $ rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -r
 $ cat /path/to/dump.aof | /redis/src/redis-cli -p 6379 --pipe
@@ -345,31 +345,31 @@ $ cat /path/to/dump.aof | /redis/src/redis-cli -p 6379 --pipe
 
 ### Convert rdb to dump format
 
-```java  
+```shell
 $ rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof
 ```
 
 ### Convert rdb to json format
 
-```java  
+```shell
 $ rct -f json -s /path/to/dump.rdb -o /path/to/dump.json
 ```
 
 ### Numbers of key in rdb
 
-```java  
+```shell
 $ rct -f count -s /path/to/dump.rdb -o /path/to/dump.csv
 ```
 
 ### Find top 50 largest keys
 
-```java  
+```shell
 $ rct -f mem -s /path/to/dump.rdb -o /path/to/dump.mem -l 50
 ```
 
 ### Diff rdb
 
-```java  
+```shell
 $ rct -f diff -s /path/to/dump1.rdb -o /path/to/dump1.diff
 $ rct -f diff -s /path/to/dump2.rdb -o /path/to/dump2.diff
 $ diff /path/to/dump1.diff /path/to/dump2.diff
@@ -377,71 +377,71 @@ $ diff /path/to/dump1.diff /path/to/dump2.diff
 
 ### Convert rdb to RESP
 
-```java  
+```shell
 $ rct -f resp -s /path/to/dump.rdb -o /path/to/appendonly.aof
 ```
 
 ### Sync with 2 redis
-```java  
+```shell
 $ rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -r
 ```
 
 ### Sync single redis to redis cluster
-```java  
+```shell
 $ rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:30001 -r -d 0
 ```
 
 ### Migrate rdb to remote redis
 
-```java  
+```shell
 $ rmt -s /path/to/dump.rdb -m redis://192.168.1.105:6379 -r
 ```
 
 ### Migrate rdb to remote redis cluster
 
-```java  
+```shell
 $ rmt -s /path/to/dump.rdb -c ./nodes-30001.conf -r
 ```
   
 or simply use following cmd without `nodes-30001.conf`  
   
-```java  
+```shell
 $ rmt -s /path/to/dump.rdb -m redis://127.0.0.1:30001 -r
 ```
 
 ### Backup remote rdb
 
-```java  
+```shell
 $ rdt -b redis://192.168.1.105:6379 -o /path/to/dump.rdb
 ```
 
 ### Backup remote rdb and convert db to dest db
 
-```java  
+```shell
 $ rdt -b redis://192.168.1.105:6379 -o /path/to/dump.rdb --goal 3
 ```
 
 ### Filter rdb
 
-```java  
+```shell
 $ rdt -b /path/to/dump.rdb -o /path/to/filtered-dump.rdb -d 0 -t string
 ```
 
 ### Split rdb via cluster's nodes.conf
 
-```java  
+```shell
 $ rdt -s ./dump.rdb -c ./nodes.conf -o /path/to/folder -d 0
 ```
 
 ### Merge multi rdb to one
 
-```java  
+```shell
 $ rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
 ```
 
 ### Cut aof-use-rdb-preamble file to rdb file and aof file
 
-```java  
+```shell
 $ rcut -s ./aof-use-rdb-preamble.aof -r ./dump.rdb -a ./appendonly.aof
 ```
 
@@ -462,7 +462,7 @@ Since `v0.1.9`, the `rct -f mem` support showing result in grafana dashboard lik
 If you want to turn it on. you **MUST** install `docker` and `docker-compose` first, the installation please refer to [docker](https://docs.docker.com/install/)  
 Then run the following command:  
 
-```java  
+```shell
 $ cd /path/to/redis-rdb-cli/dashboard
 
 # start
@@ -485,7 +485,7 @@ If you deployed this tool in multi instance, you need to change parameter [metri
   
 1. use openssl to generate keystore
   
-```xslt  
+```shell
 
 $ cd /path/to/redis-6.0-rc1
 $ ./utils/gen-test-certs.sh
@@ -504,7 +504,7 @@ set [source_keystore_pass](https://github.com/leonchen83/redis-rdb-cli/blob/mast
 
 1. use following URI to open redis ACL support  
   
-```java  
+```shell
 $ rst -s redis://user:pass@127.0.0.1:6379 -m redis://user:pass@127.0.0.1:6380 -r -d 0
 ```
   
@@ -516,7 +516,7 @@ $ rst -s redis://user:pass@127.0.0.1:6379 -m redis://user:pass@127.0.0.1:6380 -r
 
 The `rmt` command use the following 4 parameters([redis-rdb-cli.conf](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf)) to migrate data to remote.  
   
-```java  
+```properties
 migrate_batch_size=4096
 migrate_threads=4
 migrate_flush=yes
@@ -525,7 +525,7 @@ migrate_retries=1
 
 The most important parameter is `migrate_threads=4`. this means we use the following threading model to migrate data.  
 
-```java  
+```text
 
 single redis ----> single redis
 
@@ -547,7 +547,7 @@ single redis ----> single redis
 
 ``` 
 
-```java  
+```text
 
 single redis ----> redis cluster
 
@@ -577,7 +577,7 @@ The difference between cluster migration and single migration is `Endpoint` and 
 
 The following 3 parameters affect migration performance  
   
-```java  
+```properties
 migrate_batch_size=4096
 migrate_retries=1
 migrate_flush=yes
@@ -589,7 +589,7 @@ migrate_flush=yes
 
 ### Migration principle
 
-```java  
+```text
 
 +---------------+             +-------------------+    restore      +---------------+ 
 |               |             | redis dump format |---------------->|               |
@@ -620,7 +620,7 @@ User should follow the steps below to implement a sink service.
 
 1. create a java project using maven pom.xml
 
-```java  
+```xml
 
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -704,7 +704,7 @@ User should follow the steps below to implement a sink service.
 
 2. implement `SinkService` interface
 
-```java  
+```java
 
 public class YourSinkService implements SinkService {
 
@@ -727,7 +727,7 @@ public class YourSinkService implements SinkService {
 ```
 3. register this service using Java SPI
 
-```java  
+```text
 # create com.moilioncircle.redis.rdb.cli.api.sink.SinkService file in src/main/resources/META-INF/services/
 
 |-src
@@ -745,7 +745,7 @@ your.package.YourSinkService
 
 4. package and deploy
 
-```java  
+```shell
 
 $ mvn clean install
 
@@ -753,7 +753,7 @@ $ cp ./target/your-sink-service-1.0.0-jar-with-dependencies.jar /path/to/redis-r
 ```
 5. run your sink service
 
-```java  
+```shell
 
 $ ret -s redis://127.0.0.1:6379 -c config.conf -n your-sink-service
 ```
@@ -782,7 +782,7 @@ $ ret -s redis://127.0.0.1:6379 -c config.conf -n your-sink-service
 
 1. create `YourFormatterService` extend `AbstractFormatterService`  
 
-```java  
+```java
 
 public class YourFormatterService extends AbstractFormatterService {
 
@@ -805,7 +805,7 @@ public class YourFormatterService extends AbstractFormatterService {
 
 2. register this formatter using Java SPI  
 
-```java  
+```text
 # create com.moilioncircle.redis.rdb.cli.api.format.FormatterService file in src/main/resources/META-INF/services/
 
 |-src
@@ -823,7 +823,7 @@ your.package.YourFormatterService
 
 3. package and deploy
 
-```java  
+```shell
 
 $ mvn clean install
 
@@ -832,7 +832,7 @@ $ cp ./target/your-service-1.0.0-jar-with-dependencies.jar /path/to/redis-rdb-cl
 
 4. run your formatter service
 
-```java  
+```shell
 
 $ rct -f test -s redis://127.0.0.1:6379 -o ./out.csv -t string -d 0 -e json
 ```

@@ -577,7 +577,7 @@ migrate_retries=1
 
 下面3个参数影响同步性能  
   
-```
+```properties
 migrate_batch_size=4096
 migrate_retries=1
 migrate_flush=yes
