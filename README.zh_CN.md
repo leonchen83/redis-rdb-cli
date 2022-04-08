@@ -22,13 +22,13 @@
 
 ## 运行时依赖
 
-```java  
+```text
 jdk 1.8+
 ```
 
 ## 安装
 
-```java  
+```shell
 $ wget https://github.com/leonchen83/redis-rdb-cli/releases/download/${version}/redis-rdb-cli-release.zip
 $ unzip redis-rdb-cli-release.zip
 $ cd ./redis-rdb-cli/bin
@@ -37,7 +37,7 @@ $ ./rct -h
 
 ## 手动编译依赖
 
-```java  
+```text
 
 jdk 1.8+
 maven-3.3.1+
@@ -46,7 +46,7 @@ maven-3.3.1+
 
 ## 编译 & 运行
 
-```java  
+```shell
 $ git clone https://github.com/leonchen83/redis-rdb-cli.git
 $ cd redis-rdb-cli
 $ mvn clean install -Dmaven.test.skip=true
@@ -56,7 +56,7 @@ $ ./rct -h
 
 ## 在docker中运行
 
-```java  
+```shell
 # run with jvm
 $ docker run -it --rm redisrdbcli/redis-rdb-cli:latest
 $ rct -V
@@ -67,7 +67,7 @@ $ rct -V
 ```
 
 ## 在docker中通过graalvm构建native image
-```
+```shell
 $ docker build -m 8g -f DockerfileNative -t redisrdbcli:redis-rdb-cli .
 $ docker run -it redisrdbcli:redis-rdb-cli bash
 $ bash-5.1# rct -V
@@ -79,7 +79,22 @@ $ bash-5.1# rct -V
   
 ### 使用
 
-```java  
+```text
+
+Usage: rmonitor [-hV] -s <uri> [-n <name>]
+
+Options:
+  -h, --help           Show this help message and exit.
+  -n, --name <name>    Monitor name.
+  -s, --source <uri>   Source uri. eg: redis://host:port?authPassword=foobar.
+  -V, --version        Print version information and exit.
+
+Examples:
+  rmonitor -s redis://127.0.0.1:6379 -n default
+
+```
+
+```text
 
 Usage: rct [-hV] -f <format> -s <source> -o <file> [-e <escape>]
        [-d <db>...] [-k <regex>...>] [-t <type>...] [-b <bytes>]
@@ -124,7 +139,7 @@ Examples:
 ```
 
 
-```java  
+```text
 
 Usage: rmt [-hV] -s <source> (-m <uri> | -c <conf>) [-d <db>...]
        [-k <regex>...] [-t <type>...] [-rl]
@@ -164,7 +179,7 @@ Examples:
 
 ```
 
-```java  
+```text
 
 Usage: rdt [-hV] (-b <source> [-g <db>] | -s <source> -c <conf>
        | -m <file>...) -o <file> [-d <db>...] [-k <regex>...]
@@ -211,7 +226,7 @@ Examples:
 
 ```
 
-```java  
+```text
 
 Usage: rst [-hV] -s <uri> (-m <uri> | -c <conf>) [-d <db>...] [-rl]
 
@@ -241,7 +256,7 @@ Examples:
 
 ```
 
-```java  
+```text
 
 Usage: ret [-hV] -s <uri> [-c <conf>] [-p <parser>] -n <sink>
 
@@ -264,7 +279,7 @@ Examples:
 
 ```
 
-```java  
+```text
 
 Usage: rcut [-hV] -s <source> -r <file> -a <file>
 
@@ -289,7 +304,7 @@ Examples:
   
 举例如下:  
 
-```java  
+```shell
 
 $ rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -d 0
 $ rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -t string hash
@@ -299,7 +314,7 @@ $ rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0
 
 ### 监控Redis服务器
 
-```java  
+```shell
 # 第一步 
 # 打开文件 `/path/to/redis-rdb-cli/conf/redis-rdb-cli.conf`
 # 将 `metric_gateway 这个属性 从 `none` 设置成 `influxdb`
@@ -321,7 +336,7 @@ $ rmonitor -s redis-sentinel://sntnl-usr:sntnl-pwd@127.0.0.1:26379?master=mymast
 
 ### Redis大量数据插入
 
-```java  
+```shell
 
 $ rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -r
 $ cat /path/to/dump.aof | /redis/src/redis-cli -p 6379 --pipe
@@ -330,31 +345,31 @@ $ cat /path/to/dump.aof | /redis/src/redis-cli -p 6379 --pipe
 
 ### 把rdb转换成dump格式
 
-```java  
+```shell
 $ rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof
 ```
 
 ### 把rdb转换成json格式
 
-```java  
+```shell
 $ rct -f json -s /path/to/dump.rdb -o /path/to/dump.json
 ```
 
 ### rdb的key数量统计
 
-```java  
+```shell
 $ rct -f count -s /path/to/dump.rdb -o /path/to/dump.csv
 ```
 
 ### 找到占用内存最大的50个key
 
-```java  
+```shell
 $ rct -f mem -s /path/to/dump.rdb -o /path/to/dump.mem -l 50
 ```
 
 ### Diff rdb
 
-```java  
+```shell
 $ rct -f diff -s /path/to/dump1.rdb -o /path/to/dump1.diff
 $ rct -f diff -s /path/to/dump2.rdb -o /path/to/dump2.diff
 $ diff /path/to/dump1.diff /path/to/dump2.diff
@@ -362,71 +377,71 @@ $ diff /path/to/dump1.diff /path/to/dump2.diff
 
 ### 把rdb转换成RESP格式
 
-```java  
+```shell
 $ rct -f resp -s /path/to/dump.rdb -o /path/to/appendonly.aof
 ```
 
 ### 2台redis之间数据同步
-```java  
+```shell
 $ rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -r
 ```
 
 ### 同步单台redis的数据到集群
-```java  
+```shell
 $ rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:30001 -r -d 0
 ```
 
 ### 同步rdb到远端redis
 
-```java  
+```shell
 $ rmt -s /path/to/dump.rdb -m redis://192.168.1.105:6379 -r
 ```
 
 ### 同步rdb到远端redis集群
 
-```java  
+```shell
 $ rmt -s /path/to/dump.rdb -c ./nodes-30001.conf -r
 ```
   
 或者不用 `nodes-30001.conf` 这个配置文件, 直接使用如下命令  
   
-```java  
+```shell
 $ rmt -s /path/to/dump.rdb -m redis://127.0.0.1:30001 -r
 ```
 
 ### 备份远端redis的rdb
 
-```java  
+```shell
 $ rdt -b redis://192.168.1.105:6379 -o /path/to/dump.rdb
 ```
 
 ### 备份远端redis的rdb并把源端的db转换成目标db
 
-```java  
+```shell
 $ rdt -b redis://192.168.1.105:6379 -o /path/to/dump.rdb --goal 3
 ```
 
 ### 过滤rdb
 
-```java  
+```shell
 $ rdt -b /path/to/dump.rdb -o /path/to/filtered-dump.rdb -d 0 -t string
 ```
 
 ### 通过集群的nodes.conf把1个rdb分割成多个rdb
 
-```java  
+```shell
 $ rdt -s ./dump.rdb -c ./nodes.conf -o /path/to/folder -d 0
 ```
 
 ### 合并多个rdb成1个
 
-```java  
+```shell
 $ rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
 ```
 
 ### 将 aof-use-rdb-preamble 文件形式分割成 rdb 文件与 aof 文件
 
-```java  
+```shell
 $ rcut -s ./aof-use-rdb-preamble.aof -r ./dump.rdb -a ./appendonly.aof
 ```
 
@@ -447,7 +462,7 @@ $ rcut -s ./aof-use-rdb-preamble.aof -r ./dump.rdb -a ./appendonly.aof
 如果你想开启这项功能. **必须** 先安装 `docker` 和 `docker-compose`, 安装方法请参照 [docker](https://docs.docker.com/install/)  
 然后遵循如下的步骤:  
 
-```java  
+```shell
 $ cd /path/to/redis-rdb-cli/dashboard
 
 # start
@@ -470,7 +485,7 @@ $ docker-compose down
   
 1. 用 openssl 生成 keystore
   
-```xslt  
+```shell
 
 $ cd /path/to/redis-6.0-rc1
 $ ./utils/gen-test-certs.sh
@@ -489,7 +504,7 @@ $ openssl pkcs12 -export -CAfile ca.crt -in redis.crt -inkey redis.key -out redi
   
 1. 使用如下的 URI 来开启 redis ACL 支持  
   
-```java  
+```shell
 $ rst -s redis://user:pass@127.0.0.1:6379 -m redis://user:pass@127.0.0.1:6380 -r -d 0
 ```
   
@@ -501,7 +516,7 @@ $ rst -s redis://user:pass@127.0.0.1:6379 -m redis://user:pass@127.0.0.1:6380 -r
 
 `rmt`使用下面四个参数([redis-rdb-cli.conf](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf))来同步数据到远端.  
   
-```java  
+```properties
 migrate_batch_size=4096
 migrate_threads=4
 migrate_flush=yes
@@ -510,7 +525,7 @@ migrate_retries=1
 
 最重要的参数是 `migrate_threads=4`. 这意味着我们用如下的线程模型同步数据  
 
-```java  
+```text
 
 单 redis ----> 单 redis
 
@@ -532,7 +547,7 @@ migrate_retries=1
 
 ``` 
 
-```java  
+```text
 
 单 redis ----> redis 集群
 
@@ -562,7 +577,7 @@ migrate_retries=1
 
 下面3个参数影响同步性能  
   
-```java  
+```
 migrate_batch_size=4096
 migrate_retries=1
 migrate_flush=yes
@@ -574,7 +589,7 @@ migrate_flush=yes
 
 ### 同步原理
 
-```java  
+```text
 
 +---------------+             +-------------------+    restore      +---------------+ 
 |               |             | redis dump format |---------------->|               |
@@ -605,7 +620,7 @@ migrate_flush=yes
 
 1. 使用如下maven pom.xml文件创建一个Java工程
 
-```java  
+```xml  
 
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -712,7 +727,7 @@ public class YourSinkService implements SinkService {
 ```
 3. 使用Java SPI来注册这个实现类
 
-```java  
+```text
 # 在工程下的 src/main/resources/META-INF/services/ 目录创建 com.moilioncircle.redis.rdb.cli.api.sink.SinkService 文件
 
 |-src
@@ -730,7 +745,7 @@ your.package.YourSinkService
 
 4. 打包与部署
 
-```java  
+```shell
 
 $ mvn clean install
 
@@ -738,7 +753,7 @@ $ cp ./target/your-sink-service-1.0.0-jar-with-dependencies.jar /path/to/redis-r
 ```
 5. 运行你自己的同步服务
 
-```java  
+```shell
 
 $ ret -s redis://127.0.0.1:6379 -c config.conf -n your-sink-service
 ```
@@ -790,7 +805,7 @@ public class YourFormatterService extends AbstractFormatterService {
 
 2. 使用Java SPI来注册这个实现类  
 
-```java  
+```text
 # create com.moilioncircle.redis.rdb.cli.api.format.FormatterService file in src/main/resources/META-INF/services/
 
 |-src
@@ -808,7 +823,7 @@ your.package.YourFormatterService
 
 3. 打包与部署
 
-```java  
+```shell
 
 $ mvn clean install
 
@@ -817,7 +832,7 @@ $ cp ./target/your-service-1.0.0-jar-with-dependencies.jar /path/to/redis-rdb-cl
 
 4. 运行formatter服务
 
-```java  
+```shell
 
 $ rct -f test -s redis://127.0.0.1:6379 -o ./out.csv -t string -d 0 -e json
 ```
