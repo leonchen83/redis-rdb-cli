@@ -10,6 +10,17 @@ To show `top N key` need to add `--largest` option in `rct` command.
 
 Support for `enable_progress_bar` config. the value is `true` by default.  
 
+Add new command `rmonitor` to monitor redis server.  
+
+```java  
+# standalone or master-slave redis 
+$ rmonitor -s redis://127.0.0.1:6379 -n standalone
+# cluster
+$ rmonitor -s redis://127.0.0.1:30001 -n cluster
+# sentinel
+$ rmonitor -s redis-sentinel://sntnl-usr:sntnl-pwd@127.0.0.1:26379?master=mymaster&authUser=usr&authPassword=pwd -n sentinel
+```
+
 ### 0.8.2
 
 Support for redis 7.0-RC2.  

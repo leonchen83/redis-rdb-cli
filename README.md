@@ -29,10 +29,10 @@ jdk 1.8+
 ## Install
 
 ```java  
-wget https://github.com/leonchen83/redis-rdb-cli/releases/download/${version}/redis-rdb-cli-release.zip
-unzip redis-rdb-cli-release.zip
-cd ./redis-rdb-cli/bin
-./rct -h
+$ wget https://github.com/leonchen83/redis-rdb-cli/releases/download/${version}/redis-rdb-cli-release.zip
+$ unzip redis-rdb-cli-release.zip
+$ cd ./redis-rdb-cli/bin
+$ ./rct -h
 ```
 
 ## Compile requirement
@@ -47,30 +47,30 @@ maven-3.3.1+
 ## Compile & run
 
 ```java  
-git clone https://github.com/leonchen83/redis-rdb-cli.git
-cd redis-rdb-cli
-mvn clean install -Dmaven.test.skip=true
-cd target/redis-rdb-cli-release/redis-rdb-cli/bin
-./rct -h 
+$ git clone https://github.com/leonchen83/redis-rdb-cli.git
+$ cd redis-rdb-cli
+$ mvn clean install -Dmaven.test.skip=true
+$ cd target/redis-rdb-cli-release/redis-rdb-cli/bin
+$ ./rct -h 
 ```
 
 ## Run in docker
 
 ```java  
 # run with jvm
-docker run -it --rm redisrdbcli/redis-rdb-cli:latest
-rct -V
+$ docker run -it --rm redisrdbcli/redis-rdb-cli:latest
+$ rct -V
 
 # run without jvm
-docker run -it --rm redisrdbcli/redis-rdb-cli:latest-native
-rct -V
+$ docker run -it --rm redisrdbcli/redis-rdb-cli:latest-native
+$ rct -V
 ```
 
 ## Build native image via graalvm in docker
 ```
-docker build -m 8g -f DockerfileNative -t redisrdbcli:redis-rdb-cli .
-docker run -it redisrdbcli:redis-rdb-cli bash
-bash-5.1# rct -V
+$ docker build -m 8g -f DockerfileNative -t redisrdbcli:redis-rdb-cli .
+$ docker run -it redisrdbcli:redis-rdb-cli bash
+$ bash-5.1# rct -V
 ```
 
 ## Windows Environment Variables
@@ -78,6 +78,21 @@ bash-5.1# rct -V
 Add `/path/to/redis-rdb-cli/bin` to `Path` environment variable  
   
 ## Usage
+
+```java  
+
+Usage: rmonitor [-hV] -s <uri> [-n <name>]
+
+Options:
+  -h, --help           Show this help message and exit.
+  -n, --name <name>    Monitor name.
+  -s, --source <uri>   Source uri. eg: redis://host:port?authPassword=foobar.
+  -V, --version        Print version information and exit.
+
+Examples:
+  rmonitor -s redis://127.0.0.1:6379 -n default
+
+```
 
 ```java  
 
@@ -297,115 +312,137 @@ rmt -s /path/to/dump.rdb -m redis://192.168.1.105:6379 -r -d 0 1 -t list
 rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0
 ```
 
+### Monitor redis server
+
+```java  
+# step1 
+# open file `/path/to/redis-rdb-cli/conf/redis-rdb-cli.conf`
+# change property `metric_gateway from `none` to `influxdb`
+#
+# step2
+$ cd /path/to/redis-rdb-cli/dashboard
+$ docker-compose up -d
+#
+# step3
+$ rmonitor -s redis://127.0.0.1:6379 -n standalone
+$ rmonitor -s redis://127.0.0.1:30001 -n cluster
+$ rmonitor -s redis-sentinel://sntnl-usr:sntnl-pwd@127.0.0.1:26379?master=mymaster&authUser=usr&authPassword=pwd -n sentinel
+#
+# step4
+# open url `http://localhost:3000/d/monitor/monitor`, login grafana use `admin`, `admin` and check monitor result.
+```
+
+![monitor](./images/monitor.png)
+
 ### Redis mass insertion
 
 ```java  
 
-rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -r
-cat /path/to/dump.aof | /redis/src/redis-cli -p 6379 --pipe
+$ rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -r
+$ cat /path/to/dump.aof | /redis/src/redis-cli -p 6379 --pipe
 
 ```
 
 ### Convert rdb to dump format
 
 ```java  
-rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof
+$ rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof
 ```
 
 ### Convert rdb to json format
 
 ```java  
-rct -f json -s /path/to/dump.rdb -o /path/to/dump.json
+$ rct -f json -s /path/to/dump.rdb -o /path/to/dump.json
 ```
 
 ### Numbers of key in rdb
 
 ```java  
-rct -f count -s /path/to/dump.rdb -o /path/to/dump.csv
+$ rct -f count -s /path/to/dump.rdb -o /path/to/dump.csv
 ```
 
 ### Find top 50 largest keys
 
 ```java  
-rct -f mem -s /path/to/dump.rdb -o /path/to/dump.mem -l 50
+$ rct -f mem -s /path/to/dump.rdb -o /path/to/dump.mem -l 50
 ```
 
 ### Diff rdb
 
 ```java  
-rct -f diff -s /path/to/dump1.rdb -o /path/to/dump1.diff
-rct -f diff -s /path/to/dump2.rdb -o /path/to/dump2.diff
-diff /path/to/dump1.diff /path/to/dump2.diff
+$ rct -f diff -s /path/to/dump1.rdb -o /path/to/dump1.diff
+$ rct -f diff -s /path/to/dump2.rdb -o /path/to/dump2.diff
+$ diff /path/to/dump1.diff /path/to/dump2.diff
 ```
 
 ### Convert rdb to RESP
 
 ```java  
-rct -f resp -s /path/to/dump.rdb -o /path/to/appendonly.aof
+$ rct -f resp -s /path/to/dump.rdb -o /path/to/appendonly.aof
 ```
 
 ### Sync with 2 redis
 ```java  
-rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -r
+$ rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -r
 ```
 
 ### Sync single redis to redis cluster
 ```java  
-rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:30001 -r -d 0
+$ rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:30001 -r -d 0
 ```
 
 ### Migrate rdb to remote redis
 
 ```java  
-rmt -s /path/to/dump.rdb -m redis://192.168.1.105:6379 -r
+$ rmt -s /path/to/dump.rdb -m redis://192.168.1.105:6379 -r
 ```
 
 ### Migrate rdb to remote redis cluster
 
 ```java  
-rmt -s /path/to/dump.rdb -c ./nodes-30001.conf -r
+$ rmt -s /path/to/dump.rdb -c ./nodes-30001.conf -r
 ```
   
 or simply use following cmd without `nodes-30001.conf`  
   
 ```java  
-rmt -s /path/to/dump.rdb -m redis://127.0.0.1:30001 -r
+$ rmt -s /path/to/dump.rdb -m redis://127.0.0.1:30001 -r
 ```
 
 ### Backup remote rdb
 
 ```java  
-rdt -b redis://192.168.1.105:6379 -o /path/to/dump.rdb
+$ rdt -b redis://192.168.1.105:6379 -o /path/to/dump.rdb
 ```
 
 ### Backup remote rdb and convert db to dest db
 
 ```java  
-rdt -b redis://192.168.1.105:6379 -o /path/to/dump.rdb --goal 3
+$ rdt -b redis://192.168.1.105:6379 -o /path/to/dump.rdb --goal 3
 ```
 
 ### Filter rdb
 
 ```java  
-rdt -b /path/to/dump.rdb -o /path/to/filtered-dump.rdb -d 0 -t string
+$ rdt -b /path/to/dump.rdb -o /path/to/filtered-dump.rdb -d 0 -t string
 ```
 
 ### Split rdb via cluster's nodes.conf
 
 ```java  
-rdt -s ./dump.rdb -c ./nodes.conf -o /path/to/folder -d 0
+$ rdt -s ./dump.rdb -c ./nodes.conf -o /path/to/folder -d 0
 ```
 
 ### Merge multi rdb to one
 
 ```java  
-rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
+$ rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
 ```
 
 ### Cut aof-use-rdb-preamble file to rdb file and aof file
 
 ```java  
-rcut -s ./aof-use-rdb-preamble.aof -r ./dump.rdb -a ./appendonly.aof
+$ rcut -s ./aof-use-rdb-preamble.aof -r ./dump.rdb -a ./appendonly.aof
 ```
 
 ### Other parameter
@@ -420,19 +457,19 @@ More configurable parameter can be modified in `/path/to/redis-rdb-cli/conf/redi
 ## Dashboard
 
 Since `v0.1.9`, the `rct -f mem` support showing result in grafana dashboard like the following:  
-![img](./images/memory-dashboard.png)  
+![memory](./images/memory.png)  
 
 If you want to turn it on. you **MUST** install `docker` and `docker-compose` first, the installation please refer to [docker](https://docs.docker.com/install/)  
 Then run the following command:  
 
 ```java  
-cd /path/to/redis-rdb-cli/dashboard
+$ cd /path/to/redis-rdb-cli/dashboard
 
 # start
-docker-compose up -d
+$ docker-compose up -d
 
 # stop
-docker-compose down
+$ docker-compose down
 ```
   
 `cd /path/to/redis-rdb-cli/conf/redis-rdb-cli.conf`  
@@ -450,10 +487,10 @@ If you deployed this tool in multi instance, you need to change parameter [metri
   
 ```xslt  
 
-$cd /path/to/redis-6.0-rc1
-$./utils/gen-test-certs.sh
-$cd tests/tls
-$openssl pkcs12 -export -CAfile ca.crt -in redis.crt -inkey redis.key -out redis.p12
+$ cd /path/to/redis-6.0-rc1
+$ ./utils/gen-test-certs.sh
+$ cd tests/tls
+$ openssl pkcs12 -export -CAfile ca.crt -in redis.crt -inkey redis.key -out redis.p12
 
 ```
   
@@ -468,7 +505,7 @@ set [source_keystore_pass](https://github.com/leonchen83/redis-rdb-cli/blob/mast
 1. use following URI to open redis ACL support  
   
 ```java  
-rst -s redis://user:pass@127.0.0.1:6379 -m redis://user:pass@127.0.0.1:6380 -r -d 0
+$ rst -s redis://user:pass@127.0.0.1:6379 -m redis://user:pass@127.0.0.1:6380 -r -d 0
 ```
   
 2. `user` **MUST** have `+@all` permission to handle commands
@@ -710,15 +747,15 @@ your.package.YourSinkService
 
 ```java  
 
-mvn clean install
+$ mvn clean install
 
-cp ./target/your-sink-service-1.0.0-jar-with-dependencies.jar /path/to/redis-rdb-cli/lib
+$ cp ./target/your-sink-service-1.0.0-jar-with-dependencies.jar /path/to/redis-rdb-cli/lib
 ```
 5. run your sink service
 
 ```java  
 
-ret -s redis://127.0.0.1:6379 -c config.conf -n your-sink-service
+$ ret -s redis://127.0.0.1:6379 -c config.conf -n your-sink-service
 ```
 
 6. debug your sink service
@@ -788,16 +825,16 @@ your.package.YourFormatterService
 
 ```java  
 
-mvn clean install
+$ mvn clean install
 
-cp ./target/your-service-1.0.0-jar-with-dependencies.jar /path/to/redis-rdb-cli/lib
+$ cp ./target/your-service-1.0.0-jar-with-dependencies.jar /path/to/redis-rdb-cli/lib
 ```
 
 4. run your formatter service
 
 ```java  
 
-rct -f test -s redis://127.0.0.1:6379 -o ./out.csv -t string -d 0 -e json
+$ rct -f test -s redis://127.0.0.1:6379 -o ./out.csv -t string -d 0 -e json
 ```
 
 ## Contributors

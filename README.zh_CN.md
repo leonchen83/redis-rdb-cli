@@ -29,10 +29,10 @@ jdk 1.8+
 ## 安装
 
 ```java  
-wget https://github.com/leonchen83/redis-rdb-cli/releases/download/${version}/redis-rdb-cli-release.zip
-unzip redis-rdb-cli-release.zip
-cd ./redis-rdb-cli/bin
-./rct -h
+$ wget https://github.com/leonchen83/redis-rdb-cli/releases/download/${version}/redis-rdb-cli-release.zip
+$ unzip redis-rdb-cli-release.zip
+$ cd ./redis-rdb-cli/bin
+$ ./rct -h
 ```
 
 ## 手动编译依赖
@@ -47,30 +47,30 @@ maven-3.3.1+
 ## 编译 & 运行
 
 ```java  
-git clone https://github.com/leonchen83/redis-rdb-cli.git
-cd redis-rdb-cli
-mvn clean install -Dmaven.test.skip=true
-cd target/redis-rdb-cli-release/redis-rdb-cli/bin
-./rct -h 
+$ git clone https://github.com/leonchen83/redis-rdb-cli.git
+$ cd redis-rdb-cli
+$ mvn clean install -Dmaven.test.skip=true
+$ cd target/redis-rdb-cli-release/redis-rdb-cli/bin
+$ ./rct -h 
 ```
 
 ## 在docker中运行
 
 ```java  
 # run with jvm
-docker run -it --rm redisrdbcli/redis-rdb-cli:latest
-rct -V
+$ docker run -it --rm redisrdbcli/redis-rdb-cli:latest
+$ rct -V
 
 # run without jvm
-docker run -it --rm redisrdbcli/redis-rdb-cli:latest-native
-rct -V
+$ docker run -it --rm redisrdbcli/redis-rdb-cli:latest-native
+$ rct -V
 ```
 
 ## 在docker中通过graalvm构建native image
 ```
-docker build -m 8g -f DockerfileNative -t redisrdbcli:redis-rdb-cli .
-docker run -it redisrdbcli:redis-rdb-cli bash
-bash-5.1# rct -V
+$ docker build -m 8g -f DockerfileNative -t redisrdbcli:redis-rdb-cli .
+$ docker run -it redisrdbcli:redis-rdb-cli bash
+$ bash-5.1# rct -V
 ```
 
 ## 设置Windows环境变量
@@ -291,121 +291,143 @@ Examples:
 
 ```java  
 
-rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -d 0
-rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -t string hash
-rmt -s /path/to/dump.rdb -m redis://192.168.1.105:6379 -r -d 0 1 -t list
-rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0
+$ rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -d 0
+$ rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -t string hash
+$ rmt -s /path/to/dump.rdb -m redis://192.168.1.105:6379 -r -d 0 1 -t list
+$ rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0
 ```
+
+### 监控Redis服务器
+
+```java  
+# 第一步 
+# 打开文件 `/path/to/redis-rdb-cli/conf/redis-rdb-cli.conf`
+# 将 `metric_gateway 这个属性 从 `none` 设置成 `influxdb`
+#
+# 第二步
+$ cd /path/to/redis-rdb-cli/dashboard
+$ docker-compose up -d
+#
+# 第三步
+$ rmonitor -s redis://127.0.0.1:6379 -n standalone
+$ rmonitor -s redis://127.0.0.1:30001 -n cluster
+$ rmonitor -s redis-sentinel://sntnl-usr:sntnl-pwd@127.0.0.1:26379?master=mymaster&authUser=usr&authPassword=pwd -n sentinel
+#
+# 第四步
+# 浏览器打开网址 `http://localhost:3000/d/monitor/monitor`, 用 `admin`, `admin` 登录grafana 查看监控结果
+```
+
+![monitor](./images/monitor.png)
 
 ### Redis大量数据插入
 
 ```java  
 
-rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -r
-cat /path/to/dump.aof | /redis/src/redis-cli -p 6379 --pipe
+$ rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -r
+$ cat /path/to/dump.aof | /redis/src/redis-cli -p 6379 --pipe
 
 ```
 
 ### 把rdb转换成dump格式
 
 ```java  
-rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof
+$ rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof
 ```
 
 ### 把rdb转换成json格式
 
 ```java  
-rct -f json -s /path/to/dump.rdb -o /path/to/dump.json
+$ rct -f json -s /path/to/dump.rdb -o /path/to/dump.json
 ```
 
 ### rdb的key数量统计
 
 ```java  
-rct -f count -s /path/to/dump.rdb -o /path/to/dump.csv
+$ rct -f count -s /path/to/dump.rdb -o /path/to/dump.csv
 ```
 
 ### 找到占用内存最大的50个key
 
 ```java  
-rct -f mem -s /path/to/dump.rdb -o /path/to/dump.mem -l 50
+$ rct -f mem -s /path/to/dump.rdb -o /path/to/dump.mem -l 50
 ```
 
 ### Diff rdb
 
 ```java  
-rct -f diff -s /path/to/dump1.rdb -o /path/to/dump1.diff
-rct -f diff -s /path/to/dump2.rdb -o /path/to/dump2.diff
-diff /path/to/dump1.diff /path/to/dump2.diff
+$ rct -f diff -s /path/to/dump1.rdb -o /path/to/dump1.diff
+$ rct -f diff -s /path/to/dump2.rdb -o /path/to/dump2.diff
+$ diff /path/to/dump1.diff /path/to/dump2.diff
 ```
 
 ### 把rdb转换成RESP格式
 
 ```java  
-rct -f resp -s /path/to/dump.rdb -o /path/to/appendonly.aof
+$ rct -f resp -s /path/to/dump.rdb -o /path/to/appendonly.aof
 ```
 
 ### 2台redis之间数据同步
 ```java  
-rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -r
+$ rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -r
 ```
 
 ### 同步单台redis的数据到集群
 ```java  
-rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:30001 -r -d 0
+$ rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:30001 -r -d 0
 ```
 
 ### 同步rdb到远端redis
 
 ```java  
-rmt -s /path/to/dump.rdb -m redis://192.168.1.105:6379 -r
+$ rmt -s /path/to/dump.rdb -m redis://192.168.1.105:6379 -r
 ```
 
 ### 同步rdb到远端redis集群
 
 ```java  
-rmt -s /path/to/dump.rdb -c ./nodes-30001.conf -r
+$ rmt -s /path/to/dump.rdb -c ./nodes-30001.conf -r
 ```
   
 或者不用 `nodes-30001.conf` 这个配置文件, 直接使用如下命令  
   
 ```java  
-rmt -s /path/to/dump.rdb -m redis://127.0.0.1:30001 -r
+$ rmt -s /path/to/dump.rdb -m redis://127.0.0.1:30001 -r
 ```
 
 ### 备份远端redis的rdb
 
 ```java  
-rdt -b redis://192.168.1.105:6379 -o /path/to/dump.rdb
+$ rdt -b redis://192.168.1.105:6379 -o /path/to/dump.rdb
 ```
 
 ### 备份远端redis的rdb并把源端的db转换成目标db
 
 ```java  
-rdt -b redis://192.168.1.105:6379 -o /path/to/dump.rdb --goal 3
+$ rdt -b redis://192.168.1.105:6379 -o /path/to/dump.rdb --goal 3
 ```
 
 ### 过滤rdb
 
 ```java  
-rdt -b /path/to/dump.rdb -o /path/to/filtered-dump.rdb -d 0 -t string
+$ rdt -b /path/to/dump.rdb -o /path/to/filtered-dump.rdb -d 0 -t string
 ```
 
 ### 通过集群的nodes.conf把1个rdb分割成多个rdb
 
 ```java  
-rdt -s ./dump.rdb -c ./nodes.conf -o /path/to/folder -d 0
+$ rdt -s ./dump.rdb -c ./nodes.conf -o /path/to/folder -d 0
 ```
 
 ### 合并多个rdb成1个
 
 ```java  
-rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
+$ rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
 ```
 
 ### 将 aof-use-rdb-preamble 文件形式分割成 rdb 文件与 aof 文件
 
 ```java  
-rcut -s ./aof-use-rdb-preamble.aof -r ./dump.rdb -a ./appendonly.aof
+$ rcut -s ./aof-use-rdb-preamble.aof -r ./dump.rdb -a ./appendonly.aof
 ```
 
 ### 其他参数
@@ -420,19 +442,19 @@ rcut -s ./aof-use-rdb-preamble.aof -r ./dump.rdb -a ./appendonly.aof
 ## Dashboard
 
 从 `v0.1.9` 起, `rct -f mem` 支持在grafana上显示结果  
-![img](./images/memory-dashboard.png)  
+![memory](./images/memory.png)  
 
 如果你想开启这项功能. **必须** 先安装 `docker` 和 `docker-compose`, 安装方法请参照 [docker](https://docs.docker.com/install/)  
 然后遵循如下的步骤:  
 
 ```java  
-cd /path/to/redis-rdb-cli/dashboard
+$ cd /path/to/redis-rdb-cli/dashboard
 
 # start
-docker-compose up -d
+$ docker-compose up -d
 
 # stop
-docker-compose down
+$ docker-compose down
 ```
   
 `cd /path/to/redis-rdb-cli/conf/redis-rdb-cli.conf`  
@@ -450,10 +472,10 @@ docker-compose down
   
 ```xslt  
 
-$cd /path/to/redis-6.0-rc1
-$./utils/gen-test-certs.sh
-$cd tests/tls
-$openssl pkcs12 -export -CAfile ca.crt -in redis.crt -inkey redis.key -out redis.p12
+$ cd /path/to/redis-6.0-rc1
+$ ./utils/gen-test-certs.sh
+$ cd tests/tls
+$ openssl pkcs12 -export -CAfile ca.crt -in redis.crt -inkey redis.key -out redis.p12
 
 ```
   
@@ -468,7 +490,7 @@ $openssl pkcs12 -export -CAfile ca.crt -in redis.crt -inkey redis.key -out redis
 1. 使用如下的 URI 来开启 redis ACL 支持  
   
 ```java  
-rst -s redis://user:pass@127.0.0.1:6379 -m redis://user:pass@127.0.0.1:6380 -r -d 0
+$ rst -s redis://user:pass@127.0.0.1:6379 -m redis://user:pass@127.0.0.1:6380 -r -d 0
 ```
   
 2. `user` **必须** 拥有 `+@all` 权限来处理同步命令
@@ -710,15 +732,15 @@ your.package.YourSinkService
 
 ```java  
 
-mvn clean install
+$ mvn clean install
 
-cp ./target/your-sink-service-1.0.0-jar-with-dependencies.jar /path/to/redis-rdb-cli/lib
+$ cp ./target/your-sink-service-1.0.0-jar-with-dependencies.jar /path/to/redis-rdb-cli/lib
 ```
 5. 运行你自己的同步服务
 
 ```java  
 
-ret -s redis://127.0.0.1:6379 -c config.conf -n your-sink-service
+$ ret -s redis://127.0.0.1:6379 -c config.conf -n your-sink-service
 ```
 
 6. debug 你自己的同步服务
@@ -788,16 +810,16 @@ your.package.YourFormatterService
 
 ```java  
 
-mvn clean install
+$ mvn clean install
 
-cp ./target/your-service-1.0.0-jar-with-dependencies.jar /path/to/redis-rdb-cli/lib
+$ cp ./target/your-service-1.0.0-jar-with-dependencies.jar /path/to/redis-rdb-cli/lib
 ```
 
 4. 运行formatter服务
 
 ```java  
 
-rct -f test -s redis://127.0.0.1:6379 -o ./out.csv -t string -d 0 -e json
+$ rct -f test -s redis://127.0.0.1:6379 -o ./out.csv -t string -d 0 -e json
 ```
 
 ## 贡献者
