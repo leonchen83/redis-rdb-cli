@@ -47,12 +47,9 @@ import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.cmd.impl.DefaultCommand;
-import com.moilioncircle.redis.replicator.cmd.impl.FlushAllCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.PingCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.PublishCommand;
-import com.moilioncircle.redis.replicator.cmd.impl.ScriptCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.SelectCommand;
-import com.moilioncircle.redis.replicator.cmd.impl.SwapDBCommand;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
 import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
@@ -122,21 +119,17 @@ public class SingleRdbVisitor extends AbstractRstRdbVisitor implements EventList
                 CombineCommand command = (CombineCommand)event;
                 if (command.getParsedCommand() instanceof PingCommand) {
                     ping(command);
-                } else if (command.getParsedCommand() instanceof SwapDBCommand) {
-                    retry(command.getDefaultCommand(), configure.getMigrateRetries());
-                } else if (command.getParsedCommand() instanceof FlushAllCommand) {
-                    retry(command.getDefaultCommand(), configure.getMigrateRetries());
-                } else if (command.getParsedCommand() instanceof ScriptCommand) {
-                    retry(command.getDefaultCommand(), configure.getMigrateRetries());
-                } else if (command.getParsedCommand() instanceof PublishCommand) {
-                    PublishCommand publish = (PublishCommand) command.getParsedCommand();
-                    String channel = Strings.toString(publish.getChannel());
-                    if (!Strings.isEquals(channel, "__sentinel__:hello")) {
-                        // ignore sentinel message
+                } else if (filter.contains(db)) {
+                    if (command.getParsedCommand() instanceof PublishCommand) {
+                        PublishCommand publish = (PublishCommand) command.getParsedCommand();
+                        String channel = Strings.toString(publish.getChannel());
+                        if (!Strings.isEquals(channel, "__sentinel__:hello")) {
+                            // ignore sentinel message
+                            retry(command.getDefaultCommand(), configure.getMigrateRetries());
+                        }
+                    } else {
                         retry(command.getDefaultCommand(), configure.getMigrateRetries());
                     }
-                } else if (filter.contains(db)) {
-                    retry(command.getDefaultCommand(), configure.getMigrateRetries());
                 }
             } else if (event instanceof ClosingCommand) {
                 this.endpoint.get().flushQuietly();
