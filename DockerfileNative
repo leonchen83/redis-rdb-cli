@@ -1,6 +1,6 @@
 FROM springci/graalvm-ce:stable-java11-0.10.x AS builder
 
-ARG MAVEN_VERSION=3.8.4
+ARG MAVEN_VERSION=3.8.5
 ARG BASE_URL=https://ftp.yz.yamagata-u.ac.jp/pub/network/apache/maven/maven-3/${MAVEN_VERSION}/binaries
 
 WORKDIR /app
