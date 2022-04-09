@@ -48,6 +48,7 @@ import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.cmd.impl.DefaultCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.PingCommand;
+import com.moilioncircle.redis.replicator.cmd.impl.PublishCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.SelectCommand;
 import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.event.EventListener;
@@ -57,6 +58,7 @@ import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
 import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpFunction;
 import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
+import com.moilioncircle.redis.replicator.util.Strings;
 
 /**
  * @author Baoyi Chen
@@ -117,6 +119,13 @@ public class SingleRdbVisitor extends AbstractRstRdbVisitor implements EventList
                 CombineCommand command = (CombineCommand)event;
                 if (command.getParsedCommand() instanceof PingCommand) {
                     ping(command);
+                } else if (command.getParsedCommand() instanceof PublishCommand) {
+                    PublishCommand publish = (PublishCommand) command.getParsedCommand();
+                    String channel = Strings.toString(publish.getChannel());
+                    if (!Strings.isEquals(channel, "__sentinel__:hello")) {
+                        // ignore sentinel message
+                        retry(command.getDefaultCommand(), configure.getMigrateRetries());
+                    }
                 } else if (filter.contains(db)) {
                     retry(command.getDefaultCommand(), configure.getMigrateRetries());
                 }
