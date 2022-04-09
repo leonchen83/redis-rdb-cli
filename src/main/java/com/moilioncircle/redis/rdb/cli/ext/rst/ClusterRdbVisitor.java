@@ -60,7 +60,6 @@ import com.moilioncircle.redis.replicator.cmd.impl.MSetNxCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.PFCountCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.PFMergeCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.PingCommand;
-import com.moilioncircle.redis.replicator.cmd.impl.PublishCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.RPopLPushCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.RenameCommand;
 import com.moilioncircle.redis.replicator.cmd.impl.RenameNxCommand;
@@ -80,7 +79,6 @@ import com.moilioncircle.redis.replicator.event.PreCommandSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpFunction;
 import com.moilioncircle.redis.replicator.rdb.dump.datatype.DumpKeyValuePair;
-import com.moilioncircle.redis.replicator.util.Strings;
 
 /**
  * @author Baoyi Chen
@@ -453,14 +451,8 @@ public class ClusterRdbVisitor extends AbstractRstRdbVisitor implements EventLis
         } else if (parsedCommand instanceof GenericKeyCommand) {
             GenericKeyCommand cmd = (GenericKeyCommand) parsedCommand;
             retry(command, slot(cmd.getKey()), times);
-        } else if (parsedCommand instanceof PublishCommand) {
-            PublishCommand cmd = (PublishCommand) parsedCommand;
-            String channel = Strings.toString(cmd.getChannel());
-            if (!Strings.isEquals(channel, "__sentinel__:hello")) {
-                // ignore sentinel message
-                retry(command, slot(cmd.getChannel()), times);
-            }
         } else {
+            // publish
             // swapdb
             // move
             // flushall
