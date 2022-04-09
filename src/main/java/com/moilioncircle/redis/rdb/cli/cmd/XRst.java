@@ -283,7 +283,7 @@ public class XRst implements Callable<Integer> {
 		replicator.addCommandParser(CommandName.name("LPOP"), new CombineCommandParser(new LPopParser()));
 		replicator.addCommandParser(CommandName.name("LPUSH"), new CombineCommandParser(new LPushParser()));
 		replicator.addCommandParser(CommandName.name("LPUSHX"), new CombineCommandParser(new LPushXParser()));
-		replicator.addCommandParser(CommandName.name("LRem"), new CombineCommandParser(new LRemParser()));
+		replicator.addCommandParser(CommandName.name("LREM"), new CombineCommandParser(new LRemParser()));
 		replicator.addCommandParser(CommandName.name("RPOP"), new CombineCommandParser(new RPopParser()));
 		replicator.addCommandParser(CommandName.name("RPUSH"), new CombineCommandParser(new RPushParser()));
 		replicator.addCommandParser(CommandName.name("RPUSHX"), new CombineCommandParser(new RPushXParser()));
@@ -294,7 +294,6 @@ public class XRst implements Callable<Integer> {
 		replicator.addCommandParser(CommandName.name("INCRBY"), new CombineCommandParser(new IncrByParser()));
 		replicator.addCommandParser(CommandName.name("DECRBY"), new CombineCommandParser(new DecrByParser()));
 		replicator.addCommandParser(CommandName.name("PERSIST"), new CombineCommandParser(new PersistParser()));
-		replicator.addCommandParser(CommandName.name("FLUSHALL"), new CombineCommandParser(new FlushAllParser()));
 		replicator.addCommandParser(CommandName.name("FLUSHDB"), new CombineCommandParser(new FlushDBParser()));
 		replicator.addCommandParser(CommandName.name("HINCRBY"), new CombineCommandParser(new HIncrByParser()));
 		replicator.addCommandParser(CommandName.name("ZINCRBY"), new CombineCommandParser(new ZIncrByParser()));
@@ -318,14 +317,11 @@ public class XRst implements Callable<Integer> {
 		replicator.addCommandParser(CommandName.name("GEOADD"), new CombineCommandParser(new GeoAddParser()));
 		replicator.addCommandParser(CommandName.name("EVAL"), new CombineCommandParser(new EvalParser()));
 		replicator.addCommandParser(CommandName.name("EVALSHA"), new CombineCommandParser(new EvalShaParser()));
-		replicator.addCommandParser(CommandName.name("SCRIPT"), new CombineCommandParser(new ScriptParser()));
-		replicator.addCommandParser(CommandName.name("PUBLISH"), new CombineCommandParser(new PublishParser()));
 		replicator.addCommandParser(CommandName.name("BITOP"), new CombineCommandParser(new BitOpParser()));
 		replicator.addCommandParser(CommandName.name("BITFIELD"), new CombineCommandParser(new BitFieldParser()));
 		replicator.addCommandParser(CommandName.name("SETBIT"), new CombineCommandParser(new SetBitParser()));
 		replicator.addCommandParser(CommandName.name("SREM"), new CombineCommandParser(new SRemParser()));
 		replicator.addCommandParser(CommandName.name("UNLINK"), new CombineCommandParser(new UnLinkParser()));
-		replicator.addCommandParser(CommandName.name("SWAPDB"), new CombineCommandParser(new SwapDBParser()));
 		replicator.addCommandParser(CommandName.name("MULTI"), new CombineCommandParser(new MultiParser()));
 		replicator.addCommandParser(CommandName.name("EXEC"), new CombineCommandParser(new ExecParser()));
 		replicator.addCommandParser(CommandName.name("ZREMRANGEBYSCORE"), new CombineCommandParser(new ZRemRangeByScoreParser()));
@@ -343,6 +339,11 @@ public class XRst implements Callable<Integer> {
 		replicator.addCommandParser(CommandName.name("XGROUP"), new CombineCommandParser(new XGroupParser()));
 		replicator.addCommandParser(CommandName.name("XTRIM"), new CombineCommandParser(new XTrimParser()));
 		replicator.addCommandParser(CommandName.name("XSETID"), new CombineCommandParser(new XSetIdParser()));
+		// 
+		replicator.addCommandParser(CommandName.name("SCRIPT"), new CombineCommandParser(new ScriptParser()));
+		replicator.addCommandParser(CommandName.name("SWAPDB"), new CombineCommandParser(new SwapDBParser()));
+		replicator.addCommandParser(CommandName.name("PUBLISH"), new CombineCommandParser(new PublishParser()));
+		replicator.addCommandParser(CommandName.name("FLUSHALL"), new CombineCommandParser(new FlushAllParser()));
 		// since redis 6.2
 		replicator.addCommandParser(CommandName.name("COPY"), new CombineCommandParser(new CopyParser()));
 		replicator.addCommandParser(CommandName.name("LMOVE"), new CombineCommandParser(new LMoveParser()));
