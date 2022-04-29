@@ -159,6 +159,7 @@ public class Protocols {
 		}
 	}
 	
+	@SuppressWarnings("deprecation")
 	public static void functionLoad(OutputStream out, Function function, boolean replace) {
 		if (function.getName() == null) {
 			int count = 3;
