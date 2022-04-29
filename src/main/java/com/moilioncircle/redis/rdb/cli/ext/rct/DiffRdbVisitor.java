@@ -18,6 +18,7 @@ package com.moilioncircle.redis.rdb.cli.ext.rct;
 
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.FUNCTION;
 import static com.moilioncircle.redis.replicator.Constants.RDB_OPCODE_FUNCTION;
+import static com.moilioncircle.redis.replicator.Constants.RDB_OPCODE_FUNCTION2;
 import static com.moilioncircle.redis.replicator.rdb.datatype.ExpiredType.NONE;
 
 import java.io.IOException;
@@ -62,6 +63,20 @@ public class DiffRdbVisitor extends AbstractRctRdbVisitor {
         try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
             listener.write((byte) RDB_OPCODE_FUNCTION);
             event = super.applyFunction(in, version);
+        }
+        Outputs.write('\n', out);
+        return event;
+    }
+    
+    @Override
+    public Event applyFunction2(RedisInputStream in, int version) throws IOException {
+        escaper.encode(FUNCTION, out);
+        delimiter(out);
+        Event event = null;
+        version = getVersion(version);
+        try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
+            listener.write((byte) RDB_OPCODE_FUNCTION2);
+            event = super.applyFunction2(in, version);
         }
         Outputs.write('\n', out);
         return event;

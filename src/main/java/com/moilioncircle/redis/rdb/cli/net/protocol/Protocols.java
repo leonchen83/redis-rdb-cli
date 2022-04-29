@@ -160,28 +160,44 @@ public class Protocols {
 	}
 	
 	public static void functionLoad(OutputStream out, Function function, boolean replace) {
-		int count = 5;
-		if (function.getDescription() != null) {
-			count += 2;
+		if (function.getName() == null) {
+			int count = 3;
+			if (replace) {
+				count += 1;
+			}
+			Outputs.write(STAR, out);
+			Outputs.write(String.valueOf(count).getBytes(), out);
+			writeCrLf(out);
+			emitArg(out, FUNCTION_BUF);
+			emitArg(out, LOAD_BUF);
+			if (replace) {
+				emitArg(out, REPLACE_BUF);
+			}
+			emitArg(out, ByteBuffer.wrap(function.getCode()));
+		} else {
+			int count = 5;
+			if (function.getDescription() != null) {
+				count += 2;
+			}
+			if (replace) {
+				count += 1;
+			}
+			Outputs.write(STAR, out);
+			Outputs.write(String.valueOf(count).getBytes(), out);
+			writeCrLf(out);
+			emitArg(out, FUNCTION_BUF);
+			emitArg(out, LOAD_BUF);
+			emitArg(out, ByteBuffer.wrap(function.getEngineName()));
+			emitArg(out, ByteBuffer.wrap(function.getName()));
+			if (function.getDescription() != null) {
+				emitArg(out, DESCRIPTION_BUF);
+				emitArg(out, ByteBuffer.wrap(function.getDescription()));
+			}
+			if (replace) {
+				emitArg(out, REPLACE_BUF);
+			}
+			emitArg(out, ByteBuffer.wrap(function.getCode()));
 		}
-		if (replace) {
-			count += 1;
-		}
-		Outputs.write(STAR, out);
-		Outputs.write(String.valueOf(count).getBytes(), out);
-		writeCrLf(out);
-		emitArg(out, FUNCTION_BUF);
-		emitArg(out, LOAD_BUF);
-		emitArg(out, ByteBuffer.wrap(function.getEngineName()));
-		emitArg(out, ByteBuffer.wrap(function.getName()));
-		if (function.getDescription() != null) {
-			emitArg(out, DESCRIPTION_BUF);
-			emitArg(out, ByteBuffer.wrap(function.getDescription()));
-		}
-		if (replace) {
-			emitArg(out, REPLACE_BUF);
-		}
-		emitArg(out, ByteBuffer.wrap(function.getCode()));
 	}
 	
 	private static void emitArg(OutputStream out, ByteBuffer arg) {

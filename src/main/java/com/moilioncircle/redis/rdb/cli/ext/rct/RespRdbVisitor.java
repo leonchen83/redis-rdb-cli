@@ -78,6 +78,13 @@ public class RespRdbVisitor extends AbstractRctRdbVisitor {
     }
     
     @Override
+    public Event applyFunction2(RedisInputStream in, int version) throws IOException {
+        Function function = (Function) super.applyFunction2(in, version);
+        Protocols.functionLoad(this.out, function, replace);
+        return function;
+    }
+    
+    @Override
     public DB applySelectDB(RedisInputStream in, int version) throws IOException {
         DB db = super.applySelectDB(in, version);
         Protocols.emit(this.out, SELECT, String.valueOf(db.getDbNumber()).getBytes());

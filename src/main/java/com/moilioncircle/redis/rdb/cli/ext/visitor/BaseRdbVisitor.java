@@ -52,6 +52,7 @@ import com.moilioncircle.redis.replicator.rdb.BaseRdbParser;
 import com.moilioncircle.redis.replicator.rdb.DefaultRdbVisitor;
 import com.moilioncircle.redis.replicator.rdb.RdbValueVisitor;
 import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
+import com.moilioncircle.redis.replicator.rdb.skip.SkipRdbValueVisitor;
 import com.moilioncircle.redis.replicator.util.Strings;
 
 /**

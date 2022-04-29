@@ -1,3 +1,7 @@
+### 0.9.1
+
+Support for redis 7.0-GA.  
+
 ### 0.9.0
 
 Fix `redis sentinel` auth and ssl bug.  

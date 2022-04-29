@@ -102,6 +102,16 @@ public class BackupRdbVisitor extends AbstractRdtRdbVisitor {
             listener.setGuard(Guard.SAVE);
         }
     }
+    
+    @Override
+    public Event applyFunction2(RedisInputStream in, int version) throws IOException {
+        listener.setGuard(Guard.DRAIN);
+        try {
+            return super.applyFunction2(in, version);
+        } finally {
+            listener.setGuard(Guard.SAVE);
+        }
+    }
 
     @Override
     public DB applySelectDB(RedisInputStream in, int version) throws IOException {

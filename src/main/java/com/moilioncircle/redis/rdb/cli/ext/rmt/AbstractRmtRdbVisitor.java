@@ -61,6 +61,12 @@ public abstract class AbstractRmtRdbVisitor extends BaseRdbVisitor {
 	}
 	
 	@Override
+	public Event applyFunction2(RedisInputStream in, int version) throws IOException {
+		DumpFunction function = valueVisitor.applyFunction2(in, version);
+		return function;
+	}
+	
+	@Override
 	protected Event doApplyString(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
 		DumpKeyValuePair dump = new DumpKeyValuePair();
 		dump.setKey(key);

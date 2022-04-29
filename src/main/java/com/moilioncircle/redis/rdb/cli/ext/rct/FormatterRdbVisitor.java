@@ -17,6 +17,7 @@
 package com.moilioncircle.redis.rdb.cli.ext.rct;
 
 import static com.moilioncircle.redis.replicator.Constants.RDB_OPCODE_FUNCTION;
+import static com.moilioncircle.redis.replicator.Constants.RDB_OPCODE_FUNCTION2;
 
 import java.io.IOException;
 
@@ -84,6 +85,11 @@ public class FormatterRdbVisitor extends BaseRdbVisitor {
     @Override
     public Event applyFunction(RedisInputStream in, int version) throws IOException {
         return formatter.applyFunction(replicator, in, version, RDB_OPCODE_FUNCTION);
+    }
+    
+    @Override
+    public Event applyFunction2(RedisInputStream in, int version) throws IOException {
+        return formatter.applyFunction2(replicator, in, version, RDB_OPCODE_FUNCTION2);
     }
 
     @Override

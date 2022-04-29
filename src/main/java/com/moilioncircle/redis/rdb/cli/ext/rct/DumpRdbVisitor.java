@@ -22,6 +22,7 @@ import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAI
 import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAINER_PLAIN;
 import static com.moilioncircle.redis.replicator.Constants.RDB_LOAD_NONE;
 import static com.moilioncircle.redis.replicator.Constants.RDB_OPCODE_FUNCTION;
+import static com.moilioncircle.redis.replicator.Constants.RDB_OPCODE_FUNCTION2;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_HASH;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_LIST;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET;
@@ -82,6 +83,23 @@ public class DumpRdbVisitor extends AbstractRctRdbVisitor {
                 try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
                     listener.write((byte) RDB_OPCODE_FUNCTION);
                     super.applyFunction(in, version);
+                }
+                Protocols.functionRestore(this.out, out.toByteBuffers(), replace);
+                return new DumpFunction();
+            }
+        }
+    }
+    
+    @Override
+    public Event applyFunction2(RedisInputStream in, int version) throws IOException {
+        version = getVersion(version);
+        if (version < 10 /* since redis rdb version 10 */) {
+            return super.applyFunction2(in, version);
+        } else {
+            try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
+                try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
+                    listener.write((byte) RDB_OPCODE_FUNCTION2);
+                    super.applyFunction2(in, version);
                 }
                 Protocols.functionRestore(this.out, out.toByteBuffers(), replace);
                 return new DumpFunction();
