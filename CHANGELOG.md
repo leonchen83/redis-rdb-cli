@@ -1,6 +1,7 @@
 ### 0.9.1
 
 Support for redis 7.0-GA.  
+Fix `listpack` decode bug.  
 
 ### 0.9.0
 
