@@ -648,7 +648,7 @@ User should follow the steps below to implement a sink service.
         <dependency>
             <groupId>com.moilioncircle</groupId>
             <artifactId>redis-replicator</artifactId>
-            <version>[3.6.3, )</version>
+            <version>[3.6.4, )</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
