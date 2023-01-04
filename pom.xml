@@ -70,7 +70,7 @@
         <dependency>
             <groupId>com.moilioncircle</groupId>
             <artifactId>redis-replicator</artifactId>
-            <version>3.6.4</version>
+            <version>3.6.5</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -87,12 +87,12 @@
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
-            <version>4.1.1</version>
+            <version>4.3.1</version>
         </dependency>
         <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
-            <version>4.6.3</version>
+            <version>4.7.0</version>
         </dependency>
         <dependency>
             <groupId>org.jline</groupId>
@@ -102,12 +102,12 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.36</version>
+            <version>2.0.6</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-            <version>2.17.2</version>
+            <artifactId>log4j-slf4j2-impl</artifactId>
+            <version>2.19.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -116,9 +116,14 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.19.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.influxdb</groupId>
             <artifactId>influxdb-java</artifactId>
-            <version>2.22</version>
+            <version>2.23</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -142,12 +147,12 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-jar-plugin</artifactId>
-                        <version>3.2.0</version>
+                        <version>3.3.0</version>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
-                        <version>3.8.1</version>
+                        <version>3.10.1</version>
                         <configuration>
                             <source>${maven.compiler.source}</source>
                             <target>${maven.compiler.target}</target>
@@ -157,7 +162,7 @@
                     <plugin>
                         <groupId>pl.project13.maven</groupId>
                         <artifactId>git-commit-id-plugin</artifactId>
-                        <version>4.0.5</version>
+                        <version>4.9.10</version>
                         <executions>
                             <execution>
                                 <id>get-the-git-infos</id>
@@ -211,7 +216,7 @@
                     </plugin>
                     <plugin>
                         <artifactId>maven-assembly-plugin</artifactId>
-                        <version>3.3.0</version>
+                        <version>3.4.2</version>
                         <configuration>
                             <finalName>${project.artifactId}</finalName>
                             <descriptors>
@@ -238,12 +243,12 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-jar-plugin</artifactId>
-                        <version>3.2.0</version>
+                        <version>3.3.0</version>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
-                        <version>3.8.1</version>
+                        <version>3.10.1</version>
                         <configuration>
                             <source>${maven.compiler.source}</source>
                             <target>${maven.compiler.target}</target>
@@ -253,7 +258,7 @@
                     <plugin>
                         <groupId>pl.project13.maven</groupId>
                         <artifactId>git-commit-id-plugin</artifactId>
-                        <version>4.0.5</version>
+                        <version>4.9.10</version>
                         <executions>
                             <execution>
                                 <id>get-the-git-infos</id>
@@ -304,7 +309,7 @@
                     </plugin>
                     <plugin>
                         <artifactId>maven-assembly-plugin</artifactId>
-                        <version>3.3.0</version>
+                        <version>3.4.2</version>
                         <configuration>
                             <finalName>${project.artifactId}</finalName>
                             <descriptors>
@@ -331,12 +336,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.3.0</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.10.1</version>
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
@@ -346,7 +351,7 @@
             <plugin>
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
-                <version>4.0.5</version>
+                <version>4.9.10</version>
                 <executions>
                     <execution>
                         <id>get-the-git-infos</id>
@@ -372,7 +377,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.4.2</version>
                 <configuration>
                     <finalName>${project.artifactId}</finalName>
                     <descriptors>

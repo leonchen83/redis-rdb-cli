@@ -1,3 +1,8 @@
+### 0.9.2
+
+Fix Lzf compress bug.  
+Upgrade dependencies.  
+
 ### 0.9.1
 
 Support for redis 7.0-GA.  
