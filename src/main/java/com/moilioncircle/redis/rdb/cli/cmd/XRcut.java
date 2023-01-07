@@ -56,6 +56,7 @@ import picocli.CommandLine;
 		customSynopsis = {
 				"Usage: rcut [-hV] -s <source> -r <file> -a <file>",
 		},
+		description = "Description: Cut rdb preamble data from the aof and rdb snapshots.",
 		footer = {"%nExamples:",
 				"  rcut -s ./aof-use-rdb-preamble.aof -r ./dump.rdb -a ./appendonly.aof"})
 public class XRcut implements Callable<Integer> {

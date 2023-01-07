@@ -60,6 +60,7 @@ import picocli.CommandLine.Spec;
 				"       | -m <file>...) -o <file> [-d <db>...] [-k <regex>...]",
 				"       [-t <type>...]"
 		},
+		description = "Description: Backup, split and concatenate rdb snapshots files.",
 		footer = {"%nExamples:",
 				"  rdt -b ./dump.rdb -o ./dump.rdb1 -d 0 1",
 				"  rdt -b ./dump.rdb -o ./dump.rdb1 -d 0 1 -g 3",

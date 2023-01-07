@@ -157,6 +157,7 @@ import picocli.CommandLine.Spec;
 		customSynopsis = {
 				"Usage: rst [-hV] -s <uri> (-m <uri> | -c <conf>) [-d <db>...] [-rl]"
 		},
+		description = "Description: Sync the data to Redis Standalone or Cluster using rdb snapshot mechanism and also follow all real-time changes.",
 		footer = {"%nExamples:",
 				"  rst -s redis://127.0.0.1:6379 -c ./nodes.conf -r",
 				"  rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0"})
