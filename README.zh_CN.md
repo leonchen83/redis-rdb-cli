@@ -83,6 +83,9 @@ $ bash-5.1# rct -V
 
 Usage: rmonitor [-hV] -s <uri> [-n <name>]
 
+Description: Monitor Redis in Standalone, Cluster and Sentinel mode using
+Influxdb and Grafana via Docker Compose.
+
 Options:
   -h, --help           Show this help message and exit.
   -n, --name <name>    Monitor name.
@@ -99,6 +102,9 @@ Examples:
 Usage: rct [-hV] -f <format> -s <source> -o <file> [-e <escape>]
        [-d <db>...] [-k <regex>...>] [-t <type>...] [-b <bytes>]
        [-l <n>] [-r]
+
+Description: Convert rdb snapshot to other formats. Analyze memory usage by
+keys.
 
 Options:
   -b, --bytes <bytes>     Limit memory output(--format mem) to keys
@@ -144,6 +150,9 @@ Examples:
 Usage: rmt [-hV] -s <source> (-m <uri> | -c <conf>) [-d <db>...]
        [-k <regex>...] [-t <type>...] [-rl]
 
+Description: Migrate the data to Redis Standalone or Cluster using rdb snapshot
+mechanism.
+
 Options:
   -c, --config <conf>     Migrate data to cluster via redis cluster's
                           <nodes.conf> file, if specified, no need to
@@ -184,6 +193,8 @@ Examples:
 Usage: rdt [-hV] (-b <source> [-g <db>] | -s <source> -c <conf>
        | -m <file>...) -o <file> [-d <db>...] [-k <regex>...]
        [-t <type>...]
+
+Description: Backup, split and concatenate rdb snapshots files.
 
 Options:
   -b, --backup <source>   Backup <source> to local rdb file. eg:
@@ -230,6 +241,9 @@ Examples:
 
 Usage: rst [-hV] -s <uri> (-m <uri> | -c <conf>) [-d <db>...] [-rl]
 
+Description: Sync the data to Redis Standalone or Cluster using rdb snapshot
+mechanism and also follow all real-time changes.
+
 Options:
   -c, --config <conf>   Migrate data to cluster via redis cluster's
                         <nodes.conf> file, if specified, no need to
@@ -260,6 +274,8 @@ Examples:
 
 Usage: ret [-hV] -s <uri> [-c <conf>] [-p <parser>] -n <sink>
 
+Description: Run your own extension plugin.
+
 Options:
   -c, --config <conf>     External config file, if not specified,
                           default value is null.
@@ -283,11 +299,13 @@ Examples:
 
 Usage: rcut [-hV] -s <source> -r <file> -a <file>
 
+Description: Split rdb preamble data to the aof and rdb snapshots.
+
 Options:
   -a, --aof <file>        Output aof file.
   -h, --help              Show this help message and exit.
   -r, --rdb <file>        Output rdb file.
-  -s, --source <source>   Source file that be cutted. the file
+  -s, --source <source>   Source file that be cut. the file
                           format MUST BE aof-use-rdb-preamble.
                           eg: /path/to/appendonly.aof
   -V, --version           Print version information and exit.
@@ -843,6 +861,7 @@ $ rct -f test -s redis://127.0.0.1:6379 -o ./out.csv -t string -d 0 -e json
 * [Jintao Zhang](https://github.com/tao12345666333)
 * [Maz Ahmadi](https://github.com/cmdshepard)
 * [Anish Karandikar](https://github.com/anishkny)
+* [Air](https://github.com/air3ijai)
 * 特别感谢[Kater Technologies](https://www.kater.com/)
 
 ## Supported by IntelliJ IDEA

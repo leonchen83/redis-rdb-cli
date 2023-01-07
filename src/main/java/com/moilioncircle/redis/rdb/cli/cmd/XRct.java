@@ -57,7 +57,7 @@ import picocli.CommandLine.Spec;
 				"       [-d <db>...] [-k <regex>...>] [-t <type>...] [-b <bytes>]",
 				"       [-l <n>] [-r]"
 		},
-		description = "Description: Convert rdb snapshot to other formats. Analyze memory usage by keys.",
+		description = "%nDescription: Convert rdb snapshot to other formats. Analyze memory usage by keys.",
 		footer = {"%nExamples:",
 				"  rct -f dump -s ./dump.rdb -o ./appendonly.aof -r",
 				"  rct -f resp -s redis://127.0.0.1:6379 -o ./target.aof -d 0 1",

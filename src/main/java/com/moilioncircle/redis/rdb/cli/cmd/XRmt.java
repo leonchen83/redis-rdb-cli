@@ -70,7 +70,7 @@ import picocli.CommandLine.Spec;
 				"Usage: rmt [-hV] -s <source> (-m <uri> | -c <conf>) [-d <db>...]",
 				"       [-k <regex>...] [-t <type>...] [-rl]"
 		},
-		description = "Description: Migrate the data to Redis Standalone or Cluster using rdb snapshot mechanism.",
+		description = "%nDescription: Migrate the data to Redis Standalone or Cluster using rdb snapshot mechanism.",
 		footer = {"%nExamples:",
 				"  rmt -s ./dump.rdb -c ./nodes.conf -t string -r",
 				"  rmt -s ./dump.rdb -m redis://127.0.0.1:6380 -t list -d 0",

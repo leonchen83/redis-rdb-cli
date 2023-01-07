@@ -38,7 +38,7 @@ import picocli.CommandLine;
 		customSynopsis = {
 				"Usage: rmonitor [-hV] -s <uri> [-n <name>]"
 		},
-		description = "Description: Monitor Redis in Standalone, Cluster and Sentinel mode using Influx and Grafana via Docker Compose.",
+		description = "%nDescription: Monitor Redis in Standalone, Cluster and Sentinel mode using Influxdb and Grafana via Docker Compose.",
 		footer = {"%nExamples:",
 				"  rmonitor -s redis://127.0.0.1:6379 -n default"})
 public class XRMonitor implements Callable<Integer> {

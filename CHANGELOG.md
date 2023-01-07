@@ -1,3 +1,7 @@
+### 0.9.3
+
+Add command description.  
+
 ### 0.9.2
 
 Fix Lzf compress bug.  

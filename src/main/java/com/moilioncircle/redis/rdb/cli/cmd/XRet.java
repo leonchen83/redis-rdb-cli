@@ -57,7 +57,7 @@ import picocli.CommandLine.Spec;
 		customSynopsis = {
 				"Usage: ret [-hV] -s <uri> [-c <conf>] [-p <parser>] -n <sink>"
 		},
-		description = "Description: Run your own extension plugin.",
+		description = "%nDescription: Run your own extension plugin.",
 		footer = {"%nExamples:",
 				"  ret -s redis://127.0.0.1:6379 -c ./config.conf -n example",
 				"  ret -s redis://127.0.0.1:6379 -c ./config.conf -p dump -n example"})
