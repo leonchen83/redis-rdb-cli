@@ -217,7 +217,7 @@ public class XEndpoint extends AbstractEndpoint implements Closeable {
             for (int i = 0; i < count; i++) {
                 RedisObject r = protocol.parse();
                 if (r != null && r.type.isError()) {
-                    logger.error(r.getString());
+                    logger.error("failure[respond] [{}]", r.getString());
                     if (statistics) MONITOR.add(ENDPOINT_FAILURE, "respond", 1);
                 } else {
                     if (statistics) MONITOR.add(ENDPOINT_SUCCESS, address, 1);

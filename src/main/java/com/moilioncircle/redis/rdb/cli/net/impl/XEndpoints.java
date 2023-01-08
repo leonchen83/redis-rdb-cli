@@ -188,7 +188,7 @@ public class XEndpoints implements Closeable {
         
         // 2 if all endpoints failed exit.
         if (lines == null) {
-            logger.error("can't connect to any of cluster nodes");
+            logger.error("failure[failed] [can't connect to any of cluster nodes]");
             return;
         }
         
