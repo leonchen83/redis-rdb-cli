@@ -627,6 +627,22 @@ public class Configure {
         this.monitorRefreshInterval = monitorRefreshInterval;
     }
     
+    public boolean isEnableScan() {
+        return enableScan;
+    }
+    
+    public void setEnableScan(boolean enableScan) {
+        this.enableScan = enableScan;
+    }
+    
+    public int getScanStep() {
+        return scanStep;
+    }
+    
+    public void setScanStep(int scanStep) {
+        this.scanStep = scanStep;
+    }
+    
     public Configuration merge(RedisURI uri, boolean source) {
         Configuration base;
         if (uri != null) {
