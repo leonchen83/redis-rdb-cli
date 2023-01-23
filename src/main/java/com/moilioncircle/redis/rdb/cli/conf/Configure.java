@@ -281,6 +281,16 @@ public class Configure {
      */
     private int monitorRefreshInterval = 15000;
     
+    /**
+     * enable redis scan mode
+     */
+    private boolean enableScan = false;
+    
+    /**
+     * scan step
+     */
+    private int scanStep = 512;
+    
     public int getBatchSize() {
         return batchSize;
     }
@@ -642,6 +652,8 @@ public class Configure {
         conf.setAsyncCachedBytes(this.asyncCacheSize);
         conf.setVerbose(this.verbose);
         conf.setHeartbeatPeriod(this.heartbeat);
+        conf.setEnableScan(this.enableScan);
+        conf.setScanStep(this.scanStep);
 
         if (conf.isSsl()) {
             RedisSslContextFactory factory = new RedisSslContextFactory();
@@ -711,6 +723,10 @@ public class Configure {
     
         conf.monitorRefreshInterval = getInt(conf, "monitor_refresh_interval", 15000, true);
         
+        // scan
+        conf.enableScan = getBool(conf, "enable_scan", false, true);
+        conf.scanStep = getInt(conf, "scan_step", 512, true);
+        
         // export
         conf.quote = (byte) getString(conf, "quote", "\"", true).charAt(0);
         conf.delimiter = (byte) getString(conf, "delimiter", ",", true).charAt(0);
@@ -778,7 +794,7 @@ public class Configure {
             configuration.setHeartbeatPeriod(getInt(parameters.get("heartbeatPeriod"), 1000));
         }
         if (parameters.containsKey("useDefaultExceptionListener")) {
-            configuration.setUseDefaultExceptionListener(getBool(parameters.get("useDefaultExceptionListener"), false));
+            configuration.setUseDefaultExceptionListener(getBool(parameters.get("useDefaultExceptionListener"), true));
         }
         if (parameters.containsKey("ssl")) {
             configuration.setSsl(getBool(parameters.get("ssl"), false));
@@ -792,6 +808,15 @@ public class Configure {
         if (parameters.containsKey("replOffset")) {
             configuration.setReplOffset(getLong(parameters.get("replOffset"), -1L));
         }
+    
+        // scan
+        if (parameters.containsKey("enableScan")) {
+            configuration.setEnableScan(getBool(parameters.get("enableScan"), false));
+        }
+        if (parameters.containsKey("scanStep")) {
+            configuration.setScanStep(getInt(parameters.get("scanStep"), 512));
+        }
+        
         // redis 6
         return configuration;
     }
@@ -937,6 +962,8 @@ public class Configure {
                 ", exportFileFormat=" + exportFileFormat +
                 ", enableProgressBar=" + enableProgressBar +
                 ", monitorRefreshInterval=" + monitorRefreshInterval +
+                ", enableScan=" + enableScan +
+                ", scanStep=" + scanStep +
                 '}';
     }
 }

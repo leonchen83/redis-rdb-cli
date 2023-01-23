@@ -29,6 +29,7 @@ import com.moilioncircle.redis.replicator.ExceptionListener;
 import com.moilioncircle.redis.replicator.RedisAofReplicator;
 import com.moilioncircle.redis.replicator.RedisMixReplicator;
 import com.moilioncircle.redis.replicator.RedisRdbReplicator;
+import com.moilioncircle.redis.replicator.RedisScanReplicator;
 import com.moilioncircle.redis.replicator.RedisSocketReplicator;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.ReplFilter;
@@ -99,7 +100,11 @@ public class XRedisReplicator implements Replicator {
                     throw new UnsupportedOperationException(uri.getFileType().toString());
             }
         } else {
-            this.replicator = new RedisSocketReplicator(uri.getHost(), uri.getPort(), configuration);
+            if (configuration.isEnableScan()) {
+                this.replicator = new RedisScanReplicator(uri.getHost(), uri.getPort(), configuration);
+            } else {
+                this.replicator = new RedisSocketReplicator(uri.getHost(), uri.getPort(), configuration);
+            }
         }
         this.replicator.addExceptionListener((r, t, e) -> {
             throw new RuntimeException(t.getMessage(), t);

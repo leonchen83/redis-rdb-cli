@@ -70,7 +70,7 @@
         <dependency>
             <groupId>com.moilioncircle</groupId>
             <artifactId>redis-replicator</artifactId>
-            <version>3.6.5</version>
+            <version>3.7.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>

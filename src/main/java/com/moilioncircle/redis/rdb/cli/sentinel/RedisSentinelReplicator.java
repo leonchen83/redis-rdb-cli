@@ -32,6 +32,7 @@ import com.moilioncircle.redis.rdb.cli.util.XThreadFactory;
 import com.moilioncircle.redis.replicator.CloseListener;
 import com.moilioncircle.redis.replicator.Configuration;
 import com.moilioncircle.redis.replicator.ExceptionListener;
+import com.moilioncircle.redis.replicator.RedisScanReplicator;
 import com.moilioncircle.redis.replicator.RedisSocketReplicator;
 import com.moilioncircle.redis.replicator.Replicator;
 import com.moilioncircle.redis.replicator.Replicators;
@@ -57,7 +58,7 @@ public class RedisSentinelReplicator implements Replicator, SentinelListener {
 
     private HostAndPort prev;
     private Sentinel sentinel;
-    private RedisSocketReplicator replicator;
+    private Replicator replicator;
     protected final ExecutorService executors = newSingleThreadExecutor(new XThreadFactory("sentinel"));
 
     public RedisSentinelReplicator(RedisSentinelURI uri, Configuration configuration) {
@@ -68,7 +69,12 @@ public class RedisSentinelReplicator implements Replicator, SentinelListener {
     private void initialize(RedisSentinelURI uri, Configuration configuration) {
         Objects.requireNonNull(uri);
         Objects.requireNonNull(configuration);
-        this.replicator = new RedisSocketReplicator("", 1, configuration);
+        if (configuration.isEnableScan()) {
+            this.replicator = new RedisScanReplicator("", 1, configuration);
+        } else {
+            this.replicator = new RedisSocketReplicator("", 1, configuration);
+        }
+       
         this.sentinel = new DefaultSentinel(uri, configuration);
         this.sentinel.addSentinelListener(this);
     }
