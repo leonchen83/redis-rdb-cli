@@ -162,9 +162,9 @@ public class XRmt implements Callable<Integer> {
 							bar.react(b.length);
 						});
 					}
-						
+					
 					if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
-						Replicators.closeQuietly(rep);
+						Replicators.closeQuietly(r);
 					}
 					
 				});

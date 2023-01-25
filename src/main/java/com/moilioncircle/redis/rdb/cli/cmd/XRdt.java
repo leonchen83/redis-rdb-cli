@@ -171,7 +171,8 @@ public class XRdt implements Callable<Integer> {
 			List<Tuple2<Replicator, String>> list = action.dress(configure, arg);
 			
 			for (Tuple2<Replicator, String> tuple : list) {
-				tuple.getV1().addEventListener((rep, event) -> {
+				Replicator r = tuple.getV1();
+				r.addEventListener((rep, event) -> {
 					if (event instanceof PreRdbSyncEvent) {
 						rep.addRawByteListener(b -> {
 							bar.react(b.length, tuple.getV2());
@@ -179,11 +180,11 @@ public class XRdt implements Callable<Integer> {
 					}
 					
 					if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
-						Replicators.closeQuietly(rep);
+						Replicators.closeQuietly(r);
 					}
 					
 				});
-				tuple.getV1().open();
+				r.open();
 			}
 		}
 		
