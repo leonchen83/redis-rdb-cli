@@ -35,6 +35,9 @@ import com.moilioncircle.redis.rdb.cli.ext.XRedisReplicator;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
 import com.moilioncircle.redis.rdb.cli.util.XThreadFactory;
 import com.moilioncircle.redis.replicator.Replicator;
+import com.moilioncircle.redis.replicator.Replicators;
+import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
+import com.moilioncircle.redis.replicator.event.PreCommandSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 
 import picocli.CommandLine.Command;
@@ -100,7 +103,14 @@ public class XRet implements Callable<Integer> {
 						bar.react(b.length);
 					});
 				}
+				
+				if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
+					if (rep.getConfiguration().isEnableScan()) {
+						Replicators.closeQuietly(r);
+					}
+				}
 			});
+			
 			r.addEventListener(new AsyncEventListener(sinkService, r, configure.getMigrateThreads(), new XThreadFactory("sync-worker")));
 			parserService.wrap(r).open();
 		}

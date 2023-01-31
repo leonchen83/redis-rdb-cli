@@ -41,6 +41,7 @@ import com.moilioncircle.redis.rdb.cli.util.Collections;
 import com.moilioncircle.redis.rdb.cli.util.ProgressBar;
 import com.moilioncircle.redis.replicator.RedisURI;
 import com.moilioncircle.redis.replicator.Replicator;
+import com.moilioncircle.redis.replicator.Replicators;
 import com.moilioncircle.redis.replicator.cmd.CommandName;
 import com.moilioncircle.redis.replicator.cmd.parser.AppendParser;
 import com.moilioncircle.redis.replicator.cmd.parser.BLMoveParser;
@@ -133,6 +134,8 @@ import com.moilioncircle.redis.replicator.cmd.parser.ZRemRangeByLexParser;
 import com.moilioncircle.redis.replicator.cmd.parser.ZRemRangeByRankParser;
 import com.moilioncircle.redis.replicator.cmd.parser.ZRemRangeByScoreParser;
 import com.moilioncircle.redis.replicator.cmd.parser.ZUnionStoreParser;
+import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
+import com.moilioncircle.redis.replicator.event.PreCommandSyncEvent;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.rdb.RdbVisitor;
 
@@ -235,6 +238,12 @@ public class XRst implements Callable<Integer> {
 						rep.addRawByteListener(b -> {
 							bar.react(b.length);
 						});
+					}
+					
+					if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
+						if (rep.getConfiguration().isEnableScan()) {
+							Replicators.closeQuietly(r);
+						}
 					}
 				});
 				
