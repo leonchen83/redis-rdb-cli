@@ -1,10 +1,7 @@
-### 0.9.4
-
-Add support for `SCAN` mode.   
-
 ### 0.9.3
 
 Add command description.  
+Add support for `SCAN` mode.
 
 ### 0.9.2
 
