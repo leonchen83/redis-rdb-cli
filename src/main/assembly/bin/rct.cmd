@@ -57,7 +57,9 @@ set CON_FILE=%CON_DIR%\redis-rdb-cli.conf
 set MAIN_CLASS=com.moilioncircle.redis.rdb.cli.Rct
 set RCT_OPS=-server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:+ExitOnOutOfMemoryError -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -Dlog4j.configurationFile="%LOG_FILE%" -Dcli.log.path="%LOG_DIR%" -Dconf="%CON_FILE%" -Drct.home="%RCT_HOME%" -Dsun.stderr.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.err.encoding=UTF-8 -Dfile.encoding=UTF-8
 
-"%JAVACMD%" %RCT_OPS% -cp %CLASS_PATH% %MAIN_CLASS% %*
+if %JVER% GEQ 900 set ADD_OPENS="--add-opens=java.base/java.lang.invoke=ALL-UNNAMED"
+
+"%JAVACMD%" %ADD_OPENS% %RCT_OPS% -cp %CLASS_PATH% %MAIN_CLASS% %*
 if ERRORLEVEL 1 goto error
 goto end
 

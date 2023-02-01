@@ -114,6 +114,13 @@
   ]
 },
 {
+  "name":"com.moilioncircle.redis.replicator.RedisScanReplicator",
+  "fields":[
+    {"name":"host", "allowWrite":true},
+    {"name":"port", "allowWrite":true}
+  ]
+},
+{
   "name":"com.moilioncircle.redis.replicator.io.RedisInputStream"
 },
 {
