@@ -864,6 +864,10 @@ $ rct -f test -s redis://127.0.0.1:6379 -o ./out.csv -t string -d 0 -e json
 * [Air](https://github.com/air3ijai)
 * 特别感谢[Kater Technologies](https://www.kater.com/)
 
+## Supported by 宁文君
+
+2023年1月27日，在这一天我的妈妈宁文君（1953-2023）离世了。她是一个慈祥严格又乐于助人的老太太，自己的退休金虽然不多，但每年也会给贫困山区捐衣物现金。她是支撑我写下这个工具的最大动力，每当我跟她说又有新的公司在用这个工具时，她都和我一样高兴并鼓励我继续维护下去，也一直鼓励我参加各种技术分享活动。虽然我并没有取得多少成就，但她一直为我自豪。可能很多年后宁文君这个名字会被遗忘，但我希望 Github 会再有将数据备份到北极的活动，这样这个名字就会保存一千年。愿逝者安息。
+
 ## Supported by IntelliJ IDEA
 
 [IntelliJ IDEA](https://www.jetbrains.com/?from=redis-rdb-cli) is a Java integrated development environment (IDE) for developing computer software.  

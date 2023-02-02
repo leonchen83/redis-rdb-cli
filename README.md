@@ -864,6 +864,11 @@ $ rct -f test -s redis://127.0.0.1:6379 -o ./out.csv -t string -d 0 -e json
 * [Air](https://github.com/air3ijai)
 * Special thanks to [Kater Technologies](https://www.kater.com/)
 
+## Supported by 宁文君
+
+27 January 2023, A sad day that I lost my mother 宁文君, She was encouraging and supporting me in developing this tool. Every time a company uses this tool, she got excited like a child and encouraged me to keep going.
+Without her I couldn't have maintained this tool for so many years. Even I didn't achieve much but she is still proud of me, R.I.P and hope God bless her.
+
 ## Supported by IntelliJ IDEA
 
 [IntelliJ IDEA](https://www.jetbrains.com/?from=redis-rdb-cli) is a Java integrated development environment (IDE) for developing computer software.  
