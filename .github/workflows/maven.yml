@@ -20,7 +20,7 @@ jobs:
         with:
           redis-version: '6.x'
       - uses: actions/checkout@v3
-      - name: Set up JDK 1.8
+      - name: Set up JDK 8
         uses: actions/setup-java@v3
         with:
           java-version: '8'

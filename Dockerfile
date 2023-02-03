@@ -1,10 +1,10 @@
-FROM maven:3 AS builder
+FROM maven:3.8-openjdk-11-slim AS builder
 
 WORKDIR /app
 COPY . /app
 RUN mvn clean install -Dmaven.test.skip=true
 
-FROM taobeier/openjdk
+FROM adoptopenjdk/openjdk11:alpine
 COPY --from=builder /app/target/redis-rdb-cli-release.zip /tmp/redis-rdb-cli-release.zip
 WORKDIR /app
 # because of the cli has set shebang
