@@ -8,11 +8,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: ayltai/setup-graalvm@v1
+      - uses: graalvm/setup-graalvm@v1
         with:
-          java-version: 11
-          graalvm-version: 21.1.0
-          native-image: true
+          java-version: '11'
+          version: 'latest'
+          components: 'native-image'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Maven Build
         run:
           mvn clean install -Pstatic -DskipTests

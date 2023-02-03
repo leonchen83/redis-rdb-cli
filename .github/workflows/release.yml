@@ -22,34 +22,15 @@ jobs:
         echo "RELEASE_TAG=`cat ./src/main/resources/.version`" >> $GITHUB_ENV
     - name: Create Release
       id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: ncipollo/release-action@v1
       with:
-        tag_name: ${{ env.RELEASE_TAG }}
-        release_name: ${{ env.RELEASE_TAG }}
+        allowUpdates: true
+        artifacts: ./target/redis-rdb-cli-release.tar.gz,./target/redis-rdb-cli-release.zip
+        tag: ${{ env.RELEASE_TAG }}
+        name: ${{ env.RELEASE_TAG }}
         draft: false
         prerelease: false
-    - name: Upload Gzip Asset
-      id: upload-gzip-asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} 
-        asset_path: ./target/redis-rdb-cli-release.tar.gz
-        asset_name: redis-rdb-cli-release.tar.gz
-        asset_content_type: application/gzip
-    - name: Upload Zip Asset
-      id: upload-zip-asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} 
-        asset_path: ./target/redis-rdb-cli-release.zip
-        asset_name: redis-rdb-cli-release.zip
-        asset_content_type: application/zip
+        token: ${{ secrets.GITHUB_TOKEN }}
     - name: Login to Docker Hub
       uses: docker/login-action@v2
       with:
