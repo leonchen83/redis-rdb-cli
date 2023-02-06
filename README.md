@@ -659,6 +659,14 @@ $ rct -f test -s redis://127.0.0.1:6379 -o ./out.csv -t string -d 0 -e json
 * [Anish Karandikar](https://github.com/anishkny)
 * [Air](https://github.com/air3ijai)
 * Special thanks to [Kater Technologies](https://www.kater.com/)
+  
+## Consulting
+
+Commercial support for `redis-rdb-cli` is available. The following services are currently available:
+* Onsite consulting. $10,000 per day
+* Onsite training. $10,000 per day
+
+You may also contact `Baoyi Chen` directly, mail to [chen.bao.yi@gmail.com](mailto:chen.bao.yi@gmail.com).
 
 ## Supported by 宁文君
 
