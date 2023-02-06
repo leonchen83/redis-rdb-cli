@@ -666,7 +666,7 @@ $ rct -f test -s redis://127.0.0.1:6379 -o ./out.csv -t string -d 0 -e json
 * 现场咨询. 50,000元/天
 * 现场培训. 50,000元/天
 
-可以直接联系`陈宝仪`, 发送邮件至 [chen.bao.yi@gmail.com](mailto:chen.bao.yi@gmail.com).
+可以直接联系`陈宝仪`, 发送邮件至 [chen.bao.yi@gmail.com](mailto:chen.bao.yi@qq.com).
 
 ## Supported by 宁文君
 
