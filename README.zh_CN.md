@@ -131,17 +131,17 @@ $ rct -f resp -s /path/to/dump.rdb -o /path/to/appendonly.aof
 $ rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -r
 ```
 
+### 同步单台redis的数据到集群
+```shell
+$ rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:30001 -r -d 0
+```
+
 ### 在rst命令中处理主从同步的无限循环
 
 ```shell
 # 在源redis中设置 client-output-buffer-limit
 $ redis-cli config set client-output-buffer-limit "slave 0 0 0"
 $ rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -r
-```
-
-### 同步单台redis的数据到集群
-```shell
-$ rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:30001 -r -d 0
 ```
 
 ### 同步rdb到远端redis
