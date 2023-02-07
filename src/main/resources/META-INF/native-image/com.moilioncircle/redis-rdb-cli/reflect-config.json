@@ -107,16 +107,16 @@
   "name":"com.moilioncircle.redis.rdb.cli.util.CloseableThread"
 },
 {
-  "name":"com.moilioncircle.redis.replicator.RedisSocketReplicator",
+  "name":"com.moilioncircle.redis.replicator.RedisScanReplicator",
   "fields":[
     {"name":"host", "allowWrite":true}, 
     {"name":"port", "allowWrite":true}
   ]
 },
 {
-  "name":"com.moilioncircle.redis.replicator.RedisScanReplicator",
+  "name":"com.moilioncircle.redis.replicator.RedisSocketReplicator",
   "fields":[
-    {"name":"host", "allowWrite":true},
+    {"name":"host", "allowWrite":true}, 
     {"name":"port", "allowWrite":true}
   ]
 },
@@ -447,6 +447,10 @@
   "methods":[{"name":"<init>","parameterTypes":["java.lang.String","java.lang.String"] }]
 },
 {
+  "name":"java.util.ServiceLoader",
+  "methods":[{"name":"load","parameterTypes":["java.lang.Class","java.lang.ClassLoader"] }]
+},
+{
   "name":"java.util.logging.LogManager",
   "methods":[{"name":"getLoggingMXBean","parameterTypes":[] }]
 },
@@ -726,6 +730,9 @@
   "name":"org.apache.logging.log4j.core.async.AsyncLoggerConfig$RootLogger"
 },
 {
+  "name":"org.apache.logging.log4j.core.async.AsyncWaitStrategyFactoryConfig"
+},
+{
   "name":"org.apache.logging.log4j.core.async.DisruptorBlockingQueueFactory"
 },
 {
@@ -980,6 +987,9 @@
 },
 {
   "name":"org.apache.logging.log4j.core.filter.MarkerFilter"
+},
+{
+  "name":"org.apache.logging.log4j.core.filter.MutableThreadContextMapFilter"
 },
 {
   "name":"org.apache.logging.log4j.core.filter.NoMarkerFilter"
