@@ -164,7 +164,7 @@ public class XRmt implements Callable<Integer> {
 					}
 					
 					if (event instanceof PostRdbSyncEvent || event instanceof PreCommandSyncEvent) {
-						Replicators.closeQuietly(r);
+						Replicators.closeQuietly(rep);
 					}
 					
 				});

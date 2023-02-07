@@ -72,7 +72,7 @@ public class RedisSentinelReplicator implements Replicator, SentinelListener {
         Objects.requireNonNull(uri);
         Objects.requireNonNull(configuration);
         if (configuration.isEnableScan()) {
-            this.replicator = new RedisScanReplicator("", 1, configuration);
+            this.replicator = new XRedisScanReplicator("", 1, configuration);
             addEventListener(new EventListener() {
                 @Override
                 public void onEvent(Replicator replicator, Event event) {
@@ -82,7 +82,7 @@ public class RedisSentinelReplicator implements Replicator, SentinelListener {
                 }
             });
         } else {
-            this.replicator = new RedisSocketReplicator("", 1, configuration);
+            this.replicator = new XRedisSocketReplicator("", 1, configuration);
         }
        
         this.sentinel = new DefaultSentinel(uri, configuration);
@@ -227,5 +227,51 @@ public class RedisSentinelReplicator implements Replicator, SentinelListener {
     public void onClose(Sentinel sentinel) {
         Replicators.closeQuietly(replicator);
         terminateQuietly(executors, 0, MILLISECONDS);
+    }
+    
+    private class XRedisScanReplicator extends RedisScanReplicator {
+        
+        private XRedisScanReplicator(String host, int port, Configuration configuration) {
+            super(host, port, configuration);
+        }
+        
+        protected void doCloseListener(Replicator replicator) {
+            super.doCloseListener(RedisSentinelReplicator.this);
+        }
+        
+        protected void doEventListener(Replicator replicator, Event event) {
+            super.doEventListener(RedisSentinelReplicator.this, event);
+        }
+        
+        protected void doStatusListener(Replicator replicator, Status status) {
+            super.doStatusListener(RedisSentinelReplicator.this, status);
+        }
+        
+        protected void doExceptionListener(Replicator replicator, Throwable throwable, Event event) {
+            super.doExceptionListener(RedisSentinelReplicator.this, throwable, event);
+        }
+    }
+    
+    private class XRedisSocketReplicator extends RedisSocketReplicator {
+        
+        private XRedisSocketReplicator(String host, int port, Configuration configuration) {
+            super(host, port, configuration);
+        }
+        
+        protected void doCloseListener(Replicator replicator) {
+            super.doCloseListener(RedisSentinelReplicator.this);
+        }
+        
+        protected void doEventListener(Replicator replicator, Event event) {
+            super.doEventListener(RedisSentinelReplicator.this, event);
+        }
+        
+        protected void doStatusListener(Replicator replicator, Status status) {
+            super.doStatusListener(RedisSentinelReplicator.this, status);
+        }
+        
+        protected void doExceptionListener(Replicator replicator, Throwable throwable, Event event) {
+            super.doExceptionListener(RedisSentinelReplicator.this, throwable, event);
+        }
     }
 }
