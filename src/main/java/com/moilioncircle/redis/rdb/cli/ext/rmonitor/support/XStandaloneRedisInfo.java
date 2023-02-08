@@ -37,6 +37,7 @@ public class XStandaloneRedisInfo {
 	
 	private HostAndPort master;
 	private List<HostAndPort> slaves = new ArrayList<>();
+	private Map<HostAndPort, Long> replDelay = new HashMap<>();
 	private String masterStatus;
 	private String hostAndPort;
 	private String role;
@@ -80,6 +81,8 @@ public class XStandaloneRedisInfo {
 	private Double usedCpuUserChildren;
 	private Long expiredKeys;
 	private Long evictedKeys;
+	private Long backlogSize;
+	private Long masterOffset;
 	private Long slowLogLen;
 	private Long totalSlowLog;
 	private List<XSlowLog> slowLogs = new ArrayList<>();
@@ -523,6 +526,30 @@ public class XStandaloneRedisInfo {
 		this.diffTotalSlowLog = diffTotalSlowLog;
 	}
 	
+	public Map<HostAndPort, Long> getReplDelay() {
+		return replDelay;
+	}
+	
+	public void setReplDelay(Map<HostAndPort, Long> replDelay) {
+		this.replDelay = replDelay;
+	}
+	
+	public Long getBacklogSize() {
+		return backlogSize;
+	}
+	
+	public void setBacklogSize(Long backlogSize) {
+		this.backlogSize = backlogSize;
+	}
+	
+	public Long getMasterOffset() {
+		return masterOffset;
+	}
+	
+	public void setMasterOffset(Long masterOffset) {
+		this.masterOffset = masterOffset;
+	}
+	
 	public static XStandaloneRedisInfo valueOf(String info, String maxclients, long slowLogLen, RedisObject[] binaryLogs, String hostAndPort) {
 		Map<String, Map<String, String>> nextInfo = extract(info);
 		XStandaloneRedisInfo xinfo = new XStandaloneRedisInfo();
@@ -571,6 +598,9 @@ public class XStandaloneRedisInfo {
 		xinfo.usedCpuSysChildren = getDouble("CPU", "used_cpu_sys_children", nextInfo);
 		xinfo.usedCpuUserChildren = getDouble("CPU", "used_cpu_user_children", nextInfo);
 		
+		xinfo.backlogSize = getLong("Replication", "repl_backlog_size", nextInfo);
+		xinfo.masterOffset = getLong("Replication", "master_repl_offset", nextInfo);
+		
 		dbInfo(nextInfo, xinfo);
 		commandStatInfo(nextInfo, xinfo);
 		
@@ -578,9 +608,22 @@ public class XStandaloneRedisInfo {
 			int slaves = getInt("Replication", "connected_slaves", nextInfo);
 			for (int i = 0; i < slaves; i++) {
 				String[] slaveInfo = getString("Replication", "slave" + i, nextInfo).split(",");
-				String slaveHost = slaveInfo[0].split("=")[1];
-				int slavePort = Integer.parseInt(slaveInfo[1].split("=")[1]);
-				xinfo.slaves.add(new HostAndPort(slaveHost, slavePort));
+				String host = null;
+				int port = 0;
+				long offset = 0;
+				for (String inf : slaveInfo) {
+					String[] ary = inf.split("=");
+					if (ary[0].equals("ip")) {
+						host = ary[1];
+					} else if (ary[0].equals("port")) {
+						port = Integer.parseInt(ary[1]);
+					} else if (ary[0].equals("offset")) {
+						offset = Long.parseLong(ary[1]);
+					}
+				}
+				HostAndPort hp = new HostAndPort(host, port);
+				xinfo.slaves.add(hp);
+				xinfo.replDelay.put(hp, xinfo.masterOffset - offset);
 			}
 		} else {
 			String masterHost = getString("Replication", "master_host", nextInfo);
@@ -716,7 +759,11 @@ public class XStandaloneRedisInfo {
 	@Override
 	public String toString() {
 		return "XStandaloneRedisInfo{" +
-				"hostAndPort=" + hostAndPort +
+				"master=" + master +
+				", slaves=" + slaves +
+				", replDelay=" + replDelay +
+				", masterStatus='" + masterStatus + '\'' +
+				", hostAndPort='" + hostAndPort + '\'' +
 				", role='" + role + '\'' +
 				", uptimeInSeconds=" + uptimeInSeconds +
 				", redisVersion='" + redisVersion + '\'' +
@@ -758,11 +805,14 @@ public class XStandaloneRedisInfo {
 				", usedCpuUserChildren=" + usedCpuUserChildren +
 				", expiredKeys=" + expiredKeys +
 				", evictedKeys=" + evictedKeys +
+				", backlogSize=" + backlogSize +
+				", masterOffset=" + masterOffset +
 				", slowLogLen=" + slowLogLen +
 				", totalSlowLog=" + totalSlowLog +
 				", slowLogs=" + slowLogs +
 				", dbInfo=" + dbInfo +
 				", dbExpireInfo=" + dbExpireInfo +
+				", commandStats=" + commandStats +
 				", diffTotalSlowLog=" + diffTotalSlowLog +
 				", diffTotalSlowLogExecutionTime=" + diffTotalSlowLogExecutionTime +
 				", diffSlowLogs=" + diffSlowLogs +

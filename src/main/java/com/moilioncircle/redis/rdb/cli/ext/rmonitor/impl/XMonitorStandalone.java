@@ -159,7 +159,13 @@ public class XMonitorStandalone implements MonitorCommand {
 				for (HostAndPort hp : next.getSlaves()) {
 					monitor.set("connected_slaves", hostAndPort, name, role, hp.toString(), 1L);
 				}
+				for (Map.Entry<HostAndPort, Long> entry : next.getReplDelay().entrySet()) {
+					monitor.set("repl_delay", hostAndPort, name, role, entry.getKey().toString(), entry.getValue());
+				}
 			}
+			
+			setLong("repl_backlog_size", hostAndPort, name, role, next.getBacklogSize());
+			setLong("repl_master_offset", hostAndPort, name, role, next.getMasterOffset());
 			
 			if (next.getMaster() != null) {
 				monitor.set("connected_master", hostAndPort, name, role, next.getMaster().toString(), 1L);
