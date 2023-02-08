@@ -217,6 +217,11 @@
   "allDeclaredMethods":true
 },
 {
+  "name":"java.lang.ProcessBuilder$RedirectPipeImpl",
+  "fields":[{"name":"fd"}],
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"java.lang.ProcessHandle",
   "methods":[
     {"name":"current","parameterTypes":[] }, 
@@ -1399,6 +1404,18 @@
 {
   "name":"org.influxdb.dto.QueryResult$Series",
   "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.jline.terminal.impl.exec.ExecTerminalProvider",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.jline.terminal.impl.jansi.JansiTerminalProvider",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.jline.terminal.impl.jna.JnaTerminalProvider",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
