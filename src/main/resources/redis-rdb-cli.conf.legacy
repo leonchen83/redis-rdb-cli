@@ -241,7 +241,7 @@ source_keystore_pass=
 # SSL parameter
 # use java default truststore
 # 
-source_default_truststore=true
+source_default_truststore=false
 
 #
 # SSL parameter
@@ -270,7 +270,7 @@ target_keystore_pass=
 # SSL parameter
 # use java default truststore
 # 
-target_default_truststore=true
+target_default_truststore=false
 
 #
 # SSL parameter
@@ -305,7 +305,7 @@ export_meta=true
 # `rct -f mem -s ./dump.rdb -o ./dump.mem`
 # If this value is true. the exported data will with unit like B, kB, MB, GB, TB, PB, EB.
 #
-export_unit=false
+export_unit=true
 
 #
 # This parameter used in `rct` like the following
@@ -313,7 +313,7 @@ export_unit=false
 # If this value is true. the exported data show expiry as 'yyyy-MM-dd HH:mm:ss.SSS'
 # If this value is false. the exported data show expiry as unix timestamp.
 #
-export_format_date=false
+export_format_date=true
 
 #
 # This parameter used in `rct` like the following
