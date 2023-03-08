@@ -83,7 +83,7 @@ public class XRdt implements Callable<Integer> {
 		@ArgGroup(exclusive = false)
 		public Backup backup;
 		
-		@Option(names = {"-m", "--merge"}, arity = "1..*", required = true, paramLabel = "<file>", description = "Merge multi rdb files to one rdb file.", type = File.class)
+		@Option(names = {"-m", "--merge"}, arity = "1..*", required = true, paramLabel = "<file>", description = "Concat multi rdb files to one rdb file.", type = File.class)
 		public List<File> merge;
 	}
 	

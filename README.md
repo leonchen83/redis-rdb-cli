@@ -2,7 +2,7 @@
 
 <a href="https://www.buymeacoffee.com/leonchen83" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
 
-A tool that can parse, filter, split, merge rdb and analyze memory usage offline. It can also sync 2 redis data and allow user define there own sink service to migrate redis data to somewhere.
+A tool that can parse, filter, split, concat rdb and analyze memory usage offline. It can also sync 2 redis data and allow user define there own sink service to migrate redis data to somewhere.
 
 [![Java CI](https://github.com/leonchen83/redis-rdb-cli/actions/workflows/maven.yml/badge.svg)](https://github.com/leonchen83/redis-rdb-cli/actions/workflows/maven.yml)
 [![Gitter](https://badges.gitter.im/leonchen83/redis-rdb-cli.svg)](https://gitter.im/leonchen83/redis-rdb-cli?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
@@ -210,7 +210,7 @@ $ rdt -b /path/to/dump.rdb -o /path/to/filtered-dump.rdb -d 0 -t string
 $ rdt -s ./dump.rdb -c ./nodes.conf -o /path/to/folder -d 0
 ```
 
-### Merge multi rdb to one
+### Concat multi rdb to one
 
 ```shell
 $ rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
