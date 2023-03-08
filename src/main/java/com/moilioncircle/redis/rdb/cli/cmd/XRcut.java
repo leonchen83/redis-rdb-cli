@@ -82,7 +82,7 @@ public class XRcut implements Callable<Integer> {
 		RawByteListener rdbListener = new XRawByteListener(rdbStream);
 		RawByteListener aofListener = new XRawByteListener(aofStream);
 		
-		try (ProgressBar bar = ProgressBar.bar(-1, configure.isEnableProgressBar())) {
+		try (ProgressBar bar = ProgressBar.bar(configure.isEnableProgressBar())) {
 			
 			Replicator r = new RedisReplicator(source, FileType.MIXED, Configuration.defaultSetting());
 			

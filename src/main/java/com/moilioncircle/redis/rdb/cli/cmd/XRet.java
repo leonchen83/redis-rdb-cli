@@ -89,7 +89,7 @@ public class XRet implements Callable<Integer> {
 		
 		Configure configure = Configure.bind();
 		
-		try (ProgressBar bar = ProgressBar.bar(-1, configure.isEnableProgressBar())) {
+		try (ProgressBar bar = ProgressBar.bar(configure.isEnableProgressBar())) {
 			
 			Replicator r = new XRedisReplicator(source, configure);
 			r.setRdbVisitor(parserService.getRdbVisitor(r));

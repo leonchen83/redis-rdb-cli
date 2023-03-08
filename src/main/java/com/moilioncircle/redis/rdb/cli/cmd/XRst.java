@@ -201,7 +201,7 @@ public class XRst implements Callable<Integer> {
 			if (uri.getFileType() != null) {
 				throw new ParameterException(spec.commandLine(), "Invalid options: '--migrate=<uri>'");
 			}
-			try (ProgressBar bar = ProgressBar.bar(-1, configure.isEnableProgressBar())) {
+			try (ProgressBar bar = ProgressBar.bar(configure.isEnableProgressBar())) {
 				
 				Replicator r = new XRedisReplicator(source, configure);
 				r.setRdbVisitor(getRdbVisitor(r, configure, uri));
@@ -225,7 +225,7 @@ public class XRst implements Callable<Integer> {
 				throw new ParameterException(spec.commandLine(), "Invalid options: '--config=<config>'");
 			}
 			
-			try (ProgressBar bar = ProgressBar.bar(-1, configure.isEnableProgressBar())) {
+			try (ProgressBar bar = ProgressBar.bar(configure.isEnableProgressBar())) {
 				
 				Replicator r = new XRedisReplicator(source, configure);
 				r.setRdbVisitor(new ClusterRdbVisitor(r, configure, cluster(), null, readAllLines(path), replace));

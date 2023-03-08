@@ -156,7 +156,7 @@ public class XRdt implements Callable<Integer> {
 		}
 		
 		Configure configure = Configure.bind();
-		try (ProgressBar bar = ProgressBar.bar(-1, configure.isEnableProgressBar())) {
+		try (ProgressBar bar = ProgressBar.bar(configure.isEnableProgressBar())) {
 			
 			// bind args
 			Args.RdtArgs arg = new Args.RdtArgs();
