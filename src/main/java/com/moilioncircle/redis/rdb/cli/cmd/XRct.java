@@ -68,7 +68,7 @@ public class XRct implements Callable<Integer> {
 	@Spec
 	private CommandSpec spec;
 	
-	@Option(names = {"-f", "--format"}, required = true, description = {"Format to export. valid formats are json,", "jsonl, dump, diff, key, keyval, count, mem", "and resp"})
+	@Option(names = {"-f", "--format"}, required = true, description = {"Format to export. valid formats are json,", "jsonl, dump, diff, key, count, mem and resp"})
 	private String format;
 	
 	@Option(names = {"-s", "--source"}, required = true, description = {"Source file or uri. eg:", "/path/to/dump.rdb", "redis://host:port?authPassword=foobar", "redis:///path/to/dump.rdb."})

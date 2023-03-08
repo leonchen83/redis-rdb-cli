@@ -6,6 +6,5 @@
 *.count binary
 *.text binary
 *.key binary
-*.keyval binary
 *.json binary
 *.jsonl binary

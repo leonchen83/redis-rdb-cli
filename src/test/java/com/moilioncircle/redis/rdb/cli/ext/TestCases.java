@@ -121,7 +121,6 @@ public class TestCases {
                 new CommandLine(new XRct()).execute(new String[]{"-f", "jsonl", "-s", source, "-o", target(source, "jsonl", ACTUAL_SUFFIX)});
                 new CommandLine(new XRct()).execute(new String[]{"-f", "key", "-s", source, "-o", target(source, "key", ACTUAL_SUFFIX)});
                 new CommandLine(new XRct()).execute(new String[]{"-f", "count", "-s", source, "-o", target(source, "count", ACTUAL_SUFFIX)});
-                new CommandLine(new XRct()).execute(new String[]{"-f", "keyval", "-s", source, "-o", target(source, "keyval", ACTUAL_SUFFIX)});
                 new CommandLine(new XRct()).execute(new String[]{"-f", "resp", "-s", source, "-o", target(source, "resp", ACTUAL_SUFFIX)});
                 new CommandLine(new XRct()).execute(new String[]{"-f", "dump", "-s", source, "-o", target(source, "dump", ACTUAL_SUFFIX)});
                 new CommandLine(new XRct()).execute(new String[]{"-f", "diff", "-s", source, "-o", target(source, "diff", ACTUAL_SUFFIX)});
@@ -133,7 +132,6 @@ public class TestCases {
                 eq0(source, "jsonl");
                 eq0(source, "key");
                 eq0(source, "count");
-                eq0(source, "keyval");
                 eq0(source, "resp");
                 eq0(source, "dump");
                 eq0(source, "diff");
