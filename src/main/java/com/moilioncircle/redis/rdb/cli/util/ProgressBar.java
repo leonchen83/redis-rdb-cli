@@ -16,21 +16,17 @@
 
 package com.moilioncircle.redis.rdb.cli.util;
 
-import static org.jline.terminal.TerminalBuilder.builder;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
-
-import org.jline.terminal.Terminal;
 
 /**
  * @author Baoyi Chen
  */
 public abstract class ProgressBar implements Closeable {
     
-    public static ProgressBar bar(long total, boolean enable) throws IOException {
-        return enable ? new EnableBar(total) : new DisableBar();
+    public static ProgressBar bar(boolean enable) throws IOException {
+        return enable ? new EnableBar() : new DisableBar();
     }
 
     public abstract void react(long num);
@@ -60,46 +56,34 @@ public abstract class ProgressBar implements Closeable {
     
     private static class EnableBar extends ProgressBar {
         private final long ctime;
-        private final long total;
-        private Terminal terminal;
         private volatile int max = 0;
         private volatile boolean bit;
         private volatile String file;
-        private volatile double percentage;
         private volatile boolean first = true;
         private AtomicLong num = new AtomicLong();
         private volatile long atime = System.currentTimeMillis();
     
-        public EnableBar(long total) throws IOException {
-            this.total = total;
+        public EnableBar() throws IOException {
             this.ctime = System.currentTimeMillis();
-            if (total > 0) {
-                this.terminal = builder().dumb(true).build();
-            }
         }
     
+        @Override
         public void react(long num) {
             react(num, true, null);
         }
     
+        @Override
         public void react(long num, String file) {
             react(num, true, file);
         }
     
+        @Override
         public void react(long num, boolean increment, String file) {
             if (increment)
                 this.num.addAndGet(num);
             else
                 this.num.set(num);
-            if (total <= 0) {
-                show(-1, -1, this.num.get(), file);
-                return;
-            }
-            double percentage = this.num.get() / (double) total * 100;
-            int prev = (int) this.percentage;
-            this.percentage = percentage;
-            int next = (int) this.percentage;
-            show(prev, next, this.num.get(), file);
+            show(-1, -1, this.num.get(), file);
         }
     
         private void show(int prev, int next, long num, String file) {
@@ -108,11 +92,8 @@ public abstract class ProgressBar implements Closeable {
         
             if (first) {
                 first = false;
-            } else {
-                if (elapsed < 1000 && prev == next &&
-                        (file == null || file.equals(this.file))) {
-                    return;
-                }
+            } else if (elapsed < 1000 && prev == next && (file == null || file.equals(this.file))) {
+                return;
             }
         
             // avoid divide 0
@@ -132,33 +113,9 @@ public abstract class ProgressBar implements Closeable {
                 bit = true;
             }
             builder.append('[').append(Strings.lappend(Strings.pretty(num), 7, ' '));
-            if (total <= 0) {
-                if (file != null) {
-                    builder.append('|');
-                    builder.append(Strings.lappend(file, max, ' '));
-                }
-            } else {
-                int len = Math.max(terminal.getWidth(), 120);
-                builder.append('/').append(Strings.lappend(Strings.pretty(total), 7, ' ')).append('|');
-                builder.append(Strings.lappend(next, 3, ' ')).append('%');
-                if (file != null) {
-                    builder.append('|');
-                    builder.append(Strings.lappend(file, max, ' '));
-                }
-                builder.append(']');
-                int used = builder.length();
-                if (len - used >= 30 + 5 + speed.length()) {
-                    int ret = len - used - 5 - speed.length();
-                    int n = (int) (next * (ret / 100d));
-                    builder.append('[');
-                    for (int i = 0; i < ret; i++) {
-                        if (i < n) {
-                            builder.append('#');
-                        } else {
-                            builder.append('-');
-                        }
-                    }
-                }
+            if (file != null) {
+                builder.append('|');
+                builder.append(Strings.lappend(file, max, ' '));
             }
             builder.append('|');
             builder.append(speed).append("/s");

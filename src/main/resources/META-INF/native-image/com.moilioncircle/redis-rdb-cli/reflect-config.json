@@ -1407,18 +1407,6 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"org.jline.terminal.impl.exec.ExecTerminalProvider",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"org.jline.terminal.impl.jansi.JansiTerminalProvider",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"org.jline.terminal.impl.jna.JnaTerminalProvider",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
   "name":"picocli.CommandLine$AutoHelpMixin",
   "allDeclaredFields":true,
   "allDeclaredMethods":true
