@@ -37,7 +37,7 @@ public class TestCases {
     public void before() {
         // avoid log4j exception
         ClassLoader loader = TestCases.class.getClassLoader();
-        String source = loader.getResource("log4j2.xml").getPath();
+        String source = loader.getResource("logback-test.xml").getPath();
         this.path = new File(source).getParent();
         System.setProperty("cli.log.path", path);
     }
