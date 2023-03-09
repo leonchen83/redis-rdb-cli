@@ -47,7 +47,7 @@
             <fileMode>0755</fileMode>
             <directoryMode>0755</directoryMode>
             <includes>
-                <include>log4j2.xml</include>
+                <include>logback.xml</include>
                 <include>redis-rdb-cli.conf</include>
                 <include>redis-rdb-cli.conf.legacy</include>
             </includes>

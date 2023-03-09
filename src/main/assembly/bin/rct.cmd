@@ -37,8 +37,8 @@ goto error
 :chkVersion
 for /f tokens^=2-5^ delims^=.-+_^" %%j in ('java -fullversion 2^>^&1') do @set "JVER=%%j%%k%%l"
 
-if %JVER% GEQ 180 goto init
-echo java -version is less than 1.8
+if %JVER% GEQ 1100 goto init
+echo Java version is lower than 11 - Please install Java 11
 goto error
 @REM ==== END VALIDATION ====
 
@@ -55,11 +55,10 @@ set CON_DIR=%RCT_HOME%\conf
 set LOG_FILE=%CON_DIR%\log4j2.xml
 set CON_FILE=%CON_DIR%\redis-rdb-cli.conf
 set MAIN_CLASS=com.moilioncircle.redis.rdb.cli.Rct
+set ADD_OPENS="--add-opens=java.base/java.lang.invoke=ALL-UNNAMED"
 set RCT_OPS=-server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:+ExitOnOutOfMemoryError -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -Dlog4j.configurationFile="%LOG_FILE%" -Dcli.log.path="%LOG_DIR%" -Dconf="%CON_FILE%" -Drct.home="%RCT_HOME%" -Dsun.stderr.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.err.encoding=UTF-8 -Dfile.encoding=UTF-8
 
-if %JVER% GEQ 900 set ADD_OPENS="--add-opens=java.base/java.lang.invoke=ALL-UNNAMED"
-
-"%JAVACMD%" %ADD_OPENS% %RCT_OPS% -cp %CLASS_PATH% %MAIN_CLASS% %*
+"%JAVACMD%" %ADD_OPENS% %RCT_OPS% %JAVA_OPTS% -cp %CLASS_PATH% %MAIN_CLASS% %*
 if ERRORLEVEL 1 goto error
 goto end
 

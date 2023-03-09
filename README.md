@@ -23,7 +23,7 @@ A tool that can parse, filter, split, concat rdb and analyze memory usage offlin
 ## Runtime requirement
 
 ```text
-jdk 1.8+
+jdk 11+
 ```
 
 ## Install
@@ -39,8 +39,8 @@ $ ./rct -h
 
 ```text
 
-jdk 1.8+
-maven-3.3.1+
+jdk 11+
+maven-3.6.0+
 
 ```
 

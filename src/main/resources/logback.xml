@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration>
+
+<configuration>
+    <variable name="pattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%t] %logger{1} %msg%n"/>
+    
+    <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${cli.log.path:-/var/log/redis-rdb-cli}/redis-rdb-cli.log</file>
+        <encoder>
+            <pattern>${pattern}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${cli.log.path:-/var/log/redis-rdb-cli}/%d{yyyy-MM, aux}/redis-rdb-cli-%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>512MB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+    
+    <appender name="METRIC" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${cli.log.path:-/var/log/redis-rdb-cli}/redis-rdb-metric.log</file>
+        <encoder>
+            <pattern>${pattern}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${cli.log.path:-/var/log/redis-rdb-cli}/%d{yyyy-MM, aux}/redis-rdb-metric-%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>512MB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+    
+    <!--
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${pattern}</pattern>
+        </encoder>
+    </appender>
+    -->
+    
+    <logger name="METRIC_LOGGER" level="INFO" additivity="false">
+        <appender-ref ref="METRIC"/>
+    </logger>
+    <logger name="com.moilioncircle" level="INFO" additivity="false">
+        <appender-ref ref="ROLLING"/>
+    </logger>
+    
+    <root level="ERROR">
+        <appender-ref ref="ROLLING"/>
+    </root>
+</configuration>
