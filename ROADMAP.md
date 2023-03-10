@@ -2,6 +2,7 @@
 
 - [x] remove jline dependency.
 - [x] jdk baseline upgrade to jdk11.
+- [x] replace buymeacoffee to paypal.
 - [ ] support redis cluster migration.
 - [x] use `JAVA_OPTS` replace `JAVA_TOOL_OPTIONS`.
 - [x] deprecate and remove `rct -f keyval` format.
