@@ -106,16 +106,15 @@ public class SingleRdbVisitor extends AbstractRmtRdbVisitor implements EventList
     
     public void retry(DumpKeyValuePair dkv, int times) {
         logger.trace("sync rdb event [{}], times {}", new String(dkv.getKey()), times);
+
         try {
             DB db = dkv.getDb();
-    
             int index;
             if (db != null && (index = (int) db.getDbNumber()) != endpoint.get().getDB()) {
                 endpoint.get().select(true, index);
             }
-    
             byte[] expire = ZERO;
-            if (dkv.getExpiredMs() != null) {
+            if ( !configure.getIgnoreTTL() && dkv.getExpiredMs() != null) {
                 long ms = dkv.getExpiredMs() - System.currentTimeMillis();
                 if (ms <= 0) {
                     MONITOR.add(ENDPOINT_FAILURE, "expired", 1);

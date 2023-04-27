@@ -290,7 +290,13 @@ public class Configure {
      * scan step
      */
     private int scanStep = 512;
-    
+
+    /**
+     * ignore ttl option
+     */
+    private boolean ignoreTTL = false;
+
+
     public int getBatchSize() {
         return batchSize;
     }
@@ -543,6 +549,13 @@ public class Configure {
         return metricInstance;
     }
 
+    public boolean getIgnoreTTL() {
+        return this.ignoreTTL;
+    }
+
+    public boolean setIgnoreTTL(boolean ignoreTTL) {
+        return this.ignoreTTL = ignoreTTL;
+    }
     public void setMetricInstance(String metricInstance) {
         this.metricInstance = metricInstance;
     }
@@ -618,7 +631,7 @@ public class Configure {
     public void setEnableProgressBar(boolean enableProgressBar) {
         this.enableProgressBar = enableProgressBar;
     }
-    
+
     public int getMonitorRefreshInterval() {
         return monitorRefreshInterval;
     }

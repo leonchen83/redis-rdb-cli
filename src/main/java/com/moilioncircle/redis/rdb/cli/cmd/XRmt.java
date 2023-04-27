@@ -100,7 +100,7 @@ public class XRmt implements Callable<Integer> {
 	
 	@Option(names = {"-k", "--key"}, arity = "1..*", paramLabel = "<regex>", description = {"Keys to export. this can be a regex. if not", "specified, all keys will be returned."})
 	private List<String> regexs;
-	
+
 	@Option(names = {"-t", "--type"}, arity = "1..*", description = {"Data type to export. possible values are", "string, hash, set, sortedset, list, module, ", "stream. multiple types can be provided. if not", "specified, all data types will be returned."})
 	private List<String> type;
 	
@@ -109,12 +109,17 @@ public class XRmt implements Callable<Integer> {
 	
 	@Option(names = {"-l", "--legacy"}, description = {"If specify the <replace> and this parameter.", "then use lua script to migrate data to target.", "if target redis version is greater than 3.0.", "no need to add this parameter."})
 	private boolean legacy;
-	
+
+	@Option(names = {"-nt", "--ignore-ttl"}, description = {"ignores ttl in rdb file when performing migration."})
+	private boolean ignoreTTL;
+
 	@Override
 	public Integer call() throws Exception {
 		source = normalize(source, FileType.RDB, spec, "Invalid options: '--source=<source>'");
+
 		Configure configure = Configure.bind();
-		
+		configure.setIgnoreTTL(ignoreTTL);
+
 		if (exclusive.migrate != null) {
 			RedisURI uri = new RedisURI(exclusive.migrate);
 			
