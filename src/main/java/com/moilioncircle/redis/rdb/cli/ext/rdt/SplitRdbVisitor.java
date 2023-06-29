@@ -148,6 +148,12 @@ public class SplitRdbVisitor extends AbstractRdtRdbVisitor {
         shard(key);
         return super.doApplySet(in, version, key, type, context);
     }
+    
+    @Override
+    protected Event doApplySetListPack(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        shard(key);
+        return super.doApplySetListPack(in, version, key, type, context);
+    }
 
     @Override
     protected Event doApplyZSet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
@@ -225,6 +231,12 @@ public class SplitRdbVisitor extends AbstractRdtRdbVisitor {
     protected Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         shard(key);
         return super.doApplyStreamListPacks2(in, version, key, type, context);
+    }
+    
+    @Override
+    protected Event doApplyStreamListPacks3(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        shard(key);
+        return super.doApplyStreamListPacks3(in, version, key, type, context);
     }
 
 }

@@ -106,6 +106,11 @@ public class FormatterRdbVisitor extends BaseRdbVisitor {
     protected Event doApplySet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         return formatter.applySet(replicator, in, version, key, type, context);
     }
+    
+    @Override
+    protected Event doApplySetListPack(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        return formatter.applySetListPack(replicator, in, version, key, type, context);
+    }
 
     @Override
     protected Event doApplyZSet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
@@ -185,5 +190,10 @@ public class FormatterRdbVisitor extends BaseRdbVisitor {
     @Override
     protected Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         return formatter.applyStreamListPacks2(replicator, in, version, key, type, context);
+    }
+    
+    @Override
+    protected Event doApplyStreamListPacks3(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        return formatter.applyStreamListPacks3(replicator, in, version, key, type, context);
     }
 }

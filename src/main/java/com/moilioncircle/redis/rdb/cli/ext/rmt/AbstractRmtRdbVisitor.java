@@ -91,6 +91,14 @@ public abstract class AbstractRmtRdbVisitor extends BaseRdbVisitor {
 	}
 	
 	@Override
+	protected Event doApplySetListPack(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+		DumpKeyValuePair dump = new DumpKeyValuePair();
+		dump.setKey(key);
+		dump.setValue(valueVisitor.applySetListPack(in, version));
+		return context.valueOf(dump);
+	}
+	
+	@Override
 	protected Event doApplyZSet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
 		DumpKeyValuePair dump = new DumpKeyValuePair();
 		dump.setKey(key);
@@ -215,6 +223,14 @@ public abstract class AbstractRmtRdbVisitor extends BaseRdbVisitor {
 		DumpKeyValuePair dump = new DumpKeyValuePair();
 		dump.setKey(key);
 		dump.setValue(valueVisitor.applyStreamListPacks2(in, version));
+		return context.valueOf(dump);
+	}
+	
+	@Override
+	protected Event doApplyStreamListPacks3(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+		DumpKeyValuePair dump = new DumpKeyValuePair();
+		dump.setKey(key);
+		dump.setValue(valueVisitor.applyStreamListPacks3(in, version));
 		return context.valueOf(dump);
 	}
 }

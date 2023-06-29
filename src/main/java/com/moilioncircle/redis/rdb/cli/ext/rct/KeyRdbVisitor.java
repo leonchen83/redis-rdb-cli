@@ -58,6 +58,13 @@ public class KeyRdbVisitor extends AbstractRctRdbVisitor {
     }
     
     @Override
+    public Event doApplySetListPack(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        quote(key, out);
+        Outputs.write('\n', out);
+        return super.doApplySetListPack(in, version, key, type, context);
+    }
+    
+    @Override
     public Event doApplyZSet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
         Outputs.write('\n', out);
@@ -167,5 +174,12 @@ public class KeyRdbVisitor extends AbstractRctRdbVisitor {
         quote(key, out);
         Outputs.write('\n', out);
         return super.doApplyStreamListPacks2(in, version, key, type, context);
+    }
+    
+    @Override
+    public Event doApplyStreamListPacks3(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        quote(key, out);
+        Outputs.write('\n', out);
+        return super.doApplyStreamListPacks3(in, version, key, type, context);
     }
 }
