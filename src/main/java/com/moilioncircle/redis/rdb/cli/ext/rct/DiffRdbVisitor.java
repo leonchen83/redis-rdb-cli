@@ -125,6 +125,20 @@ public class DiffRdbVisitor extends AbstractRctRdbVisitor {
     }
     
     @Override
+    public Event doApplySetListPack(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        escaper.encode(key, out);
+        delimiter(out);
+        expire(context.getExpiredType(), context.getExpiredValue());
+        version = getVersion(version);
+        try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
+            listener.write((byte) type);
+            super.doApplySetListPack(in, version, key, type, context);
+        }
+        Outputs.write('\n', out);
+        return context.valueOf(new DummyKeyValuePair());
+    }
+    
+    @Override
     public Event doApplyZSet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         escaper.encode(key, out);
         delimiter(out);
@@ -347,6 +361,24 @@ public class DiffRdbVisitor extends AbstractRctRdbVisitor {
                 listener.write((byte) type);
             }
             super.doApplyStreamListPacks2(in, version, key, type, context, listener);
+        }
+        Outputs.write('\n', out);
+        return context.valueOf(new DummyKeyValuePair());
+    }
+    
+    @Override
+    public Event doApplyStreamListPacks3(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        escaper.encode(key, out);
+        delimiter(out);
+        expire(context.getExpiredType(), context.getExpiredValue());
+        version = getVersion(version);
+        try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
+            if (version < 11) {
+                listener.write((byte) Constants.RDB_TYPE_STREAM_LISTPACKS);
+            } else {
+                listener.write((byte) type);
+            }
+            super.doApplyStreamListPacks3(in, version, key, type, context, listener);
         }
         Outputs.write('\n', out);
         return context.valueOf(new DummyKeyValuePair());

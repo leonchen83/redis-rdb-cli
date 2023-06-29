@@ -31,8 +31,10 @@ import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_MODULE;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_MODULE_2;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_SET;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_SET_INTSET;
+import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_SET_LISTPACK;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_STREAM_LISTPACKS;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_STREAM_LISTPACKS_2;
+import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_STREAM_LISTPACKS_3;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_STRING;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_ZSET_2;
@@ -130,6 +132,25 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
 			} else {
 				if (listener != null) listener.setGuard(PASS);
 				valueVisitor.applySet(in, version);
+				return context.valueOf(new DummyKeyValuePair());
+			}
+		} finally {
+			if (listener != null) listener.setGuard(SAVE);
+		}
+	}
+	
+	@Override
+	public Event applySetListPack(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
+		try {
+			BaseRdbParser parser = new BaseRdbParser(in);
+			byte[] key = parser.rdbLoadEncodedStringObject().first();
+			boolean contains = filter.contains(context.getDb().getDbNumber(), RDB_TYPE_SET_LISTPACK, Strings.toString(key));
+			if (contains) {
+				if (listener != null) listener.setGuard(DRAIN);
+				return doApplySetListPack(in, version, key, RDB_TYPE_SET_LISTPACK, context);
+			} else {
+				if (listener != null) listener.setGuard(PASS);
+				valueVisitor.applySetListPack(in, version);
 				return context.valueOf(new DummyKeyValuePair());
 			}
 		} finally {
@@ -441,6 +462,25 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
 		}
 	}
 	
+	@Override
+	public Event applyStreamListPacks3(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
+		try {
+			BaseRdbParser parser = new BaseRdbParser(in);
+			byte[] key = parser.rdbLoadEncodedStringObject().first();
+			boolean contains = filter.contains(context.getDb().getDbNumber(), RDB_TYPE_STREAM_LISTPACKS_3, Strings.toString(key));
+			if (contains) {
+				if (listener != null) listener.setGuard(DRAIN);
+				return doApplyStreamListPacks3(in, version, key, RDB_TYPE_STREAM_LISTPACKS_3, context);
+			} else {
+				if (listener != null) listener.setGuard(PASS);
+				valueVisitor.applyStreamListPacks3(in, version);
+				return context.valueOf(new DummyKeyValuePair());
+			}
+		} finally {
+			if (listener != null) listener.setGuard(SAVE);
+		}
+	}
+	
 	protected Event doApplyString(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
 		valueVisitor.applyString(in, version);
 		return context.valueOf(new DummyKeyValuePair());
@@ -453,6 +493,11 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
 	
 	protected Event doApplySet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
 		valueVisitor.applySet(in, version);
+		return context.valueOf(new DummyKeyValuePair());
+	}
+	
+	protected Event doApplySetListPack(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+		valueVisitor.applySetListPack(in, version);
 		return context.valueOf(new DummyKeyValuePair());
 	}
 	
@@ -533,6 +578,11 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
 	
 	protected Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
 		valueVisitor.applyStreamListPacks2(in, version);
+		return context.valueOf(new DummyKeyValuePair());
+	}
+	
+	protected Event doApplyStreamListPacks3(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+		valueVisitor.applyStreamListPacks3(in, version);
 		return context.valueOf(new DummyKeyValuePair());
 	}
 }

@@ -110,6 +110,12 @@ public class CountRdbVisitor extends AbstractRctRdbVisitor implements EventListe
         counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
         return super.doApplySet(in, version, key, type, context);
     }
+    
+    @Override
+    public Event doApplySetListPack(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
+        return super.doApplySetListPack(in, version, key, type, context);
+    }
 
     @Override
     public Event doApplyZSet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
@@ -205,5 +211,11 @@ public class CountRdbVisitor extends AbstractRctRdbVisitor implements EventListe
     public Event doApplyStreamListPacks2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
         return super.doApplyStreamListPacks2(in, version, key, type, context);
+    }
+    
+    @Override
+    public Event doApplyStreamListPacks3(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
+        return super.doApplyStreamListPacks3(in, version, key, type, context);
     }
 }

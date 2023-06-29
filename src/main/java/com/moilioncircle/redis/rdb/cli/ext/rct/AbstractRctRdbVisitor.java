@@ -155,4 +155,52 @@ public abstract class AbstractRctRdbVisitor extends BaseRdbVisitor {
 		if (version < 10) context.setValueRdbType(RDB_TYPE_STREAM_LISTPACKS);
 		return context.valueOf(new DummyKeyValuePair());
 	}
+	
+	protected Event doApplyStreamListPacks3(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context, RawByteListener listener) throws IOException {
+		SkipRdbParser skipParser = new SkipRdbParser(in);
+		long listPacks = skipParser.rdbLoadLen().len;
+		while (listPacks-- > 0) {
+			skipParser.rdbLoadPlainStringObject();
+			skipParser.rdbLoadPlainStringObject();
+		}
+		skipParser.rdbLoadLen(); // length
+		skipParser.rdbLoadLen(); // lastId
+		skipParser.rdbLoadLen(); // lastId
+		if (version < 11) replicator.removeRawByteListener(listener);
+		skipParser.rdbLoadLen(); // firstId
+		skipParser.rdbLoadLen(); // firstId
+		skipParser.rdbLoadLen(); // maxDeletedEntryId
+		skipParser.rdbLoadLen(); // maxDeletedEntryId
+		skipParser.rdbLoadLen(); // entriesAdded
+		if (version < 11) replicator.addRawByteListener(listener);
+		long groupCount = skipParser.rdbLoadLen().len;
+		while (groupCount-- > 0) {
+			skipParser.rdbLoadPlainStringObject();
+			skipParser.rdbLoadLen();
+			skipParser.rdbLoadLen();
+			if (version < 11) replicator.removeRawByteListener(listener);
+			skipParser.rdbLoadLen(); // entriesRead
+			if (version < 11) replicator.addRawByteListener(listener);
+			long groupPel = skipParser.rdbLoadLen().len;
+			while (groupPel-- > 0) {
+				in.skip(16);
+				skipParser.rdbLoadMillisecondTime();
+				skipParser.rdbLoadLen();
+			}
+			long consumerCount = skipParser.rdbLoadLen().len;
+			while (consumerCount-- > 0) {
+				skipParser.rdbLoadPlainStringObject();
+				skipParser.rdbLoadMillisecondTime();
+				if (version < 11) replicator.removeRawByteListener(listener);
+				skipParser.rdbLoadMillisecondTime(); // activeTime
+				if (version < 11) replicator.addRawByteListener(listener);
+				long consumerPel = skipParser.rdbLoadLen().len;
+				while (consumerPel-- > 0) {
+					in.skip(16);
+				}
+			}
+		}
+		if (version < 11) context.setValueRdbType(RDB_TYPE_STREAM_LISTPACKS);
+		return context.valueOf(new DummyKeyValuePair());
+	}
 }

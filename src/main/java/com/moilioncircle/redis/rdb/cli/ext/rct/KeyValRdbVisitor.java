@@ -97,6 +97,28 @@ public class KeyValRdbVisitor extends AbstractRctRdbVisitor {
     }
     
     @Override
+    protected Event doApplySetListPack(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        quote(key, out);
+        delimiter(out);
+        BaseRdbParser parser = new BaseRdbParser(in);
+        RedisInputStream listPack = new RedisInputStream(parser.rdbLoadPlainStringObject());
+        listPack.skip(4); // total-bytes
+        int len = listPack.readInt(2);
+        while (len > 0) {
+            byte[] element = listPackEntry(listPack);
+            len--;
+            quote(element, out);
+            if (len - 1 > 0) delimiter(out);
+            else Outputs.write('\n', out);
+        }
+        int lpend = listPack.read(); // lp-end
+        if (lpend != 255) {
+            throw new AssertionError("listpack expect 255 but " + lpend);
+        }
+        return context.valueOf(new DummyKeyValuePair());
+    }
+    
+    @Override
     public Event doApplyZSet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
         delimiter(out);
@@ -469,6 +491,25 @@ public class KeyValRdbVisitor extends AbstractRctRdbVisitor {
                 listener.write((byte) type);
             }
             super.doApplyStreamListPacks2(in, version, key, type, context, listener);
+        }
+        out.write(configure.getQuote());
+        Outputs.write('\n', out);
+        return context.valueOf(new DummyKeyValuePair());
+    }
+    
+    @Override
+    public Event doApplyStreamListPacks3(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        quote(key, out);
+        delimiter(out);
+        out.write(configure.getQuote());
+        version = getVersion(version);
+        try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, redis)) {
+            if (version < 10) {
+                listener.write((byte) Constants.RDB_TYPE_STREAM_LISTPACKS);
+            } else {
+                listener.write((byte) type);
+            }
+            super.doApplyStreamListPacks3(in, version, key, type, context, listener);
         }
         out.write(configure.getQuote());
         Outputs.write('\n', out);

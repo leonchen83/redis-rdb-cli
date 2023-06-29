@@ -145,6 +145,33 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
     }
     
     @Override
+    protected Event doApplySetListPack(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        json(context, key, type, () -> {
+            Outputs.write('[', out);
+            BaseRdbParser parser = new BaseRdbParser(in);
+            RedisInputStream listPack = new RedisInputStream(parser.rdbLoadPlainStringObject());
+            boolean flag = true;
+            listPack.skip(4); // total-bytes
+            int len = listPack.readInt(2);
+            while (len > 0) {
+                if (!flag) {
+                    Outputs.write(',', out);
+                }
+                byte[] element = listPackEntry(listPack);
+                emitString(element);
+                flag = false;
+                len--;
+            }
+            int lpend = listPack.read(); // lp-end
+            if (lpend != 255) {
+                throw new AssertionError("listpack expect 255 but " + lpend);
+            }
+            Outputs.write(']', out);
+        });
+        return context.valueOf(new DummyKeyValuePair());
+    }
+    
+    @Override
     protected Event doApplyZSet(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             Outputs.write('{', out);
@@ -551,6 +578,24 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
                     listener.write((byte) type);
                 }
                 super.doApplyStreamListPacks2(in, ver, key, type, context, listener);
+            }
+            Outputs.write('"', out);
+        });
+        return context.valueOf(new DummyKeyValuePair());
+    }
+    
+    @Override
+    protected Event doApplyStreamListPacks3(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        json(context, key, type, () -> {
+            Outputs.write('"', out);
+            int ver = getVersion(version);
+            try (DumpRawByteListener listener = new DumpRawByteListener(replicator, ver, out, redis)) {
+                if (ver < 11) {
+                    listener.write((byte) Constants.RDB_TYPE_STREAM_LISTPACKS);
+                } else {
+                    listener.write((byte) type);
+                }
+                super.doApplyStreamListPacks3(in, ver, key, type, context, listener);
             }
             Outputs.write('"', out);
         });
