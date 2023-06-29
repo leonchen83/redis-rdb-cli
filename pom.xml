@@ -77,7 +77,6 @@
                     <artifactId>slf4j-api</artifactId>
                 </exclusion>
             </exclusions>
-            <version>3.7.0</version>
         </dependency>
         <dependency>
             <groupId>com.moilioncircle</groupId>
