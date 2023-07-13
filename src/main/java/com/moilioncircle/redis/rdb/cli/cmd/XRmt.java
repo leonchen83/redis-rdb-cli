@@ -109,12 +109,18 @@ public class XRmt implements Callable<Integer> {
 	
 	@Option(names = {"-l", "--legacy"}, description = {"If specify the <replace> and this parameter.", "then use lua script to migrate data to target.", "if target redis version is greater than 3.0.", "no need to add this parameter."})
 	private boolean legacy;
-	
+
+	@Option(names = {"-x", "--ignore-keys-with-ttl"}, description = {"Ignore keys whose TTL is set", "default is false."})
+	private boolean ignoreKeysWithTTL;
+
 	@Override
 	public Integer call() throws Exception {
 		source = normalize(source, FileType.RDB, spec, "Invalid options: '--source=<source>'");
 		Configure configure = Configure.bind();
-		
+		if (ignoreKeysWithTTL) {
+			configure.setIgnoreKeysWithTTL(true);
+		}
+
 		if (exclusive.migrate != null) {
 			RedisURI uri = new RedisURI(exclusive.migrate);
 			

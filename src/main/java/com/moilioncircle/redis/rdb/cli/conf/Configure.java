@@ -290,6 +290,19 @@ public class Configure {
      * scan step
      */
     private int scanStep = 512;
+
+    /**
+     * ignore keys with ttl set
+     */
+    private boolean ignoreKeysWithTTL = false;
+
+    public boolean getIgnoreKeysWithTTL() {
+        return this.ignoreKeysWithTTL;
+    }
+
+    public void setIgnoreKeysWithTTL(boolean choice) {
+        this.ignoreKeysWithTTL = choice;
+    }
     
     public int getBatchSize() {
         return batchSize;
