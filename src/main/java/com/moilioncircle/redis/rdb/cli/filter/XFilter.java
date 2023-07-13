@@ -38,16 +38,17 @@ public class XFilter implements Filter {
 	private List<Integer> dbs;
 	private List<Pattern> regexs;
 	private List<DataType> types;
+	private boolean ignoreTTL = false;
 	
 	private XFilter() {
-		this(null, null, null);
+		this(null, null, null, false);
 	}
 	
 	private XFilter(List<Integer> dbs) {
-		this(null, dbs, null);
+		this(null, dbs, null, false);
 	}
 	
-	private XFilter(List<String> regexs, List<Integer> dbs, List<String> types) {
+	private XFilter(List<String> regexs, List<Integer> dbs, List<String> types, boolean ignoreTTL) {
 		
 		if (!isEmpty(regexs)) {
 			this.keys = new HashSet<>(regexs);
@@ -59,22 +60,24 @@ public class XFilter implements Filter {
 		if (!isEmpty(types)) {
 			this.types = DataType.parse(types);
 		}
+		
+		this.ignoreTTL = ignoreTTL;
 	}
 	
 	public static Filter cluster() {
 		return new XFilter(DB0);
 	}
 	
-	public static Filter cluster(List<String> regexs, List<String> types) {
-		return new XFilter(regexs, DB0, types);
+	public static Filter cluster(List<String> regexs, List<String> types, boolean ignoreTTL) {
+		return new XFilter(regexs, DB0, types, ignoreTTL);
 	}
 	
 	public static Filter filter(List<Integer> dbs) {
-		return new XFilter(null, dbs, null);
+		return new XFilter(null, dbs, null, false);
 	}
 	
-	public static Filter filter(List<String> regexs, List<Integer> dbs, List<String> types) {
-		return new XFilter(regexs, dbs, types);
+	public static Filter filter(List<String> regexs, List<Integer> dbs, List<String> types, boolean ignoreTTL) {
+		return new XFilter(regexs, dbs, types, ignoreTTL);
 	}
 	
 	private boolean contains(int type) {
@@ -97,13 +100,17 @@ public class XFilter implements Filter {
 		return false;
 	}
 	
+	private boolean contains(boolean hasTTL) {
+		if (hasTTL) return !ignoreTTL; else return true;
+	}
+	
 	@Override
 	public boolean contains(long db) {
 		return isEmpty(dbs) || dbs.contains((int) db);
 	}
 	
 	@Override
-	public boolean contains(long db, int type, String key) {
-		return contains(db) && contains(type) && contains(key);
+	public boolean contains(long db, int type, String key, boolean hasTTL) {
+		return contains(db) && contains(type) && contains(key) && contains(hasTTL);
 	}
 }

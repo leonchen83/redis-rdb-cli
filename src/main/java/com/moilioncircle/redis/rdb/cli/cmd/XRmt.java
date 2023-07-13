@@ -110,17 +110,14 @@ public class XRmt implements Callable<Integer> {
 	@Option(names = {"-l", "--legacy"}, description = {"If specify the <replace> and this parameter.", "then use lua script to migrate data to target.", "if target redis version is greater than 3.0.", "no need to add this parameter."})
 	private boolean legacy;
 
-	@Option(names = {"-x", "--ignore-keys-with-ttl"}, description = {"Ignore keys whose TTL is set", "default is false."})
-	private boolean ignoreKeysWithTTL;
+	@Option(names = {"-i", "--ignore-ttl"}, description = {"Ignore keys whose TTL is set, default is false."})
+	private boolean ignoreTTL;
 
 	@Override
 	public Integer call() throws Exception {
 		source = normalize(source, FileType.RDB, spec, "Invalid options: '--source=<source>'");
 		Configure configure = Configure.bind();
-		if (ignoreKeysWithTTL) {
-			configure.setIgnoreKeysWithTTL(true);
-		}
-
+		
 		if (exclusive.migrate != null) {
 			RedisURI uri = new RedisURI(exclusive.migrate);
 			
@@ -159,7 +156,7 @@ public class XRmt implements Callable<Integer> {
 			try (ProgressBar bar = ProgressBar.bar(configure.isEnableProgressBar())) {
 				
 				Replicator r = new XRedisReplicator(source, configure, DefaultReplFilter.RDB);
-				r.setRdbVisitor(new ClusterRdbVisitor(r, configure, cluster(regexs, type), null, readAllLines(path), replace));
+				r.setRdbVisitor(new ClusterRdbVisitor(r, configure, cluster(regexs, type, ignoreTTL), null, readAllLines(path), replace));
 				
 				r.addEventListener((rep, event) -> {
 					
@@ -184,10 +181,10 @@ public class XRmt implements Callable<Integer> {
 		try (XEndpoint endpoint = new XEndpoint(uri.getHost(), uri.getPort(), configure.merge(uri, false))) {
 			RedisObject r = endpoint.send(CLUSTER, NODES);
 			if (r.type.isError()) {
-				return new SingleRdbVisitor(replicator, configure, filter(regexs, db, type), uri, replace, legacy);
+				return new SingleRdbVisitor(replicator, configure, filter(regexs, db, type, ignoreTTL), uri, replace, legacy);
 			} else {
 				List<String> lines = Collections.ofList(r.getString().split("\n"));
-				return new ClusterRdbVisitor(replicator, configure, cluster(regexs, type), uri, lines, replace);
+				return new ClusterRdbVisitor(replicator, configure, cluster(regexs, type, ignoreTTL), uri, lines, replace);
 			}
 		} catch (Throwable e) {
 			throw new RuntimeException("failed to connect to " + uri.getHost() + ":" + uri.getPort() + ", reason " + e.getMessage());

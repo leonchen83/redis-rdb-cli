@@ -115,6 +115,9 @@ public class XRdt implements Callable<Integer> {
 	@Option(names = {"-t", "--type"}, arity = "1..*", description = {"Data type to export. possible values are", "string, hash, set, sortedset, list, module, ", "stream. multiple types can be provided. if not", "specified, all data types will be returned."})
 	private List<String> type;
 	
+	@Option(names = {"-i", "--ignore-ttl"}, description = {"Ignore keys whose TTL is set, default is false."})
+	private boolean ignoreTTL;
+	
 	@Override
 	public Integer call() throws Exception {
 		Action action = Action.NONE;
@@ -166,7 +169,7 @@ public class XRdt implements Callable<Integer> {
 			arg.config = config;
 			arg.backup = backup;
 			arg.output = output;
-			arg.filter = XFilter.filter(regexs, db, type);
+			arg.filter = XFilter.filter(regexs, db, type, ignoreTTL);
 			
 			List<Tuple2<Replicator, String>> list = action.dress(configure, arg);
 			
