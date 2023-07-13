@@ -98,6 +98,9 @@ public class XRct implements Callable<Integer> {
 	@Option(names = {"-r", "--replace"}, description = {"Whether the generated aof with <replace>", "parameter(--format dump). if not specified,", "default value is false."})
 	private boolean replace;
 	
+	@Option(names = {"-i", "--ignore-ttl"}, description = {"Ignore keys whose TTL is set, default is false."})
+	private boolean ignoreTTL;
+	
 	@Override
 	public Integer call() throws Exception {
 		source = normalize(source, FileType.RDB, spec, "Invalid options: '--source=<source>'");
@@ -109,7 +112,7 @@ public class XRct implements Callable<Integer> {
 			args.output = output;
 			args.replace = replace;
 			args.largest = largest;
-			args.filter = filter(regexs, db, type);
+			args.filter = filter(regexs, db, type, ignoreTTL);
 			
 			Replicator r = new XRedisReplicator(source, configure, DefaultReplFilter.RDB);
 			

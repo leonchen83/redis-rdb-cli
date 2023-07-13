@@ -290,7 +290,7 @@ public class Configure {
      * scan step
      */
     private int scanStep = 512;
-    
+
     public int getBatchSize() {
         return batchSize;
     }

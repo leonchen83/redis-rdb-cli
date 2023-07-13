@@ -23,6 +23,6 @@ public interface Filter {
 	
 	boolean contains(long db);
 	
-	boolean contains(long db, int type, String key);
+	boolean contains(long db, int type, String key, boolean hasTTL);
 	
 }

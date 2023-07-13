@@ -63,7 +63,7 @@ public class SingleRdbVisitor extends AbstractRmtRdbVisitor implements EventList
     private volatile byte[] evalSha;
     private final Configuration conf;
     private ThreadLocal<XEndpoint> endpoint = new ThreadLocal<>();
-    
+
     //noinspection ThisEscapedInObjectConstruction
     public SingleRdbVisitor(Replicator replicator, Configure configure, Filter filter, RedisURI uri, boolean replace, boolean legacy) throws Exception {
         super(replicator, configure, filter, replace);
@@ -108,7 +108,6 @@ public class SingleRdbVisitor extends AbstractRmtRdbVisitor implements EventList
         logger.trace("sync rdb event [{}], times {}", new String(dkv.getKey()), times);
         try {
             DB db = dkv.getDb();
-    
             int index;
             if (db != null && (index = (int) db.getDbNumber()) != endpoint.get().getDB()) {
                 endpoint.get().select(true, index);
@@ -116,6 +115,7 @@ public class SingleRdbVisitor extends AbstractRmtRdbVisitor implements EventList
     
             byte[] expire = ZERO;
             if (dkv.getExpiredMs() != null) {
+
                 long ms = dkv.getExpiredMs() - System.currentTimeMillis();
                 if (ms <= 0) {
                     MONITOR.add(ENDPOINT_FAILURE, "expired", 1);
