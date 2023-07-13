@@ -145,7 +145,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
 		try {
 			BaseRdbParser parser = new BaseRdbParser(in);
 			byte[] key = parser.rdbLoadEncodedStringObject().first();
-			boolean contains = filter.contains(context.getDb().getDbNumber(), RDB_TYPE_SET_LISTPACK, Strings.toString(key));
+			boolean contains = filter.contains(context.getDb().getDbNumber(), RDB_TYPE_SET_LISTPACK, Strings.toString(key), context.getExpiredType() != ExpiredType.NONE);
 			if (contains) {
 				if (listener != null) listener.setGuard(DRAIN);
 				return doApplySetListPack(in, version, key, RDB_TYPE_SET_LISTPACK, context);
@@ -468,7 +468,7 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
 		try {
 			BaseRdbParser parser = new BaseRdbParser(in);
 			byte[] key = parser.rdbLoadEncodedStringObject().first();
-			boolean contains = filter.contains(context.getDb().getDbNumber(), RDB_TYPE_STREAM_LISTPACKS_3, Strings.toString(key));
+			boolean contains = filter.contains(context.getDb().getDbNumber(), RDB_TYPE_STREAM_LISTPACKS_3, Strings.toString(key), context.getExpiredType() != ExpiredType.NONE);
 			if (contains) {
 				if (listener != null) listener.setGuard(DRAIN);
 				return doApplyStreamListPacks3(in, version, key, RDB_TYPE_STREAM_LISTPACKS_3, context);
