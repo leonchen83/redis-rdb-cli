@@ -64,8 +64,6 @@ public class SingleRdbVisitor extends AbstractRmtRdbVisitor implements EventList
     private final Configuration conf;
     private ThreadLocal<XEndpoint> endpoint = new ThreadLocal<>();
 
-    private int totalKeysWithTTL = 0;
-    
     //noinspection ThisEscapedInObjectConstruction
     public SingleRdbVisitor(Replicator replicator, Configure configure, Filter filter, RedisURI uri, boolean replace, boolean legacy) throws Exception {
         super(replicator, configure, filter, replace);
@@ -117,11 +115,6 @@ public class SingleRdbVisitor extends AbstractRmtRdbVisitor implements EventList
     
             byte[] expire = ZERO;
             if (dkv.getExpiredMs() != null) {
-                if (configure.getIgnoreKeysWithTTL()) {
-                    totalKeysWithTTL += 1;
-                    return; // ignore keys with ttl
-                }
-
 
                 long ms = dkv.getExpiredMs() - System.currentTimeMillis();
                 if (ms <= 0) {
