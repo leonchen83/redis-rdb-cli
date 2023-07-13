@@ -658,6 +658,7 @@ $ rct -f test -s redis://127.0.0.1:6379 -o ./out.csv -t string -d 0 -e json
 * [Maz Ahmadi](https://github.com/cmdshepard)
 * [Anish Karandikar](https://github.com/anishkny)
 * [Air](https://github.com/air3ijai)
+* [Raghu Nandan B S](https://github.com/raghu-nandan-bs)
 * Special thanks to [Kater Technologies](https://www.kater.com/)
   
 ## Consulting
