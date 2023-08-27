@@ -4,7 +4,7 @@ WORKDIR /app
 COPY . /app
 RUN mvn clean install -Dmaven.test.skip=true
 
-FROM adoptopenjdk/openjdk11:alpine
+FROM bellsoft/liberica-openjdk-alpine-musl:11
 COPY --from=builder /app/target/redis-rdb-cli-release.zip /tmp/redis-rdb-cli-release.zip
 WORKDIR /app
 # because of the cli has set shebang
