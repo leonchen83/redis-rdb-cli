@@ -1,4 +1,11 @@
+### 0.9.5
+
+Fix full sync offset bug. this bug could cause losing data in reconnection  
+Support for java 21.  
+Docker support Apple silicon.  
+
 ### 0.9.4
+
 Add command option `--ignore-ttl`.  
 Add support for redis 7.2.  
 
