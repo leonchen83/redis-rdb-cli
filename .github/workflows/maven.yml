@@ -1,12 +1,13 @@
 name: Java CI
 
 on: [ push ]
-
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        java: [ '8', '11', '17', '21' ]
+    name: Build
     steps:
       - name: Setup redis 1
         uses: getong/redis-action@v1
@@ -20,10 +21,10 @@ jobs:
         with:
           redis-version: '6.x'
       - uses: actions/checkout@v3
-      - name: Set up JDK 8
+      - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v3
         with:
-          java-version: '8'
+          java-version: ${{ matrix.java }}
           distribution: 'adopt'
           check-latest: false
       - name: Build with Maven
