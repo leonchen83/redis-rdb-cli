@@ -97,7 +97,7 @@
         <dependency>
             <groupId>org.jline</groupId>
             <artifactId>jline</artifactId>
-            <version>3.22.0</version>
+            <version>3.26.1</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
