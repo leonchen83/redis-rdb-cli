@@ -22,8 +22,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.function.Supplier;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.moilioncircle.redis.rdb.cli.cmd.Args;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.glossary.Guard;
