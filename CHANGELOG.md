@@ -1,3 +1,7 @@
+### 0.9.6
+
+Fix `rdt` convert db bug.  
+
 ### 0.9.5
 
 Fix full sync offset bug. this bug could cause losing data in reconnection  
