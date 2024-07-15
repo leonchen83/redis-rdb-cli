@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.function.Supplier;
 
+import org.jetbrains.annotations.NotNull;
+
 import com.moilioncircle.redis.rdb.cli.cmd.Args;
 import com.moilioncircle.redis.rdb.cli.conf.Configure;
 import com.moilioncircle.redis.rdb.cli.glossary.Guard;
@@ -125,29 +127,39 @@ public class BackupRdbVisitor extends AbstractRdtRdbVisitor {
             }
         } else {
             // skip
+            DB prev;
             listener.setGuard(Guard.PASS);
             try {
-                super.applySelectDB(in, version);
+                prev = super.applySelectDB(in, version);
             } finally {
                 listener.setGuard(Guard.SAVE);
             }
-            
-            // convert
-            listener.setGuard(Guard.DRAIN);
-            try {
-                BaseRdbEncoder encoder = new BaseRdbEncoder();
-                byte[] db = encoder.rdbSaveLen(goal);
-                // type
-                listener.handle((byte) RDB_OPCODE_SELECTDB);
-                // db
-                listener.handle(db);
-                return new DB(goal);
-            } finally {
-                listener.setGuard(Guard.SAVE);
+            // save
+            if (filter.contains(prev.getDbNumber())) {
+                return generateDB(prev.getDbNumber(), goal);
+            } else {
+                return generateDB(prev.getDbNumber(), prev.getDbNumber());
             }
         }
     }
-
+    
+    private DB generateDB(long prev, long next) throws IOException {
+        listener.setGuard(Guard.DRAIN);
+        try {
+            BaseRdbEncoder encoder = new BaseRdbEncoder();
+            byte[] db = encoder.rdbSaveLen(next);
+            // type
+            listener.handle((byte) RDB_OPCODE_SELECTDB);
+            // db
+            listener.handle(db);
+            
+            // set prev db number to avoid filter wrong data.
+            return new DB(prev);
+        } finally {
+            listener.setGuard(Guard.SAVE);
+        }
+    }
+    
     @Override
     public DB applyResizeDB(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
         listener.setGuard(Guard.DRAIN);
