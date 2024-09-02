@@ -79,7 +79,7 @@ public class NodeConfParser {
 				if (commaIdx == -1) {
 					host = hostAndPort.substring(0, cIdx);
 				} else {
-					host = hostAndPort.substring(0, commaIdx);
+					host = hostAndPort.substring(commaIdx);
 				}
 				int port = parseInt(hostAndPort.substring(cIdx + 1, aIdx == -1 ? hostAndPort.length() : aIdx));
 				node.setHostAndPort(new HostAndPort(host, port));
