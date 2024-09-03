@@ -75,7 +75,7 @@ public class NodeConfParser {
 				int cIdx = hostAndPort.indexOf(":");
 				int aIdx = hostAndPort.indexOf("@");
 				int commaIdx = hostAndPort.indexOf(",");
-				String host = "";
+				String host;
 				if (commaIdx == -1) {
 					host = hostAndPort.substring(0, cIdx);
 				} else {
