@@ -42,3 +42,6 @@ hs_err_pid*
 
 # log
 /log/
+
+# Allow releases to be committed
+!/releases/*.tar.gz
