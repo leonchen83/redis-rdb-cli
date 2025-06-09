@@ -539,9 +539,9 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
                 long ttl = parser.rdbLoadLen().len;
                 byte[] field = parser.rdbLoadEncodedStringObject().first();
                 byte[] value = parser.rdbLoadEncodedStringObject().first();
+                emitString(field);
+                Outputs.write(':', out);
                 Outputs.write('{', out);
-                emitField("field", field);
-                Outputs.write(',', out);
                 emitField("value", value);
                 Outputs.write(',', out);
                 emitField("ttl", ttl != 0L ? ttl + minExpire - 1L : 0L);
@@ -573,9 +573,10 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
                 byte[] value = listPackEntry(listPack);
                 len--;
                 long ttl = Long.parseLong(Strings.toString(listPackEntry(listPack)));
+                len--;
+                emitString(field);
+                Outputs.write(':', out);
                 Outputs.write('{', out);
-                emitField("field", field);
-                Outputs.write(',', out);
                 emitField("value", value);
                 Outputs.write(',', out);
                 emitField("ttl", ttl);

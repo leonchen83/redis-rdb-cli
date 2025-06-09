@@ -41,7 +41,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,10 +60,8 @@ import com.moilioncircle.redis.replicator.rdb.BaseRdbParser;
 import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
 import com.moilioncircle.redis.replicator.rdb.datatype.Function;
-import com.moilioncircle.redis.replicator.rdb.datatype.TTLValue;
 import com.moilioncircle.redis.replicator.util.ByteArray;
 import com.moilioncircle.redis.replicator.util.Strings;
-import com.moilioncircle.redis.replicator.util.TTLByteArrayMap;
 import com.moilioncircle.redis.replicator.util.Tuples;
 import com.moilioncircle.redis.replicator.util.type.Tuple2;
 
