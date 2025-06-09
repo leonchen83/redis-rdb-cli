@@ -430,6 +430,59 @@ public class KeyValRdbVisitor extends AbstractRctRdbVisitor {
     }
     
     @Override
+    protected Event doApplyHashMetadata(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        quote(key, out);
+        delimiter(out);
+        BaseRdbParser parser = new BaseRdbParser(in);
+        long minExpire = parser.rdbLoadMillisecondTime();
+        long len = parser.rdbLoadLen().len;
+        for (long i = 0; i < len; i++) {
+            long ttl = parser.rdbLoadLen().len;
+            byte[] field = parser.rdbLoadEncodedStringObject().first();
+            byte[] value = parser.rdbLoadEncodedStringObject().first();
+            quote(field, out);
+            delimiter(out);
+            quote(value, out);
+            delimiter(out);
+            escaper.encode(ttl != 0 ? ttl + minExpire - 1L : 0L, out);
+            if (i + 1 < len) delimiter(out);
+            else Outputs.write('\n', out);
+        }
+        return context.valueOf(new DummyKeyValuePair());
+    }
+    
+    @Override
+    protected Event doApplyHashListPackEx(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        quote(key, out);
+        delimiter(out);
+        BaseRdbParser parser = new BaseRdbParser(in);
+        long minExpire = parser.rdbLoadMillisecondTime();
+        RedisInputStream listPack = new RedisInputStream(parser.rdbLoadPlainStringObject());
+        listPack.skip(4); // total-bytes
+        int len = listPack.readInt(2);
+        while (len > 0) {
+            byte[] field = listPackEntry(listPack);
+            len--;
+            byte[] value = listPackEntry(listPack);
+            len--;
+            long ttl = Long.parseLong(Strings.toString(listPackEntry(listPack)));
+            len--;
+            quote(field, out);
+            delimiter(out);
+            quote(value, out);
+            delimiter(out);
+            escaper.encode(ttl, out);
+            if (len - 1 > 0) delimiter(out);
+            else Outputs.write('\n', out);
+        }
+        int lpend = listPack.read(); // lp-end
+        if (lpend != 255) {
+            throw new AssertionError("listpack expect 255 but " + lpend);
+        }
+        return context.valueOf(new DummyKeyValuePair());
+    }
+    
+    @Override
     public Event doApplyModule(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
         delimiter(out);

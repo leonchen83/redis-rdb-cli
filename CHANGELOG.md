@@ -1,3 +1,7 @@
+### 0.9.7
+
+Add support for redis 8.0.  
+
 ### 0.9.6
 
 Fix `rdt` convert db bug.  

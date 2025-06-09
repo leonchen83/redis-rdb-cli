@@ -800,6 +800,78 @@ public class MemoryRdbVisitor extends AbstractRctRdbVisitor implements Consumer<
 	}
 	
 	@Override
+	protected Event doApplyHashMetadata(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+		long mark = System.nanoTime();
+		BaseRdbParser parser = new BaseRdbParser(in);
+		parser.rdbLoadMillisecondTime();
+		long len = parser.rdbLoadLen().len;
+		long length = 0;
+		long val = calc.calcHashHeader(len);
+		long max = 0;
+		while (len > 0) {
+			parser.rdbLoadLen();
+			byte[] field = parser.rdbLoadEncodedStringObject().first();
+			byte[] value = parser.rdbLoadEncodedStringObject().first();
+			max = Math.max(max, 8);
+			max = Math.max(max, calc.calcElement(field));
+			max = Math.max(max, calc.calcElement(value));
+			val += calc.calcString(field) + calc.calcString(value) + calc.calcHashEntry() + 8;
+			if (version < 8) val += 2 * calc.calcObjectHeader();
+			len--;
+			length++;
+		}
+		DummyKeyValuePair kv = new DummyKeyValuePair();
+		kv.setValueRdbType(type);
+		kv.setKey(key);
+		kv.setValue(val + 8);
+		kv.setContains(true);
+		kv.setLength(length);
+		kv.setMax(max);
+		MONITOR.add(MEMORY_TYPE_COUNT, "ttlhash", 1, System.nanoTime() - mark);
+		MONITOR.add(MEMORY_TYPE_MEMORY, "ttlhash", kv.getValue());
+		return context.valueOf(kv);
+	}
+	
+	@Override
+	protected Event doApplyHashListPackEx(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+		long mark = System.nanoTime();
+		BaseRdbParser parser = new BaseRdbParser(in);
+		parser.rdbLoadMillisecondTime();
+		ByteArray ary = parser.rdbLoadPlainStringObject();
+		RedisInputStream listPack = new RedisInputStream(ary);
+		long max = 0;
+		long length = 0;
+		listPack.skip(4); // total-bytes
+		int len = listPack.readInt(2);
+		while (len > 0) {
+			byte[] field = listPackEntry(listPack);
+			len--;
+			byte[] value = listPackEntry(listPack);
+			len--;
+			byte[] ttl = listPackEntry(listPack);
+			len--;
+			max = Math.max(max, calc.calcElement(field));
+			max = Math.max(max, calc.calcElement(value));
+			max = Math.max(max, calc.calcElement(ttl));
+			length++;
+		}
+		int lpend = listPack.read(); // lp-end
+		if (lpend != 255) {
+			throw new AssertionError("listpack expect 255 but " + lpend);
+		}
+		DummyKeyValuePair kv = new DummyKeyValuePair();
+		kv.setValueRdbType(type);
+		kv.setKey(key);
+		kv.setValue(ary.length() + 8);
+		kv.setContains(true);
+		kv.setLength(length);
+		kv.setMax(max);
+		MONITOR.add(MEMORY_TYPE_COUNT, "ttlhash", 1, System.nanoTime() - mark);
+		MONITOR.add(MEMORY_TYPE_MEMORY, "ttlhash", kv.getValue());
+		return context.valueOf(kv);
+	}
+	
+	@Override
 	protected Event doApplyModule(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
 		long mark = System.nanoTime();
 		MemoryRawByteListener listener = new MemoryRawByteListener();

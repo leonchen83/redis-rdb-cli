@@ -41,6 +41,7 @@ public class CommandConstants {
     public static final byte[] LOAD = "load".getBytes();
     public static final byte[] RPUSH = "rpush".getBytes();
     public static final byte[] HMSET = "hmset".getBytes();
+    public static final byte[] FIELDS = "fields".getBytes();
     
     public static final byte[] SELECT = "select".getBytes();
     public static final byte[] REPLACE = "replace".getBytes();
@@ -54,6 +55,7 @@ public class CommandConstants {
     
     public static final byte[] EXPIREAT = "expireat".getBytes();
     public static final byte[] PEXPIREAT = "pexpireat".getBytes();
+    public static final byte[] HPEXPIREAT = "hpexpireat".getBytes();
     
     public static final byte[] RESTORE = "restore".getBytes();
     public static final byte[] RESTORE_ASKING = "restore-asking".getBytes();

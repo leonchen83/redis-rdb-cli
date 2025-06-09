@@ -34,6 +34,7 @@ public enum DataType {
     STRING("string"),
     MODULE("module"),
     STREAM("stream"),
+    TTLHASH("ttlhash"),
     SORTEDSET("sortedset");
     
     private String value;
@@ -74,6 +75,8 @@ public enum DataType {
                 return MODULE;
             case "stream":
                 return STREAM;
+            case "ttlhash":
+                return TTLHASH;
             case "sortedset":
                 return SORTEDSET;
             default:
@@ -112,6 +115,9 @@ public enum DataType {
             case 19:
             case 21:
                 return STREAM;
+            case 24: 
+            case 25:
+                return TTLHASH;
             default:
                 throw new AssertionError(type);
         }
@@ -135,6 +141,8 @@ public enum DataType {
                 return type == 6 || type == 7;
             case STREAM:
                 return type == 15 || type == 19 || type == 21;
+            case TTLHASH:
+                return type == 24 || type == 25;
         }
         return false;
     }
@@ -183,6 +191,10 @@ public enum DataType {
                 return "listpacks2";
             case 21:
                 return "listpacks3";
+            case 24:
+                return "hashmetadata";
+            case 25:
+                return "hashlistpackex";
             default:
                 throw new AssertionError("Unsupported data storage type '" + type + "'");
         }

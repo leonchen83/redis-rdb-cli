@@ -307,6 +307,34 @@ public class DiffRdbVisitor extends AbstractRctRdbVisitor {
     }
     
     @Override
+    public Event doApplyHashMetadata(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        escaper.encode(key, out);
+        delimiter(out);
+        expire(context.getExpiredType(), context.getExpiredValue());
+        version = getVersion(version);
+        try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
+            listener.write((byte) type);
+            super.doApplyHashMetadata(in, version, key, type, context);
+        }
+        Outputs.write('\n', out);
+        return context.valueOf(new DummyKeyValuePair());
+    }
+    
+    @Override
+    public Event doApplyHashListPackEx(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        escaper.encode(key, out);
+        delimiter(out);
+        expire(context.getExpiredType(), context.getExpiredValue());
+        version = getVersion(version);
+        try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
+            listener.write((byte) type);
+            super.doApplyHashListPackEx(in, version, key, type, context);
+        }
+        Outputs.write('\n', out);
+        return context.valueOf(new DummyKeyValuePair());
+    }
+    
+    @Override
     public Event doApplyModule(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         escaper.encode(key, out);
         delimiter(out);

@@ -287,11 +287,11 @@ $ docker-compose down
 ```
   
 `cd /path/to/redis-rdb-cli/conf/redis-rdb-cli.conf`  
-Then change parameter [metric_gateway](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L169) from `none` to `influxdb`.  
+Then change parameter `metric_gateway` from `none` to `influxdb`.  
   
 Open `http://localhost:3000` to check the `rct -f mem`'s result.  
   
-If you deployed this tool in multi instance, you need to change parameter [metric_instance](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L215) to make sure unique between instances.  
+If you deployed this tool in multi instance, you need to change parameter `metric_instance` to make sure unique between instances.  
   
 ## Redis 6
   
@@ -309,8 +309,8 @@ $ openssl pkcs12 -export -CAfile ca.crt -in redis.crt -inkey redis.key -out redi
 ```
   
 2. If source redis and target redis use the same keystore. then config following parameters  
-[source_keystore_path](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L230) and [target_keystore_path](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L259) to point to `/path/to/redis-6.0-rc1/tests/tls/redis.p12`  
-set [source_keystore_pass](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L238) and [target_keystore_pass](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf#L267)  
+`source_keystore_path` and `target_keystore_path` to point to `/path/to/redis-6.0-rc1/tests/tls/redis.p12`  
+set `source_keystore_pass` and `target_keystore_pass`  
   
 3. after config ssl parameters use `rediss://host:port` in your command to open ssl, for example: `rst -s rediss://127.0.0.1:6379 -m rediss://127.0.0.1:30001 -r -d 0`
   
@@ -456,13 +456,13 @@ User should follow the steps below to implement a sink service.
         <dependency>
             <groupId>com.moilioncircle</groupId>
             <artifactId>redis-rdb-cli-api</artifactId>
-            <version>1.8.0</version>
+            <version>1.9.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.moilioncircle</groupId>
             <artifactId>redis-replicator</artifactId>
-            <version>[3.6.4, )</version>
+            <version>[3.9.0, )</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

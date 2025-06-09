@@ -28,6 +28,7 @@ import com.moilioncircle.redis.replicator.event.Event;
 import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
+import com.moilioncircle.redis.replicator.rdb.datatype.Slot;
 
 /**
  * @author Baoyi Chen
@@ -113,6 +114,16 @@ public class MergeRdbVisitor extends AbstractRdtRdbVisitor {
         listener.setGuard(Guard.PASS);
         try {
             return super.applyEof(in, version);
+        } finally {
+            listener.setGuard(Guard.SAVE);
+        }
+    }
+    
+    @Override
+    public Slot applySlotInfo(RedisInputStream in, int version) throws IOException {
+        listener.setGuard(Guard.PASS);
+        try {
+            return super.applySlotInfo(in, version);
         } finally {
             listener.setGuard(Guard.SAVE);
         }

@@ -171,6 +171,16 @@ public class FormatterRdbVisitor extends BaseRdbVisitor {
     protected Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         return formatter.applyListQuickList2(replicator, in, version, key, type, context);
     }
+    
+    @Override
+    protected Event doApplyHashMetadata(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        return formatter.applyHashMetadata(replicator, in, version, key, type, context);
+    }
+    
+    @Override
+    protected Event doApplyHashListPackEx(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        return formatter.applyHashListPackEx(replicator, in, version, key, type, context);
+    }
 
     @Override
     protected Event doApplyModule(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {

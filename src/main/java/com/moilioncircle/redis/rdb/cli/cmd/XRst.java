@@ -65,6 +65,8 @@ import com.moilioncircle.redis.replicator.cmd.parser.GetSetParser;
 import com.moilioncircle.redis.replicator.cmd.parser.HDelParser;
 import com.moilioncircle.redis.replicator.cmd.parser.HIncrByParser;
 import com.moilioncircle.redis.replicator.cmd.parser.HMSetParser;
+import com.moilioncircle.redis.replicator.cmd.parser.HPExpireAtParser;
+import com.moilioncircle.redis.replicator.cmd.parser.HPersistParser;
 import com.moilioncircle.redis.replicator.cmd.parser.HSetNxParser;
 import com.moilioncircle.redis.replicator.cmd.parser.HSetParser;
 import com.moilioncircle.redis.replicator.cmd.parser.IncrByParser;
@@ -133,6 +135,7 @@ import com.moilioncircle.redis.replicator.cmd.parser.ZRemRangeByLexParser;
 import com.moilioncircle.redis.replicator.cmd.parser.ZRemRangeByRankParser;
 import com.moilioncircle.redis.replicator.cmd.parser.ZRemRangeByScoreParser;
 import com.moilioncircle.redis.replicator.cmd.parser.ZUnionStoreParser;
+import com.moilioncircle.redis.replicator.cmd.parser.HSetExParser;
 import com.moilioncircle.redis.replicator.event.PreRdbSyncEvent;
 import com.moilioncircle.redis.replicator.rdb.RdbVisitor;
 
@@ -354,6 +357,10 @@ public class XRst implements Callable<Integer> {
 		// since redis 7.0
 		replicator.addCommandParser(CommandName.name("SPUBLISH"), new CombineCommandParser(new SPublishParser()));
 		replicator.addCommandParser(CommandName.name("FUNCTION"), new CombineCommandParser(new FunctionParser()));
+		// since redis 7.4
+		replicator.addCommandParser(CommandName.name("HSETEX"), new CombineCommandParser(new HSetExParser()));
+		replicator.addCommandParser(CommandName.name("HPEXPIREAT"), new CombineCommandParser(new HPExpireAtParser()));
+		replicator.addCommandParser(CommandName.name("HPERSIST"), new CombineCommandParser(new HPersistParser()));
 		return replicator;
 	}
 }

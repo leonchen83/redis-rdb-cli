@@ -101,7 +101,7 @@ public class XRmt implements Callable<Integer> {
 	@Option(names = {"-k", "--key"}, arity = "1..*", paramLabel = "<regex>", description = {"Keys to export. this can be a regex. if not", "specified, all keys will be returned."})
 	private List<String> regexs;
 	
-	@Option(names = {"-t", "--type"}, arity = "1..*", description = {"Data type to export. possible values are", "string, hash, set, sortedset, list, module, ", "stream. multiple types can be provided. if not", "specified, all data types will be returned."})
+	@Option(names = {"-t", "--type"}, arity = "1..*", description = {"Data type to export. possible values are", "string, hash, ttlhash, set, sortedset, list, module, ", "stream. multiple types can be provided. if not", "specified, all data types will be returned."})
 	private List<String> type;
 	
 	@Option(names = {"-r", "--replace"}, description = {"Replace exist key value. if not specified,", "default value is false."})

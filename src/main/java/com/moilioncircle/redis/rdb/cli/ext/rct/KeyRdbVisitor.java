@@ -149,6 +149,20 @@ public class KeyRdbVisitor extends AbstractRctRdbVisitor {
     }
     
     @Override
+    protected Event doApplyHashMetadata(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        quote(key, out);
+        Outputs.write('\n', out);
+        return super.doApplyHashMetadata(in, version, key, type, context);
+    }
+    
+    @Override
+    protected Event doApplyHashListPackEx(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        quote(key, out);
+        Outputs.write('\n', out);
+        return super.doApplyHashListPackEx(in, version, key, type, context);
+    }
+    
+    @Override
     public Event doApplyModule(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         quote(key, out);
         Outputs.write('\n', out);

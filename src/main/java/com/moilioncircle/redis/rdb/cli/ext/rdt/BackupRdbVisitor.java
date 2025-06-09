@@ -36,6 +36,7 @@ import com.moilioncircle.redis.replicator.io.RedisInputStream;
 import com.moilioncircle.redis.replicator.rdb.BaseRdbEncoder;
 import com.moilioncircle.redis.replicator.rdb.datatype.ContextKeyValuePair;
 import com.moilioncircle.redis.replicator.rdb.datatype.DB;
+import com.moilioncircle.redis.replicator.rdb.datatype.Slot;
 
 /**
  * @author Baoyi Chen
@@ -82,7 +83,7 @@ public class BackupRdbVisitor extends AbstractRdtRdbVisitor {
             listener.setGuard(Guard.SAVE);
         }
     }
-
+    
     @Override
     public Event applyModuleAux(RedisInputStream in, int version) throws IOException {
         listener.setGuard(Guard.DRAIN);
@@ -163,6 +164,16 @@ public class BackupRdbVisitor extends AbstractRdtRdbVisitor {
         listener.setGuard(Guard.DRAIN);
         try {
             return super.applyResizeDB(in, version, context);
+        } finally {
+            listener.setGuard(Guard.SAVE);
+        }
+    }
+    
+    @Override
+    public Slot applySlotInfo(RedisInputStream in, int version) throws IOException {
+        listener.setGuard(Guard.DRAIN);
+        try {
+            return super.applySlotInfo(in, version);
         } finally {
             listener.setGuard(Guard.SAVE);
         }
