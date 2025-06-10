@@ -26,13 +26,5 @@ jobs:
           file: ./Dockerfile
           push: false
           tags: ${{ secrets.DOCKER_USER }}/${{ secrets.REPO }}:latest
-      - name: Build docker latest-native
-        id: latest-native
-        uses: docker/build-push-action@v4
-        with:
-          context: ./
-          file: ./DockerfileNative
-          push: false
-          tags: ${{ secrets.DOCKER_USER }}/${{ secrets.REPO }}:latest-native
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
