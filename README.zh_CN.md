@@ -57,20 +57,8 @@ $ ./rct -h
 ## 在docker中运行
 
 ```shell
-# run with jvm
 $ docker run -it --rm redisrdbcli/redis-rdb-cli:latest
 $ rct -V
-
-# run without jvm
-$ docker run -it --rm redisrdbcli/redis-rdb-cli:latest-native
-$ rct -V
-```
-
-## 在docker中通过graalvm构建native image
-```shell
-$ docker build -m 8g -f DockerfileNative -t redisrdbcli:redis-rdb-cli .
-$ docker run -it redisrdbcli:redis-rdb-cli bash
-$ bash-5.1# rct -V
 ```
 
 ## 设置Windows环境变量
