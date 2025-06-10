@@ -1,3 +1,8 @@
+### 0.9.7
+
+Add support for redis 8.0.  
+Remove native image support.  
+
 ### 0.9.6
 
 Fix `rdt` convert db bug.  

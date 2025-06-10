@@ -1,9 +1,0 @@
-{ "rules":  [
-  {"excludeClasses": "apple.**"},
-  {"excludeClasses": "com.intellij.**"},
-  {"excludeClasses": "sun.security.rsa.**"},
-  {"excludeClasses": "sun.security.ssl.**"},
-  {"excludeClasses": "sun.security.pkcs12.**"},
-  {"excludeClasses": "sun.security.provider.**"},
-  {"excludeClasses": "com.sun.crypto.provider.**"}
-]}

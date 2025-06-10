@@ -195,6 +195,22 @@ public abstract class AbstractRmtRdbVisitor extends BaseRdbVisitor {
 	}
 	
 	@Override
+	protected Event doApplyHashMetadata(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+		DumpKeyValuePair dump = new DumpKeyValuePair();
+		dump.setKey(key);
+		dump.setValue(valueVisitor.applyHashMetadata(in, version));
+		return context.valueOf(dump);
+	}
+	
+	@Override
+	protected Event doApplyHashListPackEx(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+		DumpKeyValuePair dump = new DumpKeyValuePair();
+		dump.setKey(key);
+		dump.setValue(valueVisitor.applyHashListPackEx(in, version));
+		return context.valueOf(dump);
+	}
+	
+	@Override
 	protected Event doApplyModule(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
 		DumpKeyValuePair dump = new DumpKeyValuePair();
 		dump.setKey(key);

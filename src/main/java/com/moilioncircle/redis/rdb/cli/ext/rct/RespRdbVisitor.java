@@ -18,13 +18,17 @@ package com.moilioncircle.redis.rdb.cli.ext.rct;
 
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.DEL;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.EXPIREAT;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.FIELDS;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.HMSET;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.HPEXPIREAT;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.ONE;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.PEXPIREAT;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.RPUSH;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.SADD;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.SELECT;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.SET;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.ZADD;
+import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.ZERO;
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.ZERO_BUF;
 import static com.moilioncircle.redis.rdb.cli.util.Collections.isEmpty;
 import static com.moilioncircle.redis.replicator.Constants.QUICKLIST_NODE_CONTAINER_PACKED;
@@ -36,7 +40,10 @@ import static java.nio.ByteBuffer.wrap;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.moilioncircle.redis.rdb.cli.api.format.escape.Escaper;
 import com.moilioncircle.redis.rdb.cli.cmd.Args;
@@ -55,6 +62,8 @@ import com.moilioncircle.redis.replicator.rdb.datatype.DB;
 import com.moilioncircle.redis.replicator.rdb.datatype.Function;
 import com.moilioncircle.redis.replicator.util.ByteArray;
 import com.moilioncircle.redis.replicator.util.Strings;
+import com.moilioncircle.redis.replicator.util.Tuples;
+import com.moilioncircle.redis.replicator.util.type.Tuple2;
 
 /**
  * @author Baoyi Chen
@@ -587,6 +596,86 @@ public class RespRdbVisitor extends AbstractRctRdbVisitor {
         kv.setKey(key);
         kv.setContains(true);
         return context.valueOf(kv);
+    }
+    
+    @Override
+    protected Event doApplyHashMetadata(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        if (replace) Protocols.emit(this.out, DEL, key);
+        BaseRdbParser parser = new BaseRdbParser(in);
+        long minExpire = parser.rdbLoadMillisecondTime();
+        long len = parser.rdbLoadLen().len;
+        Map<byte[], Tuple2<byte[], byte[]>> map = new LinkedHashMap<>((int) len);
+        while (len > 0) {
+            long ttl = parser.rdbLoadLen().len;
+            byte[] field = parser.rdbLoadEncodedStringObject().first();
+            byte[] value = parser.rdbLoadEncodedStringObject().first();
+            ttl = ttl != 0L ? ttl + minExpire - 1L : 0L;
+            map.put(field, Tuples.of(String.valueOf(ttl).getBytes(), value));
+            if (map.size() == batch) {
+                ttlHash(key, map);
+                map.clear();
+            }
+            len--;
+        }
+        if (!map.isEmpty()) {
+            ttlHash(key, map);
+        }
+        DummyKeyValuePair kv = new DummyKeyValuePair();
+        kv.setValueRdbType(type);
+        kv.setKey(key);
+        kv.setContains(true);
+        return context.valueOf(kv);
+    }
+    
+    @Override
+    protected Event doApplyHashListPackEx(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        if (replace) Protocols.emit(this.out, DEL, key);
+        BaseRdbParser parser = new BaseRdbParser(in);
+        long minExpire = parser.rdbLoadMillisecondTime();
+        RedisInputStream listPack = new RedisInputStream(parser.rdbLoadPlainStringObject());
+        listPack.skip(4); // total-bytes
+        int len = listPack.readInt(2);
+        Map<byte[], Tuple2<byte[], byte[]>> map = new LinkedHashMap<>(len / 3);
+        while (len > 0) {
+            byte[] field = listPackEntry(listPack);
+            len--;
+            byte[] value = listPackEntry(listPack);
+            len--;
+            byte[] ttl = listPackEntry(listPack);
+            len--;
+            map.put(field, Tuples.of(ttl, value));
+            if (map.size() == batch) {
+                ttlHash(key, map);
+                map.clear();
+            }
+        }
+        int lpend = listPack.read(); // lp-end
+        if (lpend != 255) {
+            throw new AssertionError("listpack expect 255 but " + lpend);
+        }
+        if (!map.isEmpty()) {
+            ttlHash(key, map);
+        }
+        DummyKeyValuePair kv = new DummyKeyValuePair();
+        kv.setValueRdbType(type);
+        kv.setKey(key);
+        kv.setContains(true);
+        return context.valueOf(kv);
+    }
+    
+    private void ttlHash(byte[] key, Map<byte[], Tuple2<byte[], byte[]>> map) {
+        List<byte[]> list = new ArrayList<>(map.size() * 2);
+        for (Map.Entry<byte[], Tuple2<byte[], byte[]>> entry : map.entrySet()) {
+            list.add(entry.getKey());
+            list.add(entry.getValue().getV2());
+        }
+        Protocols.emit(this.out, HMSET, key, list);
+        for (Map.Entry<byte[], Tuple2<byte[], byte[]>> entry : map.entrySet()) {
+            byte[] v = entry.getValue().getV1();
+            if (!Arrays.equals(v, ZERO)) {
+                Protocols.emit(this.out, HPEXPIREAT, key, v, FIELDS, ONE, entry.getKey());
+            }
+        }
     }
     
     @Override

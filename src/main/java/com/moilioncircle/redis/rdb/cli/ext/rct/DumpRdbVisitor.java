@@ -617,6 +617,100 @@ public class DumpRdbVisitor extends AbstractRctRdbVisitor {
     }
     
     @Override
+    protected Event doApplyHashMetadata(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        ByteBuffer ex = ZERO_BUF;
+        if (context.getExpiredValue() != null) {
+            long ms = context.getExpiredValue() - System.currentTimeMillis();
+            if (ms <= 0) {
+                return super.doApplyHashMetadata(in, version, key, type, context);
+            } else {
+                ex = wrap(String.valueOf(ms).getBytes());
+            }
+        }
+        version = getVersion(version);
+        try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
+            if (version < 12 /* since redis rdb version 12 */) {
+                // downgrade to RDB_TYPE_HASH
+                BaseRdbParser parser = new BaseRdbParser(in);
+                BaseRdbEncoder encoder = new BaseRdbEncoder();
+                ByteBufferOutputStream out1 = new ByteBufferOutputStream(configure.getOutputBufferSize());
+                long minExpire = parser.rdbLoadMillisecondTime();
+                long len = parser.rdbLoadLen().len;
+                long total = len;
+                while (len > 0) {
+                    parser.rdbLoadLen(); // ignore ttl
+                    ByteArray field = parser.rdbLoadEncodedStringObject();
+                    encoder.rdbGenericSaveStringObject(field, out1);
+                    ByteArray value = parser.rdbLoadEncodedStringObject();
+                    encoder.rdbGenericSaveStringObject(value, out1);
+                    len--;
+                }
+                try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper, false)) {
+                    listener.write((byte) RDB_TYPE_HASH);
+                    listener.handle(encoder.rdbSaveLen(total));
+                    listener.handle(out1.toByteBuffer());
+                }
+            } else {
+                try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
+                    listener.write((byte) type);
+                    super.doApplyHashMetadata(in, version, key, type, context);
+                }
+            }
+            Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
+            return context.valueOf(new DummyKeyValuePair());
+        }
+    }
+    
+    @Override
+    protected Event doApplyHashListPackEx(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        ByteBuffer ex = ZERO_BUF;
+        if (context.getExpiredValue() != null) {
+            long ms = context.getExpiredValue() - System.currentTimeMillis();
+            if (ms <= 0) {
+                return super.doApplyHashListPackEx(in, version, key, type, context);
+            } else {
+                ex = wrap(String.valueOf(ms).getBytes());
+            }
+        }
+        version = getVersion(version);
+        try (LayeredOutputStream out = new LayeredOutputStream(configure)) {
+            if (version < 12 /* since redis rdb version 12 */) {
+                // downgrade to RDB_TYPE_HASH
+                BaseRdbParser parser = new BaseRdbParser(in);
+                BaseRdbEncoder encoder = new BaseRdbEncoder();
+                ByteBufferOutputStream out1 = new ByteBufferOutputStream(configure.getOutputBufferSize());
+                long minExpire = parser.rdbLoadMillisecondTime();
+                RedisInputStream listPack = new RedisInputStream(parser.rdbLoadPlainStringObject());
+                listPack.skip(4); // total-bytes
+                int len = listPack.readInt(2);
+                long targetLen = len / 3;
+                while (len > 0) {
+                    byte[] field = listPackEntry(listPack);
+                    encoder.rdbGenericSaveStringObject(new ByteArray(field), out1);
+                    len--;
+                    byte[] value = listPackEntry(listPack);
+                    encoder.rdbGenericSaveStringObject(new ByteArray(value), out1);
+                    len--;
+                    byte[] ttl = listPackEntry(listPack);
+                    len--;
+                }
+                try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper, false)) {
+                    listener.write((byte) RDB_TYPE_HASH);
+                    listener.handle(encoder.rdbSaveLen(targetLen));
+                    listener.handle(out1.toByteBuffer());
+                }
+            } else {
+                try (DumpRawByteListener listener = new DumpRawByteListener(replicator, version, out, escaper)) {
+                    listener.write((byte) type);
+                    super.doApplyHashListPackEx(in, version, key, type, context);
+                }
+            }
+            Protocols.restore(this.out, wrap(key), ex, out.toByteBuffers(), replace);
+            return context.valueOf(new DummyKeyValuePair());
+        }
+    }
+    
+    @Override
     protected Event doApplyModule(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         ByteBuffer ex = ZERO_BUF;
         if (context.getExpiredValue() != null) {

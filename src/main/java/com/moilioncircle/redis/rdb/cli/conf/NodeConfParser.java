@@ -74,7 +74,13 @@ public class NodeConfParser {
 				String hostAndPort = args.get(1);
 				int cIdx = hostAndPort.indexOf(":");
 				int aIdx = hostAndPort.indexOf("@");
-				String host = hostAndPort.substring(0, cIdx); // ip
+				int commaIdx = hostAndPort.indexOf(",");
+				String host;
+				if (commaIdx == -1) {
+					host = hostAndPort.substring(0, cIdx);
+				} else {
+					host = hostAndPort.substring(commaIdx + 1);
+				}
 				int port = parseInt(hostAndPort.substring(cIdx + 1, aIdx == -1 ? hostAndPort.length() : aIdx));
 				node.setHostAndPort(new HostAndPort(host, port));
 				boolean master = false;

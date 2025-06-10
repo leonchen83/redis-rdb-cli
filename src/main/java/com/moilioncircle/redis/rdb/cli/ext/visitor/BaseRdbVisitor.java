@@ -21,6 +21,8 @@ import static com.moilioncircle.redis.rdb.cli.glossary.Guard.PASS;
 import static com.moilioncircle.redis.rdb.cli.glossary.Guard.SAVE;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_HASH;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_HASH_LISTPACK;
+import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_HASH_LISTPACK_EX;
+import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_HASH_METADATA;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_HASH_ZIPLIST;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_HASH_ZIPMAP;
 import static com.moilioncircle.redis.replicator.Constants.RDB_TYPE_LIST;
@@ -388,6 +390,44 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
 	}
 	
 	@Override
+	public Event applyHashMetadata(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
+		try {
+			BaseRdbParser parser = new BaseRdbParser(in);
+			byte[] key = parser.rdbLoadEncodedStringObject().first();
+			boolean contains = filter.contains(context.getDb().getDbNumber(), RDB_TYPE_HASH_METADATA, Strings.toString(key), context.getExpiredType() != ExpiredType.NONE);
+			if (contains) {
+				if (listener != null) listener.setGuard(DRAIN);
+				return doApplyHashMetadata(in, version, key, RDB_TYPE_HASH_METADATA, context);
+			} else {
+				if (listener != null) listener.setGuard(PASS);
+				valueVisitor.applyHashMetadata(in, version);
+				return context.valueOf(new DummyKeyValuePair());
+			}
+		} finally {
+			if (listener != null) listener.setGuard(SAVE);
+		}
+	}
+	
+	@Override
+	public Event applyHashListPackEx(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
+		try {
+			BaseRdbParser parser = new BaseRdbParser(in);
+			byte[] key = parser.rdbLoadEncodedStringObject().first();
+			boolean contains = filter.contains(context.getDb().getDbNumber(), RDB_TYPE_HASH_LISTPACK_EX, Strings.toString(key), context.getExpiredType() != ExpiredType.NONE);
+			if (contains) {
+				if (listener != null) listener.setGuard(DRAIN);
+				return doApplyHashListPackEx(in, version, key, RDB_TYPE_HASH_LISTPACK_EX, context);
+			} else {
+				if (listener != null) listener.setGuard(PASS);
+				valueVisitor.applyHashListPackEx(in, version);
+				return context.valueOf(new DummyKeyValuePair());
+			}
+		} finally {
+			if (listener != null) listener.setGuard(SAVE);
+		}
+	}
+	
+	@Override
 	public Event applyModule(RedisInputStream in, int version, ContextKeyValuePair context) throws IOException {
 		try {
 			BaseRdbParser parser = new BaseRdbParser(in);
@@ -559,6 +599,16 @@ public abstract class BaseRdbVisitor extends DefaultRdbVisitor {
 	
 	protected Event doApplyListQuickList2(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
 		valueVisitor.applyListQuickList2(in, version);
+		return context.valueOf(new DummyKeyValuePair());
+	}
+	
+	protected Event doApplyHashMetadata(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+		valueVisitor.applyHashMetadata(in, version);
+		return context.valueOf(new DummyKeyValuePair());
+	}
+	
+	protected Event doApplyHashListPackEx(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+		valueVisitor.applyHashListPackEx(in, version);
 		return context.valueOf(new DummyKeyValuePair());
 	}
 	

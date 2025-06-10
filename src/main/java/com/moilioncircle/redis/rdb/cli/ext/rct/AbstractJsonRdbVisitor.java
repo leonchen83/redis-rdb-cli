@@ -525,6 +525,74 @@ public abstract class AbstractJsonRdbVisitor extends AbstractRctRdbVisitor {
     }
     
     @Override
+    protected Event doApplyHashMetadata(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        json(context, key, type, () -> {
+            Outputs.write('{', out);
+            BaseRdbParser parser = new BaseRdbParser(in);
+            long minExpire = parser.rdbLoadMillisecondTime();
+            long len = parser.rdbLoadLen().len;
+            boolean flag = true;
+            while (len > 0) {
+                if (!flag) {
+                    Outputs.write(',', out);
+                }
+                long ttl = parser.rdbLoadLen().len;
+                byte[] field = parser.rdbLoadEncodedStringObject().first();
+                byte[] value = parser.rdbLoadEncodedStringObject().first();
+                emitString(field);
+                Outputs.write(':', out);
+                Outputs.write('{', out);
+                emitField("value", value);
+                Outputs.write(',', out);
+                emitField("ttl", ttl != 0L ? ttl + minExpire - 1L : 0L);
+                Outputs.write('}', out);
+                flag = false;
+                len--;
+            }
+            Outputs.write('}', out);
+        });
+        return context.valueOf(new DummyKeyValuePair());
+    }
+    
+    @Override
+    protected Event doApplyHashListPackEx(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        json(context, key, type, () -> {
+            Outputs.write('{', out);
+            BaseRdbParser parser = new BaseRdbParser(in);
+            long minExpire = parser.rdbLoadMillisecondTime();
+            RedisInputStream listPack = new RedisInputStream(parser.rdbLoadPlainStringObject());
+            boolean flag = true;
+            listPack.skip(4); // total-bytes
+            int len = listPack.readInt(2);
+            while (len > 0) {
+                if (!flag) {
+                    Outputs.write(',', out);
+                }
+                byte[] field = listPackEntry(listPack);
+                len--;
+                byte[] value = listPackEntry(listPack);
+                len--;
+                long ttl = Long.parseLong(Strings.toString(listPackEntry(listPack)));
+                len--;
+                emitString(field);
+                Outputs.write(':', out);
+                Outputs.write('{', out);
+                emitField("value", value);
+                Outputs.write(',', out);
+                emitField("ttl", ttl);
+                Outputs.write('}', out);
+                flag = false;
+            }
+            int lpend = listPack.read(); // lp-end
+            if (lpend != 255) {
+                throw new AssertionError("listpack expect 255 but " + lpend);
+            }
+            Outputs.write('}', out);
+        });
+        return context.valueOf(new DummyKeyValuePair());
+    }
+    
+    @Override
     protected Event doApplyModule(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
         json(context, key, type, () -> {
             Outputs.write('"', out);

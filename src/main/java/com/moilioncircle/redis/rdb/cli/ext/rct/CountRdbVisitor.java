@@ -188,6 +188,18 @@ public class CountRdbVisitor extends AbstractRctRdbVisitor implements EventListe
         counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
         return super.doApplyListQuickList2(in, version, key, type, context);
     }
+    
+    @Override
+    public Event doApplyHashMetadata(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
+        return super.doApplyHashMetadata(in, version, key, type, context);
+    }
+    
+    @Override
+    public Event doApplyHashListPackEx(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
+        counter.compute(DataType.parse(type).getValue(), (k, v) -> v == null ? 1 : v + 1);
+        return super.doApplyHashListPackEx(in, version, key, type, context);
+    }
 
     @Override
     public Event doApplyModule(RedisInputStream in, int version, byte[] key, int type, ContextKeyValuePair context) throws IOException {
