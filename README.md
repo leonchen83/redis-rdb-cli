@@ -1,32 +1,32 @@
 # redis-rdb-cli
 
-<a href="https://www.paypal.com/paypalme/leonchen83" target="_blank"><img src="https://github.com/leonchen83/share/blob/master/other/buymeacoffee.jpg?raw=true" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
+<a href="https://raw.githubusercontent.com/leonchen83/share/master/other/wechat_payment.png" target="_blank"><img src="https://github.com/leonchen83/share/blob/master/other/buymeacoffee.jpg?raw=true" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
 
-A tool that can parse, filter, split, concat rdb and analyze memory usage offline. It can also sync 2 redis data and allow user define there own sink service to migrate redis data to somewhere.
+A tool that can parse, filter, split, and merge RDB files, as well as analyze memory usage offline. It can also sync data between two Redis instances and allows users to define their own sink services to migrate Redis data to custom destinations.
 
 [![Java CI](https://github.com/leonchen83/redis-rdb-cli/actions/workflows/maven.yml/badge.svg)](https://github.com/leonchen83/redis-rdb-cli/actions/workflows/maven.yml)
 [![Gitter](https://badges.gitter.im/leonchen83/redis-rdb-cli.svg)](https://gitter.im/leonchen83/redis-rdb-cli?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Hex.pm](https://img.shields.io/hexpm/l/plug.svg?maxAge=2592000)](https://github.com/leonchen83/redis-rdb-cli/blob/master/LICENSE)  
   
-## Chat with author  
+## Chat with the Author
   
 [![Join the chat at https://gitter.im/leonchen83/redis-rdb-cli](https://badges.gitter.im/leonchen83/redis-rdb-cli.svg)](https://gitter.im/leonchen83/redis-rdb-cli?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)  
   
-## Contract the author
+## Contact the Author
   
 **chen.bao.yi@gmail.com**  
   
-## Binary release
+## Binary Releases
 
-[binary releases](https://github.com/leonchen83/redis-rdb-cli/releases)
+[Binary Releases](https://github.com/leonchen83/redis-rdb-cli/releases)
 
-## Runtime requirement
+## Runtime Requirements
 
 ```text
-jdk 11+
+JDK 11 or later
 ```
 
-## Install
+## Installation
 
 ```shell
 $ wget https://github.com/leonchen83/redis-rdb-cli/releases/download/${version}/redis-rdb-cli-release.zip
@@ -35,17 +35,15 @@ $ cd ./redis-rdb-cli/bin
 $ ./rct -h
 ```
 
-## Compile requirement
+## Compiling from Source
 
+### Requirements
 ```text
-
-jdk 11+
-maven-3.6.0+
-
+JDK 11 or later
+Maven 3.3.1 or later
 ```
 
-## Compile & run
-
+### Compile & Run
 ```shell
 $ git clone https://github.com/leonchen83/redis-rdb-cli.git
 $ cd redis-rdb-cli
@@ -54,65 +52,51 @@ $ cd target/redis-rdb-cli-release/redis-rdb-cli/bin
 $ ./rct -h 
 ```
 
-## Run in docker
+## Running with Docker
 
 ```shell
-# run with jvm
 $ docker run -it --rm redisrdbcli/redis-rdb-cli:latest
 $ rct -V
-
-# run without jvm
-$ docker run -it --rm redisrdbcli/redis-rdb-cli:latest-native
-$ rct -V
-```
-
-## Build native image via graalvm in docker
-```shell
-$ docker build -m 8g -f DockerfileNative -t redisrdbcli:redis-rdb-cli .
-$ docker run -it redisrdbcli:redis-rdb-cli bash
-$ bash-5.1# rct -V
 ```
 
 ## Windows Environment Variables
   
-Add `/path/to/redis-rdb-cli/bin` to `Path` environment variable  
+To run the commands from any directory, add the `/path/to/redis-rdb-cli/bin` directory to your system's `Path` environment variable.
   
 ## Usage
 
-### Redis mass insertion
+### Mass Insertion
 
 ```shell
-
 $ rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -r
 $ cat /path/to/dump.aof | /redis/src/redis-cli -p 6379 --pipe
-
 ```
 
-### Convert rdb to dump format
+### Convert RDB to Dump Format
 
 ```shell
 $ rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof
 ```
 
-### Convert rdb to json format
+### Convert RDB to JSON Format
 
 ```shell
 $ rct -f json -s /path/to/dump.rdb -o /path/to/dump.json
 ```
 
-### Numbers of key in rdb
+### Count Keys in RDB
 
 ```shell
 $ rct -f count -s /path/to/dump.rdb -o /path/to/dump.csv
 ```
 
-### Find top 50 largest keys
+### Find Top 50 Largest Keys
 
 ```shell
 $ rct -f mem -s /path/to/dump.rdb -o /path/to/dump.mem -l 50
 ```
 
-### Diff rdb
+### Diff RDBs
 
 ```shell
 $ rct -f diff -s /path/to/dump1.rdb -o /path/to/dump1.diff
@@ -120,216 +104,204 @@ $ rct -f diff -s /path/to/dump2.rdb -o /path/to/dump2.diff
 $ diff /path/to/dump1.diff /path/to/dump2.diff
 ```
 
-### Convert rdb to RESP
+### Convert RDB to RESP
 
 ```shell
 $ rct -f resp -s /path/to/dump.rdb -o /path/to/appendonly.aof
 ```
 
-### Sync with 2 redis
+### Sync Two Redis Instances
 ```shell
 $ rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -r
 ```
 
-### Sync single redis to redis cluster
+### Sync a Single Instance to a Redis Cluster
 ```shell
 $ rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:30001 -r -d 0
 ```
 
-### Handle infinite loop in rst command
+### Handling Infinite Loops in `rst`
 
 ```shell
-# set client-output-buffer-limit in source redis
+# Set client-output-buffer-limit in the source Redis instance
 $ redis-cli config set client-output-buffer-limit "slave 0 0 0"
 $ rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -r
 ```
 
-### Migrate rdb to remote redis
+### Migrate RDB to a Remote Redis Instance
 
 ```shell
 $ rmt -s /path/to/dump.rdb -m redis://192.168.1.105:6379 -r
 ```
 
-### Downgrade migration
+### Downgrade Migration
 
 ```shell
-
-# Migrate data from redis-7 to redis-6
-# About dump_rdb_version please see comment in redis-rdb-cli.conf
+# Migrate data from Redis 7 to Redis 6
+# For `dump_rdb_version`, please see the comments in redis-rdb-cli.conf
 $ sed -i 's/dump_rdb_version=-1/dump_rdb_version=9/g' /path/to/redis-rdb-cli/conf/redis-rdb-cli.conf
 $ rmt -s redis://com.redis7:6379 -m redis://com.redis6:6379 -r
 ```
 
-### Handle big key in migration
+### Handling Large Keys During Migration
 ```shell
-
-# set proto-max-bulk-len in target redis
+# Set proto-max-bulk-len in the target Redis instance
 $ redis-cli -h ${host} -p 6380 -a ${pwd} config set proto-max-bulk-len 2048mb
 
-# set Xms Xmx in redis-rdb-cli node
+# Set Xms and Xmx for the redis-rdb-cli node
 $ export JAVA_TOOL_OPTIONS="-Xms8g -Xmx8g"
 
-# execute migration
+# Execute migration
 $ rmt -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -r
-
 ```
 
-### Migrate rdb to remote redis cluster
+### Migrate RDB to a Remote Redis Cluster
 
+Using `nodes.conf`:
 ```shell
 $ rmt -s /path/to/dump.rdb -c ./nodes-30001.conf -r
 ```
 
-or simply use following cmd without `nodes-30001.conf`
-
+Alternatively, you can connect to one of the cluster nodes directly:
 ```shell
 $ rmt -s /path/to/dump.rdb -m redis://127.0.0.1:30001 -r
 ```
 
-### Backup remote rdb
+### Backup a Remote RDB
 
 ```shell
 $ rdt -b redis://192.168.1.105:6379 -o /path/to/dump.rdb
 ```
 
-### Backup remote rdb and convert db to dest db
+### Backup Remote RDB and Change Database Index
 
 ```shell
 $ rdt -b redis://192.168.1.105:6379 -o /path/to/dump.rdb --goal 3
 ```
 
-### Filter rdb
+### Filter an RDB File
 
 ```shell
 $ rdt -b /path/to/dump.rdb -o /path/to/filtered-dump.rdb -d 0 -t string
 ```
 
-### Split rdb via cluster's nodes.conf
+### Split an RDB File using a Cluster's `nodes.conf`
 
 ```shell
 $ rdt -s ./dump.rdb -c ./nodes.conf -o /path/to/folder -d 0
 ```
 
-### Concat multi rdb to one
+### Concat Multiple RDB Files
 
 ```shell
 $ rdt -m ./dump1.rdb ./dump2.rdb -o ./dump.rdb -t hash
 ```
 
-### Cut aof-use-rdb-preamble file to rdb file and aof file
+### Extract RDB and AOF from a Mixed File
 
 ```shell
 $ rcut -s ./aof-use-rdb-preamble.aof -r ./dump.rdb -a ./appendonly.aof
 ```
 
-### Other parameter
+### Additional Configuration
 
-More configurable parameter can be modified in `/path/to/redis-rdb-cli/conf/redis-rdb-cli.conf`
+Additional configuration parameters can be modified in `/path/to/redis-rdb-cli/conf/redis-rdb-cli.conf`.
 
-### Filter
+### Filtering
 
-1. `rct`, `rdt` and `rmt` these 3 commands support data filter by `type`,`db` and `key` RegEx(Java style).  
-2. `rst` this command only support data filter by `db`.  
+The `rct`, `rdt`, and `rmt` commands support filtering by data `type`, `db` index, and `key` (using Java-style regular expressions). The `rst` command supports filtering by `db` index only.
   
 For example:
-
 ```shell
-
 $ rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -d 0
 $ rct -f dump -s /path/to/dump.rdb -o /path/to/dump.aof -t string hash
 $ rmt -s /path/to/dump.rdb -m redis://192.168.1.105:6379 -r -d 0 1 -t list
 $ rst -s redis://127.0.0.1:6379 -m redis://127.0.0.1:6380 -d 0
 ```
 
-### Monitor redis server
+### Monitor Redis Server
 
 ```shell
-# step1 
-# open file `/path/to/redis-rdb-cli/conf/redis-rdb-cli.conf`
-# change property `metric_gateway from `none` to `influxdb`
+# Step 1: 
+# Open `/path/to/redis-rdb-cli/conf/redis-rdb-cli.conf`
+# and change the `metric_gateway` property from `none` to `influxdb`.
 #
-# step2
+# Step 2:
 $ cd /path/to/redis-rdb-cli/dashboard
 $ docker-compose up -d
 #
-# step3
+# Step 3:
 $ rmonitor -s redis://127.0.0.1:6379 -n standalone
 $ rmonitor -s redis://127.0.0.1:30001 -n cluster
 $ rmonitor -s redis-sentinel://sntnl-usr:sntnl-pwd@127.0.0.1:26379?master=mymaster&authUser=usr&authPassword=pwd -n sentinel
 #
-# step4
-# open url `http://localhost:3000/d/monitor/monitor`, login grafana use `admin`, `admin` and check monitor result.
+# Step 4:
+# Open `http://localhost:3000/d/monitor/monitor` in your browser. 
+# Log in to Grafana with username `admin` and password `admin` to view the dashboard.
 ```
 
 ![monitor](./images/monitor.png)
 
-## Difference between rmt and rst
+## Difference between `rmt` and `rst`
 
-1. When `rmt` started. source redis first do `BGSAVE` and generate a snapshot rdb file. `rmt` command migrate this snapshot file to target redis. after this process done, `rmt` terminated.  
-2. `rst` not only migrate snapshot rdb file but also incremental data from source redis. so `rst` never terminated except type `CTRL+C`. `rst` only support `db` filter more details please refer to [Limitation of migration](#limitation-of-migration) 
+1.  **`rmt`**: When `rmt` starts, the source Redis instance first performs a `BGSAVE` to generate an RDB snapshot. The `rmt` command migrates this snapshot file to the target Redis instance. The command terminates after the migration is complete.
+2.  **`rst`**: In addition to migrating the initial RDB snapshot, `rst` also syncs incremental data changes from the source to the target. It runs continuously until manually stopped (e.g., with `CTRL+C`). Note that `rst` only supports filtering by `db` index. For more details, see [Limitations of Migration](#limitations-of-migration).
 
 ## Dashboard
 
-Since `v0.1.9`, the `rct -f mem` support showing result in grafana dashboard like the following:  
+Since v0.1.9, the `rct -f mem` command supports visualizing its output on a Grafana dashboard.
 ![memory](./images/memory.png)  
 
-If you want to turn it on. you **MUST** install `docker` and `docker-compose` first, the installation please refer to [docker](https://docs.docker.com/install/)  
-Then run the following command:  
-
+To enable this feature, you must have Docker and Docker Compose installed. Please refer to the official [Docker documentation](https://docs.docker.com/install/) for installation instructions.
+Then, run the following command:
 ```shell
 $ cd /path/to/redis-rdb-cli/dashboard
 
-# start
+# Start
 $ docker-compose up -d
 
-# stop
+# Stop
 $ docker-compose down
 ```
   
-`cd /path/to/redis-rdb-cli/conf/redis-rdb-cli.conf`  
-Then change parameter `metric_gateway` from `none` to `influxdb`.  
+Next, open `/path/to/redis-rdb-cli/conf/redis-rdb-cli.conf` and change the `metric_gateway` parameter from `none` to `influxdb`.
   
-Open `http://localhost:3000` to check the `rct -f mem`'s result.  
+Open `http://localhost:3000` in your browser to view the results from `rct -f mem`.  
   
-If you deployed this tool in multi instance, you need to change parameter `metric_instance` to make sure unique between instances.  
+If you are deploying this tool across multiple instances, ensure that the `metric_instance` parameter is set to a unique value for each instance.  
   
-## Redis 6
+## Using with Redis 6
   
-### Redis 6 SSL
+### Redis 6 with SSL
   
-1. use openssl to generate keystore
-  
+1.  Use OpenSSL to generate a keystore:
 ```shell
-
 $ cd /path/to/redis-6.0-rc1
 $ ./utils/gen-test-certs.sh
 $ cd tests/tls
 $ openssl pkcs12 -export -CAfile ca.crt -in redis.crt -inkey redis.key -out redis.p12
-
 ```
   
-2. If source redis and target redis use the same keystore. then config following parameters  
-`source_keystore_path` and `target_keystore_path` to point to `/path/to/redis-6.0-rc1/tests/tls/redis.p12`  
-set `source_keystore_pass` and `target_keystore_pass`  
+2.  If the source and target Redis instances use the same keystore, configure the following parameters in `redis-rdb-cli.conf`:
+`source_keystore_path` and `target_keystore_path` should point to `/path/to/redis-6.0-rc1/tests/tls/redis.p12`.
+Set `source_keystore_pass` and `target_keystore_pass`.
   
-3. after config ssl parameters use `rediss://host:port` in your command to open ssl, for example: `rst -s rediss://127.0.0.1:6379 -m rediss://127.0.0.1:30001 -r -d 0`
+3.  After configuring the SSL parameters, use the `rediss://` protocol in your commands to enable SSL, for example: `rst -s rediss://127.0.0.1:6379 -m rediss://127.0.0.1:30001 -r -d 0`
   
-### Redis 6 ACL
+### Redis 6 with ACL
 
-1. use following URI to open redis ACL support  
-  
+1.  Use the following URI format to connect with ACL credentials:
 ```shell
 $ rst -s redis://user:pass@127.0.0.1:6379 -m redis://user:pass@127.0.0.1:6380 -r -d 0
 ```
   
-2. `user` **MUST** have `+@all` permission to handle commands
+2.  The specified `user` **MUST** have `+@all` permissions to execute the necessary commands.
   
-## Hack rmt
+## Hacking `rmt`
 
-### Rmt threading model
+### `rmt` Threading Model
 
-The `rmt` command use the following 4 parameters([redis-rdb-cli.conf](https://github.com/leonchen83/redis-rdb-cli/blob/master/src/main/resources/redis-rdb-cli.conf)) to migrate data to remote.  
-  
+The `rmt` command uses the following four parameters from `redis-rdb-cli.conf` to manage data migration:
 ```properties
 migrate_batch_size=4096
 migrate_threads=4
@@ -337,10 +309,9 @@ migrate_flush=yes
 migrate_retries=1
 ```
 
-The most important parameter is `migrate_threads=4`. this means we use the following threading model to migrate data.  
+The most important parameter is `migrate_threads`. A value of `4`, for example, means that the following threading model is used for migration:
 
 ```text
-
 single redis ----> single redis
 
 +--------------+         +----------+     thread 1      +--------------+
@@ -358,11 +329,9 @@ single redis ----> single redis
 |              |    |    +----------+     thread 4      |              |
 |              |    +----| Endpoint |-------------------|              |
 +--------------+         +----------+                   +--------------+
-
 ``` 
 
 ```text
-
 single redis ----> redis cluster
 
 +--------------+         +----------+     thread 1      +--------------+
@@ -380,62 +349,56 @@ single redis ----> redis cluster
 |              |    |    +----------+     thread 4      |              |
 |              |    +----| Endpoints|-------------------|              |
 +--------------+         +----------+                   +--------------+
-
 ``` 
 
-The difference between cluster migration and single migration is `Endpoint` and `Endpoints`. In cluster migration the `Endpoints` contains multi `Endpoint` to point to every `master` instance in cluster. For example:  
-  
-3 masters 3 replicas redis cluster. if `migrate_threads=4` then we have `3 * 4 = 12` connections that connected with `master` instance. 
+The key difference between migrating to a single instance versus a cluster lies in the use of `Endpoint` versus `Endpoints`. For cluster migrations, `Endpoints` represents a collection of `Endpoint` objects, each pointing to a `master` instance in the cluster. For example, in a Redis cluster with 3 masters and 3 replicas, if `migrate_threads` is set to `4`, the tool will establish a total of `3 * 4 = 12` connections to the master instances. 
 
-### Migration performance
+### Migration Performance
 
-The following 3 parameters affect migration performance  
-  
+The following three parameters affect migration performance:
 ```properties
 migrate_batch_size=4096
 migrate_retries=1
 migrate_flush=yes
 ```
 
-1. `migrate_batch_size`: By default we use redis `pipeline` to migrate data to remote. the `migrate_batch_size` is the `pipeline` batch size. if `migrate_batch_size=1` then the `pipeline` devolved into 1 single command to sent and wait the response from remote.  
-2. `migrate_retries`: The `migrate_retries=1` means if socket error occurred. we recreate a new socket and retry to send that failed command to target redis with `migrate_retries` times.  
-3. `migrate_flush`: The `migrate_flush=yes` means we write every 1 command to socket. then we invoke `SocketOutputStream.flush()` immediately. if `migrate_flush=no` we invoke `SocketOutputStream.flush()` when write to socket every 64KB. notice that this parameter also affect `migrate_retries`. the `migrate_retries` only take effect when `migrate_flush=yes`.  
+1.  `migrate_batch_size`: By default, data is migrated using Redis pipelining. This parameter sets the batch size for the pipeline. If set to `1`, pipelining is effectively disabled, and each command is sent individually.
+2.  `migrate_retries`: If a socket error occurs, the tool will recreate the socket and retry the failed command. This parameter specifies the number of retry attempts.
+3.  `migrate_flush`: If set to `yes`, the output stream is flushed after every command. If set to `no`, the stream is flushed every 64KB. Note: Retries (`migrate_retries`) only take effect when `migrate_flush` is set to `yes`.
 
-### Migration principle
+### Migration Principle
 
 ```text
-
 +---------------+             +-------------------+    restore      +---------------+ 
 |               |             | redis dump format |---------------->|               |
 |               |             |-------------------|    restore      |               |
 |               |   convert   | redis dump format |---------------->|               |
-|    Dump rdb   |------------>|-------------------|    restore      |  Targe Redis  |
+|    Dump rdb   |------------>|-------------------|    restore      |  Target Redis |
 |               |             | redis dump format |---------------->|               |
 |               |             |-------------------|    restore      |               |
 |               |             | redis dump format |---------------->|               |
-+---------------+             +-------------------+                 +---------------+
++---------------+             +-------------------+                 +---------------+ 
 ```
 
-## Limitation of migration
+## Limitations of Migration
 
-1. We use cluster's `nodes.conf` to migrate data to cluster. because of we didn't handle the `MOVED` `ASK` redirection. so limitation of cluster migration is that the cluster **MUST** in stable state during the migration. this means the cluster **MUST** have no `migrating`, `importing` slot and no switch slave to master. 
-2. If use `rst` migrate data to cluster. the following commands not supported `PUBLISH,SWAPDB,MOVE,FLUSHALL,FLUSHDB,MULTI,EXEC,SCRIPT FLUSH,SCRIPT LOAD,EVAL,EVALSHA`. and the following commands `RPOPLPUSH,SDIFFSTORE,SINTERSTORE,SMOVE,ZINTERSTORE,ZUNIONSTORE,DEL,UNLINK,RENAME,RENAMENX,PFMERGE,PFCOUNT,MSETNX,BRPOPLPUSH,BITOP,MSET,COPY,BLMOVE,LMOVE,ZDIFFSTORE,GEOSEARCHSTORE` **ONLY SUPPORT WHEN THESE COMMAND KEYS IN THE SAME SLOT**(eg: `del {user}:1 {user}:2`)
+1.  When migrating to a cluster, this tool uses the cluster's `nodes.conf` file and does not handle `MOVED` or `ASK` redirections. Therefore, a key limitation is that the cluster **MUST** be in a stable state during the migration. This means there should be no slots in a `migrating` or `importing` state, and no failovers (promoting a replica to master) should occur.
+2.  When using `rst` to migrate data to a cluster, the following commands are not supported: `PUBLISH`, `SWAPDB`, `MOVE`, `FLUSHALL`, `FLUSHDB`, `MULTI`, `EXEC`, `SCRIPT FLUSH`, `SCRIPT LOAD`, `EVAL`, `EVALSHA`.
+3.  Additionally, the following commands are **ONLY SUPPORTED WHEN ALL KEYS IN THE COMMAND BELONG TO THE SAME SLOT** (e.g., `del {user}:1 {user}:2`): `RPOPLPUSH`, `SDIFFSTORE`, `SINTERSTORE`, `SMOVE`, `ZINTERSTORE`, `ZUNIONSTORE`, `DEL`, `UNLINK`, `RENAME`, `RENAMENX`, `PFMERGE`, `PFCOUNT`, `MSETNX`, `BRPOPLPUSH`, `BITOP`, `MSET`, `COPY`, `BLMOVE`, `LMOVE`, `ZDIFFSTORE`, `GEOSEARCHSTORE`.
 
-## Hack ret
+## Hacking `ret`
 
-### What ret command do
+### What the `ret` Command Does
 
-1. `ret` command that allow user define there own sink service like sink redis data to `mysql` or `mongodb`.
-2. `ret` command using Java SPI extension to do this job.
+1.  The `ret` command allows users to define their own sink services to send Redis data to other systems, such as MySQL or MongoDB.
+2.  It uses Java's Service Provider Interface (SPI) to load custom extensions.
 
-### How to implement a sink service
+### How to Implement a Sink Service
 
-User should follow the steps below to implement a sink service.  
+Follow the steps below to implement your own sink service.
 
-1. create a java project using maven pom.xml
-
+1.  Create a new Maven project:
 ```xml
-
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -516,10 +479,8 @@ User should follow the steps below to implement a sink service.
 
 ```
 
-2. implement `SinkService` interface
-
+2.  Implement the `SinkService` interface:
 ```java
-
 public class YourSinkService implements SinkService {
 
     @Override
@@ -529,53 +490,35 @@ public class YourSinkService implements SinkService {
 
     @Override
     public void init(File config) throws IOException {
-        // parse your external sink config
+        // Parse your external sink config
     }
 
     @Override
     public void onEvent(Replicator replicator, Event event) {
-        // your sink business
+        // Your sink business logic
     }
 }
-
 ```
-3. register this service using Java SPI
 
+3.  Register the service using Java SPI:
+Create the file `src/main/resources/META-INF/services/com.moilioncircle.redis.rdb.cli.api.sink.SinkService` with the following content:
 ```text
-# create com.moilioncircle.redis.rdb.cli.api.sink.SinkService file in src/main/resources/META-INF/services/
-
-|-src
-|____main
-| |____resources
-| | |____META-INF
-| | | |____services
-| | | | |____com.moilioncircle.redis.rdb.cli.api.sink.SinkService
-
-# add following content in com.moilioncircle.redis.rdb.cli.api.sink.SinkService
-
 your.package.YourSinkService
-
 ```
 
-4. package and deploy
-
+4.  Package and Deploy:
 ```shell
-
 $ mvn clean install
-
 $ cp ./target/your-sink-service-1.0.0-jar-with-dependencies.jar /path/to/redis-rdb-cli/lib
 ```
-5. run your sink service
 
+5.  Run Your Sink Service:
 ```shell
-
 $ ret -s redis://127.0.0.1:6379 -c config.conf -n your-sink-service
 ```
 
-6. debug your sink service
-
+6.  Debug Your Sink Service:
 ```java  
-
     public static void main(String[] args) throws Exception {
         Replicator replicator = new RedisReplicator("redis://127.0.0.1:6379");
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -589,15 +532,12 @@ $ ret -s redis://127.0.0.1:6379 -c config.conf -n your-sink-service
         replicator.addEventListener(new AsyncEventListener(sink, replicator, 4, Executors.defaultThreadFactory()));
         replicator.open();
     }
-
 ```
 
-### How to implement a formatter service
+### How to Implement a Formatter Service
 
-1. create `YourFormatterService` extend `AbstractFormatterService`  
-
+1.  Create `YourFormatterService` that extends `AbstractFormatterService`:
 ```java
-
 public class YourFormatterService extends AbstractFormatterService {
 
     @Override
@@ -614,40 +554,22 @@ public class YourFormatterService extends AbstractFormatterService {
         return context;
     }
 }
-
 ```
 
-2. register this formatter using Java SPI  
-
+2.  Register the formatter using Java SPI:
+Create the file `src/main/resources/META-INF/services/com.moilioncircle.redis.rdb.cli.api.format.FormatterService` with the following content:
 ```text
-# create com.moilioncircle.redis.rdb.cli.api.format.FormatterService file in src/main/resources/META-INF/services/
-
-|-src
-|____main
-| |____resources
-| | |____META-INF
-| | | |____services
-| | | | |____com.moilioncircle.redis.rdb.cli.api.format.FormatterService
-
-# add following content in com.moilioncircle.redis.rdb.cli.api.format.FormatterService
-
 your.package.YourFormatterService
-
 ```
 
-3. package and deploy
-
+3.  Package and Deploy:
 ```shell
-
 $ mvn clean install
-
 $ cp ./target/your-service-1.0.0-jar-with-dependencies.jar /path/to/redis-rdb-cli/lib
 ```
 
-4. run your formatter service
-
+4.  Run your formatter service:
 ```shell
-
 $ rct -f test -s redis://127.0.0.1:6379 -o ./out.csv -t string -d 0 -e json
 ```
 
@@ -663,19 +585,18 @@ $ rct -f test -s redis://127.0.0.1:6379 -o ./out.csv -t string -d 0 -e json
   
 ## Consulting
 
-Commercial support for `redis-rdb-cli` is available. The following services are currently available:
-* Onsite consulting. $10,000 per day
-* Onsite training. $10,000 per day
+Commercial support for `redis-rdb-cli` is available. The following services are currently offered:
+* Onsite consulting: $10,000 per day
+* Onsite training: $10,000 per day
 
-You may also contact `Baoyi Chen` directly, mail to [chen.bao.yi@gmail.com](mailto:chen.bao.yi@gmail.com).
+You may also contact `Baoyi Chen` directly at [chen.bao.yi@gmail.com](mailto:chen.bao.yi@gmail.com).
 
 ## Supported by 宁文君
 
-27 January 2023, A sad day that I lost my mother 宁文君, She was encouraging and supporting me in developing this tool. Every time a company uses this tool, she got excited like a child and encouraged me to keep going.
-Without her I couldn't have maintained this tool for so many years. Even I didn't achieve much but she is still proud of me, R.I.P and hope God bless her.
+27 January 2023 was a sad day; I lost my mother, 宁文君. She was encouraging and supported me in developing this tool. Every time a company used this tool, she got excited like a child and encouraged me to keep going. Without her, I couldn't have maintained this tool for so many years. Even though I didn't achieve much, she was still proud of me. R.I.P and may God bless her.
 
 ## Supported by IntelliJ IDEA
 
-[IntelliJ IDEA](https://www.jetbrains.com/?from=redis-rdb-cli) is a Java integrated development environment (IDE) for developing computer software.  
-It is developed by JetBrains (formerly known as IntelliJ), and is available as an Apache 2 Licensed community edition,  
-and in a proprietary commercial edition. Both can be used for commercial development.  
+[IntelliJ IDEA](https://www.jetbrains.com/?from=redis-rdb-cli) is a Java integrated development environment (IDE) for developing computer software.
+It is developed by JetBrains (formerly known as IntelliJ), and is available as an Apache 2 Licensed community edition,
+and in a proprietary commercial edition. Both can be used for commercial development.
