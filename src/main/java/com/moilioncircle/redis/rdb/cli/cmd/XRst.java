@@ -117,9 +117,11 @@ import com.moilioncircle.redis.replicator.cmd.parser.SetRangeParser;
 import com.moilioncircle.redis.replicator.cmd.parser.SortParser;
 import com.moilioncircle.redis.replicator.cmd.parser.SwapDBParser;
 import com.moilioncircle.redis.replicator.cmd.parser.UnLinkParser;
+import com.moilioncircle.redis.replicator.cmd.parser.XAckDelParser;
 import com.moilioncircle.redis.replicator.cmd.parser.XAckParser;
 import com.moilioncircle.redis.replicator.cmd.parser.XAddParser;
 import com.moilioncircle.redis.replicator.cmd.parser.XClaimParser;
+import com.moilioncircle.redis.replicator.cmd.parser.XDelExParser;
 import com.moilioncircle.redis.replicator.cmd.parser.XDelParser;
 import com.moilioncircle.redis.replicator.cmd.parser.XGroupParser;
 import com.moilioncircle.redis.replicator.cmd.parser.XSetIdParser;
@@ -361,6 +363,9 @@ public class XRst implements Callable<Integer> {
 		replicator.addCommandParser(CommandName.name("HSETEX"), new CombineCommandParser(new HSetExParser()));
 		replicator.addCommandParser(CommandName.name("HPEXPIREAT"), new CombineCommandParser(new HPExpireAtParser()));
 		replicator.addCommandParser(CommandName.name("HPERSIST"), new CombineCommandParser(new HPersistParser()));
+		// since redis 8.2
+		replicator.addCommandParser(CommandName.name("XACKDEL"), new CombineCommandParser(new XAckDelParser()));
+		replicator.addCommandParser(CommandName.name("XDELEX"), new CombineCommandParser(new XDelExParser()));
 		return replicator;
 	}
 }

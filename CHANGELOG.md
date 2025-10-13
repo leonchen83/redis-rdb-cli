@@ -1,3 +1,7 @@
+### 0.9.8
+
+Add support for redis 8.2.  
+
 ### 0.9.7
 
 Add support for redis 8.0.  
