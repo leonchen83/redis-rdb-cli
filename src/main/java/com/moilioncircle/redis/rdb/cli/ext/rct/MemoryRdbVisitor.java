@@ -953,8 +953,8 @@ public class MemoryRdbVisitor extends AbstractRctRdbVisitor implements Consumer<
 							if (!delete) length++;
 						}
 					} else {
-						numFields = Integer.parseInt(Strings.toString(listPackEntry(listPack)));
-						for (int i = 0; i < numFields; i++) {
+						int entryFields = Integer.parseInt(Strings.toString(listPackEntry(listPack)));
+						for (int i = 0; i < entryFields; i++) {
 							byte[] field = listPackEntry(listPack);
 							byte[] value = listPackEntry(listPack);
 							max = Math.max(max, calc.calcElement(value));
@@ -1048,8 +1048,8 @@ public class MemoryRdbVisitor extends AbstractRctRdbVisitor implements Consumer<
 							if (!delete) length++;
 						}
 					} else {
-						numFields = Integer.parseInt(Strings.toString(listPackEntry(listPack)));
-						for (int i = 0; i < numFields; i++) {
+						int entryFields = Integer.parseInt(Strings.toString(listPackEntry(listPack)));
+						for (int i = 0; i < entryFields; i++) {
 							byte[] field = listPackEntry(listPack);
 							byte[] value = listPackEntry(listPack);
 							max = Math.max(max, calc.calcElement(value));
@@ -1149,8 +1149,8 @@ public class MemoryRdbVisitor extends AbstractRctRdbVisitor implements Consumer<
 							if (!delete) length++;
 						}
 					} else {
-						numFields = Integer.parseInt(Strings.toString(listPackEntry(listPack)));
-						for (int i = 0; i < numFields; i++) {
+						int entryFields = Integer.parseInt(Strings.toString(listPackEntry(listPack)));
+						for (int i = 0; i < entryFields; i++) {
 							byte[] field = listPackEntry(listPack);
 							byte[] value = listPackEntry(listPack);
 							max = Math.max(max, calc.calcElement(value));
